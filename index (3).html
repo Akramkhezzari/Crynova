@@ -653,7 +653,7 @@
             <div class="user-info">
                 <div class="user-stat">
                     <div class="stat-value" id="balance">0</div>
-                    <div class="stat-label">CRY Coin</div>
+                    <div class="stat-label">Crynova</div>
                 </div>
                 <div class="user-stat">
                     <div class="stat-value" id="level">1</div>
@@ -738,7 +738,7 @@
                         <div class="upgrade-name">مركز بيانات</div>
                         <div class="upgrade-desc">يضاعف جميع الإيرادات</div>
                     </div>
-                    <div class="upgrade-cost" id="datacenter-cost">1000</div>
+                    <div class="upgrade-cost" id="datacenter-cost">1K</div>
                     <button class="buy-btn" id="buy-datacenter">شراء</button>
                 </div>
             </div>
@@ -750,7 +750,7 @@
                     <div class="achievement-icon"><i class="fas fa-medal"></i></div>
                     <div class="achievement-info">
                         <div class="achievement-name">المعدن المبتدئ</div>
-                        <div class="achievement-desc">اجمع 100 عملة</div>
+                        <div class="achievement-desc">اجمع 100 Crynova</div>
                         <div class="progress-bar">
                             <div class="progress" id="progress-100"></div>
                         </div>
@@ -761,7 +761,7 @@
                     <div class="achievement-icon"><i class="fas fa-award"></i></div>
                     <div class="achievement-info">
                         <div class="achievement-name">المعدن المحترف</div>
-                        <div class="achievement-desc">اجمع 500 عملة</div>
+                        <div class="achievement-desc">اجمع 500 Crynova</div>
                         <div class="progress-bar">
                             <div class="progress" id="progress-500"></div>
                         </div>
@@ -772,7 +772,7 @@
                     <div class="achievement-icon"><i class="fas fa-crown"></i></div>
                     <div class="achievement-info">
                         <div class="achievement-name">خبير التعدين</div>
-                        <div class="achievement-desc">اجمع 2000 عملة</div>
+                        <div class="achievement-desc">اجمع 2K Crynova</div>
                         <div class="progress-bar">
                             <div class="progress" id="progress-2000"></div>
                         </div>
@@ -786,19 +786,19 @@
                 <div class="leaderboard-item">
                     <div class="leaderboard-rank">1</div>
                     <div class="leaderboard-name">المعدن المحترف</div>
-                    <div class="leaderboard-score">5,240</div>
+                    <div class="leaderboard-score">5.2K</div>
                 </div>
                 
                 <div class="leaderboard-item">
                     <div class="leaderboard-rank">2</div>
                     <div class="leaderboard-name">صائد الكريبتو</div>
-                    <div class="leaderboard-score">3,870</div>
+                    <div class="leaderboard-score">3.8K</div>
                 </div>
                 
                 <div class="leaderboard-item">
                     <div class="leaderboard-rank">3</div>
                     <div class="leaderboard-name">بطل البلوكشين</div>
-                    <div class="leaderboard-score">2,950</div>
+                    <div class="leaderboard-score">2.9K</div>
                 </div>
                 
                 <div class="leaderboard-item">
@@ -812,11 +812,11 @@
             <div class="invite-panel">
                 <div class="invite-header">
                     <div class="invite-title">دعوة الأصدقاء</div>
-                    <div class="invite-bonus">+ CRY 200</div>
+                    <div class="invite-bonus">+ 200 Crynova</div>
                 </div>
                 
                 <div class="invite-description">
-                    ادعُ أصدقائك واحصل على CRY 200 لكل دعوة ناجحة! كلما زاد عدد الأصدقاء، زادت أرباحك!
+                    ادعُ أصدقائك واحصل على 200 Crynova لكل دعوة ناجحة! كلما زاد عدد الأصدقاء، زادت أرباحك!
                 </div>
                 
                 <div class="invite-stats">
@@ -831,7 +831,7 @@
                 </div>
                 
                 <button class="invite-btn" id="invite-friends">
-                    <i class="fas fa-user-plus invite-icon"></i>
+                    <i class="fab fa-telegram invite-icon"></i>
                     <span>دعوة الأصدقاء</span>
                 </button>
             </div>
@@ -907,18 +907,32 @@
         // الإشعارات
         const notification = document.getElementById('notification');
         
+        // دالة لتنسيق الأعداد الكبيرة
+        function formatNumber(num) {
+            if (num >= 1000000000) {
+                return (num / 1000000000).toFixed(1) + 'B';
+            }
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+        
         // تحديث واجهة المستخدم
         function updateUI() {
-            balanceElement.textContent = Math.floor(balance);
+            balanceElement.textContent = formatNumber(Math.floor(balance));
             levelElement.textContent = level;
             energyElement.textContent = Math.floor(energy) + '%';
-            pointsPerClickElement.textContent = pointsPerClick;
-            autoMiningRateElement.textContent = autoMiningRate + '/ثانية';
-            totalClicksElement.textContent = totalClicks;
+            pointsPerClickElement.textContent = formatNumber(pointsPerClick);
+            autoMiningRateElement.textContent = formatNumber(autoMiningRate) + '/ثانية';
+            totalClicksElement.textContent = formatNumber(totalClicks);
             efficiencyElement.textContent = efficiency + '%';
-            userScoreElement.textContent = Math.floor(balance);
-            invitesCountElement.textContent = invitesCount;
-            rewardsTotalElement.textContent = rewardsTotal;
+            userScoreElement.textContent = formatNumber(Math.floor(balance));
+            invitesCountElement.textContent = formatNumber(invitesCount);
+            rewardsTotalElement.textContent = formatNumber(rewardsTotal);
             
             // تحديث أزرار الترقيات
             buyPickaxeButton.disabled = balance < upgradeCosts.pickaxe;
@@ -926,11 +940,11 @@
             buyFarmButton.disabled = balance < upgradeCosts.farm;
             buyDatacenterButton.disabled = balance < upgradeCosts.datacenter;
             
-            // تحديث تكاليف الترقيات
-            pickaxeCostElement.textContent = upgradeCosts.pickaxe;
-            serverCostElement.textContent = upgradeCosts.server;
-            farmCostElement.textContent = upgradeCosts.farm;
-            datacenterCostElement.textContent = upgradeCosts.datacenter;
+            // تحديث تكاليف الترقيات باستخدام التنسيق الجديد
+            pickaxeCostElement.textContent = formatNumber(upgradeCosts.pickaxe);
+            serverCostElement.textContent = formatNumber(upgradeCosts.server);
+            farmCostElement.textContent = formatNumber(upgradeCosts.farm);
+            datacenterCostElement.textContent = formatNumber(upgradeCosts.datacenter);
             
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
@@ -1023,41 +1037,19 @@
         
         // زر دعوة الأصدقاء
         inviteFriendsButton.addEventListener('click', () => {
-            // محاكاة رابط دعوة
-            const inviteLink = "https://coincrynova.game/invite/" + Math.random().toString(36).substring(2, 10);
+            // رابط بوت التليجرام
+            const telegramBotLink = "https://t.me/Coin_Crynova_bot";
             
-            // محاكاة مشاركة الرابط
-            if (navigator.share) {
-                navigator.share({
-                    title: 'انضم إلى Coin Crynova!',
-                    text: 'لعبة رائعة لتعدين العملات الرقمية، انضم الآن واحصل على مكافأة!',
-                    url: inviteLink,
-                })
-                .then(() => {
-                    // مكافأة المستخدم لدعوة الأصدقاء
-                    invitesCount++;
-                    rewardsTotal += inviteReward;
-                    balance += inviteReward;
-                    
-                    showNotification(`تمت دعوة صديق بنجاح! حصلت على ${inviteReward} CRY مكافأة!`);
-                    updateUI();
-                })
-                .catch((error) => {
-                    // إذا فشلت المشاركة، عرض الرابط للمستخدم
-                    showNotification(`انسخ رابط الدعوة: ${inviteLink}`);
-                });
-            } else {
-                // إذا لم يكن المشاركة مدعومة، عرض الرابط
-                showNotification(`انسخ رابط الدعوة: ${inviteLink}`);
-                
-                // محاكاة نجاح الدعوة
-                invitesCount++;
-                rewardsTotal += inviteReward;
-                balance += inviteReward;
-                
-                showNotification(`تمت دعوة صديق بنجاح! حصلت على ${inviteReward} CRY مكافأة!`);
-                updateUI();
-            }
+            // فتح رابط البوت في نافذة جديدة
+            window.open(telegramBotLink, '_blank');
+            
+            // محاكاة نجاح الدعوة
+            invitesCount++;
+            rewardsTotal += inviteReward;
+            balance += inviteReward;
+            
+            showNotification(`تمت دعوة صديق بنجاح! حصلت على ${inviteReward} Crynova مكافأة!`);
+            updateUI();
         });
         
         // شراء ترقية المعول
@@ -1070,7 +1062,7 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.pickaxe = Math.floor(upgradeCosts.pickaxe * 1.8);
                 
-                showNotification(`تم شراء معول أفضل! النقاط لكل نقرة: ${pointsPerClick}`);
+                showNotification(`تم شراء معول أفضل! النقاط لكل نقرة: ${formatNumber(pointsPerClick)}`);
                 updateUI();
             }
         });
@@ -1085,7 +1077,7 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.server = Math.floor(upgradeCosts.server * 1.8);
                 
-                showNotification(`تم شراء خوادم سريعة! التعدين التلقائي: ${autoMiningRate}/ثانية`);
+                showNotification(`تم شراء خوادم سريعة! التعدين التلقائي: ${formatNumber(autoMiningRate)}/ثانية`);
                 updateUI();
             }
         });
@@ -1100,7 +1092,7 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.farm = Math.floor(upgradeCosts.farm * 1.8);
                 
-                showNotification(`تم شراء مزرعة تعدين! التعدين التلقائي: ${autoMiningRate}/ثانية`);
+                showNotification(`تم شراء مزرعة تعدين! التعدين التلقائي: ${formatNumber(autoMiningRate)}/ثانية`);
                 updateUI();
             }
         });
