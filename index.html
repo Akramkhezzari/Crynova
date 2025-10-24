@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Crynova - لعبة تعدين العملات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
             margin: 0;
@@ -28,15 +29,16 @@
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 15px;
             display: grid;
             grid-template-columns: 1fr 350px;
-            gap: 20px;
+            gap: 15px;
         }
 
         @media (max-width: 1100px) {
@@ -51,28 +53,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
-            background: rgba(10, 14, 23, 0.8);
-            border-radius: 20px;
-            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: rgba(10, 14, 23, 0.9);
+            border-radius: 15px;
+            margin-bottom: 15px;
             border: 1px solid var(--light);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
 
         .logo-icon {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             color: var(--primary);
             filter: drop-shadow(0 0 10px var(--primary));
         }
 
         .logo-text {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: bold;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
@@ -82,37 +84,37 @@
 
         .user-info {
             display: flex;
-            gap: 20px;
+            gap: 15px;
         }
 
         .user-stat {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px 20px;
+            padding: 8px 15px;
             background: var(--light);
             border-radius: 10px;
-            min-width: 120px;
+            min-width: 100px;
         }
 
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
             color: var(--primary);
         }
 
         .stat-label {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #a0a0a0;
         }
 
         /* لوحة التعدين الرئيسية */
         .mining-panel {
-            background: rgba(10, 14, 23, 0.8);
-            border-radius: 20px;
-            padding: 30px;
+            background: rgba(10, 14, 23, 0.9);
+            border-radius: 15px;
+            padding: 20px;
             border: 1px solid var(--light);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -120,10 +122,10 @@
 
         .crypto-visual {
             width: 100%;
-            height: 300px;
+            height: 250px;
             background: linear-gradient(135deg, #0f1b2b, #1a2d3f);
-            border-radius: 15px;
-            margin-bottom: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -141,14 +143,14 @@
         }
 
         .block {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: var(--light);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: var(--primary);
             animation: float 3s infinite ease-in-out;
             box-shadow: 0 5px 15px rgba(0, 255, 157, 0.3);
@@ -169,7 +171,7 @@
 
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+            50% { transform: translateY(-15px); }
         }
 
         .mine-controls {
@@ -183,10 +185,10 @@
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none;
             border-radius: 50%;
-            width: 180px;
-            height: 180px;
+            width: 150px;
+            height: 150px;
             color: white;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -194,54 +196,33 @@
             justify-content: center;
             align-items: center;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.4);
-            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 255, 157, 0.4);
+            margin-bottom: 15px;
             position: relative;
             overflow: hidden;
-        }
-
-        .mine-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(0, 255, 157, 0.6);
         }
 
         .mine-btn:active {
             transform: scale(0.95);
         }
 
-        .mine-btn::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: rgba(255, 255, 255, 0.1);
-            transform: rotate(45deg);
-            transition: all 0.5s ease;
-        }
-
-        .mine-btn:hover::before {
-            transform: rotate(45deg) translate(50%, 50%);
-        }
-
         .mine-icon {
-            font-size: 3.5rem;
-            margin-bottom: 10px;
+            font-size: 3rem;
+            margin-bottom: 8px;
         }
 
         .mining-stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 12px;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
         .mining-stat {
             background: var(--light);
-            padding: 15px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 8px;
             text-align: center;
         }
 
@@ -251,59 +232,54 @@
             background: linear-gradient(135deg, #0088cc, #00a8ff);
             border: none;
             border-radius: 50px;
-            padding: 15px;
+            padding: 12px;
             color: white;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             transition: all 0.3s ease;
-            margin-top: 15px;
+            margin-top: 12px;
             text-decoration: none;
         }
 
-        .channel-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 136, 204, 0.4);
-        }
-
         .channel-btn:active {
-            transform: translateY(0);
+            transform: scale(0.98);
         }
 
         .channel-icon {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
         }
 
         /* اللوحة الجانبية */
         .side-panel {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
 
         .upgrades-panel, .achievements-panel, .leaderboard-panel, .invite-panel {
-            background: rgba(10, 14, 23, 0.8);
-            border-radius: 20px;
-            padding: 25px;
+            background: rgba(10, 14, 23, 0.9);
+            border-radius: 15px;
+            padding: 20px;
             border: 1px solid var(--light);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .panel-title {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
             color: var(--primary);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .panel-title i {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
         }
 
         .upgrade {
@@ -311,16 +287,15 @@
             justify-content: space-between;
             align-items: center;
             background: var(--light);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
             transition: all 0.3s ease;
             cursor: pointer;
         }
 
-        .upgrade:hover {
-            transform: translateX(-5px);
-            box-shadow: 0 5px 15px rgba(0, 255, 157, 0.2);
+        .upgrade:active {
+            transform: translateX(-3px);
         }
 
         .upgrade-info {
@@ -329,34 +304,38 @@
 
         .upgrade-name {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             color: var(--text);
+            font-size: 0.9rem;
         }
 
         .upgrade-desc {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #a0a0a0;
         }
 
         .upgrade-cost {
             font-weight: bold;
             color: var(--primary);
-            margin-left: 15px;
+            margin-left: 12px;
+            font-size: 0.9rem;
         }
 
         .buy-btn {
             background: var(--secondary);
             border: none;
             border-radius: 5px;
-            padding: 8px 15px;
+            padding: 6px 12px;
             color: white;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 0.8rem;
         }
 
-        .buy-btn:hover {
+        .buy-btn:active {
             background: var(--primary);
+            transform: scale(0.95);
         }
 
         .buy-btn:disabled {
@@ -367,9 +346,9 @@
         .achievement {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
-            padding: 12px;
-            border-radius: 10px;
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 8px;
             background: var(--light);
             transition: all 0.3s ease;
         }
@@ -384,8 +363,8 @@
         }
 
         .achievement-icon {
-            font-size: 1.8rem;
-            margin-left: 15px;
+            font-size: 1.5rem;
+            margin-left: 12px;
             color: var(--primary);
         }
 
@@ -395,19 +374,20 @@
 
         .achievement-name {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
         }
 
         .achievement-desc {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #a0a0a0;
         }
 
         .progress-bar {
-            height: 6px;
+            height: 5px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
-            margin-top: 8px;
+            margin-top: 6px;
             overflow: hidden;
         }
 
@@ -423,35 +403,38 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            padding: 10px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .leaderboard-rank {
             font-weight: bold;
             color: var(--primary);
-            width: 30px;
+            width: 25px;
+            font-size: 0.9rem;
         }
 
         .leaderboard-name {
             flex: 1;
+            font-size: 0.9rem;
         }
 
         .leaderboard-score {
             font-weight: bold;
             color: var(--text);
+            font-size: 0.9rem;
         }
 
-        /* لوحة الدعوة الجديدة */
+        /* لوحة الدعوة */
         .invite-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .invite-title {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
             color: var(--primary);
         }
@@ -459,44 +442,45 @@
         .invite-bonus {
             background: var(--accent);
             color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
+            padding: 4px 8px;
+            border-radius: 15px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
 
         .invite-description {
             background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
             text-align: center;
-            line-height: 1.6;
+            line-height: 1.5;
+            font-size: 0.9rem;
         }
 
         .invite-stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 15px;
         }
 
         .invite-stat {
             background: var(--light);
-            padding: 15px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 8px;
             text-align: center;
         }
 
         .invite-stat-value {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: bold;
             color: var(--primary);
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .invite-stat-label {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #a0a0a0;
         }
 
@@ -505,29 +489,62 @@
             background: linear-gradient(135deg, var(--accent), #ff6b9c);
             border: none;
             border-radius: 50px;
-            padding: 15px;
+            padding: 12px;
             color: white;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             transition: all 0.3s ease;
         }
 
-        .invite-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(255, 46, 99, 0.4);
-        }
-
         .invite-btn:active {
-            transform: translateY(0);
+            transform: scale(0.98);
         }
 
         .invite-icon {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
+        }
+
+        /* رابط الدعوة */
+        .invite-link-container {
+            background: var(--light);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .invite-link {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 0.9rem;
+            direction: ltr;
+            text-align: center;
+            padding: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .copy-btn {
+            background: var(--secondary);
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .copy-btn:active {
+            background: var(--primary);
         }
 
         /* تأثيرات النيون */
@@ -541,8 +558,38 @@
 
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(0, 255, 157, 0); }
+            70% { box-shadow: 0 0 0 12px rgba(0, 255, 157, 0); }
             100% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
+        }
+
+        /* شريط التحميل */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--darker);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* التصميم المتجاوب */
@@ -550,12 +597,13 @@
             .container {
                 padding: 10px;
                 grid-template-columns: 1fr;
+                gap: 10px;
             }
             
             header {
                 flex-direction: column;
-                gap: 15px;
-                padding: 15px;
+                gap: 12px;
+                padding: 12px;
             }
             
             .user-info {
@@ -564,12 +612,12 @@
             }
             
             .user-stat {
-                min-width: 90px;
-                padding: 8px 12px;
+                min-width: 80px;
+                padding: 6px 10px;
             }
             
             .stat-value {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
             }
             
             .mining-stats {
@@ -577,12 +625,12 @@
             }
             
             .mine-btn {
-                width: 150px;
-                height: 150px;
+                width: 130px;
+                height: 130px;
             }
             
             .mine-icon {
-                font-size: 2.8rem;
+                font-size: 2.5rem;
             }
             
             .crypto-visual {
@@ -590,13 +638,13 @@
             }
             
             .block {
-                width: 50px;
-                height: 50px;
-                font-size: 1.2rem;
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
             }
             
             .upgrade, .achievement {
-                padding: 12px;
+                padding: 10px;
             }
             
             .invite-stats {
@@ -606,12 +654,12 @@
 
         @media (max-width: 480px) {
             .logo-text {
-                font-size: 1.4rem;
+                font-size: 1.3rem;
             }
             
             .user-stat {
                 min-width: 70px;
-                padding: 6px 8px;
+                padding: 5px 8px;
             }
             
             .stat-value {
@@ -619,17 +667,17 @@
             }
             
             .stat-label {
-                font-size: 0.8rem;
+                font-size: 0.7rem;
             }
             
             .mine-btn {
-                width: 130px;
-                height: 130px;
-                font-size: 1.1rem;
+                width: 120px;
+                height: 120px;
+                font-size: 1rem;
             }
             
             .mine-icon {
-                font-size: 2.5rem;
+                font-size: 2.2rem;
             }
             
             .panel-title {
@@ -637,21 +685,26 @@
             }
             
             .upgrade-name, .achievement-name {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
             
             .upgrade-desc, .achievement-desc {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
             }
             
             .invite-title {
-                font-size: 1.3rem;
+                font-size: 1.1rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <div>جاري التحميل...</div>
+    </div>
+
+    <div class="container" id="main-content" style="display: none;">
         <header>
             <div class="logo">
                 <div class="logo-icon"><i class="fas fa-coins"></i></div>
@@ -817,7 +870,7 @@
                 </div>
             </div>
             
-            <!-- لوحة دعوة الأصدقاء الجديدة -->
+            <!-- لوحة دعوة الأصدقاء -->
             <div class="invite-panel">
                 <div class="invite-header">
                     <div class="invite-title">دعوة الأصدقاء</div>
@@ -838,6 +891,14 @@
                         <div class="invite-stat-label">مكافآت الدعوات</div>
                     </div>
                 </div>
+
+                <!-- رابط الدعوة الشخصي -->
+                <div class="invite-link-container">
+                    <input type="text" class="invite-link" id="invite-link" readonly value="جاري إنشاء الرابط...">
+                    <button class="copy-btn" id="copy-link">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
                 
                 <button class="invite-btn" id="invite-friends">
                     <i class="fab fa-telegram invite-icon"></i>
@@ -848,6 +909,40 @@
     </div>
 
     <script>
+        // Telegram Web App initialization
+        let tg = window.Telegram.WebApp;
+        
+        // تهيئة Telegram Web App
+        tg.expand();
+        tg.enableClosingConfirmation();
+        tg.setHeaderColor('#0a0e17');
+        tg.setBackgroundColor('#0a0e17');
+        
+        // بيانات المستخدم من Telegram
+        const user = tg.initDataUnsafe?.user;
+        const userId = user?.id;
+        const userName = user?.first_name || 'مستخدم';
+        const userUsername = user?.username;
+        
+        // التحقق من وجود ID المستخدم
+        if (!userId) {
+            // إذا لم يكن هناك ID مستخدم، نعرض رسالة خطأ
+            document.getElementById('loading').innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--accent); margin-bottom: 20px;"></i>
+                    <h3>خطأ في التحميل</h3>
+                    <p>لم يتم التعرف على حساب المستخدم. يرجى فتح التطبيق عبر Telegram.</p>
+                    <button onclick="window.close()" style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-top: 20px; cursor: pointer;">
+                        إغلاق
+                    </button>
+                </div>
+            `;
+            throw new Error('User ID not found');
+        }
+        
+        // رابط البوت الأساسي
+        const BOT_USERNAME = 'Coin_Crynova_bot';
+        
         // متغيرات اللعبة
         let balance = 0;
         let level = 1;
@@ -893,6 +988,10 @@
         const inviteFriendsButton = document.getElementById('invite-friends');
         const invitesCountElement = document.getElementById('invites-count');
         const rewardsTotalElement = document.getElementById('rewards-total');
+        const loadingElement = document.getElementById('loading');
+        const mainContentElement = document.getElementById('main-content');
+        const inviteLinkElement = document.getElementById('invite-link');
+        const copyLinkButton = document.getElementById('copy-link');
         
         // أزرار الترقيات
         const buyPickaxeButton = document.getElementById('buy-pickaxe');
@@ -906,6 +1005,12 @@
         const farmCostElement = document.getElementById('farm-cost');
         const datacenterCostElement = document.getElementById('datacenter-cost');
         
+        // إنشاء رابط الدعوة الشخصي
+        function generateInviteLink() {
+            const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${userId}`;
+            return baseUrl;
+        }
+        
         // دالة لتنسيق الأعداد الكبيرة
         function formatNumber(num) {
             if (num >= 1000000000) {
@@ -918,6 +1023,51 @@
                 return (num / 1000).toFixed(1) + 'K';
             }
             return num.toString();
+        }
+        
+        // حفظ البيانات في التخزين المحلي
+        function saveGameData() {
+            const gameData = {
+                balance,
+                level,
+                energy,
+                pointsPerClick,
+                autoMiningRate,
+                totalClicks,
+                invitesCount,
+                rewardsTotal,
+                upgrades,
+                upgradeCosts,
+                userId
+            };
+            localStorage.setItem(`coin_crynova_${userId}`, JSON.stringify(gameData));
+            
+            // إرسال البيانات إلى Telegram (للاستخدام المستقبلي)
+            tg.sendData(JSON.stringify({
+                action: 'update_stats',
+                balance: balance,
+                level: level,
+                invitesCount: invitesCount,
+                userId: userId
+            }));
+        }
+        
+        // تحميل البيانات من التخزين المحلي
+        function loadGameData() {
+            const savedData = localStorage.getItem(`coin_crynova_${userId}`);
+            if (savedData) {
+                const gameData = JSON.parse(savedData);
+                balance = gameData.balance || 0;
+                level = gameData.level || 1;
+                energy = gameData.energy || 100;
+                pointsPerClick = gameData.pointsPerClick || 1;
+                autoMiningRate = gameData.autoMiningRate || 0;
+                totalClicks = gameData.totalClicks || 0;
+                invitesCount = gameData.invitesCount || 0;
+                rewardsTotal = gameData.rewardsTotal || 0;
+                Object.assign(upgrades, gameData.upgrades || {});
+                Object.assign(upgradeCosts, gameData.upgradeCosts || {});
+            }
         }
         
         // تحديث واجهة المستخدم
@@ -944,8 +1094,14 @@
             farmCostElement.textContent = formatNumber(upgradeCosts.farm);
             datacenterCostElement.textContent = formatNumber(upgradeCosts.datacenter);
             
+            // تحديث رابط الدعوة
+            inviteLinkElement.value = generateInviteLink();
+            
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
+            
+            // حفظ البيانات
+            saveGameData();
         }
         
         // تحديث الإنجازات
@@ -983,6 +1139,27 @@
                 level = newLevel;
             }
         }
+        
+        // نسخ رابط الدعوة
+        copyLinkButton.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(inviteLinkElement.value);
+                // تغيير نص الزر مؤقتاً للإشارة إلى النسخ
+                const originalHTML = copyLinkButton.innerHTML;
+                copyLinkButton.innerHTML = '<i class="fas fa-check"></i>';
+                copyLinkButton.style.background = 'var(--primary)';
+                
+                setTimeout(() => {
+                    copyLinkButton.innerHTML = originalHTML;
+                    copyLinkButton.style.background = '';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                // طريقة بديلة للنسخ
+                inviteLinkElement.select();
+                document.execCommand('copy');
+            }
+        });
         
         // النقر على زر التعدين
         mineButton.addEventListener('click', () => {
@@ -1023,13 +1200,18 @@
         
         // زر دعوة الأصدقاء
         inviteFriendsButton.addEventListener('click', () => {
-            // رابط بوت التليجرام
-            const telegramBotLink = "https://t.me/Coin_Crynova_bot";
+            const inviteLink = generateInviteLink();
+            const shareText = `انضم إلى Coin Crynova واحصل على مكافأة! 🎮💰\n\nلعبة تعدين العملات الرقمية الممتعة!\n\nرابط الانضمام الخاص بي: ${inviteLink}`;
             
-            // فتح رابط البوت في نافذة جديدة
-            window.open(telegramBotLink, '_blank');
+            // استخدام Telegram Share إذا كان متاحاً
+            if (tg.share) {
+                tg.share(shareText);
+            } else {
+                // فتح رابط الدعوة في نافذة جديدة
+                window.open(inviteLink, '_blank');
+            }
             
-            // محاكاة نجاح الدعوة
+            // محاكاة نجاح الدعوة (في التطبيق الحقيقي، هذا سيتم من خلال البوت)
             invitesCount++;
             rewardsTotal += inviteReward;
             balance += inviteReward;
@@ -1114,8 +1296,41 @@
         }, 1000);
         
         // تهيئة اللعبة
-        updateUI();
-        startAutoMining(); // بدء التعدين التلقائي تلقائياً
+        function initGame() {
+            loadGameData();
+            updateUI();
+            startAutoMining();
+            
+            // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
+            setTimeout(() => {
+                loadingElement.style.display = 'none';
+                mainContentElement.style.display = 'grid';
+            }, 1500);
+        }
+        
+        // بدء اللعبة عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', initGame);
+        
+        // حفظ البيانات عند إغلاق الصفحة
+        window.addEventListener('beforeunload', saveGameData);
+        
+        // معالجة بيانات البدء من Telegram (للدعوات)
+        if (tg.initDataUnsafe?.start_param) {
+            const startParam = tg.initDataUnsafe.start_param;
+            if (startParam.startsWith('invite_')) {
+                const inviterId = startParam.replace('invite_', '');
+                
+                // هنا يمكنك إضافة منطق لمكافأة المُدعِي
+                if (inviterId && inviterId !== userId.toString()) {
+                    // إرسال بيانات الدعوة إلى الخادم أو حفظها محلياً
+                    tg.sendData(JSON.stringify({
+                        action: 'invite_accepted',
+                        inviterId: inviterId,
+                        invitedUserId: userId
+                    }));
+                }
+            }
+        }
     </script>
 </body>
 </html>
