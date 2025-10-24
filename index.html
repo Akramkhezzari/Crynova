@@ -245,6 +245,39 @@
             text-align: center;
         }
 
+        /* زر الانضمام للقناة */
+        .channel-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #0088cc, #00a8ff);
+            border: none;
+            border-radius: 50px;
+            padding: 15px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            text-decoration: none;
+        }
+
+        .channel-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 136, 204, 0.4);
+        }
+
+        .channel-btn:active {
+            transform: translateY(0);
+        }
+
+        .channel-icon {
+            font-size: 1.3rem;
+        }
+
         /* اللوحة الجانبية */
         .side-panel {
             display: flex;
@@ -497,32 +530,6 @@
             font-size: 1.3rem;
         }
 
-        /* الإشعارات */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            transform: translateX(150%);
-            transition: transform 0.5s ease;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification i {
-            font-size: 1.5rem;
-        }
-
         /* تأثيرات النيون */
         .neon-text {
             text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
@@ -695,8 +702,10 @@
                         <div class="stat-value" id="total-clicks">0</div>
                     </div>
                     <div class="mining-stat">
-                        <div>الإنتاجية</div>
-                        <div class="stat-value" id="efficiency">100%</div>
+                        <a href="https://t.me/Coin_Crynova" class="channel-btn" target="_blank">
+                            <i class="fab fa-telegram channel-icon"></i>
+                            <span>انضم إلى قناتنا</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -837,11 +846,6 @@
             </div>
         </div>
     </div>
-    
-    <div class="notification" id="notification">
-        <i class="fas fa-bell"></i>
-        <div>مرحباً بك في Coin Crynova!</div>
-    </div>
 
     <script>
         // متغيرات اللعبة
@@ -851,7 +855,6 @@
         let pointsPerClick = 1;
         let autoMiningRate = 0;
         let totalClicks = 0;
-        let efficiency = 100;
         
         // إحصائيات الدعوة
         let invitesCount = 0;
@@ -885,7 +888,6 @@
         const pointsPerClickElement = document.getElementById('points-per-click');
         const autoMiningRateElement = document.getElementById('auto-mining-rate');
         const totalClicksElement = document.getElementById('total-clicks');
-        const efficiencyElement = document.getElementById('efficiency');
         const mineButton = document.getElementById('mine-btn');
         const userScoreElement = document.getElementById('user-score');
         const inviteFriendsButton = document.getElementById('invite-friends');
@@ -903,9 +905,6 @@
         const serverCostElement = document.getElementById('server-cost');
         const farmCostElement = document.getElementById('farm-cost');
         const datacenterCostElement = document.getElementById('datacenter-cost');
-        
-        // الإشعارات
-        const notification = document.getElementById('notification');
         
         // دالة لتنسيق الأعداد الكبيرة
         function formatNumber(num) {
@@ -929,7 +928,6 @@
             pointsPerClickElement.textContent = formatNumber(pointsPerClick);
             autoMiningRateElement.textContent = formatNumber(autoMiningRate) + '/ثانية';
             totalClicksElement.textContent = formatNumber(totalClicks);
-            efficiencyElement.textContent = efficiency + '%';
             userScoreElement.textContent = formatNumber(Math.floor(balance));
             invitesCountElement.textContent = formatNumber(invitesCount);
             rewardsTotalElement.textContent = formatNumber(rewardsTotal);
@@ -983,28 +981,16 @@
             const newLevel = Math.floor(balance / 100) + 1;
             if (newLevel > level) {
                 level = newLevel;
-                showNotification(`تهانينا! لقد وصلت إلى المستوى ${level}!`);
             }
-        }
-        
-        // إظهار إشعار
-        function showNotification(message) {
-            notification.querySelector('div').textContent = message;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
         }
         
         // النقر على زر التعدين
         mineButton.addEventListener('click', () => {
             if (energy <= 0) {
-                showNotification("طاقتك منخفضة! انتظر حتى تعود الطاقة.");
                 return;
             }
             
-            const coinsEarned = pointsPerClick * (efficiency / 100);
+            const coinsEarned = pointsPerClick;
             balance += coinsEarned;
             totalClicks++;
             energy -= 0.5;
@@ -1048,7 +1034,6 @@
             rewardsTotal += inviteReward;
             balance += inviteReward;
             
-            showNotification(`تمت دعوة صديق بنجاح! حصلت على ${inviteReward} Crynova مكافأة!`);
             updateUI();
         });
         
@@ -1062,7 +1047,6 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.pickaxe = Math.floor(upgradeCosts.pickaxe * 1.8);
                 
-                showNotification(`تم شراء معول أفضل! النقاط لكل نقرة: ${formatNumber(pointsPerClick)}`);
                 updateUI();
             }
         });
@@ -1077,7 +1061,6 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.server = Math.floor(upgradeCosts.server * 1.8);
                 
-                showNotification(`تم شراء خوادم سريعة! التعدين التلقائي: ${formatNumber(autoMiningRate)}/ثانية`);
                 updateUI();
             }
         });
@@ -1092,7 +1075,6 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.farm = Math.floor(upgradeCosts.farm * 1.8);
                 
-                showNotification(`تم شراء مزرعة تعدين! التعدين التلقائي: ${formatNumber(autoMiningRate)}/ثانية`);
                 updateUI();
             }
         });
@@ -1108,7 +1090,6 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.datacenter = Math.floor(upgradeCosts.datacenter * 2.5);
                 
-                showNotification(`تم شراء مركز بيانات! تضاعفت إنتاجيتك!`);
                 updateUI();
             }
         });
@@ -1135,7 +1116,6 @@
         // تهيئة اللعبة
         updateUI();
         startAutoMining(); // بدء التعدين التلقائي تلقائياً
-        showNotification("مرحباً بك في Coin Crynova! ابدأ بالضغط على زر التعدين.");
     </script>
 </body>
 </html>
