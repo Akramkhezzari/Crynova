@@ -1082,10 +1082,11 @@
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
         
-        // دالة للحصول على معرف المستخدم الفريد
+        // دالة للحصول على معرف المستخدم الفريد - الإصدار المصحح
         function getUserId() {
             if (tg?.initDataUnsafe?.user?.id) {
-                return `tg_${tg.initDataUnsafe.user.id}`;
+                // إرجاع معرف المستخدم مباشرة بدون إضافة "tg_"
+                return tg.initDataUnsafe.user.id.toString();
             }
             return `web_${userId}`;
         }
@@ -1558,24 +1559,69 @@
         }, 1000);
         
         // التحقق من رابط الدعوة عند التحميل
-        function checkInviteFromUrl() {
+        async function checkInviteFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             const startParam = urlParams.get('start');
             
             if (startParam && startParam.startsWith('invite_')) {
                 const inviterId = startParam.replace('invite_', '');
-                if (inviterId !== getUserId()) {
-                    // منح مكافأة الدعوة
-                    invitesCount++;
-                    rewardsTotal += inviteReward;
-                    balance += inviteReward;
-                    updateUI();
-                    
-                    // عرض رسالة نجاح
-                    setTimeout(() => {
-                        alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 200 Crynova!');
-                    }, 1000);
+                
+                // منع المستخدم من دعوة نفسه
+                if (inviterId === getUserId()) {
+                    console.log("لا يمكن دعوة نفسك");
+                    return;
                 }
+                
+                // التحقق مما إذا كان المستخدم قد حصل بالفعل على مكافأة من هذا المُدعِي
+                const inviteKey = `invite_claimed_${inviterId}`;
+                if (localStorage.getItem(inviteKey)) {
+                    console.log("لقد حصلت بالفعل على مكافأة الدعوة من هذا المستخدم");
+                    return;
+                }
+                
+                // منح مكافأة الدعوة للمستخدم الجديد
+                balance += inviteReward;
+                localStorage.setItem(inviteKey, 'true');
+                
+                // تحديث بيانات المُدعِي في قاعدة البيانات
+                await updateInviterRewards(inviterId);
+                
+                // عرض رسالة نجاح
+                setTimeout(() => {
+                    alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 200 Crynova!');
+                }, 1000);
+                
+                updateUI();
+            }
+        }
+        
+        // تحديث مكافآت المُدعِي في قاعدة البيانات
+        async function updateInviterRewards(inviterId) {
+            if (!db) return;
+            
+            try {
+                // الحصول على بيانات المُدعِي
+                const inviterDoc = await db.collection('users').doc(inviterId).get();
+                
+                if (inviterDoc.exists) {
+                    const inviterData = inviterDoc.data();
+                    
+                    // تحديث إحصائيات الدعوة للمُدعِي
+                    const updatedInvitesCount = (inviterData.invitesCount || 0) + 1;
+                    const updatedRewardsTotal = (inviterData.rewardsTotal || 0) + inviteReward;
+                    const updatedBalance = (inviterData.balance || 0) + inviteReward;
+                    
+                    // تحديث بيانات المُدعِي في قاعدة البيانات
+                    await db.collection('users').doc(inviterId).update({
+                        invitesCount: updatedInvitesCount,
+                        rewardsTotal: updatedRewardsTotal,
+                        balance: updatedBalance
+                    });
+                    
+                    console.log(`تم تحديث مكافآت المُدعِي ${inviterId}`);
+                }
+            } catch (error) {
+                console.error("خطأ في تحديث مكافآت المُدعِي:", error);
             }
         }
         
@@ -1584,7 +1630,7 @@
             await loadGameDataFromFirestore();
             updateUI();
             startAutoMining();
-            checkInviteFromUrl();
+            await checkInviteFromUrl();
             updateLeaderboard();
             
             // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
