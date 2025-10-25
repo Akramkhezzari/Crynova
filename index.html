@@ -1038,7 +1038,7 @@
         // إحصائيات الدعوة
         let invitesCount = 0;
         let rewardsTotal = 0;
-        const inviteReward = 1000;
+        const inviteReward = 1000; // تغيير من 200 إلى 1000
         
         // التعدين التلقائي
         let autoMiningInterval;
@@ -1082,19 +1082,13 @@
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
         
-        // دالة محسنة للحصول على معرف المستخدم
+        // دالة للحصول على معرف المستخدم الفريد - الإصدار المصحح
         function getUserId() {
             if (tg?.initDataUnsafe?.user?.id) {
-                return `tg_${tg.initDataUnsafe.user.id}`;
+                // إرجاع معرف المستخدم مباشرة بدون إضافة "tg_"
+                return tg.initDataUnsafe.user.id.toString();
             }
-            
-            // استخدام معرف محلي ثابت للتجربة على المتصفح
-            let localUserId = localStorage.getItem('local_user_id');
-            if (!localUserId) {
-                localUserId = `web_${Math.floor(Math.random() * 1000000)}`;
-                localStorage.setItem('local_user_id', localUserId);
-            }
-            return localUserId;
+            return `web_${userId}`;
         }
 
         function getUserName() {
@@ -1564,36 +1558,26 @@
             }
         }, 1000);
         
-        // التحقق من رابط الدعوة عند التحميل - الإصدار المصحح
+        // التحقق من رابط الدعوة عند التحميل
         async function checkInviteFromUrl() {
-            console.log("=== بدء فحص نظام الدعوة ===");
-            
             const urlParams = new URLSearchParams(window.location.search);
             const startParam = urlParams.get('start');
-            
-            console.log("معامل URL:", window.location.search);
-            console.log("معامل start:", startParam);
-            console.log("المستخدم الحالي:", getUserId());
             
             if (startParam && startParam.startsWith('invite_')) {
                 const inviterId = startParam.replace('invite_', '');
                 
-                console.log("تم العثور على دعوة من:", inviterId);
-                
                 // منع المستخدم من دعوة نفسه
                 if (inviterId === getUserId()) {
-                    console.log("❌ لا يمكن دعوة نفسك");
+                    console.log("لا يمكن دعوة نفسك");
                     return;
                 }
                 
                 // التحقق مما إذا كان المستخدم قد حصل بالفعل على مكافأة من هذا المُدعِي
                 const inviteKey = `invite_claimed_${inviterId}`;
                 if (localStorage.getItem(inviteKey)) {
-                    console.log("❌ لقد حصلت بالفعل على مكافأة الدعوة من هذا المستخدم");
+                    console.log("لقد حصلت بالفعل على مكافأة الدعوة من هذا المستخدم");
                     return;
                 }
-                
-                console.log("✅ منح مكافأة الدعوة للمستخدم الجديد");
                 
                 // منح مكافأة الدعوة للمستخدم الجديد
                 balance += inviteReward;
@@ -1604,35 +1588,16 @@
                 
                 // عرض رسالة نجاح
                 setTimeout(() => {
-                    alert('🎉 تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 1000 Crynova!');
+                    alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 1000 Crynova!');
                 }, 1000);
                 
                 updateUI();
-            } else {
-                console.log("❌ لا توجد دعوة في الرابط");
             }
         }
         
-        // تحديث مكافآت المُدعِي في قاعدة البيانات - الإصدار المصحح
+        // تحديث مكافآت المُدعِي في قاعدة البيانات
         async function updateInviterRewards(inviterId) {
-            console.log("🔄 تحديث مكافآت المدعي:", inviterId);
-            
-            if (!db) {
-                console.log("❌ Firestore غير متاح، استخدام التخزين المحلي");
-                
-                // حل بدائي باستخدام localStorage (مؤقت)
-                const inviterKey = `pending_invite_${inviterId}`;
-                const pendingInvites = JSON.parse(localStorage.getItem(inviterKey) || '[]');
-                pendingInvites.push({
-                    userId: getUserId(),
-                    timestamp: new Date().toISOString(),
-                    reward: inviteReward
-                });
-                localStorage.setItem(inviterKey, JSON.stringify(pendingInvites));
-                
-                console.log("✅ تم حفظ الدعوة المعلقة في التخزين المحلي");
-                return;
-            }
+            if (!db) return;
             
             try {
                 // الحصول على بيانات المُدعِي
@@ -1650,83 +1615,19 @@
                     await db.collection('users').doc(inviterId).update({
                         invitesCount: updatedInvitesCount,
                         rewardsTotal: updatedRewardsTotal,
-                        balance: updatedBalance,
-                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                        balance: updatedBalance
                     });
                     
-                    console.log(`✅ تم تحديث مكافآت المُدعِي ${inviterId}`);
-                    console.log(`- الدعوات: ${updatedInvitesCount}`);
-                    console.log(`- المكافآت: ${updatedRewardsTotal}`);
-                    console.log(`- الرصيد الجديد: ${updatedBalance}`);
-                    
-                } else {
-                    console.log("❌ المستخدم المدعي غير موجود في قاعدة البيانات");
-                    
-                    // حل بديل باستخدام localStorage
-                    const inviterKey = `pending_invite_${inviterId}`;
-                    const pendingInvites = JSON.parse(localStorage.getItem(inviterKey) || '[]');
-                    pendingInvites.push({
-                        userId: getUserId(),
-                        timestamp: new Date().toISOString(),
-                        reward: inviteReward
-                    });
-                    localStorage.setItem(inviterKey, JSON.stringify(pendingInvites));
-                    console.log("✅ تم حفظ الدعوة المعلقة في التخزين المحلي");
+                    console.log(`تم تحديث مكافآت المُدعِي ${inviterId}`);
                 }
             } catch (error) {
-                console.error("❌ خطأ في تحديث مكافآت المُدعِي:", error);
-                
-                // حل بديل باستخدام localStorage
-                const inviterKey = `pending_invite_${inviterId}`;
-                const pendingInvites = JSON.parse(localStorage.getItem(inviterKey) || '[]');
-                pendingInvites.push({
-                    userId: getUserId(),
-                    timestamp: new Date().toISOString(),
-                    reward: inviteReward
-                });
-                localStorage.setItem(inviterKey, JSON.stringify(pendingInvites));
-                console.log("✅ تم حفظ الدعوة المعلقة في التخزين المحلي كبديل");
+                console.error("خطأ في تحديث مكافآت المُدعِي:", error);
             }
         }
         
-        // معالجة الدعوات المعلقة عندما يسجل المدعي الدخول
-        async function processPendingInvites() {
-            const userId = getUserId();
-            const pendingKey = `pending_invite_${userId}`;
-            const pendingInvites = JSON.parse(localStorage.getItem(pendingKey) || '[]');
-            
-            if (pendingInvites.length === 0) return;
-            
-            console.log(`🔄 معالجة ${pendingInvites.length} دعوة معلقة`);
-            
-            for (const invite of pendingInvites) {
-                // تحديث إحصائيات المدعي
-                invitesCount++;
-                rewardsTotal += invite.reward;
-                balance += invite.reward;
-                
-                console.log(`✅ تمت معالجة دعوة من: ${invite.userId}`);
-            }
-            
-            // حذف الدعوات المعلقة بعد معالجتها
-            localStorage.removeItem(pendingKey);
-            
-            // حفظ البيانات المحدثة
-            await saveGameDataToFirestore();
-            updateUI();
-            
-            console.log(`🎉 تمت معالجة جميع الدعوات المعلقة!`);
-        }
-        
-        // تهيئة اللعبة - الإصدار المحسن
+        // تهيئة اللعبة
         async function initGame() {
-            console.log("=== بدء تهيئة اللعبة ===");
-            
             await loadGameDataFromFirestore();
-            
-            // معالجة أي دعوات معلقة
-            await processPendingInvites();
-            
             updateUI();
             startAutoMining();
             await checkInviteFromUrl();
@@ -1736,7 +1637,6 @@
             setTimeout(() => {
                 loadingElement.style.display = 'none';
                 mainContentElement.style.display = 'grid';
-                console.log("✅ تم تحميل اللعبة بنجاح");
             }, 1500);
         }
         
