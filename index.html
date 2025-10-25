@@ -1007,6 +1007,7 @@
         let userId = null;
         let userName = 'مستخدم';
         let userData = null;
+        let dbUserId = null; // إضافة هذا المتغير
 
         // رابط البوت الأساسي
         const BOT_USERNAME = 'Coin_Crynova_bot';
@@ -1066,9 +1067,9 @@
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
 
-        // ========== دوال Supabase ==========
+        // ========== دوال Supabase المعدلة ==========
 
-        // دالة للحصول على معرف المستخدم الفريد
+        // دالة للحصول على معرف المستخدم الفريد - معدلة
         async function getUserId() {
             if (tg?.initDataUnsafe?.user?.id) {
                 return tg.initDataUnsafe.user.id.toString();
@@ -1077,7 +1078,6 @@
             // إذا لم يكن في بيئة Telegram، استخدم معرف محلي
             if (!userId) {
                 userId = `web_${Math.floor(Math.random() * 1000000)}`;
-                await createOrUpdateUser();
             }
             return userId;
         }
@@ -1090,12 +1090,14 @@
             return 'مستخدم';
         }
 
-        // إنشاء أو تحديث المستخدم
+        // إنشاء أو تحديث المستخدم - معدلة
         async function createOrUpdateUser() {
             const telegramId = await getUserId();
             const username = await getUserName();
             
             try {
+                console.log("Creating/updating user with ID:", telegramId);
+                
                 // التحقق من وجود المستخدم
                 const { data: existingUser, error: userError } = await supabase
                     .from('users')
@@ -1112,6 +1114,7 @@
                 
                 if (existingUser) {
                     userId = existingUser.id;
+                    console.log("User exists, ID:", userId);
                     // تحديث بيانات المستخدم
                     await supabase
                         .from('users')
@@ -1138,9 +1141,10 @@
                     }
                     
                     userId = newUser.id;
+                    console.log("New user created, ID:", userId);
                     
                     // إنشاء بيانات اللعبة للمستخدم الجديد
-                    await supabase
+                    const { error: gameDataError } = await supabase
                         .from('game_data')
                         .insert({
                             user_id: userId,
@@ -1154,8 +1158,13 @@
                             rewards_total: 0,
                             upgrades: {}
                         });
+
+                    if (gameDataError) {
+                        console.error('Error creating game data:', gameDataError);
+                    }
                 }
                 
+                dbUserId = userId; // حفظ معرف قاعدة البيانات
                 return userId;
             } catch (error) {
                 console.error('Error in createOrUpdateUser:', error);
@@ -1163,7 +1172,7 @@
             }
         }
 
-        // تحميل بيانات اللعبة
+        // تحميل بيانات اللعبة - معدلة
         async function loadGameData() {
             try {
                 const dbUserId = await createOrUpdateUser();
@@ -1208,10 +1217,13 @@
             }
         }
 
-        // حفظ بيانات اللعبة
+        // حفظ بيانات اللعبة - معدلة
         async function saveGameData() {
             try {
-                const dbUserId = await createOrUpdateUser();
+                if (!dbUserId) {
+                    await createOrUpdateUser();
+                }
+                
                 if (!dbUserId) {
                     saveToLocalStorage();
                     return;
@@ -1296,10 +1308,13 @@
             }
         }
 
-        // معالجة الدعوات
+        // معالجة الدعوات - معدلة
         async function handleInvite(referrerId) {
             try {
-                const dbUserId = await createOrUpdateUser();
+                if (!dbUserId) {
+                    await createOrUpdateUser();
+                }
+                
                 if (!dbUserId || referrerId === dbUserId) {
                     return false;
                 }
@@ -1420,21 +1435,23 @@
             return Math.floor(num).toString();
         }
 
-        // إنشاء رابط الدعوة الشخصي
-        function generateInviteLink() {
-            const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${getUserId()}`;
+        // إنشاء رابط الدعوة الشخصي - معدلة
+        async function generateInviteLink() {
+            const currentUserId = await getUserId();
+            const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${currentUserId}`;
             return baseUrl;
         }
 
-        // التحقق من رابط الدعوة عند التحميل
+        // التحقق من رابط الدعوة عند التحميل - معدلة
         async function checkInviteFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             const startParam = urlParams.get('start');
             
             if (startParam && startParam.startsWith('invite_')) {
                 const referrerId = startParam.replace('invite_', '');
+                const currentUserId = await getUserId();
                 
-                if (referrerId === (await getUserId())) {
+                if (referrerId === currentUserId) {
                     console.log("لا يمكن دعوة نفسك");
                     return;
                 }
@@ -1450,8 +1467,8 @@
             }
         }
 
-        // تحديث واجهة المستخدم
-        function updateUI() {
+        // تحديث واجهة المستخدم - معدلة
+        async function updateUI() {
             balanceElement.textContent = formatNumber(balance);
             levelElement.textContent = level;
             energyElement.textContent = Math.floor(energy) + '%';
@@ -1474,7 +1491,7 @@
             document.getElementById('datacenter-cost').textContent = formatNumber(upgradeCosts.datacenter);
             
             // تحديث رابط الدعوة
-            inviteLinkElement.value = generateInviteLink();
+            inviteLinkElement.value = await generateInviteLink();
             
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
@@ -1544,10 +1561,11 @@
 
         // ========== event listeners ==========
 
-        // نسخ رابط الدعوة
+        // نسخ رابط الدعوة - معدلة
         copyLinkButton.addEventListener('click', async () => {
             try {
-                await navigator.clipboard.writeText(inviteLinkElement.value);
+                const inviteLink = await generateInviteLink();
+                await navigator.clipboard.writeText(inviteLink);
                 const originalHTML = copyLinkButton.innerHTML;
                 copyLinkButton.innerHTML = '<i class="fas fa-check"></i>';
                 copyLinkButton.style.background = 'var(--primary)';
@@ -1563,9 +1581,9 @@
             }
         });
 
-        // زر مشاركة الرابط
-        inviteFriendsButton.addEventListener('click', () => {
-            const inviteLink = generateInviteLink();
+        // زر مشاركة الرابط - معدلة
+        inviteFriendsButton.addEventListener('click', async () => {
+            const inviteLink = await generateInviteLink();
             const shareText = `انضم إلى Coin Crynova - لعبة تعدين العملات الرقمية الممتعة! 🎮💰\n\nاستخدم رابط الدعوة الخاص بي للانضمام:\n${inviteLink}\n\nاحصل على مكافأة 1000 Crynova مجاناً!`;
             
             if (navigator.share) {
@@ -1746,7 +1764,7 @@
             }
         }, 1000);
 
-        // تهيئة اللعبة
+        // تهيئة اللعبة - معدلة
         async function initGame() {
             await loadGameData();
             updateUI();
