@@ -6,6 +6,8 @@
     <title>Coin Crynova - لعبة تعدين العملات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- إضافة Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -984,6 +986,11 @@
     </div>
 
     <script>
+        // ========== إعدادات Supabase ==========
+        const SUPABASE_URL = 'https://ilzotuutmhpxavqsyxif.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsem90dXV0bWhweGF2cXN5eGlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0MDg1MjksImV4cCI6MjA3Njk4NDUyOX0.YXtE8Lhpa4i1gK2f2nKfWb1HLvdmT1MahlGtRxizjU8';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         // Telegram Web App Integration
         let tg = window.Telegram?.WebApp;
 
@@ -997,12 +1004,13 @@
         }
 
         // بيانات المستخدم
-        let userId = Math.floor(Math.random() * 1000000);
+        let userId = null;
         let userName = 'مستخدم';
-        
+        let userData = null;
+
         // رابط البوت الأساسي
         const BOT_USERNAME = 'Coin_Crynova_bot';
-        
+
         // متغيرات اللعبة
         let balance = 0;
         let level = 1;
@@ -1010,15 +1018,15 @@
         let pointsPerClick = 1;
         let autoMiningRate = 0;
         let totalClicks = 0;
-        
+
         // إحصائيات الدعوة
         let invitesCount = 0;
         let rewardsTotal = 0;
         const inviteReward = 1000;
-        
+
         // التعدين التلقائي
         let autoMiningInterval;
-        
+
         // تكاليف الترقيات
         const upgradeCosts = {
             pickaxe: 10,
@@ -1026,7 +1034,7 @@
             farm: 200,
             datacenter: 1000
         };
-        
+
         // عدد الترقيات المشتراة
         const upgrades = {
             pickaxe: 0,
@@ -1034,7 +1042,7 @@
             farm: 0,
             datacenter: 0
         };
-        
+
         // العناصر في واجهة المستخدم
         const balanceElement = document.getElementById('balance');
         const levelElement = document.getElementById('level');
@@ -1051,22 +1059,30 @@
         const inviteLinkElement = document.getElementById('invite-link');
         const copyLinkButton = document.getElementById('copy-link');
         const leaderboardContainer = document.getElementById('leaderboard-container');
-        
+
         // أزرار الترقيات
         const buyPickaxeButton = document.getElementById('buy-pickaxe');
         const buyServerButton = document.getElementById('buy-server');
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
-        
+
+        // ========== دوال Supabase ==========
+
         // دالة للحصول على معرف المستخدم الفريد
-        function getUserId() {
+        async function getUserId() {
             if (tg?.initDataUnsafe?.user?.id) {
                 return tg.initDataUnsafe.user.id.toString();
             }
-            return `web_${userId}`;
+            
+            // إذا لم يكن في بيئة Telegram، استخدم معرف محلي
+            if (!userId) {
+                userId = `web_${Math.floor(Math.random() * 1000000)}`;
+                await createOrUpdateUser();
+            }
+            return userId;
         }
 
-        function getUserName() {
+        async function getUserName() {
             if (tg?.initDataUnsafe?.user) {
                 const user = tg.initDataUnsafe.user;
                 return user.first_name || user.username || 'مستخدم';
@@ -1074,28 +1090,269 @@
             return 'مستخدم';
         }
 
-        // إنشاء رابط الدعوة الشخصي
-        function generateInviteLink() {
-            const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${getUserId()}`;
-            return baseUrl;
+        // إنشاء أو تحديث المستخدم
+        async function createOrUpdateUser() {
+            const telegramId = await getUserId();
+            const username = await getUserName();
+            
+            try {
+                // التحقق من وجود المستخدم
+                const { data: existingUser, error: userError } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('telegram_id', telegramId)
+                    .single();
+
+                if (userError && userError.code !== 'PGRST116') {
+                    console.error('Error checking user:', userError);
+                    return null;
+                }
+
+                let userId;
+                
+                if (existingUser) {
+                    userId = existingUser.id;
+                    // تحديث بيانات المستخدم
+                    await supabase
+                        .from('users')
+                        .update({ 
+                            username: username,
+                            first_name: username 
+                        })
+                        .eq('id', userId);
+                } else {
+                    // إنشاء مستخدم جديد
+                    const { data: newUser, error: createError } = await supabase
+                        .from('users')
+                        .insert({
+                            telegram_id: telegramId,
+                            username: username,
+                            first_name: username
+                        })
+                        .select()
+                        .single();
+
+                    if (createError) {
+                        console.error('Error creating user:', createError);
+                        return null;
+                    }
+                    
+                    userId = newUser.id;
+                    
+                    // إنشاء بيانات اللعبة للمستخدم الجديد
+                    await supabase
+                        .from('game_data')
+                        .insert({
+                            user_id: userId,
+                            balance: 0,
+                            level: 1,
+                            energy: 100,
+                            points_per_click: 1,
+                            auto_mining_rate: 0,
+                            total_clicks: 0,
+                            invites_count: 0,
+                            rewards_total: 0,
+                            upgrades: {}
+                        });
+                }
+                
+                return userId;
+            } catch (error) {
+                console.error('Error in createOrUpdateUser:', error);
+                return null;
+            }
         }
-        
-        // دالة لتنسيق الأعداد الكبيرة
-        function formatNumber(num) {
-            if (num >= 1000000000) {
-                return (num / 1000000000).toFixed(1) + 'B';
+
+        // تحميل بيانات اللعبة
+        async function loadGameData() {
+            try {
+                const dbUserId = await createOrUpdateUser();
+                if (!dbUserId) {
+                    console.log('Using local storage as fallback');
+                    loadFromLocalStorage();
+                    return;
+                }
+
+                const { data: gameData, error } = await supabase
+                    .from('game_data')
+                    .select('*')
+                    .eq('user_id', dbUserId)
+                    .single();
+
+                if (error) {
+                    console.error('Error loading game data:', error);
+                    loadFromLocalStorage();
+                    return;
+                }
+
+                if (gameData) {
+                    balance = gameData.balance || 0;
+                    level = gameData.level || 1;
+                    energy = gameData.energy || 100;
+                    pointsPerClick = gameData.points_per_click || 1;
+                    autoMiningRate = gameData.auto_mining_rate || 0;
+                    totalClicks = gameData.total_clicks || 0;
+                    invitesCount = gameData.invites_count || 0;
+                    rewardsTotal = gameData.rewards_total || 0;
+                    
+                    if (gameData.upgrades) {
+                        Object.assign(upgrades, gameData.upgrades);
+                    }
+                    
+                    userData = gameData;
+                    console.log("Game data loaded from Supabase");
+                }
+            } catch (error) {
+                console.error('Error in loadGameData:', error);
+                loadFromLocalStorage();
             }
-            if (num >= 1000000) {
-                return (num / 1000000).toFixed(1) + 'M';
-            }
-            if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            }
-            return Math.floor(num).toString();
         }
-        
-        // حفظ البيانات في التخزين المحلي
-        function saveGameData() {
+
+        // حفظ بيانات اللعبة
+        async function saveGameData() {
+            try {
+                const dbUserId = await createOrUpdateUser();
+                if (!dbUserId) {
+                    saveToLocalStorage();
+                    return;
+                }
+
+                const updateData = {
+                    balance,
+                    level,
+                    energy,
+                    points_per_click: pointsPerClick,
+                    auto_mining_rate: autoMiningRate,
+                    total_clicks: totalClicks,
+                    invites_count: invitesCount,
+                    rewards_total: rewardsTotal,
+                    upgrades,
+                    last_played: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+
+                const { error } = await supabase
+                    .from('game_data')
+                    .update(updateData)
+                    .eq('user_id', dbUserId);
+
+                if (error) {
+                    console.error('Error saving game data:', error);
+                    saveToLocalStorage();
+                    return;
+                }
+
+                // تحديث المتصدرين
+                await updateLeaderboardInDB(dbUserId);
+                
+                console.log("Game data saved to Supabase");
+            } catch (error) {
+                console.error('Error in saveGameData:', error);
+                saveToLocalStorage();
+            }
+        }
+
+        // تحديث المتصدرين في قاعدة البيانات
+        async function updateLeaderboardInDB(userId) {
+            try {
+                const username = await getUserName();
+                
+                await supabase
+                    .from('leaderboard')
+                    .upsert({
+                        user_id: userId,
+                        username: username,
+                        balance: balance,
+                        last_updated: new Date().toISOString()
+                    });
+            } catch (error) {
+                console.error('Error updating leaderboard:', error);
+            }
+        }
+
+        // جلب بيانات المتصدرين
+        async function updateLeaderboard() {
+            try {
+                const { data: leaderboardData, error } = await supabase
+                    .from('leaderboard')
+                    .select('username, balance, user_id')
+                    .order('balance', { ascending: false })
+                    .limit(10);
+
+                if (error) {
+                    console.error('Error loading leaderboard:', error);
+                    displayFallbackLeaderboard();
+                    return;
+                }
+
+                if (leaderboardData && leaderboardData.length > 0) {
+                    displayLeaderboard(leaderboardData);
+                } else {
+                    displayFallbackLeaderboard();
+                }
+            } catch (error) {
+                console.error('Error in updateLeaderboard:', error);
+                displayFallbackLeaderboard();
+            }
+        }
+
+        // معالجة الدعوات
+        async function handleInvite(referrerId) {
+            try {
+                const dbUserId = await createOrUpdateUser();
+                if (!dbUserId || referrerId === dbUserId) {
+                    return false;
+                }
+
+                // التحقق من عدم المطالبة بالمكافأة مسبقاً
+                const { data: existingReferral, error: checkError } = await supabase
+                    .from('referrals')
+                    .select('id')
+                    .eq('referred_id', dbUserId)
+                    .single();
+
+                if (checkError && checkError.code !== 'PGRST116') {
+                    console.error('Error checking referral:', checkError);
+                    return false;
+                }
+
+                if (existingReferral) {
+                    console.log('المستخدم قد حصل بالفعل على مكافأة دعوة');
+                    return false;
+                }
+
+                // تسجيل الدعوة
+                const { error: referralError } = await supabase
+                    .from('referrals')
+                    .insert({
+                        referrer_id: referrerId,
+                        referred_id: dbUserId
+                    });
+
+                if (referralError) {
+                    console.error('Error creating referral:', referralError);
+                    return false;
+                }
+
+                // منح المكافأة للمستخدم المدعو
+                balance += inviteReward;
+
+                // تحديث إحصائيات المُدعِي
+                await supabase.rpc('increment_invites', {
+                    user_id: referrerId,
+                    reward_amount: inviteReward
+                });
+
+                await saveGameData();
+                return true;
+            } catch (error) {
+                console.error('Error in handleInvite:', error);
+                return false;
+            }
+        }
+
+        // دوال النسخ الاحتياطي للتخزين المحلي
+        function saveToLocalStorage() {
             const gameData = {
                 balance,
                 level,
@@ -1112,11 +1369,9 @@
                 lastPlayed: new Date().toISOString()
             };
             localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
-            console.log("Game data saved locally");
         }
-        
-        // تحميل البيانات من التخزين المحلي
-        function loadGameData() {
+
+        function loadFromLocalStorage() {
             const savedData = localStorage.getItem(`coin_crynova_${getUserId()}`);
             if (savedData) {
                 const gameData = JSON.parse(savedData);
@@ -1131,51 +1386,70 @@
                 Object.assign(upgrades, gameData.upgrades || {});
                 Object.assign(upgradeCosts, gameData.upgradeCosts || {});
                 console.log("Game data loaded from local storage");
-            } else {
-                console.log("No saved data, starting new game");
             }
         }
 
-        // تحديث المتصدرين (محلي)
-        function updateLeaderboard() {
-            // في هذا الإصنجاز البسيط، سنعرض بيانات وهمية
-            // في الإصدار الحقيقي يمكنك ربطها بخادم
+        // دالة للمتصدرين البديلة
+        async function displayFallbackLeaderboard() {
             const mockLeaderboard = [
-                { name: 'أحمد', balance: 15000, id: '1' },
-                { name: 'محمد', balance: 12000, id: '2' },
-                { name: 'فاطمة', balance: 9800, id: '3' },
-                { name: 'خالد', balance: 7500, id: '4' },
-                { name: 'سارة', balance: 6200, id: '5' },
-                { name: getUserName(), balance: balance, id: getUserId() }
+                { username: 'أحمد', balance: 15000, user_id: '1' },
+                { username: 'محمد', balance: 12000, user_id: '2' },
+                { username: 'فاطمة', balance: 9800, user_id: '3' },
+                { username: 'خالد', balance: 7500, user_id: '4' },
+                { username: 'سارة', balance: 6200, user_id: '5' },
+                { username: await getUserName(), balance: balance, user_id: await getUserId() }
             ].sort((a, b) => b.balance - a.balance)
              .slice(0, 10);
 
             displayLeaderboard(mockLeaderboard);
         }
 
-        // عرض المتصدرين
-        function displayLeaderboard(users) {
-            leaderboardContainer.innerHTML = '';
+        // ========== دوال اللعبة الأساسية ==========
+
+        // دالة لتنسيق الأعداد الكبيرة
+        function formatNumber(num) {
+            if (num >= 1000000000) {
+                return (num / 1000000000).toFixed(1) + 'B';
+            }
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return Math.floor(num).toString();
+        }
+
+        // إنشاء رابط الدعوة الشخصي
+        function generateInviteLink() {
+            const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${getUserId()}`;
+            return baseUrl;
+        }
+
+        // التحقق من رابط الدعوة عند التحميل
+        async function checkInviteFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const startParam = urlParams.get('start');
             
-            users.forEach((user, index) => {
-                const item = document.createElement('div');
-                item.className = 'leaderboard-item';
-                if (user.id === getUserId()) {
-                    item.style.background = 'rgba(0, 255, 157, 0.1)';
-                    item.style.borderRadius = '8px';
-                    item.style.padding = '10px';
+            if (startParam && startParam.startsWith('invite_')) {
+                const referrerId = startParam.replace('invite_', '');
+                
+                if (referrerId === (await getUserId())) {
+                    console.log("لا يمكن دعوة نفسك");
+                    return;
                 }
                 
-                item.innerHTML = `
-                    <div class="leaderboard-rank">${index + 1}</div>
-                    <div class="leaderboard-name">${user.name}</div>
-                    <div class="leaderboard-score">${formatNumber(user.balance)}</div>
-                `;
-                
-                leaderboardContainer.appendChild(item);
-            });
+                const success = await handleInvite(referrerId);
+                if (success) {
+                    setTimeout(() => {
+                        alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 1000 Crynova!');
+                    }, 1000);
+                    
+                    updateUI();
+                }
+            }
         }
-        
+
         // تحديث واجهة المستخدم
         function updateUI() {
             balanceElement.textContent = formatNumber(balance);
@@ -1208,7 +1482,7 @@
             // حفظ البيانات
             saveGameData();
         }
-        
+
         // تحديث الإنجازات
         function updateAchievements() {
             // إنجاز 10K نقطة
@@ -1244,7 +1518,32 @@
                 level = newLevel;
             }
         }
-        
+
+        // عرض المتصدرين
+        function displayLeaderboard(users) {
+            leaderboardContainer.innerHTML = '';
+            
+            users.forEach((user, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                if (user.user_id === getUserId()) {
+                    item.style.background = 'rgba(0, 255, 157, 0.1)';
+                    item.style.borderRadius = '8px';
+                    item.style.padding = '10px';
+                }
+                
+                item.innerHTML = `
+                    <div class="leaderboard-rank">${index + 1}</div>
+                    <div class="leaderboard-name">${user.username}</div>
+                    <div class="leaderboard-score">${formatNumber(user.balance)}</div>
+                `;
+                
+                leaderboardContainer.appendChild(item);
+            });
+        }
+
+        // ========== event listeners ==========
+
         // نسخ رابط الدعوة
         copyLinkButton.addEventListener('click', async () => {
             try {
@@ -1263,7 +1562,7 @@
                 document.execCommand('copy');
             }
         });
-        
+
         // زر مشاركة الرابط
         inviteFriendsButton.addEventListener('click', () => {
             const inviteLink = generateInviteLink();
@@ -1284,7 +1583,7 @@
                 fallbackShare(inviteLink, shareText);
             }
         });
-        
+
         // طريقة بديلة للمشاركة
         function fallbackShare(inviteLink, shareText) {
             const shareModal = document.createElement('div');
@@ -1339,7 +1638,7 @@
                 }
             });
         }
-        
+
         // النقر على زر التعدين
         mineButton.addEventListener('click', () => {
             if (energy <= 0) {
@@ -1374,7 +1673,7 @@
             
             updateUI();
         });
-        
+
         // شراء ترقية المعول
         buyPickaxeButton.addEventListener('click', () => {
             if (balance >= upgradeCosts.pickaxe) {
@@ -1387,7 +1686,7 @@
                 updateUI();
             }
         });
-        
+
         // شراء ترقية الخوادم
         buyServerButton.addEventListener('click', () => {
             if (balance >= upgradeCosts.server) {
@@ -1400,7 +1699,7 @@
                 updateUI();
             }
         });
-        
+
         // شراء ترقية المزرعة
         buyFarmButton.addEventListener('click', () => {
             if (balance >= upgradeCosts.farm) {
@@ -1413,7 +1712,7 @@
                 updateUI();
             }
         });
-        
+
         // شراء ترقية مركز البيانات
         buyDatacenterButton.addEventListener('click', () => {
             if (balance >= upgradeCosts.datacenter) {
@@ -1427,7 +1726,7 @@
                 updateUI();
             }
         });
-        
+
         // نظام التعدين التلقائي
         function startAutoMining() {
             autoMiningInterval = setInterval(() => {
@@ -1437,7 +1736,7 @@
                 }
             }, 100);
         }
-        
+
         // استعادة الطاقة مع مرور الوقت
         setInterval(() => {
             if (energy < 100) {
@@ -1446,54 +1745,24 @@
                 updateUI();
             }
         }, 1000);
-        
-        // التحقق من رابط الدعوة عند التحميل
-        function checkInviteFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const startParam = urlParams.get('start');
-            
-            if (startParam && startParam.startsWith('invite_')) {
-                const inviterId = startParam.replace('invite_', '');
-                
-                if (inviterId === getUserId()) {
-                    console.log("لا يمكن دعوة نفسك");
-                    return;
-                }
-                
-                const inviteKey = `invite_claimed_${inviterId}`;
-                if (localStorage.getItem(inviteKey)) {
-                    console.log("لقد حصلت بالفعل على مكافأة الدعوة من هذا المستخدم");
-                    return;
-                }
-                
-                balance += inviteReward;
-                localStorage.setItem(inviteKey, 'true');
-                
-                setTimeout(() => {
-                    alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 1000 Crynova!');
-                }, 1000);
-                
-                updateUI();
-            }
-        }
-        
+
         // تهيئة اللعبة
-        function initGame() {
-            loadGameData();
+        async function initGame() {
+            await loadGameData();
             updateUI();
             startAutoMining();
-            checkInviteFromUrl();
-            updateLeaderboard();
+            await checkInviteFromUrl();
+            await updateLeaderboard();
             
             setTimeout(() => {
                 loadingElement.style.display = 'none';
                 mainContentElement.style.display = 'grid';
             }, 1500);
         }
-        
+
         // بدء اللعبة عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', initGame);
-        
+
         // حفظ البيانات عند إغلاق الصفحة
         window.addEventListener('beforeunload', () => {
             saveGameData();
