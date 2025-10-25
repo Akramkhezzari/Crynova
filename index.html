@@ -1006,13 +1006,11 @@
         // بيانات المستخدم
         let userId = null;
         let userName = 'مستخدم';
-        let userData = null;
-        let dbUserId = null; // إضافة هذا المتغير
 
         // رابط البوت الأساسي
         const BOT_USERNAME = 'Coin_Crynova_bot';
 
-        // متغيرات اللعبة
+        // متغيرات اللعبة - سيتم تخزينها في Telegram
         let balance = 0;
         let level = 1;
         let energy = 100;
@@ -1020,7 +1018,7 @@
         let autoMiningRate = 0;
         let totalClicks = 0;
 
-        // إحصائيات الدعوة
+        // إحصائيات الدعوة - سيتم تخزينها في Telegram
         let invitesCount = 0;
         let rewardsTotal = 0;
         const inviteReward = 1000;
@@ -1067,9 +1065,9 @@
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
 
-        // ========== دوال Supabase المعدلة ==========
+        // ========== دوال Telegram للتخزين ==========
 
-        // دالة للحصول على معرف المستخدم الفريد - معدلة
+        // دالة للحصول على معرف المستخدم الفريد من Telegram
         async function getUserId() {
             if (tg?.initDataUnsafe?.user?.id) {
                 return tg.initDataUnsafe.user.id.toString();
@@ -1090,204 +1088,142 @@
             return 'مستخدم';
         }
 
-        // إنشاء أو تحديث المستخدم - معدلة
-        async function createOrUpdateUser() {
-            const telegramId = await getUserId();
-            const username = await getUserName();
-            
+        // حفظ بيانات اللعبة في Telegram
+        async function saveGameData() {
             try {
-                console.log("Creating/updating user with ID:", telegramId);
-                
-                // التحقق من وجود المستخدم
-                const { data: existingUser, error: userError } = await supabase
-                    .from('users')
-                    .select('id')
-                    .eq('telegram_id', telegramId)
-                    .single();
+                const currentUserId = await getUserId();
+                const gameData = {
+                    balance,
+                    level,
+                    energy,
+                    pointsPerClick,
+                    autoMiningRate,
+                    totalClicks,
+                    invitesCount,
+                    rewardsTotal,
+                    upgrades,
+                    upgradeCosts,
+                    lastPlayed: new Date().toISOString()
+                };
 
-                if (userError && userError.code !== 'PGRST116') {
-                    console.error('Error checking user:', userError);
-                    return null;
-                }
-
-                let userId;
-                
-                if (existingUser) {
-                    userId = existingUser.id;
-                    console.log("User exists, ID:", userId);
-                    // تحديث بيانات المستخدم
-                    await supabase
-                        .from('users')
-                        .update({ 
-                            username: username,
-                            first_name: username 
-                        })
-                        .eq('id', userId);
+                // استخدام Telegram Cloud Storage
+                if (tg?.CloudStorage) {
+                    await tg.CloudStorage.setItem(`game_data_${currentUserId}`, JSON.stringify(gameData));
                 } else {
-                    // إنشاء مستخدم جديد
-                    const { data: newUser, error: createError } = await supabase
-                        .from('users')
-                        .insert({
-                            telegram_id: telegramId,
-                            username: username,
-                            first_name: username
-                        })
-                        .select()
-                        .single();
-
-                    if (createError) {
-                        console.error('Error creating user:', createError);
-                        return null;
-                    }
-                    
-                    userId = newUser.id;
-                    console.log("New user created, ID:", userId);
-                    
-                    // إنشاء بيانات اللعبة للمستخدم الجديد
-                    const { error: gameDataError } = await supabase
-                        .from('game_data')
-                        .insert({
-                            user_id: userId,
-                            balance: 0,
-                            level: 1,
-                            energy: 100,
-                            points_per_click: 1,
-                            auto_mining_rate: 0,
-                            total_clicks: 0,
-                            invites_count: 0,
-                            rewards_total: 0,
-                            upgrades: {}
-                        });
-
-                    if (gameDataError) {
-                        console.error('Error creating game data:', gameDataError);
-                    }
+                    // Fallback للتخزين المحلي
+                    localStorage.setItem(`coin_crynova_${currentUserId}`, JSON.stringify(gameData));
                 }
                 
-                dbUserId = userId; // حفظ معرف قاعدة البيانات
-                return userId;
+                console.log("Game data saved to Telegram");
+                
+                // تحديث المتصدرين في Supabase فقط
+                await updateLeaderboardInSupabase();
+                
             } catch (error) {
-                console.error('Error in createOrUpdateUser:', error);
-                return null;
+                console.error('Error saving game data:', error);
+                // Fallback للتخزين المحلي
+                const currentUserId = await getUserId();
+                const gameData = {
+                    balance,
+                    level,
+                    energy,
+                    pointsPerClick,
+                    autoMiningRate,
+                    totalClicks,
+                    invitesCount,
+                    rewardsTotal,
+                    upgrades,
+                    upgradeCosts,
+                    lastPlayed: new Date().toISOString()
+                };
+                localStorage.setItem(`coin_crynova_${currentUserId}`, JSON.stringify(gameData));
             }
         }
 
-        // تحميل بيانات اللعبة - معدلة
+        // تحميل بيانات اللعبة من Telegram
         async function loadGameData() {
             try {
-                const dbUserId = await createOrUpdateUser();
-                if (!dbUserId) {
-                    console.log('Using local storage as fallback');
-                    loadFromLocalStorage();
-                    return;
+                const currentUserId = await getUserId();
+                let gameData = null;
+
+                // محاولة التحميل من Telegram Cloud Storage
+                if (tg?.CloudStorage) {
+                    const savedData = await tg.CloudStorage.getItem(`game_data_${currentUserId}`);
+                    if (savedData) {
+                        gameData = JSON.parse(savedData);
+                    }
                 }
 
-                const { data: gameData, error } = await supabase
-                    .from('game_data')
-                    .select('*')
-                    .eq('user_id', dbUserId)
-                    .single();
-
-                if (error) {
-                    console.error('Error loading game data:', error);
-                    loadFromLocalStorage();
-                    return;
+                // إذا لم توجد بيانات في Telegram، جرب التخزين المحلي
+                if (!gameData) {
+                    const savedData = localStorage.getItem(`coin_crynova_${currentUserId}`);
+                    if (savedData) {
+                        gameData = JSON.parse(savedData);
+                    }
                 }
 
                 if (gameData) {
                     balance = gameData.balance || 0;
                     level = gameData.level || 1;
                     energy = gameData.energy || 100;
-                    pointsPerClick = gameData.points_per_click || 1;
-                    autoMiningRate = gameData.auto_mining_rate || 0;
-                    totalClicks = gameData.total_clicks || 0;
-                    invitesCount = gameData.invites_count || 0;
-                    rewardsTotal = gameData.rewards_total || 0;
+                    pointsPerClick = gameData.pointsPerClick || 1;
+                    autoMiningRate = gameData.autoMiningRate || 0;
+                    totalClicks = gameData.totalClicks || 0;
+                    invitesCount = gameData.invitesCount || 0;
+                    rewardsTotal = gameData.rewardsTotal || 0;
                     
                     if (gameData.upgrades) {
                         Object.assign(upgrades, gameData.upgrades);
                     }
                     
-                    userData = gameData;
-                    console.log("Game data loaded from Supabase");
+                    if (gameData.upgradeCosts) {
+                        Object.assign(upgradeCosts, gameData.upgradeCosts);
+                    }
+                    
+                    console.log("Game data loaded from Telegram/Local Storage");
                 }
             } catch (error) {
-                console.error('Error in loadGameData:', error);
-                loadFromLocalStorage();
+                console.error('Error loading game data:', error);
             }
         }
 
-        // حفظ بيانات اللعبة - معدلة
-        async function saveGameData() {
+        // ========== دوال Supabase للمتصدرين والدعوة فقط ==========
+
+        // تحديث المتصدرين في Supabase
+        async function updateLeaderboardInSupabase() {
             try {
-                if (!dbUserId) {
-                    await createOrUpdateUser();
-                }
-                
-                if (!dbUserId) {
-                    saveToLocalStorage();
-                    return;
-                }
-
-                const updateData = {
-                    balance,
-                    level,
-                    energy,
-                    points_per_click: pointsPerClick,
-                    auto_mining_rate: autoMiningRate,
-                    total_clicks: totalClicks,
-                    invites_count: invitesCount,
-                    rewards_total: rewardsTotal,
-                    upgrades,
-                    last_played: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                };
-
-                const { error } = await supabase
-                    .from('game_data')
-                    .update(updateData)
-                    .eq('user_id', dbUserId);
-
-                if (error) {
-                    console.error('Error saving game data:', error);
-                    saveToLocalStorage();
-                    return;
-                }
-
-                // تحديث المتصدرين
-                await updateLeaderboardInDB(dbUserId);
-                
-                console.log("Game data saved to Supabase");
-            } catch (error) {
-                console.error('Error in saveGameData:', error);
-                saveToLocalStorage();
-            }
-        }
-
-        // تحديث المتصدرين في قاعدة البيانات
-        async function updateLeaderboardInDB(userId) {
-            try {
+                const currentUserId = await getUserId();
                 const username = await getUserName();
                 
-                await supabase
+                const { data, error } = await supabase
                     .from('leaderboard')
                     .upsert({
-                        user_id: userId,
+                        user_id: currentUserId,
                         username: username,
                         balance: balance,
+                        level: level,
                         last_updated: new Date().toISOString()
+                    }, {
+                        onConflict: 'user_id'
                     });
+
+                if (error) {
+                    console.error('Error updating leaderboard:', error);
+                    return;
+                }
+                    
+                console.log("Leaderboard updated in Supabase");
             } catch (error) {
                 console.error('Error updating leaderboard:', error);
             }
         }
 
-        // جلب بيانات المتصدرين
+        // جلب بيانات المتصدرين من Supabase
         async function updateLeaderboard() {
             try {
                 const { data: leaderboardData, error } = await supabase
                     .from('leaderboard')
-                    .select('username, balance, user_id')
+                    .select('username, balance, level, user_id')
                     .order('balance', { ascending: false })
                     .limit(10);
 
@@ -1308,14 +1244,12 @@
             }
         }
 
-        // معالجة الدعوات - معدلة
+        // معالجة الدعوات في Supabase
         async function handleInvite(referrerId) {
             try {
-                if (!dbUserId) {
-                    await createOrUpdateUser();
-                }
+                const currentUserId = await getUserId();
                 
-                if (!dbUserId || referrerId === dbUserId) {
+                if (!currentUserId || referrerId === currentUserId) {
                     return false;
                 }
 
@@ -1323,7 +1257,7 @@
                 const { data: existingReferral, error: checkError } = await supabase
                     .from('referrals')
                     .select('id')
-                    .eq('referred_id', dbUserId)
+                    .eq('referred_id', currentUserId)
                     .single();
 
                 if (checkError && checkError.code !== 'PGRST116') {
@@ -1336,12 +1270,14 @@
                     return false;
                 }
 
-                // تسجيل الدعوة
+                // تسجيل الدعوة في Supabase
                 const { error: referralError } = await supabase
                     .from('referrals')
                     .insert({
                         referrer_id: referrerId,
-                        referred_id: dbUserId
+                        referred_id: currentUserId,
+                        reward_amount: inviteReward,
+                        created_at: new Date().toISOString()
                     });
 
                 if (referralError) {
@@ -1349,74 +1285,19 @@
                     return false;
                 }
 
-                // منح المكافأة للمستخدم المدعو
+                // منح المكافأة للمستخدم المدعو (تخزين في Telegram)
                 balance += inviteReward;
+                rewardsTotal += inviteReward;
 
-                // تحديث إحصائيات المُدعِي
-                await supabase.rpc('increment_invites', {
-                    user_id: referrerId,
-                    reward_amount: inviteReward
-                });
-
+                // تحديث إحصائيات المُدعِي في Telegram
+                // (سيتم تحديثها عندما يلعب المُدعِي)
+                
                 await saveGameData();
                 return true;
             } catch (error) {
                 console.error('Error in handleInvite:', error);
                 return false;
             }
-        }
-
-        // دوال النسخ الاحتياطي للتخزين المحلي
-        function saveToLocalStorage() {
-            const gameData = {
-                balance,
-                level,
-                energy,
-                pointsPerClick,
-                autoMiningRate,
-                totalClicks,
-                invitesCount,
-                rewardsTotal,
-                upgrades,
-                upgradeCosts,
-                userId: getUserId(),
-                userName: getUserName(),
-                lastPlayed: new Date().toISOString()
-            };
-            localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
-        }
-
-        function loadFromLocalStorage() {
-            const savedData = localStorage.getItem(`coin_crynova_${getUserId()}`);
-            if (savedData) {
-                const gameData = JSON.parse(savedData);
-                balance = gameData.balance || 0;
-                level = gameData.level || 1;
-                energy = gameData.energy || 100;
-                pointsPerClick = gameData.pointsPerClick || 1;
-                autoMiningRate = gameData.autoMiningRate || 0;
-                totalClicks = gameData.totalClicks || 0;
-                invitesCount = gameData.invitesCount || 0;
-                rewardsTotal = gameData.rewardsTotal || 0;
-                Object.assign(upgrades, gameData.upgrades || {});
-                Object.assign(upgradeCosts, gameData.upgradeCosts || {});
-                console.log("Game data loaded from local storage");
-            }
-        }
-
-        // دالة للمتصدرين البديلة
-        async function displayFallbackLeaderboard() {
-            const mockLeaderboard = [
-                { username: 'أحمد', balance: 15000, user_id: '1' },
-                { username: 'محمد', balance: 12000, user_id: '2' },
-                { username: 'فاطمة', balance: 9800, user_id: '3' },
-                { username: 'خالد', balance: 7500, user_id: '4' },
-                { username: 'سارة', balance: 6200, user_id: '5' },
-                { username: await getUserName(), balance: balance, user_id: await getUserId() }
-            ].sort((a, b) => b.balance - a.balance)
-             .slice(0, 10);
-
-            displayLeaderboard(mockLeaderboard);
         }
 
         // ========== دوال اللعبة الأساسية ==========
@@ -1435,14 +1316,14 @@
             return Math.floor(num).toString();
         }
 
-        // إنشاء رابط الدعوة الشخصي - معدلة
+        // إنشاء رابط الدعوة الشخصي
         async function generateInviteLink() {
             const currentUserId = await getUserId();
             const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${currentUserId}`;
             return baseUrl;
         }
 
-        // التحقق من رابط الدعوة عند التحميل - معدلة
+        // التحقق من رابط الدعوة عند التحميل
         async function checkInviteFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             const startParam = urlParams.get('start');
@@ -1467,7 +1348,7 @@
             }
         }
 
-        // تحديث واجهة المستخدم - معدلة
+        // تحديث واجهة المستخدم
         async function updateUI() {
             balanceElement.textContent = formatNumber(balance);
             levelElement.textContent = level;
@@ -1496,7 +1377,7 @@
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
             
-            // حفظ البيانات
+            // حفظ البيانات في Telegram
             saveGameData();
         }
 
@@ -1543,11 +1424,14 @@
             users.forEach((user, index) => {
                 const item = document.createElement('div');
                 item.className = 'leaderboard-item';
-                if (user.user_id === getUserId()) {
-                    item.style.background = 'rgba(0, 255, 157, 0.1)';
-                    item.style.borderRadius = '8px';
-                    item.style.padding = '10px';
-                }
+                
+                getUserId().then(currentUserId => {
+                    if (user.user_id === currentUserId) {
+                        item.style.background = 'rgba(0, 255, 157, 0.1)';
+                        item.style.borderRadius = '8px';
+                        item.style.padding = '10px';
+                    }
+                });
                 
                 item.innerHTML = `
                     <div class="leaderboard-rank">${index + 1}</div>
@@ -1559,9 +1443,23 @@
             });
         }
 
+        // دالة للمتصدرين البديلة
+        async function displayFallbackLeaderboard() {
+            const mockLeaderboard = [
+                { username: 'أحمد', balance: 15000, user_id: '1' },
+                { username: 'محمد', balance: 12000, user_id: '2' },
+                { username: 'فاطمة', balance: 9800, user_id: '3' },
+                { username: 'خالد', balance: 7500, user_id: '4' },
+                { username: 'سارة', balance: 6200, user_id: '5' }
+            ].sort((a, b) => b.balance - a.balance)
+             .slice(0, 10);
+
+            displayLeaderboard(mockLeaderboard);
+        }
+
         // ========== event listeners ==========
 
-        // نسخ رابط الدعوة - معدلة
+        // نسخ رابط الدعوة
         copyLinkButton.addEventListener('click', async () => {
             try {
                 const inviteLink = await generateInviteLink();
@@ -1581,7 +1479,7 @@
             }
         });
 
-        // زر مشاركة الرابط - معدلة
+        // زر مشاركة الرابط
         inviteFriendsButton.addEventListener('click', async () => {
             const inviteLink = await generateInviteLink();
             const shareText = `انضم إلى Coin Crynova - لعبة تعدين العملات الرقمية الممتعة! 🎮💰\n\nاستخدم رابط الدعوة الخاص بي للانضمام:\n${inviteLink}\n\nاحصل على مكافأة 1000 Crynova مجاناً!`;
@@ -1764,7 +1662,7 @@
             }
         }, 1000);
 
-        // تهيئة اللعبة - معدلة
+        // تهيئة اللعبة
         async function initGame() {
             await loadGameData();
             updateUI();
