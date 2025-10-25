@@ -1038,7 +1038,7 @@
         // إحصائيات الدعوة
         let invitesCount = 0;
         let rewardsTotal = 0;
-        const inviteReward = 1000; // تغيير من 200 إلى 1000
+        const inviteReward = 1000;
         
         // التعدين التلقائي
         let autoMiningInterval;
@@ -1085,7 +1085,6 @@
         // دالة للحصول على معرف المستخدم الفريد - الإصدار المصحح
         function getUserId() {
             if (tg?.initDataUnsafe?.user?.id) {
-                // إرجاع معرف المستخدم مباشرة بدون إضافة "tg_"
                 return tg.initDataUnsafe.user.id.toString();
             }
             return `web_${userId}`;
@@ -1117,6 +1116,140 @@
                 return (num / 1000).toFixed(1) + 'K';
             }
             return Math.floor(num).toString();
+        }
+        
+        // دالة لتسجيل الدعوة في مجموعة منفصلة
+        async function recordInvite(inviterId, invitedId) {
+            if (!db) {
+                console.log("Firestore غير متاح، لا يمكن تسجيل الدعوة");
+                return false;
+            }
+            
+            try {
+                const inviteData = {
+                    inviterId: inviterId,
+                    invitedId: invitedId,
+                    inviteReward: inviteReward,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'completed'
+                };
+                
+                // تسجيل الدعوة في مجموعة منفصلة
+                await db.collection('invites').add(inviteData);
+                console.log("تم تسجيل الدعوة بنجاح في مجموعة invites");
+                return true;
+            } catch (error) {
+                console.error("خطأ في تسجيل الدعوة:", error);
+                return false;
+            }
+        }
+
+        // دالة محسنة لتحديث مكافآت المُدعِي
+        async function updateInviterRewards(inviterId) {
+            if (!db) {
+                console.log("Firestore غير متاح");
+                return false;
+            }
+            
+            try {
+                const inviterDoc = await db.collection('users').doc(inviterId).get();
+                
+                if (inviterDoc.exists) {
+                    const inviterData = inviterDoc.data();
+                    
+                    // تحديث إحصائيات الدعوة للمُدعِي
+                    const updatedInvitesCount = (inviterData.invitesCount || 0) + 1;
+                    const updatedRewardsTotal = (inviterData.rewardsTotal || 0) + inviteReward;
+                    const updatedBalance = (inviterData.balance || 0) + inviteReward;
+                    
+                    // تحديث بيانات المُدعِي
+                    await db.collection('users').doc(inviterId).update({
+                        invitesCount: updatedInvitesCount,
+                        rewardsTotal: updatedRewardsTotal,
+                        balance: updatedBalance,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    console.log(`تم تحديث مكافآت المُدعِي ${inviterId}`);
+                    return true;
+                } else {
+                    console.log("المُدعِي غير موجود في قاعدة البيانات");
+                    return false;
+                }
+            } catch (error) {
+                console.error("خطأ في تحديث مكافآت المُدعِي:", error);
+                return false;
+            }
+        }
+
+        // دالة محسنة للتحقق من الدعوة
+        async function checkInviteFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const startParam = urlParams.get('start');
+            
+            if (startParam && startParam.startsWith('invite_')) {
+                const inviterId = startParam.replace('invite_', '');
+                const currentUserId = getUserId();
+                
+                console.log("تم اكتشاف دعوة:", { inviterId, currentUserId });
+                
+                // منع المستخدم من دعوة نفسه
+                if (inviterId === currentUserId) {
+                    console.log("لا يمكن دعوة نفسك");
+                    return;
+                }
+                
+                // التحقق مما إذا كان المستخدم قد حصل بالفعل على مكافأة من هذا المُدعِي
+                const inviteKey = `invite_claimed_${inviterId}`;
+                if (localStorage.getItem(inviteKey)) {
+                    console.log("لقد حصلت بالفعل على مكافأة الدعوة من هذا المستخدم");
+                    return;
+                }
+                
+                try {
+                    // منح مكافأة الدعوة للمستخدم الجديد
+                    balance += inviteReward;
+                    localStorage.setItem(inviteKey, 'true');
+                    
+                    // تسجيل الدعوة وتحديث مكافآت المُدعِي
+                    const inviteRecorded = await recordInvite(inviterId, currentUserId);
+                    const rewardsUpdated = await updateInviterRewards(inviterId);
+                    
+                    if (inviteRecorded && rewardsUpdated) {
+                        console.log("تم معالجة الدعوة بنجاح");
+                        
+                        // تحديث واجهة المستخدم
+                        updateUI();
+                        
+                        // عرض رسالة نجاح
+                        setTimeout(() => {
+                            alert(`تهانينا! لقد حصلت على مكافأة الدعوة بقيمة ${inviteReward} Crynova!`);
+                        }, 1000);
+                    }
+                    
+                } catch (error) {
+                    console.error("خطأ في معالجة الدعوة:", error);
+                }
+            }
+        }
+
+        // دالة لتحميل إحصائيات الدعوة للمستخدم الحالي
+        async function loadUserInviteStats() {
+            if (!db) return;
+            
+            try {
+                const userDoc = await db.collection('users').doc(getUserId()).get();
+                
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    invitesCount = userData.invitesCount || 0;
+                    rewardsTotal = userData.rewardsTotal || 0;
+                    
+                    console.log("تم تحميل إحصائيات الدعوة:", { invitesCount, rewardsTotal });
+                }
+            } catch (error) {
+                console.error("خطأ في تحميل إحصائيات الدعوة:", error);
+            }
         }
         
         // حفظ البيانات في Firestore
@@ -1558,76 +1691,10 @@
             }
         }, 1000);
         
-        // التحقق من رابط الدعوة عند التحميل
-        async function checkInviteFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const startParam = urlParams.get('start');
-            
-            if (startParam && startParam.startsWith('invite_')) {
-                const inviterId = startParam.replace('invite_', '');
-                
-                // منع المستخدم من دعوة نفسه
-                if (inviterId === getUserId()) {
-                    console.log("لا يمكن دعوة نفسك");
-                    return;
-                }
-                
-                // التحقق مما إذا كان المستخدم قد حصل بالفعل على مكافأة من هذا المُدعِي
-                const inviteKey = `invite_claimed_${inviterId}`;
-                if (localStorage.getItem(inviteKey)) {
-                    console.log("لقد حصلت بالفعل على مكافأة الدعوة من هذا المستخدم");
-                    return;
-                }
-                
-                // منح مكافأة الدعوة للمستخدم الجديد
-                balance += inviteReward;
-                localStorage.setItem(inviteKey, 'true');
-                
-                // تحديث بيانات المُدعِي في قاعدة البيانات
-                await updateInviterRewards(inviterId);
-                
-                // عرض رسالة نجاح
-                setTimeout(() => {
-                    alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 1000 Crynova!');
-                }, 1000);
-                
-                updateUI();
-            }
-        }
-        
-        // تحديث مكافآت المُدعِي في قاعدة البيانات
-        async function updateInviterRewards(inviterId) {
-            if (!db) return;
-            
-            try {
-                // الحصول على بيانات المُدعِي
-                const inviterDoc = await db.collection('users').doc(inviterId).get();
-                
-                if (inviterDoc.exists) {
-                    const inviterData = inviterDoc.data();
-                    
-                    // تحديث إحصائيات الدعوة للمُدعِي
-                    const updatedInvitesCount = (inviterData.invitesCount || 0) + 1;
-                    const updatedRewardsTotal = (inviterData.rewardsTotal || 0) + inviteReward;
-                    const updatedBalance = (inviterData.balance || 0) + inviteReward;
-                    
-                    // تحديث بيانات المُدعِي في قاعدة البيانات
-                    await db.collection('users').doc(inviterId).update({
-                        invitesCount: updatedInvitesCount,
-                        rewardsTotal: updatedRewardsTotal,
-                        balance: updatedBalance
-                    });
-                    
-                    console.log(`تم تحديث مكافآت المُدعِي ${inviterId}`);
-                }
-            } catch (error) {
-                console.error("خطأ في تحديث مكافآت المُدعِي:", error);
-            }
-        }
-        
         // تهيئة اللعبة
         async function initGame() {
             await loadGameDataFromFirestore();
+            await loadUserInviteStats(); // تحميل إحصائيات الدعوة
             updateUI();
             startAutoMining();
             await checkInviteFromUrl();
