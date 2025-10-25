@@ -6,8 +6,6 @@
     <title>Coin Crynova - لعبة تعدين العملات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- إضافة Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -986,46 +984,43 @@
     </div>
 
     <script>
-        // ========== إعدادات Supabase ==========
-        const SUPABASE_URL = 'https://ilzotuutmhpxavqsyxif.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsem90dXV0bWhweGF2cXN5eGlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0MDg1MjksImV4cCI6MjA3Njk4NDUyOX0.YXtE8Lhpa4i1gK2f2nKfWb1HLvdmT1MahlGtRxizjU8';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         // Telegram Web App Integration
         let tg = window.Telegram?.WebApp;
 
+        // تهيئة Telegram Web App
         if (tg) {
             tg.expand();
             tg.enableClosingConfirmation();
             
+            // إعداد الوضع المظلم/فاتح
             if (tg.colorScheme === 'dark') {
                 document.body.classList.add('dark-theme');
             }
         }
 
         // بيانات المستخدم
-        let userId = null;
+        let userId = Math.floor(Math.random() * 1000000);
         let userName = 'مستخدم';
-
+        
         // رابط البوت الأساسي
         const BOT_USERNAME = 'Coin_Crynova_bot';
-
-        // متغيرات اللعبة - سيتم تخزينها في Telegram
+        
+        // متغيرات اللعبة
         let balance = 0;
         let level = 1;
         let energy = 100;
         let pointsPerClick = 1;
         let autoMiningRate = 0;
         let totalClicks = 0;
-
-        // إحصائيات الدعوة - سيتم تخزينها في Telegram
+        
+        // إحصائيات الدعوة
         let invitesCount = 0;
         let rewardsTotal = 0;
         const inviteReward = 1000;
-
+        
         // التعدين التلقائي
         let autoMiningInterval;
-
+        
         // تكاليف الترقيات
         const upgradeCosts = {
             pickaxe: 10,
@@ -1033,7 +1028,7 @@
             farm: 200,
             datacenter: 1000
         };
-
+        
         // عدد الترقيات المشتراة
         const upgrades = {
             pickaxe: 0,
@@ -1041,7 +1036,7 @@
             farm: 0,
             datacenter: 0
         };
-
+        
         // العناصر في واجهة المستخدم
         const balanceElement = document.getElementById('balance');
         const levelElement = document.getElementById('level');
@@ -1058,29 +1053,22 @@
         const inviteLinkElement = document.getElementById('invite-link');
         const copyLinkButton = document.getElementById('copy-link');
         const leaderboardContainer = document.getElementById('leaderboard-container');
-
+        
         // أزرار الترقيات
         const buyPickaxeButton = document.getElementById('buy-pickaxe');
         const buyServerButton = document.getElementById('buy-server');
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
-
-        // ========== دوال Telegram للتخزين ==========
-
-        // دالة للحصول على معرف المستخدم الفريد من Telegram
-        async function getUserId() {
+        
+        // دالة للحصول على معرف المستخدم الفريد
+        function getUserId() {
             if (tg?.initDataUnsafe?.user?.id) {
                 return tg.initDataUnsafe.user.id.toString();
             }
-            
-            // إذا لم يكن في بيئة Telegram، استخدم معرف محلي
-            if (!userId) {
-                userId = `web_${Math.floor(Math.random() * 1000000)}`;
-            }
-            return userId;
+            return `web_${userId}`;
         }
 
-        async function getUserName() {
+        function getUserName() {
             if (tg?.initDataUnsafe?.user) {
                 const user = tg.initDataUnsafe.user;
                 return user.first_name || user.username || 'مستخدم';
@@ -1088,220 +1076,12 @@
             return 'مستخدم';
         }
 
-        // حفظ بيانات اللعبة في Telegram
-        async function saveGameData() {
-            try {
-                const currentUserId = await getUserId();
-                const gameData = {
-                    balance,
-                    level,
-                    energy,
-                    pointsPerClick,
-                    autoMiningRate,
-                    totalClicks,
-                    invitesCount,
-                    rewardsTotal,
-                    upgrades,
-                    upgradeCosts,
-                    lastPlayed: new Date().toISOString()
-                };
-
-                // استخدام Telegram Cloud Storage
-                if (tg?.CloudStorage) {
-                    await tg.CloudStorage.setItem(`game_data_${currentUserId}`, JSON.stringify(gameData));
-                } else {
-                    // Fallback للتخزين المحلي
-                    localStorage.setItem(`coin_crynova_${currentUserId}`, JSON.stringify(gameData));
-                }
-                
-                console.log("Game data saved to Telegram");
-                
-                // تحديث المتصدرين في Supabase فقط
-                await updateLeaderboardInSupabase();
-                
-            } catch (error) {
-                console.error('Error saving game data:', error);
-                // Fallback للتخزين المحلي
-                const currentUserId = await getUserId();
-                const gameData = {
-                    balance,
-                    level,
-                    energy,
-                    pointsPerClick,
-                    autoMiningRate,
-                    totalClicks,
-                    invitesCount,
-                    rewardsTotal,
-                    upgrades,
-                    upgradeCosts,
-                    lastPlayed: new Date().toISOString()
-                };
-                localStorage.setItem(`coin_crynova_${currentUserId}`, JSON.stringify(gameData));
-            }
+        // إنشاء رابط الدعوة الشخصي
+        function generateInviteLink() {
+            const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${getUserId()}`;
+            return baseUrl;
         }
-
-        // تحميل بيانات اللعبة من Telegram
-        async function loadGameData() {
-            try {
-                const currentUserId = await getUserId();
-                let gameData = null;
-
-                // محاولة التحميل من Telegram Cloud Storage
-                if (tg?.CloudStorage) {
-                    const savedData = await tg.CloudStorage.getItem(`game_data_${currentUserId}`);
-                    if (savedData) {
-                        gameData = JSON.parse(savedData);
-                    }
-                }
-
-                // إذا لم توجد بيانات في Telegram، جرب التخزين المحلي
-                if (!gameData) {
-                    const savedData = localStorage.getItem(`coin_crynova_${currentUserId}`);
-                    if (savedData) {
-                        gameData = JSON.parse(savedData);
-                    }
-                }
-
-                if (gameData) {
-                    balance = gameData.balance || 0;
-                    level = gameData.level || 1;
-                    energy = gameData.energy || 100;
-                    pointsPerClick = gameData.pointsPerClick || 1;
-                    autoMiningRate = gameData.autoMiningRate || 0;
-                    totalClicks = gameData.totalClicks || 0;
-                    invitesCount = gameData.invitesCount || 0;
-                    rewardsTotal = gameData.rewardsTotal || 0;
-                    
-                    if (gameData.upgrades) {
-                        Object.assign(upgrades, gameData.upgrades);
-                    }
-                    
-                    if (gameData.upgradeCosts) {
-                        Object.assign(upgradeCosts, gameData.upgradeCosts);
-                    }
-                    
-                    console.log("Game data loaded from Telegram/Local Storage");
-                }
-            } catch (error) {
-                console.error('Error loading game data:', error);
-            }
-        }
-
-        // ========== دوال Supabase للمتصدرين والدعوة فقط ==========
-
-        // تحديث المتصدرين في Supabase
-        async function updateLeaderboardInSupabase() {
-            try {
-                const currentUserId = await getUserId();
-                const username = await getUserName();
-                
-                const { data, error } = await supabase
-                    .from('leaderboard')
-                    .upsert({
-                        user_id: currentUserId,
-                        username: username,
-                        balance: balance,
-                        level: level,
-                        last_updated: new Date().toISOString()
-                    }, {
-                        onConflict: 'user_id'
-                    });
-
-                if (error) {
-                    console.error('Error updating leaderboard:', error);
-                    return;
-                }
-                    
-                console.log("Leaderboard updated in Supabase");
-            } catch (error) {
-                console.error('Error updating leaderboard:', error);
-            }
-        }
-
-        // جلب بيانات المتصدرين من Supabase
-        async function updateLeaderboard() {
-            try {
-                const { data: leaderboardData, error } = await supabase
-                    .from('leaderboard')
-                    .select('username, balance, level, user_id')
-                    .order('balance', { ascending: false })
-                    .limit(10);
-
-                if (error) {
-                    console.error('Error loading leaderboard:', error);
-                    displayFallbackLeaderboard();
-                    return;
-                }
-
-                if (leaderboardData && leaderboardData.length > 0) {
-                    displayLeaderboard(leaderboardData);
-                } else {
-                    displayFallbackLeaderboard();
-                }
-            } catch (error) {
-                console.error('Error in updateLeaderboard:', error);
-                displayFallbackLeaderboard();
-            }
-        }
-
-        // معالجة الدعوات في Supabase
-        async function handleInvite(referrerId) {
-            try {
-                const currentUserId = await getUserId();
-                
-                if (!currentUserId || referrerId === currentUserId) {
-                    return false;
-                }
-
-                // التحقق من عدم المطالبة بالمكافأة مسبقاً
-                const { data: existingReferral, error: checkError } = await supabase
-                    .from('referrals')
-                    .select('id')
-                    .eq('referred_id', currentUserId)
-                    .single();
-
-                if (checkError && checkError.code !== 'PGRST116') {
-                    console.error('Error checking referral:', checkError);
-                    return false;
-                }
-
-                if (existingReferral) {
-                    console.log('المستخدم قد حصل بالفعل على مكافأة دعوة');
-                    return false;
-                }
-
-                // تسجيل الدعوة في Supabase
-                const { error: referralError } = await supabase
-                    .from('referrals')
-                    .insert({
-                        referrer_id: referrerId,
-                        referred_id: currentUserId,
-                        reward_amount: inviteReward,
-                        created_at: new Date().toISOString()
-                    });
-
-                if (referralError) {
-                    console.error('Error creating referral:', referralError);
-                    return false;
-                }
-
-                // منح المكافأة للمستخدم المدعو (تخزين في Telegram)
-                balance += inviteReward;
-                rewardsTotal += inviteReward;
-
-                // تحديث إحصائيات المُدعِي في Telegram
-                // (سيتم تحديثها عندما يلعب المُدعِي)
-                
-                await saveGameData();
-                return true;
-            } catch (error) {
-                console.error('Error in handleInvite:', error);
-                return false;
-            }
-        }
-
-        // ========== دوال اللعبة الأساسية ==========
-
+        
         // دالة لتنسيق الأعداد الكبيرة
         function formatNumber(num) {
             if (num >= 1000000000) {
@@ -1315,41 +1095,131 @@
             }
             return Math.floor(num).toString();
         }
-
-        // إنشاء رابط الدعوة الشخصي
-        async function generateInviteLink() {
-            const currentUserId = await getUserId();
-            const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${currentUserId}`;
-            return baseUrl;
-        }
-
-        // التحقق من رابط الدعوة عند التحميل
-        async function checkInviteFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const startParam = urlParams.get('start');
+        
+        // حفظ البيانات باستخدام Telegram Web App Cloud Storage
+        async function saveGameData() {
+            const gameData = {
+                balance,
+                level,
+                energy,
+                pointsPerClick,
+                autoMiningRate,
+                totalClicks,
+                invitesCount,
+                rewardsTotal,
+                upgrades,
+                upgradeCosts,
+                userId: getUserId(),
+                userName: getUserName(),
+                lastSaved: Date.now()
+            };
             
-            if (startParam && startParam.startsWith('invite_')) {
-                const referrerId = startParam.replace('invite_', '');
-                const currentUserId = await getUserId();
-                
-                if (referrerId === currentUserId) {
-                    console.log("لا يمكن دعوة نفسك");
-                    return;
+            // محاولة استخدام Telegram Cloud Storage
+            if (tg?.CloudStorage) {
+                try {
+                    await tg.CloudStorage.setItem('game_data', JSON.stringify(gameData));
+                    console.log("Game data saved to Telegram Cloud Storage");
+                } catch (error) {
+                    console.error("Error saving to Telegram Cloud Storage:", error);
+                    // Fallback إلى localStorage
+                    localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
                 }
-                
-                const success = await handleInvite(referrerId);
-                if (success) {
-                    setTimeout(() => {
-                        alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 1000 Crynova!');
-                    }, 1000);
-                    
-                    updateUI();
+            } else {
+                // Fallback إلى localStorage
+                localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
+            }
+            
+            // تحديث المتصدرين بعد حفظ البيانات
+            updateLeaderboard();
+        }
+        
+        // تحميل البيانات باستخدام Telegram Web App Cloud Storage
+        async function loadGameData() {
+            let savedData = null;
+            
+            // محاولة استخدام Telegram Cloud Storage أولاً
+            if (tg?.CloudStorage) {
+                try {
+                    savedData = await tg.CloudStorage.getItem('game_data');
+                    if (savedData) {
+                        console.log("Game data loaded from Telegram Cloud Storage");
+                    }
+                } catch (error) {
+                    console.error("Error loading from Telegram Cloud Storage:", error);
+                }
+            }
+            
+            // إذا لم توجد بيانات في Telegram Cloud Storage، جرب localStorage
+            if (!savedData) {
+                savedData = localStorage.getItem(`coin_crynova_${getUserId()}`);
+                if (savedData) {
+                    console.log("Game data loaded from localStorage");
+                }
+            }
+            
+            if (savedData) {
+                try {
+                    const gameData = JSON.parse(savedData);
+                    balance = gameData.balance || 0;
+                    level = gameData.level || 1;
+                    energy = gameData.energy || 100;
+                    pointsPerClick = gameData.pointsPerClick || 1;
+                    autoMiningRate = gameData.autoMiningRate || 0;
+                    totalClicks = gameData.totalClicks || 0;
+                    invitesCount = gameData.invitesCount || 0;
+                    rewardsTotal = gameData.rewardsTotal || 0;
+                    Object.assign(upgrades, gameData.upgrades || {});
+                    Object.assign(upgradeCosts, gameData.upgradeCosts || {});
+                } catch (error) {
+                    console.error("Error parsing saved data:", error);
                 }
             }
         }
+        
+        // تحديث المتصدرين (محاكاة - في الإصدار الحقيقي ستحتاج لخادم)
+        async function updateLeaderboard() {
+            // في الإصدار الحقيقي، ستحتاج هنا للاتصال بخادم للحصول على بيانات المتصدرين
+            // هنا سنقوم بمحاكاة بيانات المتصدرين للتجربة
+            
+            const mockLeaderboard = [
+                { name: getUserName(), balance: balance, isCurrentUser: true },
+                { name: "المعدن المحترف", balance: 1500000, isCurrentUser: false },
+                { name: "صاحب المزرعة", balance: 980000, isCurrentUser: false },
+                { name: "خبير البلوكتشين", balance: 750000, isCurrentUser: false },
+                { name: "المبتدئ المتفائل", balance: 120000, isCurrentUser: false },
+                { name: "صاحب الحظ", balance: 50000, isCurrentUser: false }
+            ];
+            
+            // ترتيب المتصدرين تنازلياً حسب الرصيد
+            mockLeaderboard.sort((a, b) => b.balance - a.balance);
+            displayLeaderboard(mockLeaderboard);
+        }
 
+        // عرض المتصدرين
+        function displayLeaderboard(users) {
+            leaderboardContainer.innerHTML = '';
+            
+            users.forEach((user, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                if (user.isCurrentUser) {
+                    item.style.background = 'rgba(0, 255, 157, 0.1)';
+                    item.style.borderRadius = '8px';
+                    item.style.padding = '10px';
+                }
+                
+                item.innerHTML = `
+                    <div class="leaderboard-rank">${index + 1}</div>
+                    <div class="leaderboard-name">${user.name}</div>
+                    <div class="leaderboard-score">${formatNumber(user.balance)}</div>
+                `;
+                
+                leaderboardContainer.appendChild(item);
+            });
+        }
+        
         // تحديث واجهة المستخدم
-        async function updateUI() {
+        function updateUI() {
             balanceElement.textContent = formatNumber(balance);
             levelElement.textContent = level;
             energyElement.textContent = Math.floor(energy) + '%';
@@ -1365,22 +1235,22 @@
             buyFarmButton.disabled = balance < upgradeCosts.farm;
             buyDatacenterButton.disabled = balance < upgradeCosts.datacenter;
             
-            // تحديث تكاليف الترقيات
+            // تحديث تكاليف الترقيات باستخدام التنسيق الجديد
             document.getElementById('pickaxe-cost').textContent = formatNumber(upgradeCosts.pickaxe);
             document.getElementById('server-cost').textContent = formatNumber(upgradeCosts.server);
             document.getElementById('farm-cost').textContent = formatNumber(upgradeCosts.farm);
             document.getElementById('datacenter-cost').textContent = formatNumber(upgradeCosts.datacenter);
             
             // تحديث رابط الدعوة
-            inviteLinkElement.value = await generateInviteLink();
+            inviteLinkElement.value = generateInviteLink();
             
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
             
-            // حفظ البيانات في Telegram
+            // حفظ البيانات
             saveGameData();
         }
-
+        
         // تحديث الإنجازات
         function updateAchievements() {
             // إنجاز 10K نقطة
@@ -1416,54 +1286,12 @@
                 level = newLevel;
             }
         }
-
-        // عرض المتصدرين
-        function displayLeaderboard(users) {
-            leaderboardContainer.innerHTML = '';
-            
-            users.forEach((user, index) => {
-                const item = document.createElement('div');
-                item.className = 'leaderboard-item';
-                
-                getUserId().then(currentUserId => {
-                    if (user.user_id === currentUserId) {
-                        item.style.background = 'rgba(0, 255, 157, 0.1)';
-                        item.style.borderRadius = '8px';
-                        item.style.padding = '10px';
-                    }
-                });
-                
-                item.innerHTML = `
-                    <div class="leaderboard-rank">${index + 1}</div>
-                    <div class="leaderboard-name">${user.username}</div>
-                    <div class="leaderboard-score">${formatNumber(user.balance)}</div>
-                `;
-                
-                leaderboardContainer.appendChild(item);
-            });
-        }
-
-        // دالة للمتصدرين البديلة
-        async function displayFallbackLeaderboard() {
-            const mockLeaderboard = [
-                { username: 'أحمد', balance: 15000, user_id: '1' },
-                { username: 'محمد', balance: 12000, user_id: '2' },
-                { username: 'فاطمة', balance: 9800, user_id: '3' },
-                { username: 'خالد', balance: 7500, user_id: '4' },
-                { username: 'سارة', balance: 6200, user_id: '5' }
-            ].sort((a, b) => b.balance - a.balance)
-             .slice(0, 10);
-
-            displayLeaderboard(mockLeaderboard);
-        }
-
-        // ========== event listeners ==========
-
+        
         // نسخ رابط الدعوة
         copyLinkButton.addEventListener('click', async () => {
             try {
-                const inviteLink = await generateInviteLink();
-                await navigator.clipboard.writeText(inviteLink);
+                await navigator.clipboard.writeText(inviteLinkElement.value);
+                // تغيير نص الزر مؤقتاً للإشارة إلى النسخ
                 const originalHTML = copyLinkButton.innerHTML;
                 copyLinkButton.innerHTML = '<i class="fas fa-check"></i>';
                 copyLinkButton.style.background = 'var(--primary)';
@@ -1474,17 +1302,22 @@
                 }, 2000);
             } catch (err) {
                 console.error('Failed to copy: ', err);
+                // طريقة بديلة للنسخ
                 inviteLinkElement.select();
                 document.execCommand('copy');
             }
         });
-
+        
         // زر مشاركة الرابط
-        inviteFriendsButton.addEventListener('click', async () => {
-            const inviteLink = await generateInviteLink();
+        inviteFriendsButton.addEventListener('click', () => {
+            const inviteLink = generateInviteLink();
             const shareText = `انضم إلى Coin Crynova - لعبة تعدين العملات الرقمية الممتعة! 🎮💰\n\nاستخدم رابط الدعوة الخاص بي للانضمام:\n${inviteLink}\n\nاحصل على مكافأة 1000 Crynova مجاناً!`;
             
-            if (navigator.share) {
+            // استخدام Telegram Share إذا كان متاحاً
+            if (tg && tg.share) {
+                tg.share(shareText);
+            } else if (navigator.share) {
+                // استخدام Web Share API
                 navigator.share({
                     title: 'Coin Crynova - لعبة تعدين العملات',
                     text: shareText,
@@ -1499,9 +1332,10 @@
                 fallbackShare(inviteLink, shareText);
             }
         });
-
+        
         // طريقة بديلة للمشاركة
         function fallbackShare(inviteLink, shareText) {
+            // إنشاء نافذة مشاركة مخصصة
             const shareModal = document.createElement('div');
             shareModal.style.cssText = `
                 position: fixed;
@@ -1537,6 +1371,7 @@
             
             document.body.appendChild(shareModal);
             
+            // إضافة event listeners للأزرار في النافذة
             document.getElementById('modal-copy-btn').addEventListener('click', () => {
                 navigator.clipboard.writeText(inviteLink).then(() => {
                     alert('تم نسخ الرابط!');
@@ -1548,13 +1383,14 @@
                 shareModal.remove();
             });
             
+            // إغلاق النافذة عند النقر خارجها
             shareModal.addEventListener('click', (e) => {
                 if (e.target === shareModal) {
                     shareModal.remove();
                 }
             });
         }
-
+        
         // النقر على زر التعدين
         mineButton.addEventListener('click', () => {
             if (energy <= 0) {
@@ -1568,11 +1404,13 @@
             
             if (energy < 0) energy = 0;
             
+            // تأثير اهتزاز للزر
             mineButton.style.transform = 'scale(0.95)';
             setTimeout(() => {
                 mineButton.style.transform = 'scale(1)';
             }, 100);
             
+            // تأثير النص الطافي
             const floatingText = document.createElement('div');
             floatingText.textContent = `+${coinsEarned.toFixed(1)}`;
             floatingText.style.position = 'absolute';
@@ -1589,7 +1427,7 @@
             
             updateUI();
         });
-
+        
         // شراء ترقية المعول
         buyPickaxeButton.addEventListener('click', () => {
             if (balance >= upgradeCosts.pickaxe) {
@@ -1597,12 +1435,13 @@
                 pointsPerClick += 1;
                 upgrades.pickaxe++;
                 
+                // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.pickaxe = Math.floor(upgradeCosts.pickaxe * 1.8);
                 
                 updateUI();
             }
         });
-
+        
         // شراء ترقية الخوادم
         buyServerButton.addEventListener('click', () => {
             if (balance >= upgradeCosts.server) {
@@ -1610,12 +1449,13 @@
                 autoMiningRate += 1;
                 upgrades.server++;
                 
+                // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.server = Math.floor(upgradeCosts.server * 1.8);
                 
                 updateUI();
             }
         });
-
+        
         // شراء ترقية المزرعة
         buyFarmButton.addEventListener('click', () => {
             if (balance >= upgradeCosts.farm) {
@@ -1623,12 +1463,13 @@
                 autoMiningRate += 5;
                 upgrades.farm++;
                 
+                // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.farm = Math.floor(upgradeCosts.farm * 1.8);
                 
                 updateUI();
             }
         });
-
+        
         // شراء ترقية مركز البيانات
         buyDatacenterButton.addEventListener('click', () => {
             if (balance >= upgradeCosts.datacenter) {
@@ -1637,12 +1478,13 @@
                 autoMiningRate *= 1.5;
                 upgrades.datacenter++;
                 
+                // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.datacenter = Math.floor(upgradeCosts.datacenter * 2.5);
                 
                 updateUI();
             }
         });
-
+        
         // نظام التعدين التلقائي
         function startAutoMining() {
             autoMiningInterval = setInterval(() => {
@@ -1652,7 +1494,7 @@
                 }
             }, 100);
         }
-
+        
         // استعادة الطاقة مع مرور الوقت
         setInterval(() => {
             if (energy < 100) {
@@ -1661,31 +1503,68 @@
                 updateUI();
             }
         }, 1000);
-
+        
+        // التحقق من رابط الدعوة عند التحميل
+        async function checkInviteFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const startParam = urlParams.get('start');
+            
+            if (startParam && startParam.startsWith('invite_')) {
+                const inviterId = startParam.replace('invite_', '');
+                
+                // منع المستخدم من دعوة نفسه
+                if (inviterId === getUserId()) {
+                    console.log("لا يمكن دعوة نفسك");
+                    return;
+                }
+                
+                // التحقق مما إذا كان المستخدم قد حصل بالفعل على مكافأة من هذا المُدعِي
+                const inviteKey = `invite_claimed_${inviterId}`;
+                if (localStorage.getItem(inviteKey)) {
+                    console.log("لقد حصلت بالفعل على مكافأة الدعوة من هذا المستخدم");
+                    return;
+                }
+                
+                // منح مكافأة الدعوة للمستخدم الجديد
+                balance += inviteReward;
+                localStorage.setItem(inviteKey, 'true');
+                
+                // عرض رسالة نجاح
+                setTimeout(() => {
+                    alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 1000 Crynova!');
+                }, 1000);
+                
+                updateUI();
+            }
+        }
+        
         // تهيئة اللعبة
         async function initGame() {
             await loadGameData();
             updateUI();
             startAutoMining();
             await checkInviteFromUrl();
-            await updateLeaderboard();
+            updateLeaderboard();
             
+            // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
             setTimeout(() => {
                 loadingElement.style.display = 'none';
                 mainContentElement.style.display = 'grid';
             }, 1500);
         }
-
+        
         // بدء اللعبة عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', initGame);
-
+        
         // حفظ البيانات عند إغلاق الصفحة
         window.addEventListener('beforeunload', () => {
             saveGameData();
         });
-
-        // حفظ البيانات كل 30 ثانية
-        setInterval(saveGameData, 30000);
+        
+        // حفظ البيانات كل 1 ثانية
+        setInterval(() => {
+            saveGameData();
+        }, 1000);
     </script>
 </body>
 </html>
