@@ -4,6 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Crynova - لعبة تعدين العملات</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBX8v0qIVjG-Z46fVDeEUDKcPxa_FQF9Qc",
+            authDomain: "bnak-belaiba.firebaseapp.com",
+            projectId: "bnak-belaiba",
+            storageBucket: "bnak-belaiba.firebasestorage.app",
+            messagingSenderId: "286736432059",
+            appId: "1:286736432059:web:ec1ed4292850f00008229e"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // جعل db متاحاً عالمياً
+        window.firebaseApp = app;
+        window.db = db;
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -24,6 +48,9 @@
             --card-bg: rgba(16, 23, 38, 0.8);
             --card-border: rgba(255, 255, 255, 0.1);
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --success: #00d26a;
+            --warning: #ffaa00;
+            --error: #ff4757;
         }
 
         body {
@@ -595,6 +622,90 @@
             transform: scale(0.95);
         }
 
+        /* قائمة الأصدقاء المدعوين */
+        .friends-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .friend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: var(--light);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--success);
+        }
+
+        .friend-item.pending {
+            border-left: 4px solid var(--warning);
+        }
+
+        .friend-name {
+            font-weight: bold;
+        }
+
+        .friend-status {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: var(--success);
+            color: white;
+        }
+
+        .friend-status.pending {
+            background: var(--warning);
+        }
+
+        /* الإشعارات */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--success);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--error);
+        }
+
+        .notification.warning {
+            border-left: 4px solid var(--warning);
+        }
+
+        .notification-icon {
+            font-size: 1.2rem;
+        }
+
+        .notification.success .notification-icon {
+            color: var(--success);
+        }
+
+        .notification.error .notification-icon {
+            color: var(--error);
+        }
+
+        .notification.warning .notification-icon {
+            color: var(--warning);
+        }
+
         /* تأثيرات النيون */
         .neon-text {
             text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
@@ -750,6 +861,12 @@
     <div class="loading" id="loading">
         <div class="loading-spinner"></div>
         <div>جاري التحميل...</div>
+    </div>
+
+    <!-- منطقة الإشعارات -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle notification-icon"></i>
+        <span id="notification-text">تمت العملية بنجاح!</span>
     </div>
 
     <div class="container" id="main-content" style="display: none;">
@@ -952,14 +1069,31 @@
                     <i class="fas fa-share-alt invite-icon"></i>
                     <span>مشاركة الرابط</span>
                 </button>
+
+                <!-- قائمة الأصدقاء المدعوين -->
+                <div class="friends-list" id="friends-list">
+                    <!-- سيتم إضافة الأصدقاء ديناميكياً -->
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // بيانات المستخدم
-        let userId = Math.floor(Math.random() * 1000000);
-        let userName = 'مستخدم';
+    <script type="module">
+        import { doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // تهيئة Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // توسيع التطبيق لملء الشاشة
+        tg.enableClosingConfirmation(); // تفعيل تأكيد الإغلاق
+        
+        // بيانات المستخدم من Telegram
+        const user = tg.initDataUnsafe?.user;
+        const userId = user?.id || Math.floor(Math.random() * 1000000);
+        const userName = user?.first_name || 'مستخدم';
+        const userLastName = user?.last_name || '';
+        const fullName = userLastName ? `${userName} ${userLastName}` : userName;
+        
+        console.log('Telegram User:', user);
         
         // رابط البوت الأساسي
         const BOT_USERNAME = 'Coin_Crynova_bot';
@@ -976,6 +1110,9 @@
         let invitesCount = 0;
         let rewardsTotal = 0;
         const inviteReward = 200;
+        
+        // قائمة الأصدقاء المدعوين
+        let invitedFriends = [];
         
         // التعدين التلقائي - مفعل دائماً ومخفي
         let autoMiningEnabled = true;
@@ -1013,6 +1150,9 @@
         const mainContentElement = document.getElementById('main-content');
         const inviteLinkElement = document.getElementById('invite-link');
         const copyLinkButton = document.getElementById('copy-link');
+        const friendsListElement = document.getElementById('friends-list');
+        const notificationElement = document.getElementById('notification');
+        const notificationTextElement = document.getElementById('notification-text');
         
         // أزرار الترقيات
         const buyPickaxeButton = document.getElementById('buy-pickaxe');
@@ -1046,39 +1186,75 @@
             return num.toString();
         }
         
-        // حفظ البيانات في التخزين المحلي
-        function saveGameData() {
-            const gameData = {
-                balance,
-                level,
-                energy,
-                pointsPerClick,
-                autoMiningRate,
-                totalClicks,
-                invitesCount,
-                rewardsTotal,
-                upgrades,
-                upgradeCosts,
-                userId
-            };
-            localStorage.setItem(`coin_crynova_${userId}`, JSON.stringify(gameData));
+        // عرض الإشعارات
+        function showNotification(message, type = 'success') {
+            notificationTextElement.textContent = message;
+            notificationElement.className = 'notification';
+            notificationElement.classList.add(type);
+            notificationElement.classList.add('show');
+            
+            setTimeout(() => {
+                notificationElement.classList.remove('show');
+            }, 3000);
         }
         
-        // تحميل البيانات من التخزين المحلي
-        function loadGameData() {
-            const savedData = localStorage.getItem(`coin_crynova_${userId}`);
-            if (savedData) {
-                const gameData = JSON.parse(savedData);
-                balance = gameData.balance || 0;
-                level = gameData.level || 1;
-                energy = gameData.energy || 100;
-                pointsPerClick = gameData.pointsPerClick || 1;
-                autoMiningRate = gameData.autoMiningRate || 0;
-                totalClicks = gameData.totalClicks || 0;
-                invitesCount = gameData.invitesCount || 0;
-                rewardsTotal = gameData.rewardsTotal || 0;
-                Object.assign(upgrades, gameData.upgrades || {});
-                Object.assign(upgradeCosts, gameData.upgradeCosts || {});
+        // حفظ البيانات في Firebase
+        async function saveGameData() {
+            try {
+                const userRef = doc(window.db, 'users', userId.toString());
+                await setDoc(userRef, {
+                    userId: userId,
+                    userName: fullName,
+                    balance,
+                    level,
+                    energy,
+                    pointsPerClick,
+                    autoMiningRate,
+                    totalClicks,
+                    invitesCount,
+                    rewardsTotal,
+                    upgrades,
+                    upgradeCosts,
+                    invitedFriends,
+                    lastUpdated: new Date().toISOString()
+                }, { merge: true });
+                
+                console.log('تم حفظ البيانات في Firebase');
+            } catch (error) {
+                console.error('خطأ في حفظ البيانات:', error);
+                showNotification('خطأ في حفظ البيانات', 'error');
+            }
+        }
+        
+        // تحميل البيانات من Firebase
+        async function loadGameData() {
+            try {
+                const userRef = doc(window.db, 'users', userId.toString());
+                const userDoc = await getDoc(userRef);
+                
+                if (userDoc.exists()) {
+                    const gameData = userDoc.data();
+                    balance = gameData.balance || 0;
+                    level = gameData.level || 1;
+                    energy = gameData.energy || 100;
+                    pointsPerClick = gameData.pointsPerClick || 1;
+                    autoMiningRate = gameData.autoMiningRate || 0;
+                    totalClicks = gameData.totalClicks || 0;
+                    invitesCount = gameData.invitesCount || 0;
+                    rewardsTotal = gameData.rewardsTotal || 0;
+                    invitedFriends = gameData.invitedFriends || [];
+                    Object.assign(upgrades, gameData.upgrades || {});
+                    Object.assign(upgradeCosts, gameData.upgradeCosts || {});
+                    
+                    console.log('تم تحميل البيانات من Firebase');
+                } else {
+                    // إنشاء مستخدم جديد
+                    await saveGameData();
+                    console.log('تم إنشاء مستخدم جديد في Firebase');
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+                showNotification('خطأ في تحميل البيانات', 'error');
             }
         }
         
@@ -1109,11 +1285,72 @@
             // تحديث رابط الدعوة
             inviteLinkElement.value = generateInviteLink();
             
+            // تحديث قائمة الأصدقاء
+            updateFriendsList();
+            
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
             
             // حفظ البيانات
             saveGameData();
+        }
+        
+        // تحديث قائمة الأصدقاء المدعوين
+        function updateFriendsList() {
+            friendsListElement.innerHTML = '';
+            
+            if (invitedFriends.length === 0) {
+                friendsListElement.innerHTML = '<p style="text-align: center; color: #a0a0a0; padding: 10px;">لم تقم بدعوة أي أصدقاء بعد</p>';
+                return;
+            }
+            
+            invitedFriends.forEach(friend => {
+                const friendItem = document.createElement('div');
+                friendItem.className = `friend-item ${friend.status === 'pending' ? 'pending' : ''}`;
+                
+                friendItem.innerHTML = `
+                    <div class="friend-name">${friend.name}</div>
+                    <div class="friend-status ${friend.status === 'pending' ? 'pending' : ''}">
+                        ${friend.status === 'pending' ? 'قيد الانتظار' : 'مكتمل'}
+                    </div>
+                `;
+                
+                friendsListElement.appendChild(friendItem);
+            });
+        }
+        
+        // محاكاة دعوة صديق (في الواقع سيتم استدعاؤها من السيرفر)
+        async function inviteFriend(friendName, friendId) {
+            // التحقق من عدم دعوة هذا الصديق من قبل
+            const existingFriend = invitedFriends.find(f => f.id === friendId);
+            if (existingFriend) {
+                showNotification('لقد قمت بدعوة هذا الصديق من قبل!', 'error');
+                return false;
+            }
+            
+            // إضافة الصديق إلى القائمة
+            invitedFriends.push({
+                id: friendId,
+                name: friendName,
+                status: 'pending',
+                invitedAt: new Date().toISOString()
+            });
+            
+            // محاكاة قبول الدعوة بعد فترة (في الواقع سيتم من السيرفر)
+            setTimeout(async () => {
+                const friendIndex = invitedFriends.findIndex(f => f.id === friendId);
+                if (friendIndex !== -1) {
+                    invitedFriends[friendIndex].status = 'completed';
+                    invitesCount++;
+                    rewardsTotal += inviteReward;
+                    balance += inviteReward;
+                    
+                    updateUI();
+                    showNotification(`تم قبول دعوة ${friendName}! حصلت على ${inviteReward} Crynova`, 'success');
+                }
+            }, 3000);
+            
+            return true;
         }
         
         // تحديث الإنجازات
@@ -1156,20 +1393,13 @@
         copyLinkButton.addEventListener('click', async () => {
             try {
                 await navigator.clipboard.writeText(inviteLinkElement.value);
-                // تغيير نص الزر مؤقتاً للإشارة إلى النسخ
-                const originalHTML = copyLinkButton.innerHTML;
-                copyLinkButton.innerHTML = '<i class="fas fa-check"></i>';
-                copyLinkButton.style.background = 'var(--primary)';
-                
-                setTimeout(() => {
-                    copyLinkButton.innerHTML = originalHTML;
-                    copyLinkButton.style.background = '';
-                }, 2000);
+                showNotification('تم نسخ رابط الدعوة بنجاح!', 'success');
             } catch (err) {
                 console.error('Failed to copy: ', err);
                 // طريقة بديلة للنسخ
                 inviteLinkElement.select();
                 document.execCommand('copy');
+                showNotification('تم نسخ رابط الدعوة بنجاح!', 'success');
             }
         });
         
@@ -1178,20 +1408,25 @@
             const inviteLink = generateInviteLink();
             const shareText = `انضم إلى Coin Crynova - لعبة تعدين العملات الرقمية الممتعة! 🎮💰\n\nاستخدم رابط الدعوة الخاص بي للانضمام:\n${inviteLink}\n\nاحصل على مكافأة 200 Crynova مجاناً!`;
             
-            // محاولة استخدام Web Share API إذا كان متاحاً
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Coin Crynova - لعبة تعدين العملات',
-                    text: shareText,
-                    url: inviteLink
-                }).then(() => {
-                    console.log('تمت المشاركة بنجاح');
-                }).catch((error) => {
-                    console.log('خطأ في المشاركة:', error);
-                    fallbackShare(inviteLink, shareText);
-                });
+            // استخدام Telegram Share API
+            if (tg && tg.share) {
+                tg.share(shareText);
             } else {
-                fallbackShare(inviteLink, shareText);
+                // محاولة استخدام Web Share API إذا كان متاحاً
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Coin Crynova - لعبة تعدين العملات',
+                        text: shareText,
+                        url: inviteLink
+                    }).then(() => {
+                        showNotification('تمت مشاركة الرابط بنجاح!', 'success');
+                    }).catch((error) => {
+                        console.log('خطأ في المشاركة:', error);
+                        fallbackShare(inviteLink, shareText);
+                    });
+                } else {
+                    fallbackShare(inviteLink, shareText);
+                }
             }
         });
         
@@ -1219,11 +1454,11 @@
                     <input type="text" value="${inviteLink}" readonly 
                            style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--secondary); border-radius: 5px; background: var(--dark); color: var(--text); text-align: center;">
                     <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button onclick="navigator.clipboard.writeText('${inviteLink}').then(() => { alert('تم نسخ الرابط!'); this.parentElement.parentElement.parentElement.remove(); })" 
+                        <button id="modal-copy-btn" 
                                 style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
                             نسخ الرابط
                         </button>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                        <button id="modal-close-btn" 
                                 style="background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
                             إغلاق
                         </button>
@@ -1232,6 +1467,18 @@
             `;
             
             document.body.appendChild(shareModal);
+            
+            // إضافة مستمعي الأحداث
+            document.getElementById('modal-copy-btn').addEventListener('click', () => {
+                navigator.clipboard.writeText(inviteLink).then(() => {
+                    showNotification('تم نسخ الرابط بنجاح!', 'success');
+                    shareModal.remove();
+                });
+            });
+            
+            document.getElementById('modal-close-btn').addEventListener('click', () => {
+                shareModal.remove();
+            });
             
             // إغلاق النافذة عند النقر خارجها
             shareModal.addEventListener('click', (e) => {
@@ -1244,6 +1491,7 @@
         // النقر على زر التعدين
         mineButton.addEventListener('click', () => {
             if (energy <= 0) {
+                showNotification('طاقتك منخفضة! انتظر حتى تتعافى.', 'warning');
                 return;
             }
             
@@ -1288,7 +1536,10 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.pickaxe = Math.floor(upgradeCosts.pickaxe * 1.8);
                 
+                showNotification('تم شراء ترقية المعول بنجاح!', 'success');
                 updateUI();
+            } else {
+                showNotification('رصيدك غير كافي لشراء هذه الترقية!', 'error');
             }
         });
         
@@ -1302,7 +1553,10 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.server = Math.floor(upgradeCosts.server * 1.8);
                 
+                showNotification('تم شراء ترقية الخوادم بنجاح!', 'success');
                 updateUI();
+            } else {
+                showNotification('رصيدك غير كافي لشراء هذه الترقية!', 'error');
             }
         });
         
@@ -1316,7 +1570,10 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.farm = Math.floor(upgradeCosts.farm * 1.8);
                 
+                showNotification('تم شراء ترقية المزرعة بنجاح!', 'success');
                 updateUI();
+            } else {
+                showNotification('رصيدك غير كافي لشراء هذه الترقية!', 'error');
             }
         });
         
@@ -1331,7 +1588,10 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.datacenter = Math.floor(upgradeCosts.datacenter * 2.5);
                 
+                showNotification('تم شراء ترقية مركز البيانات بنجاح!', 'success');
                 updateUI();
+            } else {
+                showNotification('رصيدك غير كافي لشراء هذه الترقية!', 'error');
             }
         });
         
@@ -1354,9 +1614,18 @@
             }
         }, 1000);
         
+        // محاكاة دعوة أصدقاء (لأغراض العرض)
+        setTimeout(() => {
+            inviteFriend('أحمد', 123456);
+        }, 5000);
+        
+        setTimeout(() => {
+            inviteFriend('محمد', 789012);
+        }, 10000);
+        
         // تهيئة اللعبة
-        function initGame() {
-            loadGameData();
+        async function initGame() {
+            await loadGameData();
             updateUI();
             startAutoMining();
             
@@ -1364,6 +1633,7 @@
             setTimeout(() => {
                 loadingElement.style.display = 'none';
                 mainContentElement.style.display = 'grid';
+                showNotification(`مرحباً ${fullName}!`, 'success');
             }, 1500);
         }
         
@@ -1372,6 +1642,21 @@
         
         // حفظ البيانات عند إغلاق الصفحة
         window.addEventListener('beforeunload', saveGameData);
+        
+        // الاستماع للتغييرات في الوقت الحقيقي (اختياري)
+        function setupRealtimeListener() {
+            const userRef = doc(window.db, 'users', userId.toString());
+            onSnapshot(userRef, (doc) => {
+                if (doc.exists()) {
+                    const gameData = doc.data();
+                    // تحديث البيانات المحلية إذا لزم الأمر
+                    console.log('تم تحديث البيانات في الوقت الحقيقي:', gameData);
+                }
+            });
+        }
+        
+        // تفعيل الاستماع للتغييرات في الوقت الحقيقي
+        setTimeout(setupRealtimeListener, 2000);
     </script>
 </body>
 </html>
