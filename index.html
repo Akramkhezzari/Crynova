@@ -907,35 +907,35 @@
             <div class="achievements-panel">
                 <h2 class="panel-title"><i class="fas fa-trophy"></i> الإنجازات</h2>
                 
-                <div class="achievement locked" id="achievement-100">
+                <div class="achievement locked" id="achievement-10000">
                     <div class="achievement-icon"><i class="fas fa-medal"></i></div>
                     <div class="achievement-info">
                         <div class="achievement-name">المعدن المبتدئ</div>
-                        <div class="achievement-desc">اجمع 100 Crynova</div>
+                        <div class="achievement-desc">اجمع 10K Crynova</div>
                         <div class="progress-bar">
-                            <div class="progress" id="progress-100"></div>
+                            <div class="progress" id="progress-10000"></div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="achievement locked" id="achievement-500">
+                <div class="achievement locked" id="achievement-100000">
                     <div class="achievement-icon"><i class="fas fa-award"></i></div>
                     <div class="achievement-info">
                         <div class="achievement-name">المعدن المحترف</div>
-                        <div class="achievement-desc">اجمع 500 Crynova</div>
+                        <div class="achievement-desc">اجمع 100K Crynova</div>
                         <div class="progress-bar">
-                            <div class="progress" id="progress-500"></div>
+                            <div class="progress" id="progress-100000"></div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="achievement locked" id="achievement-2000">
+                <div class="achievement locked" id="achievement-1000000">
                     <div class="achievement-icon"><i class="fas fa-crown"></i></div>
                     <div class="achievement-info">
                         <div class="achievement-name">خبير التعدين</div>
-                        <div class="achievement-desc">اجمع 2K Crynova</div>
+                        <div class="achievement-desc">اجمع 1M Crynova</div>
                         <div class="progress-bar">
-                            <div class="progress" id="progress-2000"></div>
+                            <div class="progress" id="progress-1000000"></div>
                         </div>
                     </div>
                 </div>
@@ -952,11 +952,11 @@
             <div class="invite-panel">
                 <div class="invite-header">
                     <div class="invite-title">دعوة الأصدقاء</div>
-                    <div class="invite-bonus">+ 200 Crynova</div>
+                    <div class="invite-bonus">+ 1000 Crynova</div>
                 </div>
                 
                 <div class="invite-description">
-                    ادعُ أصدقائك واحصل على 200 Crynova لكل دعوة ناجحة! كلما زاد عدد الأصدقاء، زادت أرباحك!
+                    ادعُ أصدقائك واحصل على 1000 Crynova لكل دعوة ناجحة! كلما زاد عدد الأصدقاء، زادت أرباحك!
                 </div>
                 
                 <div class="invite-stats">
@@ -1038,7 +1038,7 @@
         // إحصائيات الدعوة
         let invitesCount = 0;
         let rewardsTotal = 0;
-        const inviteReward = 200;
+        const inviteReward = 1000; // تغيير من 200 إلى 1000
         
         // التعدين التلقائي
         let autoMiningInterval;
@@ -1310,31 +1310,31 @@
         
         // تحديث الإنجازات
         function updateAchievements() {
-            // إنجاز 100 نقطة
-            const progress100 = Math.min(balance / 100 * 100, 100);
-            document.getElementById('progress-100').style.width = progress100 + '%';
+            // إنجاز 10K نقطة
+            const progress10000 = Math.min(balance / 10000 * 100, 100);
+            document.getElementById('progress-10000').style.width = progress10000 + '%';
             
-            if (balance >= 100) {
-                document.getElementById('achievement-100').classList.remove('locked');
-                document.getElementById('achievement-100').classList.add('unlocked');
+            if (balance >= 10000) {
+                document.getElementById('achievement-10000').classList.remove('locked');
+                document.getElementById('achievement-10000').classList.add('unlocked');
             }
             
-            // إنجاز 500 نقطة
-            const progress500 = Math.min(balance / 500 * 100, 100);
-            document.getElementById('progress-500').style.width = progress500 + '%';
+            // إنجاز 100K نقطة
+            const progress100000 = Math.min(balance / 100000 * 100, 100);
+            document.getElementById('progress-100000').style.width = progress100000 + '%';
             
-            if (balance >= 500) {
-                document.getElementById('achievement-500').classList.remove('locked');
-                document.getElementById('achievement-500').classList.add('unlocked');
+            if (balance >= 100000) {
+                document.getElementById('achievement-100000').classList.remove('locked');
+                document.getElementById('achievement-100000').classList.add('unlocked');
             }
             
-            // إنجاز 2000 نقطة
-            const progress2000 = Math.min(balance / 2000 * 100, 100);
-            document.getElementById('progress-2000').style.width = progress2000 + '%';
+            // إنجاز 1M نقطة
+            const progress1000000 = Math.min(balance / 1000000 * 100, 100);
+            document.getElementById('progress-1000000').style.width = progress1000000 + '%';
             
-            if (balance >= 2000) {
-                document.getElementById('achievement-2000').classList.remove('locked');
-                document.getElementById('achievement-2000').classList.add('unlocked');
+            if (balance >= 1000000) {
+                document.getElementById('achievement-1000000').classList.remove('locked');
+                document.getElementById('achievement-1000000').classList.add('unlocked');
             }
             
             // تحديث المستوى
@@ -1368,7 +1368,7 @@
         // زر مشاركة الرابط
         inviteFriendsButton.addEventListener('click', () => {
             const inviteLink = generateInviteLink();
-            const shareText = `انضم إلى Coin Crynova - لعبة تعدين العملات الرقمية الممتعة! 🎮💰\n\nاستخدم رابط الدعوة الخاص بي للانضمام:\n${inviteLink}\n\nاحصل على مكافأة 200 Crynova مجاناً!`;
+            const shareText = `انضم إلى Coin Crynova - لعبة تعدين العملات الرقمية الممتعة! 🎮💰\n\nاستخدم رابط الدعوة الخاص بي للانضمام:\n${inviteLink}\n\nاحصل على مكافأة 1000 Crynova مجاناً!`;
             
             // محاولة استخدام Web Share API إذا كان متاحاً
             if (navigator.share) {
@@ -1588,7 +1588,7 @@
                 
                 // عرض رسالة نجاح
                 setTimeout(() => {
-                    alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 200 Crynova!');
+                    alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 1000 Crynova!');
                 }, 1000);
                 
                 updateUI();
