@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Crynova - لعبة تعدين العملات</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -32,20 +35,30 @@
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
+            padding: 10px;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 20px;
+            padding: 10px;
             display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 20px;
+            grid-template-columns: 1fr;
+            gap: 15px;
         }
 
-        @media (max-width: 1100px) {
+        @media (min-width: 768px) {
             .container {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 300px;
+                max-width: 1200px;
+                padding: 15px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr 350px;
+                gap: 20px;
             }
         }
 
@@ -53,25 +66,41 @@
         header {
             grid-column: 1 / -1;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 30px;
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px;
             background: var(--card-bg);
-            border-radius: 20px;
-            margin-bottom: 20px;
+            border-radius: 15px;
+            margin-bottom: 10px;
             border: 1px solid var(--card-border);
             box-shadow: var(--shadow);
             backdrop-filter: blur(10px);
         }
 
+        @media (min-width: 480px) {
+            header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px;
+            }
+        }
+
         .logo {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        @media (min-width: 480px) {
+            .logo {
+                justify-content: flex-start;
+            }
         }
 
         .logo-icon {
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: var(--primary);
             filter: drop-shadow(0 0 15px var(--primary));
             animation: glow 2s infinite alternate;
@@ -83,7 +112,7 @@
         }
 
         .logo-text {
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             font-weight: bold;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
@@ -92,42 +121,71 @@
             text-shadow: 0 2px 10px rgba(0, 255, 157, 0.3);
         }
 
+        @media (min-width: 480px) {
+            .logo-text {
+                font-size: 1.6rem;
+            }
+        }
+
         .user-info {
-            display: flex;
-            gap: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 100%;
+        }
+
+        @media (min-width: 480px) {
+            .user-info {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                width: auto;
+            }
         }
 
         .user-stat {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 12px 20px;
+            padding: 10px 8px;
             background: var(--light);
-            border-radius: 15px;
-            min-width: 120px;
+            border-radius: 12px;
             transition: transform 0.3s ease;
+            min-width: 0;
         }
 
         .user-stat:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
         }
 
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: bold;
             color: var(--primary);
         }
 
+        @media (min-width: 480px) {
+            .stat-value {
+                font-size: 1.3rem;
+            }
+        }
+
         .stat-label {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             color: #a0a0a0;
+            text-align: center;
+        }
+
+        @media (min-width: 480px) {
+            .stat-label {
+                font-size: 0.85rem;
+            }
         }
 
         /* لوحة التعدين الرئيسية */
         .mining-panel {
             background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
+            border-radius: 15px;
+            padding: 20px;
             border: 1px solid var(--card-border);
             box-shadow: var(--shadow);
             display: flex;
@@ -138,10 +196,10 @@
 
         .crypto-visual {
             width: 100%;
-            height: 280px;
+            height: 200px;
             background: linear-gradient(135deg, #0f1b2b, #1a2d3f);
-            border-radius: 15px;
-            margin-bottom: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -150,27 +208,40 @@
             border: 2px solid var(--card-border);
         }
 
+        @media (min-width: 480px) {
+            .crypto-visual {
+                height: 250px;
+            }
+        }
+
         .blockchain-animation {
-            width: 80%;
-            height: 80%;
+            width: 90%;
+            height: 90%;
             display: flex;
             justify-content: space-around;
             align-items: center;
         }
 
         .block {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: var(--light);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             color: var(--primary);
             animation: float 3s infinite ease-in-out;
             box-shadow: 0 5px 20px rgba(0, 255, 157, 0.4);
-            position: relative;
+        }
+
+        @media (min-width: 480px) {
+            .block {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
         }
 
         .block:nth-child(2) {
@@ -187,7 +258,7 @@
 
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+            50% { transform: translateY(-15px); }
         }
 
         .mine-controls {
@@ -201,10 +272,10 @@
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none;
             border-radius: 50%;
-            width: 180px;
-            height: 180px;
+            width: 140px;
+            height: 140px;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -213,9 +284,17 @@
             align-items: center;
             transition: all 0.3s ease;
             box-shadow: 0 10px 30px rgba(0, 255, 157, 0.5);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             position: relative;
             overflow: hidden;
+        }
+
+        @media (min-width: 480px) {
+            .mine-btn {
+                width: 160px;
+                height: 160px;
+                font-size: 1.1rem;
+            }
         }
 
         .mine-btn:active {
@@ -223,28 +302,40 @@
         }
 
         .mine-icon {
-            font-size: 3.5rem;
-            margin-bottom: 10px;
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        @media (min-width: 480px) {
+            .mine-icon {
+                font-size: 3rem;
+            }
         }
 
         .mining-stats {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            grid-template-columns: 1fr;
+            gap: 12px;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 15px;
+        }
+
+        @media (min-width: 480px) {
+            .mining-stats {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
         .mining-stat {
             background: var(--light);
-            padding: 15px;
-            border-radius: 12px;
+            padding: 12px;
+            border-radius: 10px;
             text-align: center;
             transition: transform 0.3s ease;
         }
 
         .mining-stat:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
         }
 
         /* زر الانضمام للقناة */
@@ -253,17 +344,17 @@
             background: linear-gradient(135deg, #0088cc, #00a8ff);
             border: none;
             border-radius: 50px;
-            padding: 15px;
+            padding: 12px;
             color: white;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             transition: all 0.3s ease;
-            margin-top: 15px;
+            margin-top: 10px;
             text-decoration: none;
             box-shadow: 0 5px 15px rgba(0, 168, 255, 0.4);
         }
@@ -273,38 +364,38 @@
         }
 
         .channel-icon {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
         }
 
         /* اللوحة الجانبية */
         .side-panel {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
 
         .upgrades-panel, .achievements-panel, .leaderboard-panel, .invite-panel {
             background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
+            border-radius: 15px;
+            padding: 20px;
             border: 1px solid var(--card-border);
             box-shadow: var(--shadow);
             backdrop-filter: blur(10px);
         }
 
         .panel-title {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
             color: var(--primary);
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding-bottom: 10px;
+            gap: 8px;
+            padding-bottom: 8px;
             border-bottom: 1px solid var(--card-border);
         }
 
         .panel-title i {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
         }
 
         .upgrade {
@@ -312,21 +403,21 @@
             justify-content: space-between;
             align-items: center;
             background: var(--light);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 12px;
             transition: all 0.3s ease;
             cursor: pointer;
             border-left: 4px solid transparent;
         }
 
         .upgrade:hover {
-            transform: translateX(-5px);
+            transform: translateX(-3px);
             border-left: 4px solid var(--primary);
         }
 
         .upgrade:active {
-            transform: translateX(-3px);
+            transform: translateX(-2px);
         }
 
         .upgrade-info {
@@ -335,33 +426,33 @@
 
         .upgrade-name {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             color: var(--text);
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
         .upgrade-desc {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: #a0a0a0;
         }
 
         .upgrade-cost {
             font-weight: bold;
             color: var(--primary);
-            margin-left: 15px;
-            font-size: 1rem;
+            margin-left: 10px;
+            font-size: 0.9rem;
         }
 
         .buy-btn {
             background: var(--secondary);
             border: none;
-            border-radius: 8px;
-            padding: 8px 15px;
+            border-radius: 6px;
+            padding: 6px 12px;
             color: white;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
 
         .buy-btn:active {
@@ -377,9 +468,9 @@
         .achievement {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
-            padding: 12px;
-            border-radius: 12px;
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 10px;
             background: var(--light);
             transition: all 0.3s ease;
         }
@@ -394,8 +485,8 @@
         }
 
         .achievement-icon {
-            font-size: 1.6rem;
-            margin-left: 15px;
+            font-size: 1.4rem;
+            margin-left: 12px;
             color: var(--primary);
         }
 
@@ -405,20 +496,20 @@
 
         .achievement-name {
             font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 1rem;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
         }
 
         .achievement-desc {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: #a0a0a0;
         }
 
         .progress-bar {
-            height: 6px;
+            height: 5px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
-            margin-top: 8px;
+            margin-top: 6px;
             overflow: hidden;
         }
 
@@ -430,11 +521,31 @@
             transition: width 0.5s ease;
         }
 
+        .leaderboard-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .leaderboard-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .leaderboard-container::-webkit-scrollbar-track {
+            background: var(--light);
+            border-radius: 3px;
+        }
+
+        .leaderboard-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
         .leaderboard-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            padding: 10px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
         }
@@ -442,25 +553,29 @@
         .leaderboard-item:hover {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
         }
 
         .leaderboard-rank {
             font-weight: bold;
             color: var(--primary);
-            width: 30px;
-            font-size: 1rem;
+            width: 25px;
+            font-size: 0.9rem;
         }
 
         .leaderboard-name {
             flex: 1;
-            font-size: 1rem;
+            font-size: 0.9rem;
+            margin: 0 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .leaderboard-score {
             font-weight: bold;
             color: var(--text);
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
         /* لوحة دعوة الأصدقاء */
@@ -468,11 +583,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .invite-title {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: var(--primary);
         }
@@ -480,52 +595,52 @@
         .invite-bonus {
             background: var(--accent);
             color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
+            padding: 5px 10px;
+            border-radius: 15px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             box-shadow: 0 3px 10px rgba(255, 46, 99, 0.4);
         }
 
         .invite-description {
             background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
             text-align: center;
-            line-height: 1.6;
-            font-size: 1rem;
+            line-height: 1.5;
+            font-size: 0.9rem;
             border: 1px solid var(--card-border);
         }
 
         .invite-stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 15px;
         }
 
         .invite-stat {
             background: var(--light);
-            padding: 15px;
-            border-radius: 12px;
+            padding: 12px;
+            border-radius: 10px;
             text-align: center;
             transition: transform 0.3s ease;
         }
 
         .invite-stat:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
         }
 
         .invite-stat-value {
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: var(--primary);
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .invite-stat-label {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #a0a0a0;
         }
 
@@ -534,15 +649,15 @@
             background: linear-gradient(135deg, var(--accent), #ff6b9c);
             border: none;
             border-radius: 50px;
-            padding: 15px;
+            padding: 12px;
             color: white;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             transition: all 0.3s ease;
             box-shadow: 0 5px 15px rgba(255, 46, 99, 0.4);
         }
@@ -552,18 +667,18 @@
         }
 
         .invite-icon {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
         }
 
         /* رابط الدعوة */
         .invite-link-container {
             background: var(--light);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             border: 1px solid var(--card-border);
         }
 
@@ -572,22 +687,24 @@
             background: transparent;
             border: none;
             color: var(--text);
-            font-size: 1rem;
+            font-size: 0.9rem;
             direction: ltr;
             text-align: center;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 8px;
+            border-radius: 6px;
             background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .copy-btn {
             background: var(--secondary);
             border: none;
-            border-radius: 8px;
-            padding: 10px 15px;
+            border-radius: 6px;
+            padding: 8px 12px;
             color: white;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             transition: all 0.3s ease;
         }
 
@@ -607,7 +724,7 @@
 
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(0, 255, 157, 0); }
+            70% { box-shadow: 0 0 0 12px rgba(0, 255, 157, 0); }
             100% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
         }
 
@@ -624,14 +741,14 @@
             align-items: center;
             z-index: 9999;
             flex-direction: column;
-            gap: 25px;
+            gap: 20px;
         }
 
         .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid var(--light);
-            border-top: 4px solid var(--primary);
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--light);
+            border-top: 3px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -641,108 +758,41 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* التصميم المتجاوب */
-        @media (max-width: 768px) {
+        /* تحسينات للشاشات الصغيرة جداً */
+        @media (max-width: 360px) {
             .container {
-                padding: 15px;
-                grid-template-columns: 1fr;
-                gap: 15px;
+                padding: 8px;
+                gap: 10px;
             }
             
             header {
-                flex-direction: column;
-                gap: 15px;
-                padding: 15px;
-            }
-            
-            .user-info {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            .user-stat {
-                min-width: 100px;
-                padding: 10px 15px;
-            }
-            
-            .stat-value {
-                font-size: 1.3rem;
-            }
-            
-            .mining-stats {
-                grid-template-columns: 1fr;
-            }
-            
-            .mine-btn {
-                width: 160px;
-                height: 160px;
-            }
-            
-            .mine-icon {
-                font-size: 3rem;
-            }
-            
-            .crypto-visual {
-                height: 220px;
-            }
-            
-            .block {
-                width: 50px;
-                height: 50px;
-                font-size: 1.3rem;
-            }
-            
-            .upgrade, .achievement {
                 padding: 12px;
             }
             
-            .invite-stats {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .logo-text {
-                font-size: 1.5rem;
-            }
-            
             .user-stat {
-                min-width: 90px;
-                padding: 8px 12px;
+                padding: 8px 6px;
             }
             
             .stat-value {
-                font-size: 1.2rem;
+                font-size: 1rem;
             }
             
             .stat-label {
-                font-size: 0.8rem;
+                font-size: 0.7rem;
             }
             
             .mine-btn {
-                width: 140px;
-                height: 140px;
-                font-size: 1.1rem;
+                width: 120px;
+                height: 120px;
+                font-size: 0.9rem;
             }
             
             .mine-icon {
-                font-size: 2.5rem;
+                font-size: 2rem;
             }
             
-            .panel-title {
-                font-size: 1.2rem;
-            }
-            
-            .upgrade-name, .achievement-name {
-                font-size: 0.95rem;
-            }
-            
-            .upgrade-desc, .achievement-desc {
-                font-size: 0.8rem;
-            }
-            
-            .invite-title {
-                font-size: 1.2rem;
+            .mining-panel, .upgrades-panel, .achievements-panel, .leaderboard-panel, .invite-panel {
+                padding: 15px;
             }
         }
     </style>
@@ -893,7 +943,7 @@
             
             <div class="leaderboard-panel">
                 <h2 class="panel-title"><i class="fas fa-chart-line"></i> المتصدرون</h2>
-                <div id="leaderboard-content">
+                <div class="leaderboard-container" id="leaderboard-container">
                     <!-- سيتم ملؤها ديناميكياً -->
                 </div>
             </div>
@@ -937,13 +987,42 @@
     </div>
 
     <script>
-        // Telegram Web App SDK
-        let tg = window.Telegram.WebApp;
-        
-        // بيانات المستخدم من Telegram
-        let userId = tg.initDataUnsafe?.user?.id || Math.floor(Math.random() * 1000000);
-        let userName = tg.initDataUnsafe?.user?.first_name || 'مستخدم';
-        let userUsername = tg.initDataUnsafe?.user?.username || '';
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBX8v0qIVjG-Z46fVDeEUDKcPxa_FQF9Qc",
+            authDomain: "bnak-belaiba.firebaseapp.com",
+            projectId: "bnak-belaiba",
+            storageBucket: "bnak-belaiba.firebasestorage.app",
+            messagingSenderId: "286736432059",
+            appId: "1:286736432059:web:ec1ed4292850f00008229e"
+        };
+
+        // Initialize Firebase
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+        }
+
+        // Telegram Web App Integration
+        let tg = window.Telegram?.WebApp;
+
+        if (tg) {
+            tg.expand();
+            tg.enableClosingConfirmation();
+            
+            // إعداد الوضع المظلم/فاتح
+            if (tg.colorScheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+        }
+
+        // بيانات المستخدم
+        let userId = Math.floor(Math.random() * 1000000);
+        let userName = 'مستخدم';
         
         // رابط البوت الأساسي
         const BOT_USERNAME = 'Coin_Crynova_bot';
@@ -962,7 +1041,6 @@
         const inviteReward = 200;
         
         // التعدين التلقائي
-        let autoMiningEnabled = true;
         let autoMiningInterval;
         
         // تكاليف الترقيات
@@ -980,12 +1058,7 @@
             farm: 0,
             datacenter: 0
         };
-
-        // قاعدة بيانات محاكاة للمستخدمين
-        const userDatabase = {
-            // سيتم حفظ بيانات المستخدم الحالي والمستخدمين الآخرين
-        };
-
+        
         // العناصر في واجهة المستخدم
         const balanceElement = document.getElementById('balance');
         const levelElement = document.getElementById('level');
@@ -994,7 +1067,6 @@
         const autoMiningRateElement = document.getElementById('auto-mining-rate');
         const totalClicksElement = document.getElementById('total-clicks');
         const mineButton = document.getElementById('mine-btn');
-        const leaderboardContent = document.getElementById('leaderboard-content');
         const inviteFriendsButton = document.getElementById('invite-friends');
         const invitesCountElement = document.getElementById('invites-count');
         const rewardsTotalElement = document.getElementById('rewards-total');
@@ -1002,6 +1074,7 @@
         const mainContentElement = document.getElementById('main-content');
         const inviteLinkElement = document.getElementById('invite-link');
         const copyLinkButton = document.getElementById('copy-link');
+        const leaderboardContainer = document.getElementById('leaderboard-container');
         
         // أزرار الترقيات
         const buyPickaxeButton = document.getElementById('buy-pickaxe');
@@ -1009,26 +1082,25 @@
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
         
-        // عناصر تكاليف الترقيات
-        const pickaxeCostElement = document.getElementById('pickaxe-cost');
-        const serverCostElement = document.getElementById('server-cost');
-        const farmCostElement = document.getElementById('farm-cost');
-        const datacenterCostElement = document.getElementById('datacenter-cost');
-        
-        // تهيئة Telegram Web App
-        function initTelegramWebApp() {
-            tg.expand();
-            tg.enableClosingConfirmation();
-            
-            // استخدام بيانات المستخدم من Telegram
-            if (tg.initDataUnsafe?.user) {
-                console.log('مستخدم Telegram:', tg.initDataUnsafe.user);
+        // دالة للحصول على معرف المستخدم الفريد
+        function getUserId() {
+            if (tg?.initDataUnsafe?.user?.id) {
+                return `tg_${tg.initDataUnsafe.user.id}`;
             }
+            return `web_${userId}`;
         }
-        
-        // إنشاء رابط الدعوة الشخصي باستخدام معرف Telegram
+
+        function getUserName() {
+            if (tg?.initDataUnsafe?.user) {
+                const user = tg.initDataUnsafe.user;
+                return user.first_name || user.username || 'مستخدم';
+            }
+            return 'مستخدم';
+        }
+
+        // إنشاء رابط الدعوة الشخصي
         function generateInviteLink() {
-            const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${userId}`;
+            const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${getUserId()}`;
             return baseUrl;
         }
         
@@ -1043,15 +1115,18 @@
             if (num >= 1000) {
                 return (num / 1000).toFixed(1) + 'K';
             }
-            return num.toString();
+            return Math.floor(num).toString();
         }
         
-        // حفظ بيانات المستخدم في التخزين المحلي
-        function saveUserData() {
+        // حفظ البيانات في Firestore
+        async function saveGameDataToFirestore() {
+            if (!db) {
+                console.log("Firestore not available, using local storage");
+                saveGameData();
+                return;
+            }
+            
             const userData = {
-                userId,
-                userName,
-                userUsername,
                 balance,
                 level,
                 energy,
@@ -1062,87 +1137,146 @@
                 rewardsTotal,
                 upgrades,
                 upgradeCosts,
-                lastUpdate: Date.now()
+                userName: getUserName(),
+                lastPlayed: firebase.firestore.FieldValue.serverTimestamp(),
+                telegramData: tg?.initDataUnsafe?.user || null
             };
             
-            // حفظ في localStorage
-            localStorage.setItem(`coin_crynova_${userId}`, JSON.stringify(userData));
-            
-            // محاكاة حفظ في قاعدة بيانات (في تطبيق حقيقي، سيتم إرسال هذه البيانات لخادم)
-            userDatabase[userId] = userData;
-            
-            console.log('تم حفظ بيانات المستخدم:', userData);
+            try {
+                await db.collection('users').doc(getUserId()).set(userData, { merge: true });
+                console.log("Game data saved to Firestore");
+                
+                // تحديث المتصدرين بعد حفظ البيانات
+                updateLeaderboard();
+            } catch (error) {
+                console.error("Error saving to Firestore:", error);
+                saveGameData(); // Fallback to local storage
+            }
         }
         
-        // تحميل بيانات المستخدم من التخزين المحلي
-        function loadUserData() {
-            const savedData = localStorage.getItem(`coin_crynova_${userId}`);
-            if (savedData) {
-                const userData = JSON.parse(savedData);
-                balance = userData.balance || 0;
-                level = userData.level || 1;
-                energy = userData.energy || 100;
-                pointsPerClick = userData.pointsPerClick || 1;
-                autoMiningRate = userData.autoMiningRate || 0;
-                totalClicks = userData.totalClicks || 0;
-                invitesCount = userData.invitesCount || 0;
-                rewardsTotal = userData.rewardsTotal || 0;
-                Object.assign(upgrades, userData.upgrades || {});
-                Object.assign(upgradeCosts, userData.upgradeCosts || {});
+        // تحميل البيانات من Firestore
+        async function loadGameDataFromFirestore() {
+            if (!db) {
+                console.log("Firestore not available, loading from local storage");
+                loadGameData();
+                return;
             }
             
-            // محاكاة تحميل بيانات المتصدرين
-            loadLeaderboardData();
-        }
-        
-        // تحميل بيانات المتصدرين
-        function loadLeaderboardData() {
-            // في تطبيق حقيقي، سيتم جلب هذه البيانات من خادم
-            const leaderboardData = [
-                { rank: 1, name: "المعدن المحترف", score: 5200, userId: 123456 },
-                { rank: 2, name: "صائد الكريبتو", score: 3800, userId: 789012 },
-                { rank: 3, name: "بطل البلوكشين", score: 2900, userId: 345678 },
-                { rank: 4, name: userName || "أنت", score: Math.floor(balance), userId: userId }
-            ];
-            
-            // ترتيب المتصدرين تنازلياً حسب النقاط
-            leaderboardData.sort((a, b) => b.score - a.score);
-            
-            // تحديث المراتب
-            leaderboardData.forEach((user, index) => {
-                user.rank = index + 1;
-            });
-            
-            updateLeaderboardUI(leaderboardData);
-        }
-        
-        // تحديث واجهة المتصدرين
-        function updateLeaderboardUI(leaderboardData) {
-            leaderboardContent.innerHTML = '';
-            
-            leaderboardData.forEach(user => {
-                const leaderboardItem = document.createElement('div');
-                leaderboardItem.className = 'leaderboard-item';
-                leaderboardItem.innerHTML = `
-                    <div class="leaderboard-rank">${user.rank}</div>
-                    <div class="leaderboard-name">${user.name}</div>
-                    <div class="leaderboard-score">${formatNumber(user.score)}</div>
-                `;
+            try {
+                const doc = await db.collection('users').doc(getUserId()).get();
                 
-                // تمييز المستخدم الحالي
-                if (user.userId === userId) {
-                    leaderboardItem.style.background = 'rgba(0, 255, 157, 0.1)';
-                    leaderboardItem.style.borderRadius = '8px';
-                    leaderboardItem.style.padding = '12px';
+                if (doc.exists) {
+                    const data = doc.data();
+                    balance = data.balance || 0;
+                    level = data.level || 1;
+                    energy = data.energy || 100;
+                    pointsPerClick = data.pointsPerClick || 1;
+                    autoMiningRate = data.autoMiningRate || 0;
+                    totalClicks = data.totalClicks || 0;
+                    invitesCount = data.invitesCount || 0;
+                    rewardsTotal = data.rewardsTotal || 0;
+                    Object.assign(upgrades, data.upgrades || {});
+                    Object.assign(upgradeCosts, data.upgradeCosts || {});
+                    
+                    console.log("Game data loaded from Firestore");
+                } else {
+                    console.log("No existing data, starting new game");
+                    loadGameData(); // Fallback to local storage if exists
+                }
+            } catch (error) {
+                console.error("Error loading from Firestore:", error);
+                loadGameData(); // Fallback to local storage
+            }
+        }
+
+        // تحديث المتصدرين
+        async function updateLeaderboard() {
+            if (!db) return;
+            
+            try {
+                const usersSnapshot = await db.collection('users')
+                    .orderBy('balance', 'desc')
+                    .limit(100)
+                    .get();
+                
+                const leaderboardData = [];
+                usersSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    leaderboardData.push({
+                        name: data.userName || 'مستخدم',
+                        balance: data.balance || 0,
+                        isCurrentUser: doc.id === getUserId()
+                    });
+                });
+                
+                displayLeaderboard(leaderboardData);
+            } catch (error) {
+                console.error("Error loading leaderboard:", error);
+            }
+        }
+
+        // عرض المتصدرين
+        function displayLeaderboard(users) {
+            leaderboardContainer.innerHTML = '';
+            
+            users.forEach((user, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                if (user.isCurrentUser) {
+                    item.style.background = 'rgba(0, 255, 157, 0.1)';
+                    item.style.borderRadius = '8px';
+                    item.style.padding = '10px';
                 }
                 
-                leaderboardContent.appendChild(leaderboardItem);
+                item.innerHTML = `
+                    <div class="leaderboard-rank">${index + 1}</div>
+                    <div class="leaderboard-name">${user.name}</div>
+                    <div class="leaderboard-score">${formatNumber(user.balance)}</div>
+                `;
+                
+                leaderboardContainer.appendChild(item);
             });
+        }
+        
+        // حفظ البيانات في التخزين المحلي
+        function saveGameData() {
+            const gameData = {
+                balance,
+                level,
+                energy,
+                pointsPerClick,
+                autoMiningRate,
+                totalClicks,
+                invitesCount,
+                rewardsTotal,
+                upgrades,
+                upgradeCosts,
+                userId: getUserId()
+            };
+            localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
+        }
+        
+        // تحميل البيانات من التخزين المحلي
+        function loadGameData() {
+            const savedData = localStorage.getItem(`coin_crynova_${getUserId()}`);
+            if (savedData) {
+                const gameData = JSON.parse(savedData);
+                balance = gameData.balance || 0;
+                level = gameData.level || 1;
+                energy = gameData.energy || 100;
+                pointsPerClick = gameData.pointsPerClick || 1;
+                autoMiningRate = gameData.autoMiningRate || 0;
+                totalClicks = gameData.totalClicks || 0;
+                invitesCount = gameData.invitesCount || 0;
+                rewardsTotal = gameData.rewardsTotal || 0;
+                Object.assign(upgrades, gameData.upgrades || {});
+                Object.assign(upgradeCosts, gameData.upgradeCosts || {});
+            }
         }
         
         // تحديث واجهة المستخدم
         function updateUI() {
-            balanceElement.textContent = formatNumber(Math.floor(balance));
+            balanceElement.textContent = formatNumber(balance);
             levelElement.textContent = level;
             energyElement.textContent = Math.floor(energy) + '%';
             pointsPerClickElement.textContent = formatNumber(pointsPerClick);
@@ -1157,11 +1291,11 @@
             buyFarmButton.disabled = balance < upgradeCosts.farm;
             buyDatacenterButton.disabled = balance < upgradeCosts.datacenter;
             
-            // تحديث تكاليف الترقيات
-            pickaxeCostElement.textContent = formatNumber(upgradeCosts.pickaxe);
-            serverCostElement.textContent = formatNumber(upgradeCosts.server);
-            farmCostElement.textContent = formatNumber(upgradeCosts.farm);
-            datacenterCostElement.textContent = formatNumber(upgradeCosts.datacenter);
+            // تحديث تكاليف الترقيات باستخدام التنسيق الجديد
+            document.getElementById('pickaxe-cost').textContent = formatNumber(upgradeCosts.pickaxe);
+            document.getElementById('server-cost').textContent = formatNumber(upgradeCosts.server);
+            document.getElementById('farm-cost').textContent = formatNumber(upgradeCosts.farm);
+            document.getElementById('datacenter-cost').textContent = formatNumber(upgradeCosts.datacenter);
             
             // تحديث رابط الدعوة
             inviteLinkElement.value = generateInviteLink();
@@ -1169,11 +1303,8 @@
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
             
-            // تحديث المتصدرين
-            loadLeaderboardData();
-            
             // حفظ البيانات
-            saveUserData();
+            saveGameDataToFirestore();
         }
         
         // تحديث الإنجازات
@@ -1216,7 +1347,6 @@
         copyLinkButton.addEventListener('click', async () => {
             try {
                 await navigator.clipboard.writeText(inviteLinkElement.value);
-                
                 // تغيير نص الزر مؤقتاً للإشارة إلى النسخ
                 const originalHTML = copyLinkButton.innerHTML;
                 copyLinkButton.innerHTML = '<i class="fas fa-check"></i>';
@@ -1226,14 +1356,6 @@
                     copyLinkButton.innerHTML = originalHTML;
                     copyLinkButton.style.background = '';
                 }, 2000);
-                
-                // إشعار Telegram
-                tg.showPopup({
-                    title: 'تم النسخ!',
-                    message: 'تم نسخ رابط الدعوة إلى الحافظة',
-                    buttons: [{ type: 'ok' }]
-                });
-                
             } catch (err) {
                 console.error('Failed to copy: ', err);
                 // طريقة بديلة للنسخ
@@ -1242,23 +1364,89 @@
             }
         });
         
-        // زر مشاركة الرابط عبر Telegram
+        // زر مشاركة الرابط
         inviteFriendsButton.addEventListener('click', () => {
             const inviteLink = generateInviteLink();
             const shareText = `انضم إلى Coin Crynova - لعبة تعدين العملات الرقمية الممتعة! 🎮💰\n\nاستخدم رابط الدعوة الخاص بي للانضمام:\n${inviteLink}\n\nاحصل على مكافأة 200 Crynova مجاناً!`;
             
-            // استخدام Telegram Share API
-            tg.shareMessage(shareText);
+            // محاولة استخدام Web Share API إذا كان متاحاً
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Coin Crynova - لعبة تعدين العملات',
+                    text: shareText,
+                    url: inviteLink
+                }).then(() => {
+                    console.log('تمت المشاركة بنجاح');
+                }).catch((error) => {
+                    console.log('خطأ في المشاركة:', error);
+                    fallbackShare(inviteLink, shareText);
+                });
+            } else {
+                fallbackShare(inviteLink, shareText);
+            }
         });
+        
+        // طريقة بديلة للمشاركة
+        function fallbackShare(inviteLink, shareText) {
+            // إنشاء نافذة مشاركة مخصصة
+            const shareModal = document.createElement('div');
+            shareModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+            
+            shareModal.innerHTML = `
+                <div style="background: var(--light); padding: 20px; border-radius: 15px; max-width: 90%; text-align: center;">
+                    <h3 style="color: var(--primary); margin-bottom: 15px;">مشاركة الرابط</h3>
+                    <p style="margin-bottom: 15px; color: var(--text);">انسخ الرابط وأرسله إلى أصدقائك:</p>
+                    <input type="text" value="${inviteLink}" readonly 
+                           style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--secondary); border-radius: 5px; background: var(--dark); color: var(--text); text-align: center;">
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button id="modal-copy-btn" 
+                                style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                            نسخ الرابط
+                        </button>
+                        <button id="modal-close-btn" 
+                                style="background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                            إغلاق
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(shareModal);
+            
+            // إضافة event listeners للأزرار في النافذة
+            document.getElementById('modal-copy-btn').addEventListener('click', () => {
+                navigator.clipboard.writeText(inviteLink).then(() => {
+                    alert('تم نسخ الرابط!');
+                    shareModal.remove();
+                });
+            });
+            
+            document.getElementById('modal-close-btn').addEventListener('click', () => {
+                shareModal.remove();
+            });
+            
+            // إغلاق النافذة عند النقر خارجها
+            shareModal.addEventListener('click', (e) => {
+                if (e.target === shareModal) {
+                    shareModal.remove();
+                }
+            });
+        }
         
         // النقر على زر التعدين
         mineButton.addEventListener('click', () => {
             if (energy <= 0) {
-                tg.showPopup({
-                    title: 'نفذت الطاقة!',
-                    message: 'انتظر حتى تعود الطاقة للشحن',
-                    buttons: [{ type: 'ok' }]
-                });
                 return;
             }
             
@@ -1304,8 +1492,6 @@
                 upgradeCosts.pickaxe = Math.floor(upgradeCosts.pickaxe * 1.8);
                 
                 updateUI();
-                
-                tg.HapticFeedback.impactOccurred('light');
             }
         });
         
@@ -1320,8 +1506,6 @@
                 upgradeCosts.server = Math.floor(upgradeCosts.server * 1.8);
                 
                 updateUI();
-                
-                tg.HapticFeedback.impactOccurred('light');
             }
         });
         
@@ -1336,8 +1520,6 @@
                 upgradeCosts.farm = Math.floor(upgradeCosts.farm * 1.8);
                 
                 updateUI();
-                
-                tg.HapticFeedback.impactOccurred('medium');
             }
         });
         
@@ -1353,8 +1535,6 @@
                 upgradeCosts.datacenter = Math.floor(upgradeCosts.datacenter * 2.5);
                 
                 updateUI();
-                
-                tg.HapticFeedback.impactOccurred('heavy');
             }
         });
         
@@ -1377,12 +1557,35 @@
             }
         }, 1000);
         
+        // التحقق من رابط الدعوة عند التحميل
+        function checkInviteFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const startParam = urlParams.get('start');
+            
+            if (startParam && startParam.startsWith('invite_')) {
+                const inviterId = startParam.replace('invite_', '');
+                if (inviterId !== getUserId()) {
+                    // منح مكافأة الدعوة
+                    invitesCount++;
+                    rewardsTotal += inviteReward;
+                    balance += inviteReward;
+                    updateUI();
+                    
+                    // عرض رسالة نجاح
+                    setTimeout(() => {
+                        alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 200 Crynova!');
+                    }, 1000);
+                }
+            }
+        }
+        
         // تهيئة اللعبة
-        function initGame() {
-            initTelegramWebApp();
-            loadUserData();
+        async function initGame() {
+            await loadGameDataFromFirestore();
             updateUI();
             startAutoMining();
+            checkInviteFromUrl();
+            updateLeaderboard();
             
             // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
             setTimeout(() => {
@@ -1395,31 +1598,9 @@
         document.addEventListener('DOMContentLoaded', initGame);
         
         // حفظ البيانات عند إغلاق الصفحة
-        window.addEventListener('beforeunload', saveUserData);
-        
-        // معالجة دعوة الأصدقاء (إذا كان المستخدم جاء عبر رابط دعوة)
-        function handleInvite() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const startParam = urlParams.get('start');
-            
-            if (startParam && startParam.startsWith('invite_')) {
-                const inviterId = startParam.replace('invite_', '');
-                
-                // منح مكافأة للمستخدم المدعو (في تطبيق حقيقي، سيتم إرسال هذا للخادم)
-                balance += 50;
-                
-                tg.showPopup({
-                    title: 'مكافأة ترحيب!',
-                    message: 'لقد حصلت على 50 Crynova كمكافأة للانضمام عبر دعوة صديق!',
-                    buttons: [{ type: 'ok' }]
-                });
-                
-                updateUI();
-            }
-        }
-        
-        // تشغيل معالجة الدعوة بعد التهيئة
-        setTimeout(handleInvite, 2000);
+        window.addEventListener('beforeunload', () => {
+            saveGameDataToFirestore();
+        });
     </script>
 </body>
 </html>
