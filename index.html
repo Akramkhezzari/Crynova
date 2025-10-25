@@ -8,7 +8,7 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -1009,29 +1009,13 @@
             
             <div class="leaderboard-panel">
                 <h2 class="panel-title"><i class="fas fa-chart-line"></i> المتصدرون</h2>
-                
-                <div class="leaderboard-item">
-                    <div class="leaderboard-rank">1</div>
-                    <div class="leaderboard-name">المعدن المحترف</div>
-                    <div class="leaderboard-score">5.2K</div>
-                </div>
-                
-                <div class="leaderboard-item">
-                    <div class="leaderboard-rank">2</div>
-                    <div class="leaderboard-name">صائد الكريبتو</div>
-                    <div class="leaderboard-score">3.8K</div>
-                </div>
-                
-                <div class="leaderboard-item">
-                    <div class="leaderboard-rank">3</div>
-                    <div class="leaderboard-name">بطل البلوكشين</div>
-                    <div class="leaderboard-score">2.9K</div>
-                </div>
-                
-                <div class="leaderboard-item">
-                    <div class="leaderboard-rank">4</div>
-                    <div class="leaderboard-name">أنت</div>
-                    <div class="leaderboard-score" id="user-score">0</div>
+                <div class="leaderboard-list" id="leaderboard-list">
+                    <!-- سيتم تحميل المتصدرين من Firebase -->
+                    <div class="leaderboard-item">
+                        <div class="leaderboard-rank">1</div>
+                        <div class="leaderboard-name">جاري التحميل...</div>
+                        <div class="leaderboard-score">0</div>
+                    </div>
                 </div>
             </div>
             
@@ -1151,6 +1135,7 @@
         const inviteLinkElement = document.getElementById('invite-link');
         const copyLinkButton = document.getElementById('copy-link');
         const friendsListElement = document.getElementById('friends-list');
+        const leaderboardListElement = document.getElementById('leaderboard-list');
         const notificationElement = document.getElementById('notification');
         const notificationTextElement = document.getElementById('notification-text');
         
@@ -1256,6 +1241,65 @@
                 console.error('خطأ في تحميل البيانات:', error);
                 showNotification('خطأ في تحميل البيانات', 'error');
             }
+        }
+        
+        // تحميل المتصدرين من Firebase
+        async function loadLeaderboard() {
+            try {
+                const usersRef = collection(window.db, 'users');
+                const q = query(usersRef, orderBy('balance', 'desc'), limit(10));
+                const querySnapshot = await getDocs(q);
+                
+                const leaderboardData = [];
+                querySnapshot.forEach((doc) => {
+                    const userData = doc.data();
+                    leaderboardData.push({
+                        id: userData.userId,
+                        name: userData.userName || 'مستخدم',
+                        balance: userData.balance || 0,
+                        level: userData.level || 1
+                    });
+                });
+                
+                updateLeaderboardUI(leaderboardData);
+                console.log('تم تحميل المتصدرين:', leaderboardData);
+            } catch (error) {
+                console.error('خطأ في تحميل المتصدرين:', error);
+                // عرض بيانات افتراضية في حالة الخطأ
+                updateLeaderboardUI([
+                    { id: 1, name: 'المعدن المحترف', balance: 5200, level: 52 },
+                    { id: 2, name: 'صائد الكريبتو', balance: 3800, level: 38 },
+                    { id: 3, name: 'بطل البلوكشين', balance: 2900, level: 29 }
+                ]);
+            }
+        }
+        
+        // تحديث واجهة المتصدرين
+        function updateLeaderboardUI(leaderboardData) {
+            leaderboardListElement.innerHTML = '';
+            
+            if (leaderboardData.length === 0) {
+                leaderboardListElement.innerHTML = '<p style="text-align: center; color: #a0a0a0; padding: 10px;">لا توجد بيانات متاحة</p>';
+                return;
+            }
+            
+            leaderboardData.forEach((user, index) => {
+                const leaderboardItem = document.createElement('div');
+                leaderboardItem.className = 'leaderboard-item';
+                
+                // تحديد إذا كان المستخدم الحالي
+                const isCurrentUser = user.id === userId;
+                
+                leaderboardItem.innerHTML = `
+                    <div class="leaderboard-rank">${index + 1}</div>
+                    <div class="leaderboard-name" style="${isCurrentUser ? 'color: var(--primary); font-weight: bold;' : ''}">
+                        ${isCurrentUser ? 'أنت' : user.name}
+                    </div>
+                    <div class="leaderboard-score">${formatNumber(user.balance)}</div>
+                `;
+                
+                leaderboardListElement.appendChild(leaderboardItem);
+            });
         }
         
         // تحديث واجهة المستخدم
@@ -1614,20 +1658,24 @@
             }
         }, 1000);
         
-        // محاكاة دعوة أصدقاء (لأغراض العرض)
-        setTimeout(() => {
-            inviteFriend('أحمد', 123456);
-        }, 5000);
-        
-        setTimeout(() => {
-            inviteFriend('محمد', 789012);
-        }, 10000);
+        // تحديث المتصدرين كل ساعة
+        function startLeaderboardUpdates() {
+            // تحديث فوري عند البدء
+            loadLeaderboard();
+            
+            // تحديث كل ساعة (3600000 مللي ثانية)
+            setInterval(() => {
+                loadLeaderboard();
+                console.log('تم تحديث قائمة المتصدرين');
+            }, 3600000);
+        }
         
         // تهيئة اللعبة
         async function initGame() {
             await loadGameData();
             updateUI();
             startAutoMining();
+            startLeaderboardUpdates();
             
             // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
             setTimeout(() => {
