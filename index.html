@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Crynova - لعبة تعدين العملات</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -892,29 +893,8 @@
             
             <div class="leaderboard-panel">
                 <h2 class="panel-title"><i class="fas fa-chart-line"></i> المتصدرون</h2>
-                
-                <div class="leaderboard-item">
-                    <div class="leaderboard-rank">1</div>
-                    <div class="leaderboard-name">المعدن المحترف</div>
-                    <div class="leaderboard-score">5.2K</div>
-                </div>
-                
-                <div class="leaderboard-item">
-                    <div class="leaderboard-rank">2</div>
-                    <div class="leaderboard-name">صائد الكريبتو</div>
-                    <div class="leaderboard-score">3.8K</div>
-                </div>
-                
-                <div class="leaderboard-item">
-                    <div class="leaderboard-rank">3</div>
-                    <div class="leaderboard-name">بطل البلوكشين</div>
-                    <div class="leaderboard-score">2.9K</div>
-                </div>
-                
-                <div class="leaderboard-item">
-                    <div class="leaderboard-rank">4</div>
-                    <div class="leaderboard-name">أنت</div>
-                    <div class="leaderboard-score" id="user-score">0</div>
+                <div id="leaderboard-content">
+                    <!-- سيتم ملؤها ديناميكياً -->
                 </div>
             </div>
             
@@ -957,9 +937,13 @@
     </div>
 
     <script>
-        // بيانات المستخدم
-        let userId = Math.floor(Math.random() * 1000000);
-        let userName = 'مستخدم';
+        // Telegram Web App SDK
+        let tg = window.Telegram.WebApp;
+        
+        // بيانات المستخدم من Telegram
+        let userId = tg.initDataUnsafe?.user?.id || Math.floor(Math.random() * 1000000);
+        let userName = tg.initDataUnsafe?.user?.first_name || 'مستخدم';
+        let userUsername = tg.initDataUnsafe?.user?.username || '';
         
         // رابط البوت الأساسي
         const BOT_USERNAME = 'Coin_Crynova_bot';
@@ -977,7 +961,7 @@
         let rewardsTotal = 0;
         const inviteReward = 200;
         
-        // التعدين التلقائي - مفعل دائماً ومخفي
+        // التعدين التلقائي
         let autoMiningEnabled = true;
         let autoMiningInterval;
         
@@ -996,7 +980,12 @@
             farm: 0,
             datacenter: 0
         };
-        
+
+        // قاعدة بيانات محاكاة للمستخدمين
+        const userDatabase = {
+            // سيتم حفظ بيانات المستخدم الحالي والمستخدمين الآخرين
+        };
+
         // العناصر في واجهة المستخدم
         const balanceElement = document.getElementById('balance');
         const levelElement = document.getElementById('level');
@@ -1005,7 +994,7 @@
         const autoMiningRateElement = document.getElementById('auto-mining-rate');
         const totalClicksElement = document.getElementById('total-clicks');
         const mineButton = document.getElementById('mine-btn');
-        const userScoreElement = document.getElementById('user-score');
+        const leaderboardContent = document.getElementById('leaderboard-content');
         const inviteFriendsButton = document.getElementById('invite-friends');
         const invitesCountElement = document.getElementById('invites-count');
         const rewardsTotalElement = document.getElementById('rewards-total');
@@ -1026,7 +1015,18 @@
         const farmCostElement = document.getElementById('farm-cost');
         const datacenterCostElement = document.getElementById('datacenter-cost');
         
-        // إنشاء رابط الدعوة الشخصي
+        // تهيئة Telegram Web App
+        function initTelegramWebApp() {
+            tg.expand();
+            tg.enableClosingConfirmation();
+            
+            // استخدام بيانات المستخدم من Telegram
+            if (tg.initDataUnsafe?.user) {
+                console.log('مستخدم Telegram:', tg.initDataUnsafe.user);
+            }
+        }
+        
+        // إنشاء رابط الدعوة الشخصي باستخدام معرف Telegram
         function generateInviteLink() {
             const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${userId}`;
             return baseUrl;
@@ -1046,9 +1046,12 @@
             return num.toString();
         }
         
-        // حفظ البيانات في التخزين المحلي
-        function saveGameData() {
-            const gameData = {
+        // حفظ بيانات المستخدم في التخزين المحلي
+        function saveUserData() {
+            const userData = {
+                userId,
+                userName,
+                userUsername,
                 balance,
                 level,
                 energy,
@@ -1059,27 +1062,82 @@
                 rewardsTotal,
                 upgrades,
                 upgradeCosts,
-                userId
+                lastUpdate: Date.now()
             };
-            localStorage.setItem(`coin_crynova_${userId}`, JSON.stringify(gameData));
+            
+            // حفظ في localStorage
+            localStorage.setItem(`coin_crynova_${userId}`, JSON.stringify(userData));
+            
+            // محاكاة حفظ في قاعدة بيانات (في تطبيق حقيقي، سيتم إرسال هذه البيانات لخادم)
+            userDatabase[userId] = userData;
+            
+            console.log('تم حفظ بيانات المستخدم:', userData);
         }
         
-        // تحميل البيانات من التخزين المحلي
-        function loadGameData() {
+        // تحميل بيانات المستخدم من التخزين المحلي
+        function loadUserData() {
             const savedData = localStorage.getItem(`coin_crynova_${userId}`);
             if (savedData) {
-                const gameData = JSON.parse(savedData);
-                balance = gameData.balance || 0;
-                level = gameData.level || 1;
-                energy = gameData.energy || 100;
-                pointsPerClick = gameData.pointsPerClick || 1;
-                autoMiningRate = gameData.autoMiningRate || 0;
-                totalClicks = gameData.totalClicks || 0;
-                invitesCount = gameData.invitesCount || 0;
-                rewardsTotal = gameData.rewardsTotal || 0;
-                Object.assign(upgrades, gameData.upgrades || {});
-                Object.assign(upgradeCosts, gameData.upgradeCosts || {});
+                const userData = JSON.parse(savedData);
+                balance = userData.balance || 0;
+                level = userData.level || 1;
+                energy = userData.energy || 100;
+                pointsPerClick = userData.pointsPerClick || 1;
+                autoMiningRate = userData.autoMiningRate || 0;
+                totalClicks = userData.totalClicks || 0;
+                invitesCount = userData.invitesCount || 0;
+                rewardsTotal = userData.rewardsTotal || 0;
+                Object.assign(upgrades, userData.upgrades || {});
+                Object.assign(upgradeCosts, userData.upgradeCosts || {});
             }
+            
+            // محاكاة تحميل بيانات المتصدرين
+            loadLeaderboardData();
+        }
+        
+        // تحميل بيانات المتصدرين
+        function loadLeaderboardData() {
+            // في تطبيق حقيقي، سيتم جلب هذه البيانات من خادم
+            const leaderboardData = [
+                { rank: 1, name: "المعدن المحترف", score: 5200, userId: 123456 },
+                { rank: 2, name: "صائد الكريبتو", score: 3800, userId: 789012 },
+                { rank: 3, name: "بطل البلوكشين", score: 2900, userId: 345678 },
+                { rank: 4, name: userName || "أنت", score: Math.floor(balance), userId: userId }
+            ];
+            
+            // ترتيب المتصدرين تنازلياً حسب النقاط
+            leaderboardData.sort((a, b) => b.score - a.score);
+            
+            // تحديث المراتب
+            leaderboardData.forEach((user, index) => {
+                user.rank = index + 1;
+            });
+            
+            updateLeaderboardUI(leaderboardData);
+        }
+        
+        // تحديث واجهة المتصدرين
+        function updateLeaderboardUI(leaderboardData) {
+            leaderboardContent.innerHTML = '';
+            
+            leaderboardData.forEach(user => {
+                const leaderboardItem = document.createElement('div');
+                leaderboardItem.className = 'leaderboard-item';
+                leaderboardItem.innerHTML = `
+                    <div class="leaderboard-rank">${user.rank}</div>
+                    <div class="leaderboard-name">${user.name}</div>
+                    <div class="leaderboard-score">${formatNumber(user.score)}</div>
+                `;
+                
+                // تمييز المستخدم الحالي
+                if (user.userId === userId) {
+                    leaderboardItem.style.background = 'rgba(0, 255, 157, 0.1)';
+                    leaderboardItem.style.borderRadius = '8px';
+                    leaderboardItem.style.padding = '12px';
+                }
+                
+                leaderboardContent.appendChild(leaderboardItem);
+            });
         }
         
         // تحديث واجهة المستخدم
@@ -1090,7 +1148,6 @@
             pointsPerClickElement.textContent = formatNumber(pointsPerClick);
             autoMiningRateElement.textContent = formatNumber(autoMiningRate) + '/ثانية';
             totalClicksElement.textContent = formatNumber(totalClicks);
-            userScoreElement.textContent = formatNumber(Math.floor(balance));
             invitesCountElement.textContent = formatNumber(invitesCount);
             rewardsTotalElement.textContent = formatNumber(rewardsTotal);
             
@@ -1100,7 +1157,7 @@
             buyFarmButton.disabled = balance < upgradeCosts.farm;
             buyDatacenterButton.disabled = balance < upgradeCosts.datacenter;
             
-            // تحديث تكاليف الترقيات باستخدام التنسيق الجديد
+            // تحديث تكاليف الترقيات
             pickaxeCostElement.textContent = formatNumber(upgradeCosts.pickaxe);
             serverCostElement.textContent = formatNumber(upgradeCosts.server);
             farmCostElement.textContent = formatNumber(upgradeCosts.farm);
@@ -1112,8 +1169,11 @@
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
             
+            // تحديث المتصدرين
+            loadLeaderboardData();
+            
             // حفظ البيانات
-            saveGameData();
+            saveUserData();
         }
         
         // تحديث الإنجازات
@@ -1156,6 +1216,7 @@
         copyLinkButton.addEventListener('click', async () => {
             try {
                 await navigator.clipboard.writeText(inviteLinkElement.value);
+                
                 // تغيير نص الزر مؤقتاً للإشارة إلى النسخ
                 const originalHTML = copyLinkButton.innerHTML;
                 copyLinkButton.innerHTML = '<i class="fas fa-check"></i>';
@@ -1165,6 +1226,14 @@
                     copyLinkButton.innerHTML = originalHTML;
                     copyLinkButton.style.background = '';
                 }, 2000);
+                
+                // إشعار Telegram
+                tg.showPopup({
+                    title: 'تم النسخ!',
+                    message: 'تم نسخ رابط الدعوة إلى الحافظة',
+                    buttons: [{ type: 'ok' }]
+                });
+                
             } catch (err) {
                 console.error('Failed to copy: ', err);
                 // طريقة بديلة للنسخ
@@ -1173,77 +1242,23 @@
             }
         });
         
-        // زر مشاركة الرابط
+        // زر مشاركة الرابط عبر Telegram
         inviteFriendsButton.addEventListener('click', () => {
             const inviteLink = generateInviteLink();
             const shareText = `انضم إلى Coin Crynova - لعبة تعدين العملات الرقمية الممتعة! 🎮💰\n\nاستخدم رابط الدعوة الخاص بي للانضمام:\n${inviteLink}\n\nاحصل على مكافأة 200 Crynova مجاناً!`;
             
-            // محاولة استخدام Web Share API إذا كان متاحاً
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Coin Crynova - لعبة تعدين العملات',
-                    text: shareText,
-                    url: inviteLink
-                }).then(() => {
-                    console.log('تمت المشاركة بنجاح');
-                }).catch((error) => {
-                    console.log('خطأ في المشاركة:', error);
-                    fallbackShare(inviteLink, shareText);
-                });
-            } else {
-                fallbackShare(inviteLink, shareText);
-            }
+            // استخدام Telegram Share API
+            tg.shareMessage(shareText);
         });
-        
-        // طريقة بديلة للمشاركة
-        function fallbackShare(inviteLink, shareText) {
-            // إنشاء نافذة مشاركة مخصصة
-            const shareModal = document.createElement('div');
-            shareModal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.8);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
-            `;
-            
-            shareModal.innerHTML = `
-                <div style="background: var(--light); padding: 20px; border-radius: 15px; max-width: 90%; text-align: center;">
-                    <h3 style="color: var(--primary); margin-bottom: 15px;">مشاركة الرابط</h3>
-                    <p style="margin-bottom: 15px; color: var(--text);">انسخ الرابط وأرسله إلى أصدقائك:</p>
-                    <input type="text" value="${inviteLink}" readonly 
-                           style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--secondary); border-radius: 5px; background: var(--dark); color: var(--text); text-align: center;">
-                    <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button onclick="navigator.clipboard.writeText('${inviteLink}').then(() => { alert('تم نسخ الرابط!'); this.parentElement.parentElement.parentElement.remove(); })" 
-                                style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                            نسخ الرابط
-                        </button>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
-                                style="background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                            إغلاق
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(shareModal);
-            
-            // إغلاق النافذة عند النقر خارجها
-            shareModal.addEventListener('click', (e) => {
-                if (e.target === shareModal) {
-                    shareModal.remove();
-                }
-            });
-        }
         
         // النقر على زر التعدين
         mineButton.addEventListener('click', () => {
             if (energy <= 0) {
+                tg.showPopup({
+                    title: 'نفذت الطاقة!',
+                    message: 'انتظر حتى تعود الطاقة للشحن',
+                    buttons: [{ type: 'ok' }]
+                });
                 return;
             }
             
@@ -1289,6 +1304,8 @@
                 upgradeCosts.pickaxe = Math.floor(upgradeCosts.pickaxe * 1.8);
                 
                 updateUI();
+                
+                tg.HapticFeedback.impactOccurred('light');
             }
         });
         
@@ -1303,6 +1320,8 @@
                 upgradeCosts.server = Math.floor(upgradeCosts.server * 1.8);
                 
                 updateUI();
+                
+                tg.HapticFeedback.impactOccurred('light');
             }
         });
         
@@ -1317,6 +1336,8 @@
                 upgradeCosts.farm = Math.floor(upgradeCosts.farm * 1.8);
                 
                 updateUI();
+                
+                tg.HapticFeedback.impactOccurred('medium');
             }
         });
         
@@ -1332,10 +1353,12 @@
                 upgradeCosts.datacenter = Math.floor(upgradeCosts.datacenter * 2.5);
                 
                 updateUI();
+                
+                tg.HapticFeedback.impactOccurred('heavy');
             }
         });
         
-        // نظام التعدين التلقائي - يعمل دائماً ومخفي
+        // نظام التعدين التلقائي
         function startAutoMining() {
             autoMiningInterval = setInterval(() => {
                 if (autoMiningRate > 0) {
@@ -1356,7 +1379,8 @@
         
         // تهيئة اللعبة
         function initGame() {
-            loadGameData();
+            initTelegramWebApp();
+            loadUserData();
             updateUI();
             startAutoMining();
             
@@ -1371,7 +1395,31 @@
         document.addEventListener('DOMContentLoaded', initGame);
         
         // حفظ البيانات عند إغلاق الصفحة
-        window.addEventListener('beforeunload', saveGameData);
+        window.addEventListener('beforeunload', saveUserData);
+        
+        // معالجة دعوة الأصدقاء (إذا كان المستخدم جاء عبر رابط دعوة)
+        function handleInvite() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const startParam = urlParams.get('start');
+            
+            if (startParam && startParam.startsWith('invite_')) {
+                const inviterId = startParam.replace('invite_', '');
+                
+                // منح مكافأة للمستخدم المدعو (في تطبيق حقيقي، سيتم إرسال هذا للخادم)
+                balance += 50;
+                
+                tg.showPopup({
+                    title: 'مكافأة ترحيب!',
+                    message: 'لقد حصلت على 50 Crynova كمكافأة للانضمام عبر دعوة صديق!',
+                    buttons: [{ type: 'ok' }]
+                });
+                
+                updateUI();
+            }
+        }
+        
+        // تشغيل معالجة الدعوة بعد التهيئة
+        setTimeout(handleInvite, 2000);
     </script>
 </body>
 </html>
