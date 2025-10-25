@@ -795,61 +795,6 @@
                 padding: 15px;
             }
         }
-
-        /* نافذة التنبيه المخصصة */
-        .custom-alert {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-        }
-
-        .alert-content {
-            background: var(--light);
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 90%;
-            border: 2px solid var(--primary);
-            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.3);
-        }
-
-        .alert-title {
-            color: var(--primary);
-            font-size: 1.4rem;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
-        .alert-message {
-            color: var(--text);
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-
-        .alert-btn {
-            background: var(--primary);
-            color: var(--dark);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .alert-btn:hover {
-            background: var(--secondary);
-            transform: scale(1.05);
-        }
     </style>
 </head>
 <body>
@@ -1159,20 +1104,6 @@
             return baseUrl;
         }
         
-        // دالة لعرض تنبيه مخصص
-        function showCustomAlert(title, message) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'custom-alert';
-            alertDiv.innerHTML = `
-                <div class="alert-content">
-                    <div class="alert-title">${title}</div>
-                    <div class="alert-message">${message}</div>
-                    <button class="alert-btn" onclick="this.parentElement.parentElement.remove()">حسناً</button>
-                </div>
-            `;
-            document.body.appendChild(alertDiv);
-        }
-        
         // دالة لتنسيق الأعداد الكبيرة
         function formatNumber(num) {
             if (num >= 1000000000) {
@@ -1208,8 +1139,7 @@
                 upgradeCosts,
                 userName: getUserName(),
                 lastPlayed: firebase.firestore.FieldValue.serverTimestamp(),
-                telegramData: tg?.initDataUnsafe?.user || null,
-                userId: getUserId()
+                telegramData: tg?.initDataUnsafe?.user || null
             };
             
             try {
@@ -1259,68 +1189,6 @@
             }
         }
 
-        // نظام الدعوة المحسن
-        async function handleInviteReward(inviterId) {
-            if (!db) {
-                console.log("Firestore not available for invite handling");
-                return;
-            }
-
-            try {
-                // التحقق من أن هذه الدعوة جديدة
-                const inviteDoc = await db.collection('invites')
-                    .where('inviterId', '==', inviterId)
-                    .where('invitedId', '==', getUserId())
-                    .get();
-
-                if (inviteDoc.empty) {
-                    // هذه دعوة جديدة، منح المكافأة للمدعو
-                    const invitedUserData = {
-                        balance: balance + inviteReward,
-                        invitesCount: invitesCount + 1,
-                        rewardsTotal: rewardsTotal + inviteReward,
-                        lastPlayed: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-
-                    await db.collection('users').doc(getUserId()).update(invitedUserData);
-
-                    // تحديث البيانات المحلية
-                    balance += inviteReward;
-                    invitesCount += 1;
-                    rewardsTotal += inviteReward;
-
-                    // حفظ بيانات الدعوة
-                    await db.collection('invites').add({
-                        inviterId: inviterId,
-                        invitedId: getUserId(),
-                        rewardAmount: inviteReward,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                        completed: true
-                    });
-
-                    // منح المكافأة للمدعو أيضاً
-                    const inviterDoc = await db.collection('users').doc(inviterId).get();
-                    if (inviterDoc.exists) {
-                        const inviterData = inviterDoc.data();
-                        await db.collection('users').doc(inviterId).update({
-                            balance: (inviterData.balance || 0) + inviteReward,
-                            invitesCount: (inviterData.invitesCount || 0) + 1,
-                            rewardsTotal: (inviterData.rewardsTotal || 0) + inviteReward
-                        });
-                    }
-
-                    console.log("Invite reward granted to both users");
-                    showCustomAlert('تهانينا! 🎉', `لقد حصلت على مكافأة الدعوة بقيمة ${inviteReward} Crynova!`);
-                    
-                    updateUI();
-                } else {
-                    console.log("Invite already processed");
-                }
-            } catch (error) {
-                console.error("Error handling invite reward:", error);
-            }
-        }
-
         // تحديث المتصدرين
         async function updateLeaderboard() {
             if (!db) return;
@@ -1351,11 +1219,6 @@
         function displayLeaderboard(users) {
             leaderboardContainer.innerHTML = '';
             
-            if (users.length === 0) {
-                leaderboardContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #a0a0a0;">لا توجد بيانات بعد</div>';
-                return;
-            }
-            
             users.forEach((user, index) => {
                 const item = document.createElement('div');
                 item.className = 'leaderboard-item';
@@ -1363,7 +1226,6 @@
                     item.style.background = 'rgba(0, 255, 157, 0.1)';
                     item.style.borderRadius = '8px';
                     item.style.padding = '10px';
-                    item.style.border = '1px solid var(--primary)';
                 }
                 
                 item.innerHTML = `
@@ -1494,14 +1356,11 @@
                     copyLinkButton.innerHTML = originalHTML;
                     copyLinkButton.style.background = '';
                 }, 2000);
-                
-                showCustomAlert('تم النسخ! ✅', 'تم نسخ رابط الدعوة إلى الحافظة');
             } catch (err) {
                 console.error('Failed to copy: ', err);
                 // طريقة بديلة للنسخ
                 inviteLinkElement.select();
                 document.execCommand('copy');
-                showCustomAlert('تم النسخ! ✅', 'تم نسخ رابط الدعوة إلى الحافظة');
             }
         });
         
@@ -1568,7 +1427,7 @@
             // إضافة event listeners للأزرار في النافذة
             document.getElementById('modal-copy-btn').addEventListener('click', () => {
                 navigator.clipboard.writeText(inviteLink).then(() => {
-                    showCustomAlert('تم النسخ! ✅', 'تم نسخ رابط الدعوة إلى الحافظة');
+                    alert('تم نسخ الرابط!');
                     shareModal.remove();
                 });
             });
@@ -1588,7 +1447,6 @@
         // النقر على زر التعدين
         mineButton.addEventListener('click', () => {
             if (energy <= 0) {
-                showCustomAlert('انتبه! ⚠️', 'طاقتك منخفضة! انتظر حتى تعود الطاقة');
                 return;
             }
             
@@ -1633,7 +1491,6 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.pickaxe = Math.floor(upgradeCosts.pickaxe * 1.8);
                 
-                showCustomAlert('تم الشراء! 🛒', 'تم شراء ترقية المعول بنجاح!');
                 updateUI();
             }
         });
@@ -1648,7 +1505,6 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.server = Math.floor(upgradeCosts.server * 1.8);
                 
-                showCustomAlert('تم الشراء! 🛒', 'تم شراء ترقية الخوادم بنجاح!');
                 updateUI();
             }
         });
@@ -1663,7 +1519,6 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.farm = Math.floor(upgradeCosts.farm * 1.8);
                 
-                showCustomAlert('تم الشراء! 🛒', 'تم شراء ترقية المزرعة بنجاح!');
                 updateUI();
             }
         });
@@ -1679,7 +1534,6 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.datacenter = Math.floor(upgradeCosts.datacenter * 2.5);
                 
-                showCustomAlert('تم الشراء! 🛒', 'تم شراء ترقية مركز البيانات بنجاح!');
                 updateUI();
             }
         });
@@ -1711,8 +1565,16 @@
             if (startParam && startParam.startsWith('invite_')) {
                 const inviterId = startParam.replace('invite_', '');
                 if (inviterId !== getUserId()) {
-                    console.log("Processing invite from:", inviterId);
-                    handleInviteReward(inviterId);
+                    // منح مكافأة الدعوة
+                    invitesCount++;
+                    rewardsTotal += inviteReward;
+                    balance += inviteReward;
+                    updateUI();
+                    
+                    // عرض رسالة نجاح
+                    setTimeout(() => {
+                        alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 200 Crynova!');
+                    }, 1000);
                 }
             }
         }
@@ -1739,11 +1601,6 @@
         window.addEventListener('beforeunload', () => {
             saveGameDataToFirestore();
         });
-
-        // حفظ البيانات كل 30 ثانية
-        setInterval(() => {
-            saveGameDataToFirestore();
-        }, 30000);
     </script>
 </body>
 </html>
