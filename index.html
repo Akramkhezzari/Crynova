@@ -1007,6 +1007,17 @@
             console.error("Firebase initialization error:", error);
         }
 
+        // === نظام الكتابة الذكي ===
+        let lastUpdateTimestamp = 0;
+        const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000; // 5 أيام بالميلي ثانية
+
+        // التحقق مما إذا حان وقت التحديث
+        function shouldUpdateFirebase() {
+            const now = Date.now();
+            const timeSinceLastUpdate = now - lastUpdateTimestamp;
+            return timeSinceLastUpdate >= FIVE_DAYS_MS;
+        }
+
         // Telegram Web App Integration
         let tg = window.Telegram?.WebApp;
 
@@ -1038,7 +1049,7 @@
         // إحصائيات الدعوة
         let invitesCount = 0;
         let rewardsTotal = 0;
-        const inviteReward = 1000; // تغيير من 200 إلى 1000
+        const inviteReward = 1000;
         
         // التعدين التلقائي
         let autoMiningInterval;
@@ -1082,10 +1093,9 @@
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
         
-        // دالة للحصول على معرف المستخدم الفريد - الإصدار المصحح
+        // دالة للحصول على معرف المستخدم الفريد
         function getUserId() {
             if (tg?.initDataUnsafe?.user?.id) {
-                // إرجاع معرف المستخدم مباشرة بدون إضافة "tg_"
                 return tg.initDataUnsafe.user.id.toString();
             }
             return `web_${userId}`;
@@ -1119,7 +1129,7 @@
             return Math.floor(num).toString();
         }
         
-        // حفظ البيانات في Firestore
+        // حفظ البيانات في Firestore بنظام الكتابة الذكي
         async function saveGameDataToFirestore() {
             if (!db) {
                 console.log("Firestore not available, using local storage");
@@ -1127,35 +1137,48 @@
                 return;
             }
             
-            const userData = {
-                balance,
-                level,
-                energy,
-                pointsPerClick,
-                autoMiningRate,
-                totalClicks,
-                invitesCount,
-                rewardsTotal,
-                upgrades,
-                upgradeCosts,
-                userName: getUserName(),
-                lastPlayed: firebase.firestore.FieldValue.serverTimestamp(),
-                telegramData: tg?.initDataUnsafe?.user || null
-            };
+            const now = Date.now();
+            const isNewUser = !lastUpdateTimestamp;
             
-            try {
-                await db.collection('users').doc(getUserId()).set(userData, { merge: true });
-                console.log("Game data saved to Firestore");
+            // تحديث فقط إذا كان مستخدم جديد أو مرت 5 أيام
+            if (isNewUser || shouldUpdateFirebase()) {
+                const userData = {
+                    balance,
+                    level,
+                    energy,
+                    pointsPerClick,
+                    autoMiningRate,
+                    totalClicks,
+                    invitesCount,
+                    rewardsTotal,
+                    upgrades,
+                    upgradeCosts,
+                    userName: getUserName(),
+                    lastPlayed: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                    registrationDate: isNewUser ? firebase.firestore.FieldValue.serverTimestamp() : undefined,
+                    telegramData: tg?.initDataUnsafe?.user || null
+                };
                 
-                // تحديث المتصدرين بعد حفظ البيانات
-                updateLeaderboard();
-            } catch (error) {
-                console.error("Error saving to Firestore:", error);
-                saveGameData(); // Fallback to local storage
+                try {
+                    await db.collection('users').doc(getUserId()).set(userData, { merge: true });
+                    lastUpdateTimestamp = now;
+                    console.log(`Game data ${isNewUser ? 'saved' : 'updated'} to Firestore`);
+                    
+                    // تحديث المتصدرين فقط عند الكتابة إلى Firebase
+                    updateLeaderboard();
+                } catch (error) {
+                    console.error("Error saving to Firestore:", error);
+                    saveGameData(); // Fallback to local storage
+                }
+            } else {
+                // حفظ محلي فقط بدون كتابة في Firebase
+                saveGameData();
+                console.log("Data saved locally - Firebase update not required yet");
             }
         }
         
-        // تحميل البيانات من Firestore
+        // تحميل البيانات من Firestore مع تهيئة نظام التتبع
         async function loadGameDataFromFirestore() {
             if (!db) {
                 console.log("Firestore not available, loading from local storage");
@@ -1179,9 +1202,18 @@
                     Object.assign(upgrades, data.upgrades || {});
                     Object.assign(upgradeCosts, data.upgradeCosts || {});
                     
+                    // تهيئة وقت آخر تحديث
+                    if (data.lastUpdate?.toDate) {
+                        lastUpdateTimestamp = data.lastUpdate.toDate().getTime();
+                    } else {
+                        lastUpdateTimestamp = Date.now();
+                    }
+                    
                     console.log("Game data loaded from Firestore");
                 } else {
                     console.log("No existing data, starting new game");
+                    // مستخدم جديد - سيتم الكتابة عند أول حفظ
+                    lastUpdateTimestamp = 0;
                     loadGameData(); // Fallback to local storage if exists
                 }
             } catch (error) {
@@ -1252,7 +1284,8 @@
                 rewardsTotal,
                 upgrades,
                 upgradeCosts,
-                userId: getUserId()
+                userId: getUserId(),
+                lastUpdateTimestamp
             };
             localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
         }
@@ -1272,6 +1305,7 @@
                 rewardsTotal = gameData.rewardsTotal || 0;
                 Object.assign(upgrades, gameData.upgrades || {});
                 Object.assign(upgradeCosts, gameData.upgradeCosts || {});
+                lastUpdateTimestamp = gameData.lastUpdateTimestamp || 0;
             }
         }
         
@@ -1304,7 +1338,7 @@
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
             
-            // حفظ البيانات
+            // حفظ البيانات بنظام الكتابة الذكي
             saveGameDataToFirestore();
         }
         
@@ -1615,7 +1649,8 @@
                     await db.collection('users').doc(inviterId).update({
                         invitesCount: updatedInvitesCount,
                         rewardsTotal: updatedRewardsTotal,
-                        balance: updatedBalance
+                        balance: updatedBalance,
+                        lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     
                     console.log(`تم تحديث مكافآت المُدعِي ${inviterId}`);
@@ -1625,6 +1660,24 @@
             }
         }
         
+        // إضافة معلومات التتبع للتصحيح
+        function getUpdateStatus() {
+            const now = Date.now();
+            const timeSinceLastUpdate = now - lastUpdateTimestamp;
+            const daysSinceLastUpdate = Math.floor(timeSinceLastUpdate / (24 * 60 * 60 * 1000));
+            const shouldUpdate = shouldUpdateFirebase();
+            
+            console.log(`حالة التحديث: ${shouldUpdate ? 'حتاج تحديث' : 'لا يحتاج تحديث'}`);
+            console.log(`آخر تحديث: ${daysSinceLastUpdate} يوم مضى`);
+            console.log(`المستخدم: ${lastUpdateTimestamp === 0 ? 'جديد' : 'قديم'}`);
+            
+            return {
+                shouldUpdate,
+                daysSinceLastUpdate,
+                isNewUser: lastUpdateTimestamp === 0
+            };
+        }
+        
         // تهيئة اللعبة
         async function initGame() {
             await loadGameDataFromFirestore();
@@ -1632,6 +1685,9 @@
             startAutoMining();
             await checkInviteFromUrl();
             updateLeaderboard();
+            
+            // إظهار حالة النظام للتصحيح
+            getUpdateStatus();
             
             // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
             setTimeout(() => {
