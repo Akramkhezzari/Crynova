@@ -645,10 +645,14 @@
             width: 16px;
         }
 
-        #reset-timer, #recharge-cooldown {
+        #reset-timer {
             font-weight: bold;
             color: var(--primary);
             direction: ltr;
+        }
+
+        .streak-info {
+            display: none; /* إخفاء معلومات التتابع */
         }
 
         /* لوحة دعوة الأصدقاء */
@@ -1055,12 +1059,12 @@
                 <h2 class="panel-title"><i class="fas fa-calendar-day"></i> المهام اليومية</h2>
                 
                 <div class="missions-container">
-                    <!-- مهمة التواجد اليومي -->
+                    <!-- مهمة التواجد اليومي فقط -->
                     <div class="mission-item" id="mission-daily">
                         <div class="mission-icon"><i class="fas fa-fire"></i></div>
                         <div class="mission-info">
                             <div class="mission-name">التواجد اليومي</div>
-                            <div class="mission-desc">سجل دخولك اليومي للحصول على المكافأة</div>
+                            <div class="mission-desc">سجل دخولك اليومي للحصول على المكافأة مضاعفة يوميا ×2</div>
                             <div class="mission-progress">
                                 <div class="progress-bar">
                                     <div class="progress" id="progress-daily"></div>
@@ -1073,51 +1077,16 @@
                             <i class="fas fa-coins"></i>
                         </button>
                     </div>
-                    
-                    <!-- مهمة محافظ على الطاقة -->
-                    <div class="mission-item" id="mission-energy">
-                        <div class="mission-icon"><i class="fas fa-battery-half"></i></div>
-                        <div class="mission-info">
-                            <div class="mission-name">محافظ على الطاقة</div>
-                            <div class="mission-desc">حافظ على طاقة فوق 50% لمدة 15 دقيقة</div>
-                            <div class="mission-progress">
-                                <div class="progress-bar">
-                                    <div class="progress" id="progress-energy"></div>
-                                </div>
-                                <span class="progress-text" id="energy-timer">00:00</span>
-                            </div>
-                        </div>
-                        <button class="mission-reward" id="reward-energy">
-                            <span>250</span>
-                            <i class="fas fa-coins"></i>
-                        </button>
-                    </div>
-                    
-                    <!-- مهمة معيد الشحن -->
-                    <div class="mission-item" id="mission-recharge">
-                        <div class="mission-icon"><i class="fas fa-bolt"></i></div>
-                        <div class="mission-info">
-                            <div class="mission-name">معيد الشحن</div>
-                            <div class="mission-desc">استعد الطاقة من 0% إلى 100%</div>
-                            <div class="mission-progress">
-                                <div class="progress-bar">
-                                    <div class="progress" id="progress-recharge"></div>
-                                </div>
-                                <span class="progress-text" id="recharge-status">غير مكتمل</span>
-                            </div>
-                        </div>
-                        <button class="mission-reward" id="reward-recharge">
-                            <span>500</span>
-                            <i class="fas fa-coins"></i>
-                        </button>
-                    </div>
+                </div>
+
+                <!-- معلومات التتابع - مخفية -->
+                <div class="streak-info" style="display: none;">
+                    <div class="streak-days" id="current-streak">1</div>
+                    <div class="streak-label">يوم متتالي</div>
                 </div>
                 
-                <div class="cooldown-info">
-                    <div class="cooldown-item">
-                        <i class="fas fa-sync-alt"></i>
-                        <span>معيد الشحن: <span id="recharge-cooldown">جاهز</span></span>
-                    </div>
+                <!-- توقيت التجديد - مخفي -->
+                <div class="cooldown-info" style="display: none;">
                     <div class="reset-info">
                         <i class="fas fa-clock"></i>
                         <span>يتجدد بعد: <span id="reset-timer">24:00:00</span></span>
@@ -1220,30 +1189,15 @@
             farm: 0,
             datacenter: 0
         };
-        
+
         // نظام المهام اليومية المعدل
         const dailyMissions = {
             dailyLogin: { 
-                streak: 0, 
+                streak: 1, 
                 lastClaim: null, 
                 claimed: false,
-                baseReward: 100
-            },
-            energyKeeper: {
-                progress: 0,
-                targetTime: 15 * 60, // 15 دقيقة بالثواني
-                currentTime: 0,
-                completed: false,
-                claimed: false,
-                active: false,
-                reward: 250
-            },
-            rechargeMaster: {
-                completed: false,
-                claimed: false,
-                lastUsed: null,
-                cooldown: 30 * 60, // 30 دقيقة بالثواني
-                reward: 500
+                baseReward: 100,
+                maxStreak: 15 // زيادة إلى 15 يوم
             }
         };
 
@@ -1266,11 +1220,6 @@
         const buyServerButton = document.getElementById('buy-server');
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
-
-        // متغيرات التوقيت
-        let energyMissionInterval;
-        let rechargeCooldownInterval;
-        let resetTimerInterval;
 
         // دالة للحصول على معرف المستخدم الفريد
         function getUserId() {
@@ -1634,9 +1583,6 @@
                 mineButton.removeChild(floatingText);
             }, 1500);
             
-            // بدء مهمة الطاقة عند النقر
-            startEnergyMissionOnClick();
-            
             updateUI();
         });
         
@@ -1721,9 +1667,6 @@
         // تهيئة المهام اليومية
         function initDailyMissions() {
             loadMissionsData();
-            startEnergyMission();
-            startResetTimer();
-            startRechargeCooldown();
             updateMissionsUI();
             setupMissionRewards();
         }
@@ -1745,15 +1688,7 @@
 
         // إعادة تعيين المهام اليومية
         function resetDailyMissions() {
-            dailyMissions.energyKeeper.progress = 0;
-            dailyMissions.energyKeeper.currentTime = 0;
-            dailyMissions.energyKeeper.completed = false;
-            dailyMissions.energyKeeper.claimed = false;
-            dailyMissions.energyKeeper.active = false;
-            
-            dailyMissions.rechargeMaster.completed = false;
-            dailyMissions.rechargeMaster.claimed = false;
-            
+            dailyMissions.dailyLogin.claimed = false;
             saveMissionsData();
         }
 
@@ -1763,7 +1698,7 @@
             const lastClaim = dailyMissions.dailyLogin.lastClaim;
             
             if (!lastClaim) {
-                // أول دخول
+                // أول دخول - يمكن لأي مستخدم استلام المكافأة مباشرة
                 dailyMissions.dailyLogin.streak = 1;
                 dailyMissions.dailyLogin.claimed = false;
             } else if (lastClaim === today) {
@@ -1778,8 +1713,8 @@
                 if (diffDays === 1) {
                     // تواجد متتالي
                     dailyMissions.dailyLogin.streak++;
-                    if (dailyMissions.dailyLogin.streak > 10) {
-                        dailyMissions.dailyLogin.streak = 1;
+                    if (dailyMissions.dailyLogin.streak > dailyMissions.dailyLogin.maxStreak) {
+                        dailyMissions.dailyLogin.streak = 1; // العودة للبداية بعد 15 يوم
                     }
                     dailyMissions.dailyLogin.claimed = false;
                 } else {
@@ -1795,87 +1730,8 @@
         // حساب مكافأة التواجد اليومي
         function calculateDailyReward() {
             const base = dailyMissions.dailyLogin.baseReward;
-            const streak = Math.min(dailyMissions.dailyLogin.streak, 10);
+            const streak = Math.min(dailyMissions.dailyLogin.streak, dailyMissions.dailyLogin.maxStreak);
             return base * Math.pow(2, streak - 1);
-        }
-
-        // بدء مهمة الطاقة
-        function startEnergyMission() {
-            energyMissionInterval = setInterval(() => {
-                if (dailyMissions.energyKeeper.active && !dailyMissions.energyKeeper.completed) {
-                    if (energy > 50) {
-                        dailyMissions.energyKeeper.currentTime++;
-                        
-                        if (dailyMissions.energyKeeper.currentTime >= dailyMissions.energyKeeper.targetTime) {
-                            dailyMissions.energyKeeper.completed = true;
-                            dailyMissions.energyKeeper.active = false;
-                            showMissionCompleteNotification('energy');
-                        }
-                    } else {
-                        dailyMissions.energyKeeper.currentTime = 0;
-                        dailyMissions.energyKeeper.active = false;
-                    }
-                    
-                    updateMissionsUI();
-                    saveMissionsData();
-                }
-            }, 1000);
-        }
-
-        // بدء مؤقت إعادة الشحن
-        function startRechargeCooldown() {
-            rechargeCooldownInterval = setInterval(() => {
-                updateRechargeCooldown();
-            }, 1000);
-        }
-
-        // تحديث مؤقت إعادة الشحن
-        function updateRechargeCooldown() {
-            const rechargeMission = dailyMissions.rechargeMaster;
-            
-            if (rechargeMission.lastUsed) {
-                const now = Math.floor(Date.now() / 1000);
-                const lastUsed = Math.floor(new Date(rechargeMission.lastUsed).getTime() / 1000);
-                const timePassed = now - lastUsed;
-                const timeLeft = rechargeMission.cooldown - timePassed;
-                
-                if (timeLeft > 0) {
-                    const minutes = Math.floor(timeLeft / 60);
-                    const seconds = timeLeft % 60;
-                    document.getElementById('recharge-cooldown').textContent = 
-                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                } else {
-                    document.getElementById('recharge-cooldown').textContent = 'جاهز';
-                    rechargeMission.completed = false;
-                }
-            } else {
-                document.getElementById('recharge-cooldown').textContent = 'جاهز';
-            }
-        }
-
-        // التحقق من إعادة شحن الطاقة
-        function checkEnergyRecharge() {
-            const rechargeMission = dailyMissions.rechargeMaster;
-            
-            if (!rechargeMission.claimed && energy === 100) {
-                // التحقق من آخر استخدام لمهمة إعادة الشحن
-                if (!rechargeMission.lastUsed) {
-                    rechargeMission.completed = true;
-                    showMissionCompleteNotification('recharge');
-                } else {
-                    const now = Math.floor(Date.now() / 1000);
-                    const lastUsed = Math.floor(new Date(rechargeMission.lastUsed).getTime() / 1000);
-                    const timePassed = now - lastUsed;
-                    
-                    if (timePassed >= rechargeMission.cooldown) {
-                        rechargeMission.completed = true;
-                        showMissionCompleteNotification('recharge');
-                    }
-                }
-                
-                updateMissionsUI();
-                saveMissionsData();
-            }
         }
 
         // تحديث واجهة المهام
@@ -1888,25 +1744,6 @@
             document.getElementById('daily-streak').textContent = `اليوم ${dailyMission.streak}`;
             document.getElementById('progress-daily').style.width = dailyMission.claimed ? '100%' : '0%';
             updateMissionButton('mission-daily', dailyMission.claimed, dailyMission.claimed);
-
-            // مهمة محافظ على الطاقة
-            const energyMission = dailyMissions.energyKeeper;
-            const progressPercent = (energyMission.currentTime / energyMission.targetTime) * 100;
-            
-            document.getElementById('progress-energy').style.width = `${progressPercent}%`;
-            
-            const minutes = Math.floor(energyMission.currentTime / 60);
-            const seconds = energyMission.currentTime % 60;
-            document.getElementById('energy-timer').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            updateMissionButton('mission-energy', energyMission.completed, energyMission.claimed);
-
-            // مهمة معيد الشحن
-            const rechargeMission = dailyMissions.rechargeMaster;
-            document.getElementById('progress-recharge').style.width = rechargeMission.completed ? '100%' : '0%';
-            document.getElementById('recharge-status').textContent = rechargeMission.completed ? 'مكتمل' : 'غير مكتمل';
-            updateMissionButton('mission-recharge', rechargeMission.completed, rechargeMission.claimed);
         }
 
         // تحديث حالة زر المهمة
@@ -1944,41 +1781,6 @@
                     saveMissionsData();
                 }
             });
-
-            // مكافأة محافظ على الطاقة
-            document.getElementById('reward-energy').addEventListener('click', function() {
-                if (dailyMissions.energyKeeper.completed && !dailyMissions.energyKeeper.claimed) {
-                    balance += dailyMissions.energyKeeper.reward;
-                    dailyMissions.energyKeeper.claimed = true;
-                    
-                    showRewardEffect(dailyMissions.energyKeeper.reward);
-                    updateUI();
-                    updateMissionsUI();
-                    saveMissionsData();
-                }
-            });
-
-            // مكافأة معيد الشحن
-            document.getElementById('reward-recharge').addEventListener('click', function() {
-                if (dailyMissions.rechargeMaster.completed && !dailyMissions.rechargeMaster.claimed) {
-                    balance += dailyMissions.rechargeMaster.reward;
-                    dailyMissions.rechargeMaster.claimed = true;
-                    dailyMissions.rechargeMaster.lastUsed = new Date();
-                    
-                    showRewardEffect(dailyMissions.rechargeMaster.reward);
-                    updateUI();
-                    updateMissionsUI();
-                    saveMissionsData();
-                }
-            });
-        }
-
-        // بدء مهمة الطاقة عند النقر
-        function startEnergyMissionOnClick() {
-            if (!dailyMissions.energyKeeper.completed && !dailyMissions.energyKeeper.claimed) {
-                dailyMissions.energyKeeper.active = true;
-                updateMissionsUI();
-            }
         }
 
         // تأثير المكافأة
@@ -2006,57 +1808,10 @@
             }, 2000);
         }
 
-        // إشعار إكمال المهمة
-        function showMissionCompleteNotification(missionType) {
-            const missionNames = {
-                daily: 'التواجد اليومي',
-                energy: 'محافظ على الطاقة', 
-                recharge: 'معيد الشحن'
-            };
-            
-            // يمكنك إضافة إشعار مرئي هنا
-            console.log(`أكملت مهمة: ${missionNames[missionType]}`);
-        }
-
-        // مؤقت إعادة التعيين اليومي
-        function startResetTimer() {
-            updateResetTimer();
-            resetTimerInterval = setInterval(updateResetTimer, 1000);
-        }
-
-        function updateResetTimer() {
-            const now = new Date();
-            const tomorrow = new Date(now);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            tomorrow.setHours(0, 0, 0, 0);
-            
-            const timeLeft = tomorrow - now;
-            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-            
-            document.getElementById('reset-timer').textContent = 
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (timeLeft <= 1000) {
-                resetDailyMissions();
-                updateMissionsUI();
-            }
-        }
-
         // حفظ بيانات المهام
         function saveMissionsData() {
             localStorage.setItem(`daily_missions_v2_${getUserId()}`, JSON.stringify(dailyMissions));
             localStorage.setItem(`missions_date_${getUserId()}`, new Date().toDateString());
-        }
-
-        // التكامل مع اللعبة الرئيسية
-        function connectMissionsToGame() {
-            // بدء مهمة الطاقة عند النقر
-            mineButton.addEventListener('click', startEnergyMissionOnClick);
-            
-            // التحقق من إعادة شحن الطاقة
-            setInterval(checkEnergyRecharge, 5000);
         }
 
         // التحقق من رابط الدعوة عند التحميل
@@ -2163,7 +1918,6 @@
             startAutoMining();
             checkInviteFromUrl();
             initDailyMissions();
-            connectMissionsToGame();
             
             // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
             setTimeout(() => {
