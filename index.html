@@ -6,6 +6,9 @@
     <title>Coin Crynova - لعبة تعدين العملات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -755,11 +758,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* مؤشر الحفظ - مخفي */
-        .save-indicator {
-            display: none;
-        }
-
         /* تحسينات للشاشات الصغيرة جداً */
         @media (max-width: 360px) {
             .container {
@@ -800,9 +798,6 @@
     </style>
 </head>
 <body>
-    <!-- تم إخفاء مؤشر الحفظ -->
-    <div class="save-indicator" id="save-indicator">جاري الحفظ...</div>
-    
     <div class="loading" id="loading">
         <div class="loading-spinner"></div>
         <div>جاري التحميل...</div>
@@ -992,10 +987,29 @@
     </div>
 
     <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBX8v0qIVjG-Z46fVDeEUDKcPxa_FQF9Qc",
+            authDomain: "bnak-belaiba.firebaseapp.com",
+            projectId: "bnak-belaiba",
+            storageBucket: "bnak-belaiba.firebasestorage.app",
+            messagingSenderId: "286736432059",
+            appId: "1:286736432059:web:ec1ed4292850f00008229e"
+        };
+
+        // Initialize Firebase
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+        }
+
         // Telegram Web App Integration
         let tg = window.Telegram?.WebApp;
 
-        // تهيئة Telegram Web App
         if (tg) {
             tg.expand();
             tg.enableClosingConfirmation();
@@ -1024,7 +1038,7 @@
         // إحصائيات الدعوة
         let invitesCount = 0;
         let rewardsTotal = 0;
-        const inviteReward = 1000;
+        const inviteReward = 1000; // تغيير من 200 إلى 1000
         
         // التعدين التلقائي
         let autoMiningInterval;
@@ -1068,16 +1082,10 @@
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
         
-        // متغيرات نظام الحفظ المتقدم
-        let isSaving = false;
-        let saveQueue = [];
-        let lastSaveTime = 0;
-        const SAVE_COOLDOWN = 1000; // ثانية واحدة بين كل حفظ
-        const MAX_SAVE_ATTEMPTS = 3;
-        
-        // دالة للحصول على معرف المستخدم الفريد
+        // دالة للحصول على معرف المستخدم الفريد - الإصدار المصحح
         function getUserId() {
             if (tg?.initDataUnsafe?.user?.id) {
+                // إرجاع معرف المستخدم مباشرة بدون إضافة "tg_"
                 return tg.initDataUnsafe.user.id.toString();
             }
             return `web_${userId}`;
@@ -1111,26 +1119,15 @@
             return Math.floor(num).toString();
         }
         
-        // نظام الحفظ المتقدم
-        async function saveGameData() {
-            const now = Date.now();
-            
-            // التحقق من الوقت المنقضي منذ آخر حفظ
-            if (now - lastSaveTime < SAVE_COOLDOWN) {
-                return Promise.resolve(); // تجاهل إذا لم يمر وقت كافٍ
+        // حفظ البيانات في Firestore
+        async function saveGameDataToFirestore() {
+            if (!db) {
+                console.log("Firestore not available, using local storage");
+                saveGameData();
+                return;
             }
             
-            // إذا كان هناك عملية حفظ جارية، أضف الطلب إلى قائمة الانتظار
-            if (isSaving) {
-                return new Promise((resolve) => {
-                    saveQueue.push(resolve);
-                });
-            }
-            
-            isSaving = true;
-            lastSaveTime = now;
-            
-            const gameData = {
+            const userData = {
                 balance,
                 level,
                 energy,
@@ -1141,144 +1138,82 @@
                 rewardsTotal,
                 upgrades,
                 upgradeCosts,
-                userId: getUserId(),
                 userName: getUserName(),
-                lastSaved: now,
-                version: '1.1'
+                lastPlayed: firebase.firestore.FieldValue.serverTimestamp(),
+                telegramData: tg?.initDataUnsafe?.user || null
             };
             
-            let saved = false;
-            let attempts = 0;
-            let lastError = null;
+            try {
+                await db.collection('users').doc(getUserId()).set(userData, { merge: true });
+                console.log("Game data saved to Firestore");
+                
+                // تحديث المتصدرين بعد حفظ البيانات
+                updateLeaderboard();
+            } catch (error) {
+                console.error("Error saving to Firestore:", error);
+                saveGameData(); // Fallback to local storage
+            }
+        }
+        
+        // تحميل البيانات من Firestore
+        async function loadGameDataFromFirestore() {
+            if (!db) {
+                console.log("Firestore not available, loading from local storage");
+                loadGameData();
+                return;
+            }
             
-            // محاولة متعددة للحفظ
-            while (!saved && attempts < MAX_SAVE_ATTEMPTS) {
-                try {
-                    // محاولة استخدام Telegram Cloud Storage أولاً
-                    if (tg?.CloudStorage) {
-                        await tg.CloudStorage.setItem('game_data', JSON.stringify(gameData));
-                        console.log("Game data saved to Telegram Cloud Storage");
-                        saved = true;
-                    } else {
-                        // Fallback إلى localStorage
-                        localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
-                        console.log("Game data saved to localStorage");
-                        saved = true;
-                    }
-                } catch (error) {
-                    console.error(`Save attempt ${attempts + 1} failed:`, error);
-                    attempts++;
-                    lastError = error;
+            try {
+                const doc = await db.collection('users').doc(getUserId()).get();
+                
+                if (doc.exists) {
+                    const data = doc.data();
+                    balance = data.balance || 0;
+                    level = data.level || 1;
+                    energy = data.energy || 100;
+                    pointsPerClick = data.pointsPerClick || 1;
+                    autoMiningRate = data.autoMiningRate || 0;
+                    totalClicks = data.totalClicks || 0;
+                    invitesCount = data.invitesCount || 0;
+                    rewardsTotal = data.rewardsTotal || 0;
+                    Object.assign(upgrades, data.upgrades || {});
+                    Object.assign(upgradeCosts, data.upgradeCosts || {});
                     
-                    // انتظار قبل إعادة المحاولة (زيادة زمن الانتظار مع كل محاولة)
-                    await new Promise(resolve => setTimeout(resolve, 300 * attempts));
+                    console.log("Game data loaded from Firestore");
+                } else {
+                    console.log("No existing data, starting new game");
+                    loadGameData(); // Fallback to local storage if exists
                 }
-            }
-            
-            if (!saved) {
-                console.error("Failed to save game data after all attempts:", lastError);
-                // يمكن هنا إضافة منطق للتعامل مع فشل الحفظ
-            }
-            
-            isSaving = false;
-            
-            // معالجة الطلبات المعلقة في قائمة الانتظار
-            if (saveQueue.length > 0) {
-                const nextResolve = saveQueue.shift();
-                nextResolve();
-            }
-            
-            return Promise.resolve();
-        }
-        
-        // تحميل البيانات باستخدام Telegram Web App Cloud Storage
-        async function loadGameData() {
-            let savedData = null;
-            
-            // محاولة استخدام Telegram Cloud Storage أولاً
-            if (tg?.CloudStorage) {
-                try {
-                    savedData = await tg.CloudStorage.getItem('game_data');
-                    if (savedData) {
-                        console.log("Game data loaded from Telegram Cloud Storage");
-                    }
-                } catch (error) {
-                    console.error("Error loading from Telegram Cloud Storage:", error);
-                }
-            }
-            
-            // إذا لم توجد بيانات في Telegram Cloud Storage، جرب localStorage
-            if (!savedData) {
-                savedData = localStorage.getItem(`coin_crynova_${getUserId()}`);
-                if (savedData) {
-                    console.log("Game data loaded from localStorage");
-                }
-            }
-            
-            if (savedData) {
-                try {
-                    const gameData = JSON.parse(savedData);
-                    balance = gameData.balance || 0;
-                    level = gameData.level || 1;
-                    energy = gameData.energy || 100;
-                    pointsPerClick = gameData.pointsPerClick || 1;
-                    autoMiningRate = gameData.autoMiningRate || 0;
-                    totalClicks = gameData.totalClicks || 0;
-                    invitesCount = gameData.invitesCount || 0;
-                    rewardsTotal = gameData.rewardsTotal || 0;
-                    Object.assign(upgrades, gameData.upgrades || {});
-                    Object.assign(upgradeCosts, gameData.upgradeCosts || {});
-                    
-                    console.log("Game data loaded successfully");
-                } catch (error) {
-                    console.error("Error parsing saved data:", error);
-                    // في حالة فشل تحميل البيانات، نبدأ بلعبة جديدة
-                    resetGameData();
-                }
-            } else {
-                console.log("No saved data found, starting new game");
+            } catch (error) {
+                console.error("Error loading from Firestore:", error);
+                loadGameData(); // Fallback to local storage
             }
         }
-        
-        // إعادة تعيين بيانات اللعبة
-        function resetGameData() {
-            balance = 0;
-            level = 1;
-            energy = 100;
-            pointsPerClick = 1;
-            autoMiningRate = 0;
-            totalClicks = 0;
-            invitesCount = 0;
-            rewardsTotal = 0;
-            
-            upgrades.pickaxe = 0;
-            upgrades.server = 0;
-            upgrades.farm = 0;
-            upgrades.datacenter = 0;
-            
-            upgradeCosts.pickaxe = 10;
-            upgradeCosts.server = 50;
-            upgradeCosts.farm = 200;
-            upgradeCosts.datacenter = 1000;
-        }
-        
-        // تحديث المتصدرين (محاكاة - في الإصدار الحقيقي ستحتاج لخادم)
+
+        // تحديث المتصدرين
         async function updateLeaderboard() {
-            // في الإصدار الحقيقي، ستحتاج هنا للاتصال بخادم للحصول على بيانات المتصدرين
-            // هنا سنقوم بمحاكاة بيانات المتصدرين للتجربة
+            if (!db) return;
             
-            const mockLeaderboard = [
-                { name: getUserName(), balance: balance, isCurrentUser: true },
-                { name: "المعدن المحترف", balance: 1500000, isCurrentUser: false },
-                { name: "صاحب المزرعة", balance: 980000, isCurrentUser: false },
-                { name: "خبير البلوكتشين", balance: 750000, isCurrentUser: false },
-                { name: "المبتدئ المتفائل", balance: 120000, isCurrentUser: false },
-                { name: "صاحب الحظ", balance: 50000, isCurrentUser: false }
-            ];
-            
-            // ترتيب المتصدرين تنازلياً حسب الرصيد
-            mockLeaderboard.sort((a, b) => b.balance - a.balance);
-            displayLeaderboard(mockLeaderboard);
+            try {
+                const usersSnapshot = await db.collection('users')
+                    .orderBy('balance', 'desc')
+                    .limit(100)
+                    .get();
+                
+                const leaderboardData = [];
+                usersSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    leaderboardData.push({
+                        name: data.userName || 'مستخدم',
+                        balance: data.balance || 0,
+                        isCurrentUser: doc.id === getUserId()
+                    });
+                });
+                
+                displayLeaderboard(leaderboardData);
+            } catch (error) {
+                console.error("Error loading leaderboard:", error);
+            }
         }
 
         // عرض المتصدرين
@@ -1302,6 +1237,42 @@
                 
                 leaderboardContainer.appendChild(item);
             });
+        }
+        
+        // حفظ البيانات في التخزين المحلي
+        function saveGameData() {
+            const gameData = {
+                balance,
+                level,
+                energy,
+                pointsPerClick,
+                autoMiningRate,
+                totalClicks,
+                invitesCount,
+                rewardsTotal,
+                upgrades,
+                upgradeCosts,
+                userId: getUserId()
+            };
+            localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
+        }
+        
+        // تحميل البيانات من التخزين المحلي
+        function loadGameData() {
+            const savedData = localStorage.getItem(`coin_crynova_${getUserId()}`);
+            if (savedData) {
+                const gameData = JSON.parse(savedData);
+                balance = gameData.balance || 0;
+                level = gameData.level || 1;
+                energy = gameData.energy || 100;
+                pointsPerClick = gameData.pointsPerClick || 1;
+                autoMiningRate = gameData.autoMiningRate || 0;
+                totalClicks = gameData.totalClicks || 0;
+                invitesCount = gameData.invitesCount || 0;
+                rewardsTotal = gameData.rewardsTotal || 0;
+                Object.assign(upgrades, gameData.upgrades || {});
+                Object.assign(upgradeCosts, gameData.upgradeCosts || {});
+            }
         }
         
         // تحديث واجهة المستخدم
@@ -1333,15 +1304,8 @@
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
             
-            // حفظ البيانات - سيتم التحكم في التوقيت من خلال نظام الحفظ المتقدم
-            scheduleSave();
-        }
-        
-        // جدولة الحفظ مع التحكم في التكرار
-        function scheduleSave() {
-            saveGameData().catch(error => {
-                console.error("Scheduled save failed:", error);
-            });
+            // حفظ البيانات
+            saveGameDataToFirestore();
         }
         
         // تحديث الإنجازات
@@ -1406,11 +1370,8 @@
             const inviteLink = generateInviteLink();
             const shareText = `انضم إلى Coin Crynova - لعبة تعدين العملات الرقمية الممتعة! 🎮💰\n\nاستخدم رابط الدعوة الخاص بي للانضمام:\n${inviteLink}\n\nاحصل على مكافأة 1000 Crynova مجاناً!`;
             
-            // استخدام Telegram Share إذا كان متاحاً
-            if (tg && tg.share) {
-                tg.share(shareText);
-            } else if (navigator.share) {
-                // استخدام Web Share API
+            // محاولة استخدام Web Share API إذا كان متاحاً
+            if (navigator.share) {
                 navigator.share({
                     title: 'Coin Crynova - لعبة تعدين العملات',
                     text: shareText,
@@ -1622,6 +1583,9 @@
                 balance += inviteReward;
                 localStorage.setItem(inviteKey, 'true');
                 
+                // تحديث بيانات المُدعِي في قاعدة البيانات
+                await updateInviterRewards(inviterId);
+                
                 // عرض رسالة نجاح
                 setTimeout(() => {
                     alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 1000 Crynova!');
@@ -1631,59 +1595,58 @@
             }
         }
         
-        // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
-        function showMainContent() {
-            loadingElement.style.display = 'none';
-            mainContentElement.style.display = 'grid';
+        // تحديث مكافآت المُدعِي في قاعدة البيانات
+        async function updateInviterRewards(inviterId) {
+            if (!db) return;
+            
+            try {
+                // الحصول على بيانات المُدعِي
+                const inviterDoc = await db.collection('users').doc(inviterId).get();
+                
+                if (inviterDoc.exists) {
+                    const inviterData = inviterDoc.data();
+                    
+                    // تحديث إحصائيات الدعوة للمُدعِي
+                    const updatedInvitesCount = (inviterData.invitesCount || 0) + 1;
+                    const updatedRewardsTotal = (inviterData.rewardsTotal || 0) + inviteReward;
+                    const updatedBalance = (inviterData.balance || 0) + inviteReward;
+                    
+                    // تحديث بيانات المُدعِي في قاعدة البيانات
+                    await db.collection('users').doc(inviterId).update({
+                        invitesCount: updatedInvitesCount,
+                        rewardsTotal: updatedRewardsTotal,
+                        balance: updatedBalance
+                    });
+                    
+                    console.log(`تم تحديث مكافآت المُدعِي ${inviterId}`);
+                }
+            } catch (error) {
+                console.error("خطأ في تحديث مكافآت المُدعِي:", error);
+            }
         }
         
         // تهيئة اللعبة
         async function initGame() {
-            try {
-                console.log("بدء تحميل اللعبة...");
-                
-                // تحميل البيانات
-                await loadGameData();
-                
-                // تحديث الواجهة
-                updateUI();
-                
-                // بدء التعدين التلقائي
-                startAutoMining();
-                
-                // التحقق من رابط الدعوة
-                await checkInviteFromUrl();
-                
-                // تحديث المتصدرين
-                updateLeaderboard();
-                
-                // إظهار المحتوى الرئيسي
-                showMainContent();
-                
-                console.log("اللعبة جاهزة!");
-            } catch (error) {
-                console.error("خطأ في تهيئة اللعبة:", error);
-                // في حالة الخطأ، إظهار المحتوى الرئيسي على أي حال
-                showMainContent();
-            }
+            await loadGameDataFromFirestore();
+            updateUI();
+            startAutoMining();
+            await checkInviteFromUrl();
+            updateLeaderboard();
+            
+            // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
+            setTimeout(() => {
+                loadingElement.style.display = 'none';
+                mainContentElement.style.display = 'grid';
+            }, 1500);
         }
         
         // بدء اللعبة عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("صفحة الويب محملة، بدء تهيئة اللعبة...");
-            // استخدام setTimeout للتأكد من أن كل شيء محمل بشكل صحيح
-            setTimeout(initGame, 100);
-        });
+        document.addEventListener('DOMContentLoaded', initGame);
         
         // حفظ البيانات عند إغلاق الصفحة
         window.addEventListener('beforeunload', () => {
-            saveGameData();
+            saveGameDataToFirestore();
         });
-        
-        // حفظ البيانات كل ثانية (مع التحكم في التكرار)
-        setInterval(() => {
-            scheduleSave();
-        }, 1000);
     </script>
 </body>
 </html>
