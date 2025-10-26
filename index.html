@@ -371,7 +371,7 @@
             gap: 15px;
         }
 
-        .upgrades-panel, .achievements-panel, .leaderboard-panel, .invite-panel {
+        .upgrades-panel, .achievements-panel, .daily-missions-panel, .invite-panel {
             background: var(--card-bg);
             border-radius: 15px;
             padding: 20px;
@@ -518,61 +518,137 @@
             transition: width 0.5s ease;
         }
 
-        .leaderboard-container {
-            max-height: 300px;
-            overflow-y: auto;
-            padding-right: 5px;
+        /* لوحة المهام اليومية */
+        .daily-missions-panel {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
         }
 
-        .leaderboard-container::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .leaderboard-container::-webkit-scrollbar-track {
-            background: var(--light);
-            border-radius: 3px;
-        }
-
-        .leaderboard-container::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 3px;
-        }
-
-        .leaderboard-item {
+        .missions-container {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .mission-item {
+            display: flex;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--light);
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid transparent;
             transition: all 0.3s ease;
+            gap: 12px;
         }
 
-        .leaderboard-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 10px;
+        .mission-item:hover {
+            transform: translateX(-3px);
+            border-left: 4px solid var(--secondary);
         }
 
-        .leaderboard-rank {
-            font-weight: bold;
+        .mission-item.completed {
+            border-left: 4px solid var(--primary);
+            background: linear-gradient(135deg, var(--light), rgba(0, 255, 157, 0.1));
+        }
+
+        .mission-icon {
+            font-size: 1.5rem;
             color: var(--primary);
-            width: 25px;
-            font-size: 0.9rem;
+            width: 40px;
+            text-align: center;
         }
 
-        .leaderboard-name {
+        .mission-info {
             flex: 1;
-            font-size: 0.9rem;
-            margin: 0 8px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
-        .leaderboard-score {
+        .mission-name {
             font-weight: bold;
+            margin-bottom: 4px;
             color: var(--text);
             font-size: 0.9rem;
+        }
+
+        .mission-desc {
+            font-size: 0.8rem;
+            color: #a0a0a0;
+            margin-bottom: 8px;
+        }
+
+        .mission-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: bold;
+            min-width: 60px;
+        }
+
+        .mission-reward {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            min-width: 80px;
+            justify-content: center;
+        }
+
+        .mission-reward:active {
+            transform: scale(0.95);
+        }
+
+        .mission-reward:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .mission-reward.claimed {
+            background: var(--accent);
+        }
+
+        .cooldown-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            background: var(--light);
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .cooldown-item, .reset-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+        }
+
+        .cooldown-item i, .reset-info i {
+            color: var(--primary);
+            width: 16px;
+        }
+
+        #reset-timer, #recharge-cooldown {
+            font-weight: bold;
+            color: var(--primary);
+            direction: ltr;
         }
 
         /* لوحة دعوة الأصدقاء */
@@ -590,24 +666,42 @@
         }
 
         .invite-bonus {
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
+            padding: 5px 12px;
+            border-radius: 20px;
             font-weight: bold;
             font-size: 0.8rem;
-            box-shadow: 0 3px 10px rgba(255, 46, 99, 0.4);
+            box-shadow: 0 3px 15px rgba(0, 255, 157, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .invite-description {
             background: rgba(255, 255, 255, 0.05);
-            padding: 12px;
+            padding: 15px;
             border-radius: 10px;
             margin-bottom: 15px;
             text-align: center;
-            line-height: 1.5;
+            line-height: 1.6;
             font-size: 0.9rem;
             border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .invite-description::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
         }
 
         .invite-stats {
@@ -634,6 +728,7 @@
             font-weight: bold;
             color: var(--primary);
             margin-bottom: 4px;
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
         }
 
         .invite-stat-label {
@@ -643,7 +738,7 @@
 
         .invite-btn {
             width: 100%;
-            background: linear-gradient(135deg, var(--accent), #ff6b9c);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none;
             border-radius: 50px;
             padding: 12px;
@@ -656,7 +751,24 @@
             justify-content: center;
             gap: 8px;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(255, 46, 99, 0.4);
+            box-shadow: 0 5px 20px rgba(0, 255, 157, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .invite-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .invite-btn:hover::before {
+            left: 100%;
         }
 
         .invite-btn:active {
@@ -788,7 +900,7 @@
                 font-size: 2rem;
             }
             
-            .mining-panel, .upgrades-panel, .achievements-panel, .leaderboard-panel, .invite-panel {
+            .mining-panel, .upgrades-panel, .achievements-panel, .daily-missions-panel, .invite-panel {
                 padding: 15px;
             }
         }
@@ -938,32 +1050,105 @@
                 </div>
             </div>
             
-            <div class="leaderboard-panel">
-                <h2 class="panel-title"><i class="fas fa-chart-line"></i> المتصدرون</h2>
-                <div class="leaderboard-container" id="leaderboard-container">
-                    <!-- سيتم ملؤها ديناميكياً -->
+            <!-- لوحة المهام اليومية بدلاً من المتصدرين -->
+            <div class="daily-missions-panel">
+                <h2 class="panel-title"><i class="fas fa-calendar-day"></i> المهام اليومية</h2>
+                
+                <div class="missions-container">
+                    <!-- مهمة التواجد اليومي -->
+                    <div class="mission-item" id="mission-daily">
+                        <div class="mission-icon"><i class="fas fa-fire"></i></div>
+                        <div class="mission-info">
+                            <div class="mission-name">التواجد اليومي</div>
+                            <div class="mission-desc">سجل دخولك اليومي للحصول على المكافأة</div>
+                            <div class="mission-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" id="progress-daily"></div>
+                                </div>
+                                <span class="progress-text" id="daily-streak">اليوم 1</span>
+                            </div>
+                        </div>
+                        <button class="mission-reward" id="reward-daily">
+                            <span id="daily-reward-amount">100</span>
+                            <i class="fas fa-coins"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- مهمة محافظ على الطاقة -->
+                    <div class="mission-item" id="mission-energy">
+                        <div class="mission-icon"><i class="fas fa-battery-half"></i></div>
+                        <div class="mission-info">
+                            <div class="mission-name">محافظ على الطاقة</div>
+                            <div class="mission-desc">حافظ على طاقة فوق 50% لمدة 15 دقيقة</div>
+                            <div class="mission-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" id="progress-energy"></div>
+                                </div>
+                                <span class="progress-text" id="energy-timer">00:00</span>
+                            </div>
+                        </div>
+                        <button class="mission-reward" id="reward-energy">
+                            <span>250</span>
+                            <i class="fas fa-coins"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- مهمة معيد الشحن -->
+                    <div class="mission-item" id="mission-recharge">
+                        <div class="mission-icon"><i class="fas fa-bolt"></i></div>
+                        <div class="mission-info">
+                            <div class="mission-name">معيد الشحن</div>
+                            <div class="mission-desc">استعد الطاقة من 0% إلى 100%</div>
+                            <div class="mission-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" id="progress-recharge"></div>
+                                </div>
+                                <span class="progress-text" id="recharge-status">غير مكتمل</span>
+                            </div>
+                        </div>
+                        <button class="mission-reward" id="reward-recharge">
+                            <span>500</span>
+                            <i class="fas fa-coins"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="cooldown-info">
+                    <div class="cooldown-item">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>معيد الشحن: <span id="recharge-cooldown">جاهز</span></span>
+                    </div>
+                    <div class="reset-info">
+                        <i class="fas fa-clock"></i>
+                        <span>يتجدد بعد: <span id="reset-timer">24:00:00</span></span>
+                    </div>
                 </div>
             </div>
             
             <!-- لوحة دعوة الأصدقاء -->
             <div class="invite-panel">
                 <div class="invite-header">
-                    <div class="invite-title">دعوة الأصدقاء</div>
-                    <div class="invite-bonus">+ 1000 Crynova</div>
+                    <div class="invite-title">نظام المكافآت الخاص</div>
+                    <div class="invite-bonus">🔒 مكافآت سرية</div>
                 </div>
                 
                 <div class="invite-description">
-                    ادعُ أصدقائك واحصل على 1000 Crynova لكل دعوة ناجحة! كلما زاد عدد الأصدقاء، زادت أرباحك!
+                    <i class="fas fa-shield-alt" style="color: var(--primary); margin-left: 5px;"></i>
+                    نظام المكافآت يعمل بصمت... المكافآت تظهر في وقتها لمن يستحقها فقط!
+                    <br>
+                    <small style="color: #a0a0a0; margin-top: 8px; display: block;">
+                        🤫 لا تسأل عن التفاصيل... فقط استمر وسوف تتفاجأ!
+                    </small>
                 </div>
                 
                 <div class="invite-stats">
                     <div class="invite-stat">
-                        <div class="invite-stat-value" id="invites-count">0</div>
-                        <div class="invite-stat-label">عدد الدعوات</div>
+                        <div class="invite-stat-value" id="invites-count">?</div>
+                        <div class="invite-stat-label">النشاط</div>
                     </div>
                     <div class="invite-stat">
-                        <div class="invite-stat-value" id="rewards-total">0</div>
-                        <div class="invite-stat-label">مكافآت الدعوات</div>
+                        <div class="invite-stat-value" id="rewards-total">🔒</div>
+                        <div class="invite-stat-label">المكافآت</div>
                     </div>
                 </div>
 
@@ -976,8 +1161,8 @@
                 </div>
                 
                 <button class="invite-btn" id="invite-friends">
-                    <i class="fas fa-share-alt invite-icon"></i>
-                    <span>مشاركة الرابط</span>
+                    <i class="fas fa-gift invite-icon"></i>
+                    <span>اكتشف المكافآت</span>
                 </button>
             </div>
         </div>
@@ -1036,6 +1221,32 @@
             datacenter: 0
         };
         
+        // نظام المهام اليومية المعدل
+        const dailyMissions = {
+            dailyLogin: { 
+                streak: 0, 
+                lastClaim: null, 
+                claimed: false,
+                baseReward: 100
+            },
+            energyKeeper: {
+                progress: 0,
+                targetTime: 15 * 60, // 15 دقيقة بالثواني
+                currentTime: 0,
+                completed: false,
+                claimed: false,
+                active: false,
+                reward: 250
+            },
+            rechargeMaster: {
+                completed: false,
+                claimed: false,
+                lastUsed: null,
+                cooldown: 30 * 60, // 30 دقيقة بالثواني
+                reward: 500
+            }
+        };
+
         // العناصر في واجهة المستخدم
         const balanceElement = document.getElementById('balance');
         const levelElement = document.getElementById('level');
@@ -1045,20 +1256,22 @@
         const totalClicksElement = document.getElementById('total-clicks');
         const mineButton = document.getElementById('mine-btn');
         const inviteFriendsButton = document.getElementById('invite-friends');
-        const invitesCountElement = document.getElementById('invites-count');
-        const rewardsTotalElement = document.getElementById('rewards-total');
         const loadingElement = document.getElementById('loading');
         const mainContentElement = document.getElementById('main-content');
         const inviteLinkElement = document.getElementById('invite-link');
         const copyLinkButton = document.getElementById('copy-link');
-        const leaderboardContainer = document.getElementById('leaderboard-container');
         
         // أزرار الترقيات
         const buyPickaxeButton = document.getElementById('buy-pickaxe');
         const buyServerButton = document.getElementById('buy-server');
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
-        
+
+        // متغيرات التوقيت
+        let energyMissionInterval;
+        let rechargeCooldownInterval;
+        let resetTimerInterval;
+
         // دالة للحصول على معرف المستخدم الفريد
         function getUserId() {
             if (tg?.initDataUnsafe?.user?.id) {
@@ -1108,6 +1321,7 @@
                 rewardsTotal,
                 upgrades,
                 upgradeCosts,
+                dailyMissions,
                 userName: getUserName(),
                 lastPlayed: new Date().toISOString()
             };
@@ -1176,53 +1390,9 @@
             rewardsTotal = gameData.rewardsTotal || 0;
             Object.assign(upgrades, gameData.upgrades || {});
             Object.assign(upgradeCosts, gameData.upgradeCosts || {});
-        }
-        
-        // تحديث المتصدرين (نسخة مبسطة باستخدام التخزين المحلي)
-        function updateLeaderboard() {
-            // في هذا الإصنجاز المبسط، سنعرض بيانات وهمية للمتصدرين
-            // في التطبيق الحقيقي، يمكنك استخدام خادم خاص لتخزين بيانات المتصدرين
-            const mockLeaderboard = [
-                { name: getUserName(), balance: balance, isCurrentUser: true },
-                { name: "المعدن المحترف", balance: 150000, isCurrentUser: false },
-                { name: "صاحب المزرعة", balance: 120000, isCurrentUser: false },
-                { name: "خبير التعدين", balance: 98000, isCurrentUser: false },
-                { name: "المبتدئ الماهر", balance: 75000, isCurrentUser: false },
-                { name: "هاكر البلوكشين", balance: 62000, isCurrentUser: false },
-                { name: "ملك التعدين", balance: 45000, isCurrentUser: false },
-                { name: "صاحب الخوادم", balance: 32000, isCurrentUser: false },
-                { name: "مستثمر ذهبي", balance: 28000, isCurrentUser: false },
-                { name: "محب العملات", balance: 15000, isCurrentUser: false }
-            ];
-            
-            // ترتيب المتصدرين تنازلياً حسب الرصيد
-            mockLeaderboard.sort((a, b) => b.balance - a.balance);
-            displayLeaderboard(mockLeaderboard);
+            Object.assign(dailyMissions, gameData.dailyMissions || {});
         }
 
-        // عرض المتصدرين
-        function displayLeaderboard(users) {
-            leaderboardContainer.innerHTML = '';
-            
-            users.forEach((user, index) => {
-                const item = document.createElement('div');
-                item.className = 'leaderboard-item';
-                if (user.isCurrentUser) {
-                    item.style.background = 'rgba(0, 255, 157, 0.1)';
-                    item.style.borderRadius = '8px';
-                    item.style.padding = '10px';
-                }
-                
-                item.innerHTML = `
-                    <div class="leaderboard-rank">${index + 1}</div>
-                    <div class="leaderboard-name">${user.name}</div>
-                    <div class="leaderboard-score">${formatNumber(user.balance)}</div>
-                `;
-                
-                leaderboardContainer.appendChild(item);
-            });
-        }
-        
         // تحديث واجهة المستخدم
         function updateUI() {
             balanceElement.textContent = formatNumber(balance);
@@ -1231,8 +1401,6 @@
             pointsPerClickElement.textContent = formatNumber(pointsPerClick);
             autoMiningRateElement.textContent = formatNumber(autoMiningRate) + '/ثانية';
             totalClicksElement.textContent = formatNumber(totalClicks);
-            invitesCountElement.textContent = formatNumber(invitesCount);
-            rewardsTotalElement.textContent = formatNumber(rewardsTotal);
             
             // تحديث أزرار الترقيات
             buyPickaxeButton.disabled = balance < upgradeCosts.pickaxe;
@@ -1251,6 +1419,9 @@
             
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
+            
+            // تحديث إحصائيات الدعوة
+            updateInviteStats();
             
             // حفظ البيانات
             saveGameData();
@@ -1291,6 +1462,30 @@
                 level = newLevel;
             }
         }
+
+        // تحديث إحصائيات الدعوة لتكون أكثر غموضاً
+        function updateInviteStats() {
+            const invitesCountElement = document.getElementById('invites-count');
+            const rewardsTotalElement = document.getElementById('rewards-total');
+            
+            if (invitesCount === 0) {
+                invitesCountElement.textContent = '?';
+                invitesCountElement.style.color = '#a0a0a0';
+            } else if (invitesCount < 3) {
+                invitesCountElement.textContent = '🌟';
+                invitesCountElement.style.color = 'var(--primary)';
+            } else if (invitesCount < 10) {
+                invitesCountElement.textContent = '🌟🌟';
+                invitesCountElement.style.color = 'var(--primary)';
+            } else {
+                invitesCountElement.textContent = '🌟🌟🌟';
+                invitesCountElement.style.color = 'var(--primary)';
+            }
+            
+            // إخفاء إجمالي المكافآت
+            rewardsTotalElement.textContent = '🔒';
+            rewardsTotalElement.style.color = '#a0a0a0';
+        }
         
         // نسخ رابط الدعوة
         copyLinkButton.addEventListener('click', async () => {
@@ -1316,12 +1511,12 @@
         // زر مشاركة الرابط
         inviteFriendsButton.addEventListener('click', () => {
             const inviteLink = generateInviteLink();
-            const shareText = `انضم إلى Coin Crynova - لعبة تعدين العملات الرقمية الممتعة! 🎮💰\n\nاستخدم رابط الدعوة الخاص بي للانضمام:\n${inviteLink}\n\nاحصل على مكافأة 1000 Crynova مجاناً!`;
+            const shareText = `🎮 اكتشف عالم Coin Crynova السري! \n\n${inviteLink}\n\n✨ نظام مكافآت سري ينتظر من يجده...`;
             
             // محاولة استخدام Web Share API إذا كان متاحاً
             if (navigator.share) {
                 navigator.share({
-                    title: 'Coin Crynova - لعبة تعدين العملات',
+                    title: 'Coin Crynova - عالم الأسرار',
                     text: shareText,
                     url: inviteLink
                 }).then(() => {
@@ -1345,7 +1540,7 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(0,0,0,0.8);
+                background: rgba(0,0,0,0.9);
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -1353,19 +1548,26 @@
             `;
             
             shareModal.innerHTML = `
-                <div style="background: var(--light); padding: 20px; border-radius: 15px; max-width: 90%; text-align: center;">
-                    <h3 style="color: var(--primary); margin-bottom: 15px;">مشاركة الرابط</h3>
-                    <p style="margin-bottom: 15px; color: var(--text);">انسخ الرابط وأرسله إلى أصدقائك:</p>
+                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 90%; text-align: center; border: 2px solid var(--primary);">
+                    <div style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <h3 style="color: var(--primary); margin-bottom: 15px;">اكتشف الأسرار</h3>
+                    <p style="margin-bottom: 15px; color: var(--text);">شارك الرابط وانتظر المفاجآت...</p>
                     <input type="text" value="${inviteLink}" readonly 
-                           style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--secondary); border-radius: 5px; background: var(--dark); color: var(--text); text-align: center;">
+                           style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid var(--secondary); 
+                                  border-radius: 8px; background: var(--dark); color: var(--text); text-align: center;
+                                  font-size: 0.9rem;">
                     <div style="display: flex; gap: 10px; justify-content: center;">
                         <button id="modal-copy-btn" 
-                                style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                            نسخ الرابط
+                                style="background: var(--primary); color: white; border: none; padding: 12px 25px; 
+                                       border-radius: 8px; cursor: pointer; font-weight: bold;">
+                            <i class="fas fa-copy"></i> نسخ
                         </button>
                         <button id="modal-close-btn" 
-                                style="background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                            إغلاق
+                                style="background: var(--accent); color: white; border: none; padding: 12px 25px; 
+                                       border-radius: 8px; cursor: pointer; font-weight: bold;">
+                            <i class="fas fa-times"></i> إغلاق
                         </button>
                     </div>
                 </div>
@@ -1376,8 +1578,13 @@
             // إضافة event listeners للأزرار في النافذة
             document.getElementById('modal-copy-btn').addEventListener('click', () => {
                 navigator.clipboard.writeText(inviteLink).then(() => {
-                    alert('تم نسخ الرابط!');
-                    shareModal.remove();
+                    // تأثير نسخ ناجح
+                    const btn = document.getElementById('modal-copy-btn');
+                    btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
+                    btn.style.background = 'var(--secondary)';
+                    setTimeout(() => {
+                        shareModal.remove();
+                    }, 1500);
                 });
             });
             
@@ -1426,6 +1633,9 @@
             setTimeout(() => {
                 mineButton.removeChild(floatingText);
             }, 1500);
+            
+            // بدء مهمة الطاقة عند النقر
+            startEnergyMissionOnClick();
             
             updateUI();
         });
@@ -1505,7 +1715,350 @@
                 updateUI();
             }
         }, 1000);
-        
+
+        // ========== نظام المهام اليومية ==========
+
+        // تهيئة المهام اليومية
+        function initDailyMissions() {
+            loadMissionsData();
+            startEnergyMission();
+            startResetTimer();
+            startRechargeCooldown();
+            updateMissionsUI();
+            setupMissionRewards();
+        }
+
+        // تحميل بيانات المهام
+        function loadMissionsData() {
+            const savedMissions = localStorage.getItem(`daily_missions_v2_${getUserId()}`);
+            const savedDate = localStorage.getItem(`missions_date_${getUserId()}`);
+            
+            if (savedMissions && savedDate === new Date().toDateString()) {
+                Object.assign(dailyMissions, JSON.parse(savedMissions));
+            } else {
+                resetDailyMissions();
+            }
+            
+            // التحقق من التواجد اليومي
+            checkDailyLogin();
+        }
+
+        // إعادة تعيين المهام اليومية
+        function resetDailyMissions() {
+            dailyMissions.energyKeeper.progress = 0;
+            dailyMissions.energyKeeper.currentTime = 0;
+            dailyMissions.energyKeeper.completed = false;
+            dailyMissions.energyKeeper.claimed = false;
+            dailyMissions.energyKeeper.active = false;
+            
+            dailyMissions.rechargeMaster.completed = false;
+            dailyMissions.rechargeMaster.claimed = false;
+            
+            saveMissionsData();
+        }
+
+        // التحقق من التواجد اليومي
+        function checkDailyLogin() {
+            const today = new Date().toDateString();
+            const lastClaim = dailyMissions.dailyLogin.lastClaim;
+            
+            if (!lastClaim) {
+                // أول دخول
+                dailyMissions.dailyLogin.streak = 1;
+                dailyMissions.dailyLogin.claimed = false;
+            } else if (lastClaim === today) {
+                // تم المطالبة اليوم
+                dailyMissions.dailyLogin.claimed = true;
+            } else {
+                const lastClaimDate = new Date(lastClaim);
+                const todayDate = new Date();
+                const diffTime = todayDate - lastClaimDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === 1) {
+                    // تواجد متتالي
+                    dailyMissions.dailyLogin.streak++;
+                    if (dailyMissions.dailyLogin.streak > 10) {
+                        dailyMissions.dailyLogin.streak = 1;
+                    }
+                    dailyMissions.dailyLogin.claimed = false;
+                } else {
+                    // كسر التتابع
+                    dailyMissions.dailyLogin.streak = 1;
+                    dailyMissions.dailyLogin.claimed = false;
+                }
+            }
+            
+            saveMissionsData();
+        }
+
+        // حساب مكافأة التواجد اليومي
+        function calculateDailyReward() {
+            const base = dailyMissions.dailyLogin.baseReward;
+            const streak = Math.min(dailyMissions.dailyLogin.streak, 10);
+            return base * Math.pow(2, streak - 1);
+        }
+
+        // بدء مهمة الطاقة
+        function startEnergyMission() {
+            energyMissionInterval = setInterval(() => {
+                if (dailyMissions.energyKeeper.active && !dailyMissions.energyKeeper.completed) {
+                    if (energy > 50) {
+                        dailyMissions.energyKeeper.currentTime++;
+                        
+                        if (dailyMissions.energyKeeper.currentTime >= dailyMissions.energyKeeper.targetTime) {
+                            dailyMissions.energyKeeper.completed = true;
+                            dailyMissions.energyKeeper.active = false;
+                            showMissionCompleteNotification('energy');
+                        }
+                    } else {
+                        dailyMissions.energyKeeper.currentTime = 0;
+                        dailyMissions.energyKeeper.active = false;
+                    }
+                    
+                    updateMissionsUI();
+                    saveMissionsData();
+                }
+            }, 1000);
+        }
+
+        // بدء مؤقت إعادة الشحن
+        function startRechargeCooldown() {
+            rechargeCooldownInterval = setInterval(() => {
+                updateRechargeCooldown();
+            }, 1000);
+        }
+
+        // تحديث مؤقت إعادة الشحن
+        function updateRechargeCooldown() {
+            const rechargeMission = dailyMissions.rechargeMaster;
+            
+            if (rechargeMission.lastUsed) {
+                const now = Math.floor(Date.now() / 1000);
+                const lastUsed = Math.floor(new Date(rechargeMission.lastUsed).getTime() / 1000);
+                const timePassed = now - lastUsed;
+                const timeLeft = rechargeMission.cooldown - timePassed;
+                
+                if (timeLeft > 0) {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    document.getElementById('recharge-cooldown').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                } else {
+                    document.getElementById('recharge-cooldown').textContent = 'جاهز';
+                    rechargeMission.completed = false;
+                }
+            } else {
+                document.getElementById('recharge-cooldown').textContent = 'جاهز';
+            }
+        }
+
+        // التحقق من إعادة شحن الطاقة
+        function checkEnergyRecharge() {
+            const rechargeMission = dailyMissions.rechargeMaster;
+            
+            if (!rechargeMission.claimed && energy === 100) {
+                // التحقق من آخر استخدام لمهمة إعادة الشحن
+                if (!rechargeMission.lastUsed) {
+                    rechargeMission.completed = true;
+                    showMissionCompleteNotification('recharge');
+                } else {
+                    const now = Math.floor(Date.now() / 1000);
+                    const lastUsed = Math.floor(new Date(rechargeMission.lastUsed).getTime() / 1000);
+                    const timePassed = now - lastUsed;
+                    
+                    if (timePassed >= rechargeMission.cooldown) {
+                        rechargeMission.completed = true;
+                        showMissionCompleteNotification('recharge');
+                    }
+                }
+                
+                updateMissionsUI();
+                saveMissionsData();
+            }
+        }
+
+        // تحديث واجهة المهام
+        function updateMissionsUI() {
+            // مهمة التواجد اليومي
+            const dailyMission = dailyMissions.dailyLogin;
+            const dailyReward = calculateDailyReward();
+            
+            document.getElementById('daily-reward-amount').textContent = formatNumber(dailyReward);
+            document.getElementById('daily-streak').textContent = `اليوم ${dailyMission.streak}`;
+            document.getElementById('progress-daily').style.width = dailyMission.claimed ? '100%' : '0%';
+            updateMissionButton('mission-daily', dailyMission.claimed, dailyMission.claimed);
+
+            // مهمة محافظ على الطاقة
+            const energyMission = dailyMissions.energyKeeper;
+            const progressPercent = (energyMission.currentTime / energyMission.targetTime) * 100;
+            
+            document.getElementById('progress-energy').style.width = `${progressPercent}%`;
+            
+            const minutes = Math.floor(energyMission.currentTime / 60);
+            const seconds = energyMission.currentTime % 60;
+            document.getElementById('energy-timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            updateMissionButton('mission-energy', energyMission.completed, energyMission.claimed);
+
+            // مهمة معيد الشحن
+            const rechargeMission = dailyMissions.rechargeMaster;
+            document.getElementById('progress-recharge').style.width = rechargeMission.completed ? '100%' : '0%';
+            document.getElementById('recharge-status').textContent = rechargeMission.completed ? 'مكتمل' : 'غير مكتمل';
+            updateMissionButton('mission-recharge', rechargeMission.completed, rechargeMission.claimed);
+        }
+
+        // تحديث حالة زر المهمة
+        function updateMissionButton(missionId, completed, claimed) {
+            const button = document.querySelector(`#${missionId} .mission-reward`);
+            const missionItem = document.getElementById(missionId);
+            
+            if (claimed) {
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                button.disabled = true;
+                button.classList.add('claimed');
+                missionItem.classList.add('completed');
+            } else if (completed) {
+                button.disabled = false;
+                missionItem.classList.add('completed');
+            } else {
+                button.disabled = true;
+                missionItem.classList.remove('completed');
+            }
+        }
+
+        // إعداد مكافآت المهام
+        function setupMissionRewards() {
+            // مكافأة التواجد اليومي
+            document.getElementById('reward-daily').addEventListener('click', function() {
+                if (!dailyMissions.dailyLogin.claimed) {
+                    const reward = calculateDailyReward();
+                    balance += reward;
+                    dailyMissions.dailyLogin.claimed = true;
+                    dailyMissions.dailyLogin.lastClaim = new Date().toDateString();
+                    
+                    showRewardEffect(reward);
+                    updateUI();
+                    updateMissionsUI();
+                    saveMissionsData();
+                }
+            });
+
+            // مكافأة محافظ على الطاقة
+            document.getElementById('reward-energy').addEventListener('click', function() {
+                if (dailyMissions.energyKeeper.completed && !dailyMissions.energyKeeper.claimed) {
+                    balance += dailyMissions.energyKeeper.reward;
+                    dailyMissions.energyKeeper.claimed = true;
+                    
+                    showRewardEffect(dailyMissions.energyKeeper.reward);
+                    updateUI();
+                    updateMissionsUI();
+                    saveMissionsData();
+                }
+            });
+
+            // مكافأة معيد الشحن
+            document.getElementById('reward-recharge').addEventListener('click', function() {
+                if (dailyMissions.rechargeMaster.completed && !dailyMissions.rechargeMaster.claimed) {
+                    balance += dailyMissions.rechargeMaster.reward;
+                    dailyMissions.rechargeMaster.claimed = true;
+                    dailyMissions.rechargeMaster.lastUsed = new Date();
+                    
+                    showRewardEffect(dailyMissions.rechargeMaster.reward);
+                    updateUI();
+                    updateMissionsUI();
+                    saveMissionsData();
+                }
+            });
+        }
+
+        // بدء مهمة الطاقة عند النقر
+        function startEnergyMissionOnClick() {
+            if (!dailyMissions.energyKeeper.completed && !dailyMissions.energyKeeper.claimed) {
+                dailyMissions.energyKeeper.active = true;
+                updateMissionsUI();
+            }
+        }
+
+        // تأثير المكافأة
+        function showRewardEffect(reward) {
+            const effect = document.createElement('div');
+            effect.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 2rem;
+                font-weight: bold;
+                color: var(--primary);
+                background: rgba(0, 0, 0, 0.8);
+                padding: 20px 40px;
+                border-radius: 15px;
+                z-index: 10000;
+                animation: rewardPop 2s ease-out forwards;
+            `;
+            effect.textContent = `+${reward} Crynova!`;
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                document.body.removeChild(effect);
+            }, 2000);
+        }
+
+        // إشعار إكمال المهمة
+        function showMissionCompleteNotification(missionType) {
+            const missionNames = {
+                daily: 'التواجد اليومي',
+                energy: 'محافظ على الطاقة', 
+                recharge: 'معيد الشحن'
+            };
+            
+            // يمكنك إضافة إشعار مرئي هنا
+            console.log(`أكملت مهمة: ${missionNames[missionType]}`);
+        }
+
+        // مؤقت إعادة التعيين اليومي
+        function startResetTimer() {
+            updateResetTimer();
+            resetTimerInterval = setInterval(updateResetTimer, 1000);
+        }
+
+        function updateResetTimer() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            
+            const timeLeft = tomorrow - now;
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            document.getElementById('reset-timer').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 1000) {
+                resetDailyMissions();
+                updateMissionsUI();
+            }
+        }
+
+        // حفظ بيانات المهام
+        function saveMissionsData() {
+            localStorage.setItem(`daily_missions_v2_${getUserId()}`, JSON.stringify(dailyMissions));
+            localStorage.setItem(`missions_date_${getUserId()}`, new Date().toDateString());
+        }
+
+        // التكامل مع اللعبة الرئيسية
+        function connectMissionsToGame() {
+            // بدء مهمة الطاقة عند النقر
+            mineButton.addEventListener('click', startEnergyMissionOnClick);
+            
+            // التحقق من إعادة شحن الطاقة
+            setInterval(checkEnergyRecharge, 5000);
+        }
+
         // التحقق من رابط الدعوة عند التحميل
         function checkInviteFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1527,17 +2080,22 @@
                     return;
                 }
                 
-                // منح مكافأة الدعوة للمستخدم الجديد
-                balance += inviteReward;
+                // منح مكافأة سرية بدلاً من المبلغ المعلن
+                const secretReward = Math.floor(Math.random() * 500) + 500; // بين 500 و 1000
+                balance += secretReward;
+                
+                // تحديث الإحصائيات
+                invitesCount++;
+                rewardsTotal += secretReward;
                 localStorage.setItem(inviteKey, 'true');
                 
                 // تحديث بيانات المُدعِي في التخزين المحلي
                 updateInviterRewards(inviterId);
                 
-                // عرض رسالة نجاح
+                // إشعار سري
                 setTimeout(() => {
-                    alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 1000 Crynova!');
-                }, 1000);
+                    showSecretRewardNotification(secretReward);
+                }, 2000);
                 
                 updateUI();
             }
@@ -1546,11 +2104,57 @@
         // تحديث مكافآت المُدعِي في التخزين المحلي
         function updateInviterRewards(inviterId) {
             // في هذا الإصدار المبسط، سنقوم بتحديث بيانات المُدعِي محلياً
-            // في التطبيق الحقيقي، ستحتاج إلى خادم لتحديث بيانات المُدعِي
             console.log(`تم تحديث مكافآت المُدعِي ${inviterId} محلياً`);
-            
-            // يمكنك إضافة منطق إضافي هنا إذا كنت تريد تتبع الدعوات بين المستخدمين
         }
+
+        // إشعار المكافأة السرية
+        function showSecretRewardNotification(reward) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20%;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: var(--primary);
+                padding: 15px 30px;
+                border-radius: 10px;
+                border: 2px solid var(--primary);
+                font-weight: bold;
+                font-size: 1.1rem;
+                z-index: 10000;
+                animation: slideDown 3s ease-in-out forwards;
+                text-align: center;
+            `;
+            notification.innerHTML = `
+                <div style="margin-bottom: 8px; font-size: 1.5rem;">🎁</div>
+                <div>مكافأة سرية: +${reward} Crynova!</div>
+                <div style="font-size: 0.8rem; color: #a0a0a0; margin-top: 5px;">النظام يراقب نشاطك...</div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 3000);
+        }
+
+        // إضافة animation جديدة
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                0% { top: -100px; opacity: 0; }
+                20% { top: 20%; opacity: 1; }
+                80% { top: 20%; opacity: 1; }
+                100% { top: -100px; opacity: 0; }
+            }
+            @keyframes rewardPop {
+                0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+                50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
         
         // تهيئة اللعبة
         function initGame() {
@@ -1558,7 +2162,8 @@
             updateUI();
             startAutoMining();
             checkInviteFromUrl();
-            updateLeaderboard();
+            initDailyMissions();
+            connectMissionsToGame();
             
             // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
             setTimeout(() => {
