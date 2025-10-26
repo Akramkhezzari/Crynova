@@ -364,6 +364,62 @@
             font-size: 1.1rem;
         }
 
+        /* زر اليوتيوب - أحمر */
+        .youtube-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            border: none;
+            border-radius: 50px;
+            padding: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+        }
+
+        .youtube-btn:active {
+            transform: scale(0.98);
+        }
+
+        .youtube-icon {
+            font-size: 1.1rem;
+        }
+
+        /* زر تويتر - أزرق */
+        .twitter-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #1DA1F2, #0d8bd9);
+            border: none;
+            border-radius: 50px;
+            padding: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(29, 161, 242, 0.4);
+        }
+
+        .twitter-btn:active {
+            transform: scale(0.98);
+        }
+
+        .twitter-icon {
+            font-size: 1.1rem;
+        }
+
         /* اللوحة الجانبية */
         .side-panel {
             display: flex;
@@ -948,7 +1004,7 @@
                 </div>
                 <div class="user-stat">
                     <div class="stat-value" id="auto-mining-header">0/ث</div>
-                    <div class="stat-label">تعدين</div>
+                    <div class="stat-label">السرعة</div>
                 </div>
                 <div class="user-stat">
                     <div class="stat-value" id="energy">100%</div>
@@ -973,7 +1029,7 @@
                 </button>
                 
                 <div class="mining-stats">
-                    <!-- زر تفاعل مع القناة - نفس تصميم زر الانضمام -->
+                    <!-- زر تفاعل مع القناة -->
                     <div class="mining-stat">
                         <a href="https://t.me/Coin_Crynova" class="channel-btn" target="_blank" id="channel-interaction-btn">
                             <i class="fas fa-heart channel-icon-btn"></i>
@@ -981,14 +1037,23 @@
                         </a>
                     </div>
                     
+                    <!-- زر اليوتيوب - أحمر - بدون رابط -->
                     <div class="mining-stat">
-                        <div>التعدين التلقائي</div>
-                        <div class="stat-value" id="auto-mining-rate">0/ثانية</div>
+                        <button class="youtube-btn">
+                            <i class="fab fa-youtube youtube-icon"></i>
+                            <span>تابع قناتنا على يوتيوب</span>
+                        </button>
                     </div>
+
+                    <!-- زر تويتر - أزرق - بدون رابط -->
                     <div class="mining-stat">
-                        <div>عدد النقرات</div>
-                        <div class="stat-value" id="total-clicks">0</div>
+                        <button class="twitter-btn">
+                            <i class="fab fa-twitter twitter-icon"></i>
+                            <span>تابع قناتنا على تويتر</span>
+                        </button>
                     </div>
+
+                    <!-- زر الانضمام للقناة -->
                     <div class="mining-stat">
                         <a href="https://t.me/Coin_Crynova" class="channel-btn" target="_blank">
                             <i class="fab fa-telegram channel-icon-btn"></i>
@@ -1228,8 +1293,6 @@
         const balanceElement = document.getElementById('balance');
         const levelElement = document.getElementById('level');
         const energyElement = document.getElementById('energy');
-        const autoMiningRateElement = document.getElementById('auto-mining-rate');
-        const totalClicksElement = document.getElementById('total-clicks');
         const mineButton = document.getElementById('mine-btn');
         const inviteFriendsButton = document.getElementById('invite-friends');
         const loadingElement = document.getElementById('loading');
@@ -1370,8 +1433,6 @@
             balanceElement.textContent = formatNumber(balance);
             levelElement.textContent = level;
             energyElement.textContent = Math.floor(energy) + '%';
-            autoMiningRateElement.textContent = formatNumber(autoMiningRate) + '/ثانية';
-            totalClicksElement.textContent = formatNumber(totalClicks);
             
             // تحديث النقاط لكل نقرة في الهيدر
             document.getElementById('points-per-click-header').textContent = formatNumber(pointsPerClick);
