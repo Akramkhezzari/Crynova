@@ -323,12 +323,59 @@
             }
         }
 
+        /* تحديث زر تفاعل القناة */
+        .channel-interaction-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ff6b6b, #ff2e63);
+            border: none;
+            border-radius: 50px;
+            padding: 15px;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 5px 20px rgba(255, 46, 99, 0.4);
+            position: relative;
+            overflow: hidden;
+            grid-column: 1 / -1;
+        }
+
+        .channel-interaction-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .channel-interaction-btn:hover::before {
+            left: 100%;
+        }
+
+        .channel-interaction-btn:active {
+            transform: scale(0.98);
+        }
+
+        .channel-interaction-icon {
+            font-size: 1.3rem;
+        }
+
         .mining-stat {
             background: var(--light);
             padding: 12px;
             border-radius: 10px;
             text-align: center;
             transition: transform 0.3s ease;
+            cursor: pointer;
         }
 
         .mining-stat:hover {
@@ -360,7 +407,7 @@
             transform: scale(0.98);
         }
 
-        .channel-icon {
+        .channel-icon-btn {
             font-size: 1.1rem;
         }
 
@@ -973,10 +1020,12 @@
                 </button>
                 
                 <div class="mining-stats">
-                    <div class="mining-stat">
-                        <div>النقاط لكل نقرة</div>
-                        <div class="stat-value" id="points-per-click">1</div>
-                    </div>
+                    <!-- زر تفاعل مع القناة - تم تحديثه -->
+                    <a href="https://t.me/Coin_Crynova" class="channel-interaction-btn" target="_blank" id="channel-interaction-btn">
+                        <i class="fab fa-telegram channel-interaction-icon"></i>
+                        <span>تفاعل مع القناة</span>
+                    </a>
+                    
                     <div class="mining-stat">
                         <div>التعدين التلقائي</div>
                         <div class="stat-value" id="auto-mining-rate">0/ثانية</div>
@@ -987,7 +1036,7 @@
                     </div>
                     <div class="mining-stat">
                         <a href="https://t.me/Coin_Crynova" class="channel-btn" target="_blank">
-                            <i class="fab fa-telegram channel-icon"></i>
+                            <i class="fab fa-telegram channel-icon-btn"></i>
                             <span>انضم إلى قناتنا</span>
                         </a>
                     </div>
@@ -1224,7 +1273,6 @@
         const balanceElement = document.getElementById('balance');
         const levelElement = document.getElementById('level');
         const energyElement = document.getElementById('energy');
-        const pointsPerClickElement = document.getElementById('points-per-click');
         const autoMiningRateElement = document.getElementById('auto-mining-rate');
         const totalClicksElement = document.getElementById('total-clicks');
         const mineButton = document.getElementById('mine-btn');
@@ -1233,6 +1281,7 @@
         const mainContentElement = document.getElementById('main-content');
         const inviteLinkElement = document.getElementById('invite-link');
         const copyLinkButton = document.getElementById('copy-link');
+        const channelInteractionButton = document.getElementById('channel-interaction-btn');
         
         // أزرار الترقيات
         const buyPickaxeButton = document.getElementById('buy-pickaxe');
@@ -1366,7 +1415,6 @@
             balanceElement.textContent = formatNumber(balance);
             levelElement.textContent = level;
             energyElement.textContent = Math.floor(energy) + '%';
-            pointsPerClickElement.textContent = formatNumber(pointsPerClick);
             autoMiningRateElement.textContent = formatNumber(autoMiningRate) + '/ثانية';
             totalClicksElement.textContent = formatNumber(totalClicks);
             
@@ -1504,6 +1552,53 @@
             }
         });
         
+        // زر تفاعل القناة - تم تحديثه
+        channelInteractionButton.addEventListener('click', (e) => {
+            // فتح القناة في نافذة جديدة
+            window.open('https://t.me/Coin_Crynova', '_blank');
+            
+            // منح مكافأة تفاعل مع القناة
+            setTimeout(() => {
+                const interactionReward = 50;
+                balance += interactionReward;
+                
+                // إظهار تأثير المكافأة
+                showChannelRewardEffect(interactionReward);
+                updateUI();
+            }, 1000);
+        });
+
+        // تأثير مكافأة تفاعل القناة
+        function showChannelRewardEffect(reward) {
+            const effect = document.createElement('div');
+            effect.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 1.8rem;
+                font-weight: bold;
+                color: #ff2e63;
+                background: rgba(0, 0, 0, 0.9);
+                padding: 20px 40px;
+                border-radius: 15px;
+                z-index: 10000;
+                animation: rewardPop 2s ease-out forwards;
+                border: 2px solid #ff2e63;
+                text-align: center;
+            `;
+            effect.innerHTML = `
+                <div style="margin-bottom: 10px; font-size: 2.5rem;">💎</div>
+                <div>+${reward} Crynova</div>
+                <div style="font-size: 1rem; margin-top: 5px;">مكافأة تفاعل القناة!</div>
+            `;
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                document.body.removeChild(effect);
+            }, 2000);
+        }
+
         // طريقة بديلة للمشاركة
         function fallbackShare(inviteLink, shareText) {
             // إنشاء نافذة مشاركة مخصصة
