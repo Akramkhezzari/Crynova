@@ -755,6 +755,11 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* مؤشر الحفظ - مخفي */
+        .save-indicator {
+            display: none;
+        }
+
         /* تحسينات للشاشات الصغيرة جداً */
         @media (max-width: 360px) {
             .container {
@@ -795,6 +800,9 @@
     </style>
 </head>
 <body>
+    <!-- تم إخفاء مؤشر الحفظ -->
+    <div class="save-indicator" id="save-indicator">جاري الحفظ...</div>
+    
     <div class="loading" id="loading">
         <div class="loading-spinner"></div>
         <div>جاري التحميل...</div>
@@ -1060,6 +1068,13 @@
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
         
+        // متغيرات نظام الحفظ المتقدم
+        let isSaving = false;
+        let saveQueue = [];
+        let lastSaveTime = 0;
+        const SAVE_COOLDOWN = 1000; // ثانية واحدة بين كل حفظ
+        const MAX_SAVE_ATTEMPTS = 3;
+        
         // دالة للحصول على معرف المستخدم الفريد
         function getUserId() {
             if (tg?.initDataUnsafe?.user?.id) {
@@ -1096,8 +1111,25 @@
             return Math.floor(num).toString();
         }
         
-        // حفظ البيانات باستخدام Telegram Web App Cloud Storage
+        // نظام الحفظ المتقدم
         async function saveGameData() {
+            const now = Date.now();
+            
+            // التحقق من الوقت المنقضي منذ آخر حفظ
+            if (now - lastSaveTime < SAVE_COOLDOWN) {
+                return Promise.resolve(); // تجاهل إذا لم يمر وقت كافٍ
+            }
+            
+            // إذا كان هناك عملية حفظ جارية، أضف الطلب إلى قائمة الانتظار
+            if (isSaving) {
+                return new Promise((resolve) => {
+                    saveQueue.push(resolve);
+                });
+            }
+            
+            isSaving = true;
+            lastSaveTime = now;
+            
             const gameData = {
                 balance,
                 level,
@@ -1111,26 +1143,52 @@
                 upgradeCosts,
                 userId: getUserId(),
                 userName: getUserName(),
-                lastSaved: Date.now()
+                lastSaved: now,
+                version: '1.1'
             };
             
-            // محاولة استخدام Telegram Cloud Storage
-            if (tg?.CloudStorage) {
+            let saved = false;
+            let attempts = 0;
+            let lastError = null;
+            
+            // محاولة متعددة للحفظ
+            while (!saved && attempts < MAX_SAVE_ATTEMPTS) {
                 try {
-                    await tg.CloudStorage.setItem('game_data', JSON.stringify(gameData));
-                    console.log("Game data saved to Telegram Cloud Storage");
+                    // محاولة استخدام Telegram Cloud Storage أولاً
+                    if (tg?.CloudStorage) {
+                        await tg.CloudStorage.setItem('game_data', JSON.stringify(gameData));
+                        console.log("Game data saved to Telegram Cloud Storage");
+                        saved = true;
+                    } else {
+                        // Fallback إلى localStorage
+                        localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
+                        console.log("Game data saved to localStorage");
+                        saved = true;
+                    }
                 } catch (error) {
-                    console.error("Error saving to Telegram Cloud Storage:", error);
-                    // Fallback إلى localStorage
-                    localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
+                    console.error(`Save attempt ${attempts + 1} failed:`, error);
+                    attempts++;
+                    lastError = error;
+                    
+                    // انتظار قبل إعادة المحاولة (زيادة زمن الانتظار مع كل محاولة)
+                    await new Promise(resolve => setTimeout(resolve, 300 * attempts));
                 }
-            } else {
-                // Fallback إلى localStorage
-                localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
             }
             
-            // تحديث المتصدرين بعد حفظ البيانات
-            updateLeaderboard();
+            if (!saved) {
+                console.error("Failed to save game data after all attempts:", lastError);
+                // يمكن هنا إضافة منطق للتعامل مع فشل الحفظ
+            }
+            
+            isSaving = false;
+            
+            // معالجة الطلبات المعلقة في قائمة الانتظار
+            if (saveQueue.length > 0) {
+                const nextResolve = saveQueue.shift();
+                nextResolve();
+            }
+            
+            return Promise.resolve();
         }
         
         // تحميل البيانات باستخدام Telegram Web App Cloud Storage
@@ -1170,10 +1228,38 @@
                     rewardsTotal = gameData.rewardsTotal || 0;
                     Object.assign(upgrades, gameData.upgrades || {});
                     Object.assign(upgradeCosts, gameData.upgradeCosts || {});
+                    
+                    console.log("Game data loaded successfully");
                 } catch (error) {
                     console.error("Error parsing saved data:", error);
+                    // في حالة فشل تحميل البيانات، نبدأ بلعبة جديدة
+                    resetGameData();
                 }
+            } else {
+                console.log("No saved data found, starting new game");
             }
+        }
+        
+        // إعادة تعيين بيانات اللعبة
+        function resetGameData() {
+            balance = 0;
+            level = 1;
+            energy = 100;
+            pointsPerClick = 1;
+            autoMiningRate = 0;
+            totalClicks = 0;
+            invitesCount = 0;
+            rewardsTotal = 0;
+            
+            upgrades.pickaxe = 0;
+            upgrades.server = 0;
+            upgrades.farm = 0;
+            upgrades.datacenter = 0;
+            
+            upgradeCosts.pickaxe = 10;
+            upgradeCosts.server = 50;
+            upgradeCosts.farm = 200;
+            upgradeCosts.datacenter = 1000;
         }
         
         // تحديث المتصدرين (محاكاة - في الإصدار الحقيقي ستحتاج لخادم)
@@ -1247,8 +1333,15 @@
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
             
-            // حفظ البيانات
-            saveGameData();
+            // حفظ البيانات - سيتم التحكم في التوقيت من خلال نظام الحفظ المتقدم
+            scheduleSave();
+        }
+        
+        // جدولة الحفظ مع التحكم في التكرار
+        function scheduleSave() {
+            saveGameData().catch(error => {
+                console.error("Scheduled save failed:", error);
+            });
         }
         
         // تحديث الإنجازات
@@ -1538,32 +1631,58 @@
             }
         }
         
+        // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
+        function showMainContent() {
+            loadingElement.style.display = 'none';
+            mainContentElement.style.display = 'grid';
+        }
+        
         // تهيئة اللعبة
         async function initGame() {
-            await loadGameData();
-            updateUI();
-            startAutoMining();
-            await checkInviteFromUrl();
-            updateLeaderboard();
-            
-            // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
-            setTimeout(() => {
-                loadingElement.style.display = 'none';
-                mainContentElement.style.display = 'grid';
-            }, 1500);
+            try {
+                console.log("بدء تحميل اللعبة...");
+                
+                // تحميل البيانات
+                await loadGameData();
+                
+                // تحديث الواجهة
+                updateUI();
+                
+                // بدء التعدين التلقائي
+                startAutoMining();
+                
+                // التحقق من رابط الدعوة
+                await checkInviteFromUrl();
+                
+                // تحديث المتصدرين
+                updateLeaderboard();
+                
+                // إظهار المحتوى الرئيسي
+                showMainContent();
+                
+                console.log("اللعبة جاهزة!");
+            } catch (error) {
+                console.error("خطأ في تهيئة اللعبة:", error);
+                // في حالة الخطأ، إظهار المحتوى الرئيسي على أي حال
+                showMainContent();
+            }
         }
         
         // بدء اللعبة عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', initGame);
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("صفحة الويب محملة، بدء تهيئة اللعبة...");
+            // استخدام setTimeout للتأكد من أن كل شيء محمل بشكل صحيح
+            setTimeout(initGame, 100);
+        });
         
         // حفظ البيانات عند إغلاق الصفحة
         window.addEventListener('beforeunload', () => {
             saveGameData();
         });
         
-        // حفظ البيانات كل 1 ثانية
+        // حفظ البيانات كل ثانية (مع التحكم في التكرار)
         setInterval(() => {
-            saveGameData();
+            scheduleSave();
         }, 1000);
     </script>
 </body>
