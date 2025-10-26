@@ -795,12 +795,67 @@
                 padding: 15px;
             }
         }
+
+        /* تأثيرات إضافية */
+        .floating-coin {
+            position: absolute;
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 1.5s ease-out forwards;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            color: var(--text);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .energy-warning {
+            color: var(--accent) !important;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
     <div class="loading" id="loading">
         <div class="loading-spinner"></div>
         <div>جاري التحميل...</div>
+    </div>
+
+    <div class="notification" id="notification">
+        <div id="notification-text"></div>
     </div>
 
     <div class="container" id="main-content" style="display: none;">
@@ -1007,17 +1062,6 @@
             console.error("Firebase initialization error:", error);
         }
 
-        // === نظام الكتابة الذكي ===
-        let lastUpdateTimestamp = 0;
-        const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000; // 5 أيام بالميلي ثانية
-
-        // التحقق مما إذا حان وقت التحديث
-        function shouldUpdateFirebase() {
-            const now = Date.now();
-            const timeSinceLastUpdate = now - lastUpdateTimestamp;
-            return timeSinceLastUpdate >= FIVE_DAYS_MS;
-        }
-
         // Telegram Web App Integration
         let tg = window.Telegram?.WebApp;
 
@@ -1035,7 +1079,7 @@
         let userId = Math.floor(Math.random() * 1000000);
         let userName = 'مستخدم';
         
-        // رابط البوت الأساسي
+        // رابط البوت الأساسي - تم التصحيح هنا
         const BOT_USERNAME = 'Coin_Crynova_bot';
         
         // متغيرات اللعبة
@@ -1049,7 +1093,7 @@
         // إحصائيات الدعوة
         let invitesCount = 0;
         let rewardsTotal = 0;
-        const inviteReward = 1000;
+        const inviteReward = 1000; // تغيير من 200 إلى 1000
         
         // التعدين التلقائي
         let autoMiningInterval;
@@ -1086,6 +1130,8 @@
         const inviteLinkElement = document.getElementById('invite-link');
         const copyLinkButton = document.getElementById('copy-link');
         const leaderboardContainer = document.getElementById('leaderboard-container');
+        const notificationElement = document.getElementById('notification');
+        const notificationTextElement = document.getElementById('notification-text');
         
         // أزرار الترقيات
         const buyPickaxeButton = document.getElementById('buy-pickaxe');
@@ -1093,9 +1139,10 @@
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
         
-        // دالة للحصول على معرف المستخدم الفريد
+        // دالة للحصول على معرف المستخدم الفريد - الإصدار المصحح
         function getUserId() {
             if (tg?.initDataUnsafe?.user?.id) {
+                // إرجاع معرف المستخدم مباشرة بدون إضافة "tg_"
                 return tg.initDataUnsafe.user.id.toString();
             }
             return `web_${userId}`;
@@ -1109,8 +1156,9 @@
             return 'مستخدم';
         }
 
-        // إنشاء رابط الدعوة الشخصي
+        // إنشاء رابط الدعوة الشخصي - تم التصحيح هنا
         function generateInviteLink() {
+            // استخدام رابط البوت الصحيح
             const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${getUserId()}`;
             return baseUrl;
         }
@@ -1129,7 +1177,17 @@
             return Math.floor(num).toString();
         }
         
-        // حفظ البيانات في Firestore بنظام الكتابة الذكي
+        // دالة لعرض الإشعارات
+        function showNotification(message, duration = 3000) {
+            notificationTextElement.textContent = message;
+            notificationElement.classList.add('show');
+            
+            setTimeout(() => {
+                notificationElement.classList.remove('show');
+            }, duration);
+        }
+        
+        // حفظ البيانات في Firestore
         async function saveGameDataToFirestore() {
             if (!db) {
                 console.log("Firestore not available, using local storage");
@@ -1137,48 +1195,35 @@
                 return;
             }
             
-            const now = Date.now();
-            const isNewUser = !lastUpdateTimestamp;
+            const userData = {
+                balance,
+                level,
+                energy,
+                pointsPerClick,
+                autoMiningRate,
+                totalClicks,
+                invitesCount,
+                rewardsTotal,
+                upgrades,
+                upgradeCosts,
+                userName: getUserName(),
+                lastPlayed: firebase.firestore.FieldValue.serverTimestamp(),
+                telegramData: tg?.initDataUnsafe?.user || null
+            };
             
-            // تحديث فقط إذا كان مستخدم جديد أو مرت 5 أيام
-            if (isNewUser || shouldUpdateFirebase()) {
-                const userData = {
-                    balance,
-                    level,
-                    energy,
-                    pointsPerClick,
-                    autoMiningRate,
-                    totalClicks,
-                    invitesCount,
-                    rewardsTotal,
-                    upgrades,
-                    upgradeCosts,
-                    userName: getUserName(),
-                    lastPlayed: firebase.firestore.FieldValue.serverTimestamp(),
-                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
-                    registrationDate: isNewUser ? firebase.firestore.FieldValue.serverTimestamp() : undefined,
-                    telegramData: tg?.initDataUnsafe?.user || null
-                };
+            try {
+                await db.collection('users').doc(getUserId()).set(userData, { merge: true });
+                console.log("Game data saved to Firestore");
                 
-                try {
-                    await db.collection('users').doc(getUserId()).set(userData, { merge: true });
-                    lastUpdateTimestamp = now;
-                    console.log(`Game data ${isNewUser ? 'saved' : 'updated'} to Firestore`);
-                    
-                    // تحديث المتصدرين فقط عند الكتابة إلى Firebase
-                    updateLeaderboard();
-                } catch (error) {
-                    console.error("Error saving to Firestore:", error);
-                    saveGameData(); // Fallback to local storage
-                }
-            } else {
-                // حفظ محلي فقط بدون كتابة في Firebase
-                saveGameData();
-                console.log("Data saved locally - Firebase update not required yet");
+                // تحديث المتصدرين بعد حفظ البيانات
+                updateLeaderboard();
+            } catch (error) {
+                console.error("Error saving to Firestore:", error);
+                saveGameData(); // Fallback to local storage
             }
         }
         
-        // تحميل البيانات من Firestore مع تهيئة نظام التتبع
+        // تحميل البيانات من Firestore
         async function loadGameDataFromFirestore() {
             if (!db) {
                 console.log("Firestore not available, loading from local storage");
@@ -1202,18 +1247,9 @@
                     Object.assign(upgrades, data.upgrades || {});
                     Object.assign(upgradeCosts, data.upgradeCosts || {});
                     
-                    // تهيئة وقت آخر تحديث
-                    if (data.lastUpdate?.toDate) {
-                        lastUpdateTimestamp = data.lastUpdate.toDate().getTime();
-                    } else {
-                        lastUpdateTimestamp = Date.now();
-                    }
-                    
                     console.log("Game data loaded from Firestore");
                 } else {
                     console.log("No existing data, starting new game");
-                    // مستخدم جديد - سيتم الكتابة عند أول حفظ
-                    lastUpdateTimestamp = 0;
                     loadGameData(); // Fallback to local storage if exists
                 }
             } catch (error) {
@@ -1284,8 +1320,7 @@
                 rewardsTotal,
                 upgrades,
                 upgradeCosts,
-                userId: getUserId(),
-                lastUpdateTimestamp
+                userId: getUserId()
             };
             localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
         }
@@ -1305,7 +1340,6 @@
                 rewardsTotal = gameData.rewardsTotal || 0;
                 Object.assign(upgrades, gameData.upgrades || {});
                 Object.assign(upgradeCosts, gameData.upgradeCosts || {});
-                lastUpdateTimestamp = gameData.lastUpdateTimestamp || 0;
             }
         }
         
@@ -1313,7 +1347,16 @@
         function updateUI() {
             balanceElement.textContent = formatNumber(balance);
             levelElement.textContent = level;
-            energyElement.textContent = Math.floor(energy) + '%';
+            
+            // تحديث الطاقة مع تحذير إذا كانت منخفضة
+            if (energy <= 20) {
+                energyElement.textContent = Math.floor(energy) + '%';
+                energyElement.classList.add('energy-warning');
+            } else {
+                energyElement.textContent = Math.floor(energy) + '%';
+                energyElement.classList.remove('energy-warning');
+            }
+            
             pointsPerClickElement.textContent = formatNumber(pointsPerClick);
             autoMiningRateElement.textContent = formatNumber(autoMiningRate) + '/ثانية';
             totalClicksElement.textContent = formatNumber(totalClicks);
@@ -1338,7 +1381,7 @@
             // تحديث شريط التقدم للإنجازات
             updateAchievements();
             
-            // حفظ البيانات بنظام الكتابة الذكي
+            // حفظ البيانات
             saveGameDataToFirestore();
         }
         
@@ -1375,6 +1418,7 @@
             const newLevel = Math.floor(balance / 100) + 1;
             if (newLevel > level) {
                 level = newLevel;
+                showNotification(`تهانينا! لقد وصلت إلى المستوى ${level}!`);
             }
         }
         
@@ -1382,20 +1426,13 @@
         copyLinkButton.addEventListener('click', async () => {
             try {
                 await navigator.clipboard.writeText(inviteLinkElement.value);
-                // تغيير نص الزر مؤقتاً للإشارة إلى النسخ
-                const originalHTML = copyLinkButton.innerHTML;
-                copyLinkButton.innerHTML = '<i class="fas fa-check"></i>';
-                copyLinkButton.style.background = 'var(--primary)';
-                
-                setTimeout(() => {
-                    copyLinkButton.innerHTML = originalHTML;
-                    copyLinkButton.style.background = '';
-                }, 2000);
+                showNotification('تم نسخ رابط الدعوة بنجاح!');
             } catch (err) {
                 console.error('Failed to copy: ', err);
                 // طريقة بديلة للنسخ
                 inviteLinkElement.select();
                 document.execCommand('copy');
+                showNotification('تم نسخ رابط الدعوة بنجاح!');
             }
         });
         
@@ -1462,7 +1499,7 @@
             // إضافة event listeners للأزرار في النافذة
             document.getElementById('modal-copy-btn').addEventListener('click', () => {
                 navigator.clipboard.writeText(inviteLink).then(() => {
-                    alert('تم نسخ الرابط!');
+                    showNotification('تم نسخ الرابط!');
                     shareModal.remove();
                 });
             });
@@ -1482,6 +1519,7 @@
         // النقر على زر التعدين
         mineButton.addEventListener('click', () => {
             if (energy <= 0) {
+                showNotification('لقد نفدت طاقتك! انتظر قليلاً لاستعادتها.', 2000);
                 return;
             }
             
@@ -1498,19 +1536,17 @@
                 mineButton.style.transform = 'scale(1)';
             }, 100);
             
-            // تأثير النص الطافي
+            // تأثير النص الطافي المحسن
             const floatingText = document.createElement('div');
             floatingText.textContent = `+${coinsEarned.toFixed(1)}`;
-            floatingText.style.position = 'absolute';
-            floatingText.style.color = 'var(--primary)';
-            floatingText.style.fontWeight = 'bold';
-            floatingText.style.fontSize = '1.2rem';
-            floatingText.style.pointerEvents = 'none';
-            floatingText.style.animation = 'float 1.5s ease-out forwards';
+            floatingText.className = 'floating-coin';
+            floatingText.style.left = `${Math.random() * 60 + 20}%`;
             mineButton.appendChild(floatingText);
             
             setTimeout(() => {
-                mineButton.removeChild(floatingText);
+                if (mineButton.contains(floatingText)) {
+                    mineButton.removeChild(floatingText);
+                }
             }, 1500);
             
             updateUI();
@@ -1526,6 +1562,7 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.pickaxe = Math.floor(upgradeCosts.pickaxe * 1.8);
                 
+                showNotification(`تم شراء معول دياموند! النقاط لكل نقرة: ${pointsPerClick}`);
                 updateUI();
             }
         });
@@ -1540,6 +1577,7 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.server = Math.floor(upgradeCosts.server * 1.8);
                 
+                showNotification(`تم شراء خوادم سريعة! التعدين التلقائي: ${autoMiningRate}/ثانية`);
                 updateUI();
             }
         });
@@ -1554,6 +1592,7 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.farm = Math.floor(upgradeCosts.farm * 1.8);
                 
+                showNotification(`تم شراء مزرعة تعدين! التعدين التلقائي: ${autoMiningRate}/ثانية`);
                 updateUI();
             }
         });
@@ -1569,6 +1608,7 @@
                 // زيادة سعر الترقية للمرة القادمة
                 upgradeCosts.datacenter = Math.floor(upgradeCosts.datacenter * 2.5);
                 
+                showNotification(`تم شراء مركز بيانات! تضاعفت جميع الإيرادات!`);
                 updateUI();
             }
         });
@@ -1622,7 +1662,7 @@
                 
                 // عرض رسالة نجاح
                 setTimeout(() => {
-                    alert('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 1000 Crynova!');
+                    showNotification('تهانينا! لقد حصلت على مكافأة الدعوة بقيمة 1000 Crynova!', 5000);
                 }, 1000);
                 
                 updateUI();
@@ -1649,8 +1689,7 @@
                     await db.collection('users').doc(inviterId).update({
                         invitesCount: updatedInvitesCount,
                         rewardsTotal: updatedRewardsTotal,
-                        balance: updatedBalance,
-                        lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                        balance: updatedBalance
                     });
                     
                     console.log(`تم تحديث مكافآت المُدعِي ${inviterId}`);
@@ -1660,24 +1699,6 @@
             }
         }
         
-        // إضافة معلومات التتبع للتصحيح
-        function getUpdateStatus() {
-            const now = Date.now();
-            const timeSinceLastUpdate = now - lastUpdateTimestamp;
-            const daysSinceLastUpdate = Math.floor(timeSinceLastUpdate / (24 * 60 * 60 * 1000));
-            const shouldUpdate = shouldUpdateFirebase();
-            
-            console.log(`حالة التحديث: ${shouldUpdate ? 'حتاج تحديث' : 'لا يحتاج تحديث'}`);
-            console.log(`آخر تحديث: ${daysSinceLastUpdate} يوم مضى`);
-            console.log(`المستخدم: ${lastUpdateTimestamp === 0 ? 'جديد' : 'قديم'}`);
-            
-            return {
-                shouldUpdate,
-                daysSinceLastUpdate,
-                isNewUser: lastUpdateTimestamp === 0
-            };
-        }
-        
         // تهيئة اللعبة
         async function initGame() {
             await loadGameDataFromFirestore();
@@ -1685,9 +1706,6 @@
             startAutoMining();
             await checkInviteFromUrl();
             updateLeaderboard();
-            
-            // إظهار حالة النظام للتصحيح
-            getUpdateStatus();
             
             // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
             setTimeout(() => {
