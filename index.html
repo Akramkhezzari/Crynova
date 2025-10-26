@@ -126,15 +126,15 @@
 
         .user-info {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
             width: 100%;
         }
 
         @media (min-width: 480px) {
             .user-info {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 12px;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
                 width: auto;
             }
         }
@@ -143,9 +143,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px 8px;
+            padding: 8px 6px;
             background: var(--light);
-            border-radius: 12px;
+            border-radius: 10px;
             transition: transform 0.3s ease;
             min-width: 0;
         }
@@ -155,26 +155,26 @@
         }
 
         .stat-value {
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             font-weight: bold;
             color: var(--primary);
         }
 
         @media (min-width: 480px) {
             .stat-value {
-                font-size: 1.3rem;
+                font-size: 1rem;
             }
         }
 
         .stat-label {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: #a0a0a0;
             text-align: center;
         }
 
         @media (min-width: 480px) {
             .stat-label {
-                font-size: 0.85rem;
+                font-size: 0.7rem;
             }
         }
 
@@ -652,7 +652,7 @@
         }
 
         .streak-info {
-            display: none; /* إخفاء معلومات التتابع */
+            display: none;
         }
 
         /* لوحة دعوة الأصدقاء */
@@ -882,16 +882,21 @@
                 padding: 12px;
             }
             
+            .user-info {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+            
             .user-stat {
-                padding: 8px 6px;
+                padding: 6px 4px;
             }
             
             .stat-value {
-                font-size: 1rem;
+                font-size: 0.8rem;
             }
             
             .stat-label {
-                font-size: 0.7rem;
+                font-size: 0.6rem;
             }
             
             .mine-btn {
@@ -906,6 +911,12 @@
             
             .mining-panel, .upgrades-panel, .achievements-panel, .daily-missions-panel, .invite-panel {
                 padding: 15px;
+            }
+        }
+
+        @media (min-width: 361px) and (max-width: 480px) {
+            .user-info {
+                grid-template-columns: repeat(5, 1fr);
             }
         }
     </style>
@@ -930,6 +941,14 @@
                 <div class="user-stat">
                     <div class="stat-value" id="level">1</div>
                     <div class="stat-label">المستوى</div>
+                </div>
+                <div class="user-stat">
+                    <div class="stat-value" id="points-per-click-header">1</div>
+                    <div class="stat-label">النقرة</div>
+                </div>
+                <div class="user-stat">
+                    <div class="stat-value" id="auto-mining-header">0/ث</div>
+                    <div class="stat-label">تعدين</div>
                 </div>
                 <div class="user-stat">
                     <div class="stat-value" id="energy">100%</div>
@@ -963,7 +982,7 @@
                         <div class="stat-value" id="auto-mining-rate">0/ثانية</div>
                     </div>
                     <div class="mining-stat">
-                        <div>إجمالي النقرات</div>
+                        <div>عدد النقرات</div>
                         <div class="stat-value" id="total-clicks">0</div>
                     </div>
                     <div class="mining-stat">
@@ -1197,7 +1216,7 @@
                 lastClaim: null, 
                 claimed: false,
                 baseReward: 100,
-                maxStreak: 15 // زيادة إلى 15 يوم
+                maxStreak: 15
             }
         };
 
@@ -1350,6 +1369,12 @@
             pointsPerClickElement.textContent = formatNumber(pointsPerClick);
             autoMiningRateElement.textContent = formatNumber(autoMiningRate) + '/ثانية';
             totalClicksElement.textContent = formatNumber(totalClicks);
+            
+            // تحديث النقاط لكل نقرة في الهيدر
+            document.getElementById('points-per-click-header').textContent = formatNumber(pointsPerClick);
+            
+            // تحديث التعدين التلقائي في الهيدر
+            document.getElementById('auto-mining-header').textContent = formatNumber(autoMiningRate) + '/ث';
             
             // تحديث أزرار الترقيات
             buyPickaxeButton.disabled = balance < upgradeCosts.pickaxe;
