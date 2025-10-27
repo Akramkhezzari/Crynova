@@ -1451,6 +1451,76 @@
         let autoMiningRate = 0;
         let totalClicks = 0;
         
+        // نظام المستويات المحسن
+        const levelRequirements = {
+            1: 0,
+            2: 1000,
+            3: 5000,
+            4: 15000,
+            5: 40000,
+            6: 80000,
+            7: 150000,
+            8: 250000,
+            9: 400000,
+            10: 600000,
+            11: 850000,
+            12: 1150000,
+            13: 1500000,
+            14: 1900000,
+            15: 2350000,
+            16: 2850000,
+            17: 3400000,
+            18: 4000000,
+            19: 4650000,
+            20: 5350000,
+            21: 6100000,
+            22: 6900000,
+            23: 7750000,
+            24: 8650000,
+            25: 9600000,
+            26: 10600000,
+            27: 11650000,
+            28: 12750000,
+            29: 13900000,
+            30: 15100000,
+            31: 16350000,
+            32: 17650000,
+            33: 19000000,
+            34: 20400000,
+            35: 21850000,
+            36: 23350000,
+            37: 24900000,
+            38: 26500000,
+            39: 28150000,
+            40: 29850000,
+            41: 31600000,
+            42: 33400000,
+            43: 35250000,
+            44: 37150000,
+            45: 39100000,
+            46: 41100000,
+            47: 43150000,
+            48: 45250000,
+            49: 47400000,
+            50: 49600000
+        };
+
+        // دالة حساب المستوى بناءً على الرصيد (بدون مكافآت)
+        function calculateLevel() {
+            let newLevel = 1;
+            
+            // البحث عن أعلى مستوى يمكن تحقيقه بالرصيد الحالي
+            for (let lvl in levelRequirements) {
+                if (balance >= levelRequirements[lvl]) {
+                    newLevel = parseInt(lvl);
+                } else {
+                    break;
+                }
+            }
+            
+            return newLevel;
+        }
+        
         // إحصائيات الدعوة
         let invitesCount = 0;
         let rewardsTotal = 0;
@@ -1712,7 +1782,14 @@
         // تحديث واجهة المستخدم
         function updateUI() {
             balanceElement.textContent = formatNumber(balance);
+            
+            // تحديث المستوى باستخدام النظام الجديد
+            const newLevel = calculateLevel();
+            if (newLevel !== level) {
+                level = newLevel;
+            }
             levelElement.textContent = level;
+            
             energyElement.textContent = Math.floor(energy) + '%';
             
             // تحديث النقاط لكل نقرة في الهيدر
@@ -1782,12 +1859,6 @@
             if (balance >= 1000000) {
                 document.getElementById('achievement-1000000').classList.remove('locked');
                 document.getElementById('achievement-1000000').classList.add('unlocked');
-            }
-            
-            // تحديث المستوى
-            const newLevel = Math.floor(balance / 100) + 1;
-            if (newLevel > level) {
-                level = newLevel;
             }
         }
 
