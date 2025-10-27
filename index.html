@@ -612,6 +612,11 @@
             background: linear-gradient(135deg, var(--light), rgba(0, 255, 157, 0.1));
         }
 
+        .mission-item.active {
+            border-left: 4px solid #ffd700;
+            background: linear-gradient(135deg, var(--light), rgba(255, 215, 0, 0.1));
+        }
+
         .mission-icon {
             font-size: 1.5rem;
             color: var(--primary);
@@ -677,6 +682,10 @@
 
         .mission-reward.claimed {
             background: var(--accent);
+        }
+
+        .mission-reward.active {
+            background: linear-gradient(135deg, #ffd700, #ffa500);
         }
 
         .cooldown-info {
@@ -1142,12 +1151,12 @@
                 </div>
             </div>
             
-            <!-- لوحة المهام اليومية بدلاً من المتصدرين -->
+            <!-- لوحة المهام اليومية -->
             <div class="daily-missions-panel">
                 <h2 class="panel-title"><i class="fas fa-calendar-day"></i> المهام اليومية</h2>
                 
                 <div class="missions-container">
-                    <!-- مهمة التواجد اليومي فقط -->
+                    <!-- مهمة التواجد اليومي -->
                     <div class="mission-item" id="mission-daily">
                         <div class="mission-icon"><i class="fas fa-fire"></i></div>
                         <div class="mission-info">
@@ -1165,6 +1174,25 @@
                             <i class="fas fa-coins"></i>
                         </button>
                     </div>
+
+                    <!-- مهمة مضاعفة السرعة الجديدة -->
+                    <div class="mission-item" id="mission-boost">
+                        <div class="mission-icon"><i class="fas fa-bolt"></i></div>
+                        <div class="mission-info">
+                            <div class="mission-name">نشاط الصباح 💪</div>
+                            <div class="mission-desc">احصل على مضاعفة سرعة التعدين ×2 لمدة 30 دقيقة</div>
+                            <div class="mission-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" id="progress-boost"></div>
+                                </div>
+                                <span class="progress-text" id="boost-timer">30:00</span>
+                            </div>
+                        </div>
+                        <button class="mission-reward" id="reward-boost">
+                            <span>تفعيل</span>
+                            <i class="fas fa-rocket"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- معلومات التتابع - مخفية -->
@@ -1173,8 +1201,8 @@
                     <div class="streak-label">يوم متتالي</div>
                 </div>
                 
-                <!-- توقيت التجديد - مخفي -->
-                <div class="cooldown-info" style="display: none;">
+                <!-- توقيت التجديد -->
+                <div class="cooldown-info">
                     <div class="reset-info">
                         <i class="fas fa-clock"></i>
                         <span>يتجدد بعد: <span id="reset-timer">24:00:00</span></span>
@@ -1253,6 +1281,7 @@
         let pointsPerClick = 1;
         let autoMiningRate = 0;
         let totalClicks = 0;
+        let originalAutoMiningRate = 0;
         
         // إحصائيات الدعوة
         let invitesCount = 0;
@@ -1261,6 +1290,7 @@
         
         // التعدين التلقائي
         let autoMiningInterval;
+        let boostInterval;
         
         // تكاليف الترقيات
         const upgradeCosts = {
@@ -1286,6 +1316,13 @@
                 claimed: false,
                 baseReward: 100,
                 maxStreak: 15
+            },
+            speedBoost: {
+                claimed: false,
+                active: false,
+                startTime: null,
+                duration: 30 * 60 * 1000, // 30 دقيقة بالميلي ثانية
+                boostMultiplier: 2
             }
         };
 
@@ -1426,6 +1463,19 @@
             Object.assign(upgrades, gameData.upgrades || {});
             Object.assign(upgradeCosts, gameData.upgradeCosts || {});
             Object.assign(dailyMissions, gameData.dailyMissions || {});
+            
+            // التحقق من مضاعفة السرعة النشطة
+            if (dailyMissions.speedBoost.active && dailyMissions.speedBoost.startTime) {
+                const elapsed = Date.now() - dailyMissions.speedBoost.startTime;
+                if (elapsed < dailyMissions.speedBoost.duration) {
+                    // مضاعفة السرعة لا تزال نشطة
+                    startSpeedBoost();
+                } else {
+                    // مضاعفة السرعة انتهت
+                    dailyMissions.speedBoost.active = false;
+                    dailyMissions.speedBoost.claimed = true;
+                }
+            }
         }
 
         // تحديث واجهة المستخدم
@@ -1460,6 +1510,9 @@
             
             // تحديث إحصائيات الدعوة
             updateInviteStats();
+            
+            // تحديث المهام اليومية
+            updateMissionsUI();
             
             // حفظ البيانات
             saveGameData();
@@ -1525,6 +1578,316 @@
             rewardsTotalElement.style.color = '#a0a0a0';
         }
         
+        // ========== نظام المهام اليومية ==========
+
+        // تهيئة المهام اليومية
+        function initDailyMissions() {
+            loadMissionsData();
+            updateMissionsUI();
+            setupMissionRewards();
+            startResetTimer();
+        }
+
+        // تحميل بيانات المهام
+        function loadMissionsData() {
+            const savedMissions = localStorage.getItem(`daily_missions_v2_${getUserId()}`);
+            const savedDate = localStorage.getItem(`missions_date_${getUserId()}`);
+            
+            if (savedMissions && savedDate === new Date().toDateString()) {
+                Object.assign(dailyMissions, JSON.parse(savedMissions));
+            } else {
+                resetDailyMissions();
+            }
+            
+            // التحقق من التواجد اليومي
+            checkDailyLogin();
+        }
+
+        // إعادة تعيين المهام اليومية
+        function resetDailyMissions() {
+            dailyMissions.dailyLogin.claimed = false;
+            dailyMissions.speedBoost.claimed = false;
+            dailyMissions.speedBoost.active = false;
+            dailyMissions.speedBoost.startTime = null;
+            saveMissionsData();
+        }
+
+        // التحقق من التواجد اليومي
+        function checkDailyLogin() {
+            const today = new Date().toDateString();
+            const lastClaim = dailyMissions.dailyLogin.lastClaim;
+            
+            if (!lastClaim) {
+                // أول دخول - يمكن لأي مستخدم استلام المكافأة مباشرة
+                dailyMissions.dailyLogin.streak = 1;
+                dailyMissions.dailyLogin.claimed = false;
+            } else if (lastClaim === today) {
+                // تم المطالبة اليوم
+                dailyMissions.dailyLogin.claimed = true;
+            } else {
+                const lastClaimDate = new Date(lastClaim);
+                const todayDate = new Date();
+                const diffTime = todayDate - lastClaimDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === 1) {
+                    // تواجد متتالي
+                    dailyMissions.dailyLogin.streak++;
+                    if (dailyMissions.dailyLogin.streak > dailyMissions.dailyLogin.maxStreak) {
+                        dailyMissions.dailyLogin.streak = 1; // العودة للبداية بعد 15 يوم
+                    }
+                    dailyMissions.dailyLogin.claimed = false;
+                } else {
+                    // كسر التتابع
+                    dailyMissions.dailyLogin.streak = 1;
+                    dailyMissions.dailyLogin.claimed = false;
+                }
+            }
+            
+            saveMissionsData();
+        }
+
+        // حساب مكافأة التواجد اليومي
+        function calculateDailyReward() {
+            const base = dailyMissions.dailyLogin.baseReward;
+            const streak = Math.min(dailyMissions.dailyLogin.streak, dailyMissions.dailyLogin.maxStreak);
+            return base * Math.pow(2, streak - 1);
+        }
+
+        // تحديث واجهة المهام
+        function updateMissionsUI() {
+            // مهمة التواجد اليومي
+            const dailyMission = dailyMissions.dailyLogin;
+            const dailyReward = calculateDailyReward();
+            
+            document.getElementById('daily-reward-amount').textContent = formatNumber(dailyReward);
+            document.getElementById('daily-streak').textContent = `اليوم ${dailyMission.streak}`;
+            document.getElementById('progress-daily').style.width = dailyMission.claimed ? '100%' : '0%';
+            updateMissionButton('mission-daily', dailyMission.claimed, dailyMission.claimed);
+
+            // مهمة مضاعفة السرعة
+            const boostMission = dailyMissions.speedBoost;
+            const boostItem = document.getElementById('mission-boost');
+            const boostButton = document.getElementById('reward-boost');
+            const boostTimer = document.getElementById('boost-timer');
+            const boostProgress = document.getElementById('progress-boost');
+
+            if (boostMission.active && boostMission.startTime) {
+                const elapsed = Date.now() - boostMission.startTime;
+                const remaining = Math.max(0, boostMission.duration - elapsed);
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                
+                boostTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                boostProgress.style.width = `${((boostMission.duration - remaining) / boostMission.duration * 100)}%`;
+                
+                boostItem.classList.add('active');
+                boostButton.innerHTML = '<i class="fas fa-bolt"></i>';
+                boostButton.disabled = true;
+                boostButton.classList.add('active');
+            } else {
+                boostTimer.textContent = '30:00';
+                boostProgress.style.width = boostMission.claimed ? '100%' : '0%';
+                boostItem.classList.remove('active');
+                boostButton.innerHTML = '<span>تفعيل</span><i class="fas fa-rocket"></i>';
+                boostButton.disabled = boostMission.claimed;
+                boostButton.classList.remove('active');
+                
+                if (boostMission.claimed) {
+                    boostItem.classList.add('completed');
+                } else {
+                    boostItem.classList.remove('completed');
+                }
+            }
+        }
+
+        // تحديث حالة زر المهمة
+        function updateMissionButton(missionId, completed, claimed) {
+            const button = document.querySelector(`#${missionId} .mission-reward`);
+            const missionItem = document.getElementById(missionId);
+            
+            if (claimed) {
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                button.disabled = true;
+                button.classList.add('claimed');
+                missionItem.classList.add('completed');
+            } else if (completed) {
+                button.disabled = false;
+                missionItem.classList.add('completed');
+            } else {
+                button.disabled = true;
+                missionItem.classList.remove('completed');
+            }
+        }
+
+        // تفعيل مضاعفة السرعة
+        function activateSpeedBoost() {
+            if (dailyMissions.speedBoost.claimed || dailyMissions.speedBoost.active) {
+                return;
+            }
+
+            dailyMissions.speedBoost.active = true;
+            dailyMissions.speedBoost.claimed = true;
+            dailyMissions.speedBoost.startTime = Date.now();
+            
+            originalAutoMiningRate = autoMiningRate;
+            autoMiningRate *= dailyMissions.speedBoost.boostMultiplier;
+            
+            // تأثير مرئي
+            showBoostEffect();
+            
+            // بدء عد تنازلي
+            startBoostTimer();
+            
+            updateUI();
+            saveMissionsData();
+        }
+
+        // بدء عد تنازلي لمضاعفة السرعة
+        function startBoostTimer() {
+            if (boostInterval) {
+                clearInterval(boostInterval);
+            }
+            
+            boostInterval = setInterval(() => {
+                if (!dailyMissions.speedBoost.active || !dailyMissions.speedBoost.startTime) {
+                    clearInterval(boostInterval);
+                    return;
+                }
+                
+                const elapsed = Date.now() - dailyMissions.speedBoost.startTime;
+                
+                if (elapsed >= dailyMissions.speedBoost.duration) {
+                    // انتهاء المضاعفة
+                    clearInterval(boostInterval);
+                    autoMiningRate = originalAutoMiningRate;
+                    dailyMissions.speedBoost.active = false;
+                    updateUI();
+                    saveMissionsData();
+                } else {
+                    updateMissionsUI();
+                }
+            }, 1000);
+        }
+
+        // بدء مضاعفة السرعة عند التحميل إذا كانت نشطة
+        function startSpeedBoost() {
+            originalAutoMiningRate = autoMiningRate / dailyMissions.speedBoost.boostMultiplier;
+            startBoostTimer();
+        }
+
+        // تأثير مضاعفة السرعة
+        function showBoostEffect() {
+            const effect = document.createElement('div');
+            effect.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 2rem;
+                font-weight: bold;
+                color: #ffd700;
+                background: rgba(0, 0, 0, 0.9);
+                padding: 20px 40px;
+                border-radius: 15px;
+                z-index: 10000;
+                animation: rewardPop 2s ease-out forwards;
+                border: 2px solid #ffd700;
+                text-align: center;
+            `;
+            effect.innerHTML = `
+                <div style="margin-bottom: 10px; font-size: 2.5rem;">⚡</div>
+                <div>مضاعفة السرعة مفعلة!</div>
+                <div style="font-size: 1rem; margin-top: 5px;">×2 لمدة 30 دقيقة</div>
+            `;
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                document.body.removeChild(effect);
+            }, 2000);
+        }
+
+        // إعداد مكافآت المهام
+        function setupMissionRewards() {
+            // مكافأة التواجد اليومي
+            document.getElementById('reward-daily').addEventListener('click', function() {
+                if (!dailyMissions.dailyLogin.claimed) {
+                    const reward = calculateDailyReward();
+                    balance += reward;
+                    dailyMissions.dailyLogin.claimed = true;
+                    dailyMissions.dailyLogin.lastClaim = new Date().toDateString();
+                    
+                    showRewardEffect(reward);
+                    updateUI();
+                    updateMissionsUI();
+                    saveMissionsData();
+                }
+            });
+
+            // مكافأة مضاعفة السرعة
+            document.getElementById('reward-boost').addEventListener('click', function() {
+                activateSpeedBoost();
+            });
+        }
+
+        // تأثير المكافأة
+        function showRewardEffect(reward) {
+            const effect = document.createElement('div');
+            effect.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 2rem;
+                font-weight: bold;
+                color: var(--primary);
+                background: rgba(0, 0, 0, 0.8);
+                padding: 20px 40px;
+                border-radius: 15px;
+                z-index: 10000;
+                animation: rewardPop 2s ease-out forwards;
+            `;
+            effect.textContent = `+${reward} Crynova!`;
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                document.body.removeChild(effect);
+            }, 2000);
+        }
+
+        // حفظ بيانات المهام
+        function saveMissionsData() {
+            localStorage.setItem(`daily_missions_v2_${getUserId()}`, JSON.stringify(dailyMissions));
+            localStorage.setItem(`missions_date_${getUserId()}`, new Date().toDateString());
+        }
+
+        // بدء عد تنازلي لتجديد المهام
+        function startResetTimer() {
+            setInterval(() => {
+                const now = new Date();
+                const nextReset = new Date();
+                nextReset.setUTCHours(24, 0, 0, 0); // 00:00 UTC
+                
+                if (now.getUTCHours() >= 24) {
+                    nextReset.setUTCDate(nextReset.getUTCDate() + 1);
+                }
+                
+                const timeUntilReset = nextReset - now;
+                const hours = Math.floor(timeUntilReset / (1000 * 60 * 60));
+                const minutes = Math.floor((timeUntilReset % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeUntilReset % (1000 * 60)) / 1000);
+                
+                document.getElementById('reset-timer').textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // إذا حان وقت التجديد
+                if (timeUntilReset <= 1000) {
+                    resetDailyMissions();
+                    updateMissionsUI();
+                }
+            }, 1000);
+        }
+
         // نسخ رابط الدعوة
         copyLinkButton.addEventListener('click', async () => {
             try {
@@ -1797,158 +2160,6 @@
                 updateUI();
             }
         }, 1000);
-
-        // ========== نظام المهام اليومية ==========
-
-        // تهيئة المهام اليومية
-        function initDailyMissions() {
-            loadMissionsData();
-            updateMissionsUI();
-            setupMissionRewards();
-        }
-
-        // تحميل بيانات المهام
-        function loadMissionsData() {
-            const savedMissions = localStorage.getItem(`daily_missions_v2_${getUserId()}`);
-            const savedDate = localStorage.getItem(`missions_date_${getUserId()}`);
-            
-            if (savedMissions && savedDate === new Date().toDateString()) {
-                Object.assign(dailyMissions, JSON.parse(savedMissions));
-            } else {
-                resetDailyMissions();
-            }
-            
-            // التحقق من التواجد اليومي
-            checkDailyLogin();
-        }
-
-        // إعادة تعيين المهام اليومية
-        function resetDailyMissions() {
-            dailyMissions.dailyLogin.claimed = false;
-            saveMissionsData();
-        }
-
-        // التحقق من التواجد اليومي
-        function checkDailyLogin() {
-            const today = new Date().toDateString();
-            const lastClaim = dailyMissions.dailyLogin.lastClaim;
-            
-            if (!lastClaim) {
-                // أول دخول - يمكن لأي مستخدم استلام المكافأة مباشرة
-                dailyMissions.dailyLogin.streak = 1;
-                dailyMissions.dailyLogin.claimed = false;
-            } else if (lastClaim === today) {
-                // تم المطالبة اليوم
-                dailyMissions.dailyLogin.claimed = true;
-            } else {
-                const lastClaimDate = new Date(lastClaim);
-                const todayDate = new Date();
-                const diffTime = todayDate - lastClaimDate;
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                
-                if (diffDays === 1) {
-                    // تواجد متتالي
-                    dailyMissions.dailyLogin.streak++;
-                    if (dailyMissions.dailyLogin.streak > dailyMissions.dailyLogin.maxStreak) {
-                        dailyMissions.dailyLogin.streak = 1; // العودة للبداية بعد 15 يوم
-                    }
-                    dailyMissions.dailyLogin.claimed = false;
-                } else {
-                    // كسر التتابع
-                    dailyMissions.dailyLogin.streak = 1;
-                    dailyMissions.dailyLogin.claimed = false;
-                }
-            }
-            
-            saveMissionsData();
-        }
-
-        // حساب مكافأة التواجد اليومي
-        function calculateDailyReward() {
-            const base = dailyMissions.dailyLogin.baseReward;
-            const streak = Math.min(dailyMissions.dailyLogin.streak, dailyMissions.dailyLogin.maxStreak);
-            return base * Math.pow(2, streak - 1);
-        }
-
-        // تحديث واجهة المهام
-        function updateMissionsUI() {
-            // مهمة التواجد اليومي
-            const dailyMission = dailyMissions.dailyLogin;
-            const dailyReward = calculateDailyReward();
-            
-            document.getElementById('daily-reward-amount').textContent = formatNumber(dailyReward);
-            document.getElementById('daily-streak').textContent = `اليوم ${dailyMission.streak}`;
-            document.getElementById('progress-daily').style.width = dailyMission.claimed ? '100%' : '0%';
-            updateMissionButton('mission-daily', dailyMission.claimed, dailyMission.claimed);
-        }
-
-        // تحديث حالة زر المهمة
-        function updateMissionButton(missionId, completed, claimed) {
-            const button = document.querySelector(`#${missionId} .mission-reward`);
-            const missionItem = document.getElementById(missionId);
-            
-            if (claimed) {
-                button.innerHTML = '<i class="fas fa-check"></i>';
-                button.disabled = true;
-                button.classList.add('claimed');
-                missionItem.classList.add('completed');
-            } else if (completed) {
-                button.disabled = false;
-                missionItem.classList.add('completed');
-            } else {
-                button.disabled = true;
-                missionItem.classList.remove('completed');
-            }
-        }
-
-        // إعداد مكافآت المهام
-        function setupMissionRewards() {
-            // مكافأة التواجد اليومي
-            document.getElementById('reward-daily').addEventListener('click', function() {
-                if (!dailyMissions.dailyLogin.claimed) {
-                    const reward = calculateDailyReward();
-                    balance += reward;
-                    dailyMissions.dailyLogin.claimed = true;
-                    dailyMissions.dailyLogin.lastClaim = new Date().toDateString();
-                    
-                    showRewardEffect(reward);
-                    updateUI();
-                    updateMissionsUI();
-                    saveMissionsData();
-                }
-            });
-        }
-
-        // تأثير المكافأة
-        function showRewardEffect(reward) {
-            const effect = document.createElement('div');
-            effect.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 2rem;
-                font-weight: bold;
-                color: var(--primary);
-                background: rgba(0, 0, 0, 0.8);
-                padding: 20px 40px;
-                border-radius: 15px;
-                z-index: 10000;
-                animation: rewardPop 2s ease-out forwards;
-            `;
-            effect.textContent = `+${reward} Crynova!`;
-            document.body.appendChild(effect);
-            
-            setTimeout(() => {
-                document.body.removeChild(effect);
-            }, 2000);
-        }
-
-        // حفظ بيانات المهام
-        function saveMissionsData() {
-            localStorage.setItem(`daily_missions_v2_${getUserId()}`, JSON.stringify(dailyMissions));
-            localStorage.setItem(`missions_date_${getUserId()}`, new Date().toDateString());
-        }
 
         // التحقق من رابط الدعوة عند التحميل
         function checkInviteFromUrl() {
