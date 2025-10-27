@@ -1179,13 +1179,13 @@
                     <div class="mission-item" id="mission-boost">
                         <div class="mission-icon"><i class="fas fa-bolt"></i></div>
                         <div class="mission-info">
-                            <div class="mission-name">نشاط الصباح 💪</div>
-                            <div class="mission-desc">احصل على مضاعفة سرعة التعدين ×2 لمدة 30 دقيقة</div>
+                            <div class="mission-name">انفجار الطاقة ⚡</div>
+                            <div class="mission-desc">احصل على مضاعفة سرعة التعدين زيادة بنسبة 03% يومياً</div>
                             <div class="mission-progress">
                                 <div class="progress-bar">
                                     <div class="progress" id="progress-boost"></div>
                                 </div>
-                                <span class="progress-text" id="boost-timer">30:00</span>
+                                <span class="progress-text" id="boost-timer">24:00:00</span>
                             </div>
                         </div>
                         <button class="mission-reward" id="reward-boost">
@@ -1321,8 +1321,8 @@
                 claimed: false,
                 active: false,
                 startTime: null,
-                duration: 30 * 60 * 1000, // 30 دقيقة بالميلي ثانية
-                boostMultiplier: 2
+                duration: 24 * 60 * 60 * 1000, // 24 ساعة
+                boostMultiplier: 1.0003 // زيادة 0.03%
             }
         };
 
@@ -1675,10 +1675,12 @@
             if (boostMission.active && boostMission.startTime) {
                 const elapsed = Date.now() - boostMission.startTime;
                 const remaining = Math.max(0, boostMission.duration - elapsed);
-                const minutes = Math.floor(remaining / 60000);
-                const seconds = Math.floor((remaining % 60000) / 1000);
+                const hours = Math.floor(remaining / (1000 * 60 * 60));
+                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
                 
-                boostTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                boostTimer.textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 boostProgress.style.width = `${((boostMission.duration - remaining) / boostMission.duration * 100)}%`;
                 
                 boostItem.classList.add('active');
@@ -1686,7 +1688,7 @@
                 boostButton.disabled = true;
                 boostButton.classList.add('active');
             } else {
-                boostTimer.textContent = '30:00';
+                boostTimer.textContent = '24:00:00';
                 boostProgress.style.width = boostMission.claimed ? '100%' : '0%';
                 boostItem.classList.remove('active');
                 boostButton.innerHTML = '<span>تفعيل</span><i class="fas fa-rocket"></i>';
@@ -1798,7 +1800,7 @@
             effect.innerHTML = `
                 <div style="margin-bottom: 10px; font-size: 2.5rem;">⚡</div>
                 <div>مضاعفة السرعة مفعلة!</div>
-                <div style="font-size: 1rem; margin-top: 5px;">×2 لمدة 30 دقيقة</div>
+                <div style="font-size: 1rem; margin-top: 5px;">+0.03% لمدة 24 ساعة</div>
             `;
             document.body.appendChild(effect);
             
