@@ -1063,7 +1063,7 @@
                     <div class="mining-stat">
                         <a href="https://t.me/Coin_Crynova" class="channel-btn" target="_blank" id="channel-interaction-btn">
                             <i class="fas fa-heart channel-icon-btn"></i>
-                            <span>تفاعل مع القناة</span>
+                            <span>التفاعل مع منشور داخل القناة</span>
                         </a>
                     </div>
                     
@@ -1285,7 +1285,7 @@
             datacenter: 0
         };
 
-        // بيانات المهام اليومية
+        // بيانات المهام اليومية المحدثة
         const dailyMissions = [
             {
                 id: 'daily_login',
@@ -1300,10 +1300,10 @@
             {
                 id: 'energy_boost',
                 name: 'انفجار الطاقة ⚡',
-                description: 'احصل على مضاعفة سرعة التعدين زيادة بنسبة 0.05% يومياً',
+                description: 'احصل على مضاعفة سرعة التعدين زيادة بنسبة 5% يومياً',
                 icon: 'fas fa-bolt',
                 rewardType: 'mining_boost',
-                rewardValue: 0.0005, // 0.05% = 0.0005
+                rewardValue: 0.05, // 5% = 0.05
                 claimed: false,
                 available: true
             }
@@ -1313,7 +1313,6 @@
         let dailyLoginClaimed = false;
         let energyBoostActive = false;
         let energyBoostEndTime = 0;
-        let originalAutoMiningRate = 0;
 
         // العناصر في واجهة المستخدم
         const balanceElement = document.getElementById('balance');
@@ -1385,7 +1384,6 @@
                 dailyLoginClaimed,
                 energyBoostActive,
                 energyBoostEndTime,
-                originalAutoMiningRate,
                 userName: getUserName(),
                 lastPlayed: new Date().toISOString()
             };
@@ -1457,7 +1455,6 @@
             dailyLoginClaimed = gameData.dailyLoginClaimed || false;
             energyBoostActive = gameData.energyBoostActive || false;
             energyBoostEndTime = gameData.energyBoostEndTime || 0;
-            originalAutoMiningRate = gameData.originalAutoMiningRate || 0;
             
             Object.assign(upgrades, gameData.upgrades || {});
             Object.assign(upgradeCosts, gameData.upgradeCosts || {});
@@ -1642,17 +1639,12 @@
             showBonusEffect(bonus);
         }
 
-        // المطالبة بتعزيز الطاقة
+        // المطالبة بتعزيز الطاقة - التصحيح النهائي
         function claimMiningBoost(mission) {
-            const boost = mission.rewardValue; // 0.0005 = 0.05%
+            const boost = mission.rewardValue; // 0.05 = 5%
             
-            // حفظ المعدل الأصلي إذا كانت هذه هي المرة الأولى
-            if (!energyBoostActive) {
-                originalAutoMiningRate = autoMiningRate;
-            }
-            
-            // تطبيق التعزيز (0.05%)
-            autoMiningRate = originalAutoMiningRate * (1 + boost);
+            // تطبيق التعزيز (5% زيادة في التعدين التلقائي)
+            autoMiningRate = autoMiningRate * (1 + boost);
             energyBoostActive = true;
             energyBoostEndTime = Date.now() + (24 * 60 * 60 * 1000); // 24 ساعة
             
@@ -1660,11 +1652,11 @@
             showBoostEffect(boost);
         }
 
-        // التحقق من انتهاء مدة تعزيز الطاقة
+        // التحقق من انتهاء مدة تعزيز الطاقة - التصحيح
         function checkEnergyBoost() {
             if (energyBoostActive && Date.now() > energyBoostEndTime) {
-                // إعادة المعدل إلى الطبيعي
-                autoMiningRate = originalAutoMiningRate;
+                // إعادة المعدل إلى الطبيعي (إزالة التعزيز 5%)
+                autoMiningRate = autoMiningRate / 1.05;
                 energyBoostActive = false;
                 
                 // إعادة تعيين المهمة
@@ -1702,7 +1694,7 @@
                     rewardText = `مضاعفة الرصيد ${mission.rewardValue}x!`;
                     break;
                 case 'mining_boost':
-                    rewardText = `تعزيز الطاقة +${(mission.rewardValue * 100).toFixed(2)}%!`;
+                    rewardText = `تعزيز الطاقة +${(mission.rewardValue * 100).toFixed(0)}% سرعة تعدين!`;
                     break;
             }
             
@@ -1770,8 +1762,8 @@
             `;
             
             effect.innerHTML = `
-                <div style="margin-bottom: 5px;">⚡ تعزيز الطاقة!</div>
-                <div>+${(boost * 100).toFixed(2)}% سرعة تعدين</div>
+                <div style="margin-bottom: 5px;">⚡ انفجار الطاقة!</div>
+                <div>+${(boost * 100).toFixed(0)}% سرعة تعدين</div>
                 <div style="font-size: 0.8rem; margin-top: 5px;">لمدة 24 ساعة</div>
             `;
             
@@ -1874,52 +1866,14 @@
             }
         });
         
-        // زر تفاعل القناة - نفس تصميم زر الانضمام
+        // زر تفاعل القناة - تم إزالة المكافأة التلقائية
         channelInteractionButton.addEventListener('click', (e) => {
-            // فتح القناة في نافذة جديدة
+            // فتح القناة في نافذة جديدة فقط
             window.open('https://t.me/Coin_Crynova', '_blank');
             
-            // منح مكافأة تفاعل مع القناة
-            setTimeout(() => {
-                const interactionReward = 50;
-                balance += interactionReward;
-                
-                // إظهار تأثير المكافأة
-                showChannelRewardEffect(interactionReward);
-                updateUI();
-            }, 1000);
+            // تم إزالة جزء منح المكافأة التلقائية
+            // لا توجد مكافأة تلقائية الآن
         });
-
-        // تأثير مكافأة تفاعل القناة
-        function showChannelRewardEffect(reward) {
-            const effect = document.createElement('div');
-            effect.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 1.8rem;
-                font-weight: bold;
-                color: var(--primary);
-                background: rgba(0, 0, 0, 0.9);
-                padding: 20px 40px;
-                border-radius: 15px;
-                z-index: 10000;
-                animation: rewardPop 2s ease-out forwards;
-                border: 2px solid var(--primary);
-                text-align: center;
-            `;
-            effect.innerHTML = `
-                <div style="margin-bottom: 10px; font-size: 2.5rem;">💎</div>
-                <div>+${reward} Crynova</div>
-                <div style="font-size: 1rem; margin-top: 5px;">مكافأة تفاعل القناة!</div>
-            `;
-            document.body.appendChild(effect);
-            
-            setTimeout(() => {
-                document.body.removeChild(effect);
-            }, 2000);
-        }
 
         // طريقة بديلة للمشاركة
         function fallbackShare(inviteLink, shareText) {
