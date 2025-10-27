@@ -1191,6 +1191,7 @@
             transition: transform 0.3s ease;
             z-index: 10000;
             max-width: 300px;
+            backdrop-filter: blur(10px);
         }
 
         .notification.show {
@@ -1203,6 +1204,32 @@
 
         .notification.error {
             border-left: 4px solid var(--accent);
+        }
+
+        .notification.warning {
+            border-left: 4px solid #ffd700;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification-content i {
+            font-size: 1.2rem;
+        }
+
+        .notification.success .notification-content i {
+            color: var(--primary);
+        }
+
+        .notification.error .notification-content i {
+            color: var(--accent);
+        }
+
+        .notification.warning .notification-content i {
+            color: #ffd700;
         }
 
         /* أنماط قائمة المدعوين */
@@ -1458,7 +1485,7 @@
                 </button>
             </div>
             
-            <!-- 3. نظام المكافآت الخاص -->
+            <!-- 3. نظام الدعوة -->
             <div class="invite-panel">
                 <div class="invite-header">
                     <div class="invite-title">نظام الدعوة</div>
@@ -1548,7 +1575,96 @@
             8: 250000,
             9: 400000,
             10: 600000,
-            // ... المستويات الأخرى تبقى كما هي
+            11: 850000,
+            12: 1150000,
+            13: 1500000,
+            14: 1900000,
+            15: 2350000,
+            16: 2850000,
+            17: 3400000,
+            18: 4000000,
+            19: 4650000,
+            20: 5350000,
+            21: 6100000,
+            22: 6900000,
+            23: 7750000,
+            24: 8650000,
+            25: 9600000,
+            26: 10600000,
+            27: 11650000,
+            28: 12750000,
+            29: 13900000,
+            30: 15100000,
+            31: 16350000,
+            32: 17650000,
+            33: 19000000,
+            34: 20400000,
+            35: 21850000,
+            36: 23350000,
+            37: 24900000,
+            38: 26500000,
+            39: 28150000,
+            40: 29850000,
+            41: 31600000,
+            42: 33400000,
+            43: 35250000,
+            44: 37150000,
+            45: 39100000,
+            46: 41100000,
+            47: 43150000,
+            48: 45250000,
+            49: 47400000,
+            50: 49600000,
+            51: 52000000,
+            52: 54500000,
+            53: 57100000,
+            54: 59800000,
+            55: 62600000,
+            56: 65500000,
+            57: 68500000,
+            58: 71600000,
+            59: 74800000,
+            60: 78100000,
+            61: 81500000,
+            62: 85000000,
+            63: 88600000,
+            64: 92300000,
+            65: 96100000,
+            66: 100000000,
+            67: 104000000,
+            68: 108100000,
+            69: 112300000,
+            70: 116600000,
+            71: 121000000,
+            72: 125500000,
+            73: 130100000,
+            74: 134800000,
+            75: 139600000,
+            76: 144500000,
+            77: 149500000,
+            78: 154600000,
+            79: 159800000,
+            80: 165100000,
+            81: 170500000,
+            82: 176000000,
+            83: 181600000,
+            84: 187300000,
+            85: 193100000,
+            86: 199000000,
+            87: 205000000,
+            88: 211100000,
+            89: 217300000,
+            90: 223600000,
+            91: 230000000,
+            92: 236500000,
+            93: 243100000,
+            94: 249800000,
+            95: 256600000,
+            96: 263500000,
+            97: 270500000,
+            98: 277600000,
+            99: 284800000,
+            100: 292000000
         };
 
         // إحصائيات الدعوة
@@ -1648,7 +1764,7 @@
             }
         };
 
-        // نظام الدعوة المحسن مع Telegram Cloud Storage
+        // نظام الدعوة المحسن مع إصلاحات كاملة
         const inviteSystem = {
             // حفظ بيانات الدعوة في السحابة
             async saveInviteData(inviterId, inviteData) {
@@ -1656,13 +1772,15 @@
                     if (tg && tg.CloudStorage) {
                         const key = `invite_data_${inviterId}`;
                         await tg.CloudStorage.setItem(key, JSON.stringify(inviteData));
-                        console.log("تم حفظ بيانات الدعوة في السحابة");
+                        console.log("تم حفظ بيانات الدعوة في السحابة للمستخدم:", inviterId);
+                        return true;
                     }
                 } catch (error) {
                     console.log("خطأ في حفظ بيانات الدعوة في السحابة:", error);
-                    // حفظ نسخة احتياطية محلياً
-                    this.saveInviteDataLocal(inviterId, inviteData);
                 }
+                
+                // حفظ نسخة احتياطية محلياً
+                return this.saveInviteDataLocal(inviterId, inviteData);
             },
 
             // تحميل بيانات الدعوة من السحابة
@@ -1671,28 +1789,51 @@
                     if (tg && tg.CloudStorage) {
                         const key = `invite_data_${inviterId}`;
                         const data = await tg.CloudStorage.getItem(key);
-                        return data ? JSON.parse(data) : null;
+                        if (data) {
+                            console.log("تم تحميل بيانات الدعوة من السحابة للمستخدم:", inviterId);
+                            return JSON.parse(data);
+                        }
                     }
                 } catch (error) {
                     console.log("خطأ في تحميل بيانات الدعوة من السحابة:", error);
-                    return this.loadInviteDataLocal(inviterId);
                 }
-                return null;
+                
+                return this.loadInviteDataLocal(inviterId);
             },
 
             // حفظ محلي احتياطي
             saveInviteDataLocal(inviterId, inviteData) {
-                localStorage.setItem(`invite_data_${inviterId}`, JSON.stringify(inviteData));
+                try {
+                    localStorage.setItem(`invite_data_${inviterId}`, JSON.stringify(inviteData));
+                    console.log("تم حفظ بيانات الدعوة محلياً للمستخدم:", inviterId);
+                    return true;
+                } catch (error) {
+                    console.log("خطأ في الحفظ المحلي:", error);
+                    return false;
+                }
             },
 
             // تحميل محلي احتياطي
             loadInviteDataLocal(inviterId) {
-                const data = localStorage.getItem(`invite_data_${inviterId}`);
-                return data ? JSON.parse(data) : null;
+                try {
+                    const data = localStorage.getItem(`invite_data_${inviterId}`);
+                    return data ? JSON.parse(data) : null;
+                } catch (error) {
+                    console.log("خطأ في التحميل المحلي:", error);
+                    return null;
+                }
             },
 
-            // إضافة مدعو جديد
+            // إضافة مدعو جديد - الإصلاح هنا
             async addInvitedUser(inviterId, invitedUserId, invitedUserName) {
+                console.log("محاولة إضافة مدعو جديد:", { inviterId, invitedUserId, invitedUserName });
+                
+                // منع المستخدم من دعوة نفسه
+                if (inviterId === invitedUserId) {
+                    console.log("لا يمكن دعوة نفسك");
+                    return { success: false, reason: "self_invite" };
+                }
+
                 let inviteData = await this.loadInviteData(inviterId);
                 
                 if (!inviteData) {
@@ -1700,28 +1841,40 @@
                         inviterId: inviterId,
                         invitedUsers: [],
                         totalInvites: 0,
-                        lastUpdated: new Date().toISOString()
+                        lastUpdated: new Date().toISOString(),
+                        created: new Date().toISOString()
                     };
                 }
 
                 // التحقق إذا كان المستخدم مدعو مسبقاً
                 const existingUser = inviteData.invitedUsers.find(user => user.userId === invitedUserId);
-                if (!existingUser) {
-                    inviteData.invitedUsers.push({
-                        userId: invitedUserId,
-                        userName: invitedUserName,
-                        invitedAt: new Date().toISOString(),
-                        active: true
-                    });
-                    
-                    inviteData.totalInvites = inviteData.invitedUsers.length;
-                    inviteData.lastUpdated = new Date().toISOString();
-
-                    await this.saveInviteData(inviterId, inviteData);
-                    return true;
+                if (existingUser) {
+                    console.log("المستخدم مدعو مسبقاً:", invitedUserId);
+                    return { success: false, reason: "already_invited" };
                 }
+
+                // إضافة المستخدم الجديد
+                const newUser = {
+                    userId: invitedUserId,
+                    userName: invitedUserName,
+                    invitedAt: new Date().toISOString(),
+                    active: true,
+                    rewardGiven: false
+                };
+
+                inviteData.invitedUsers.push(newUser);
+                inviteData.totalInvites = inviteData.invitedUsers.length;
+                inviteData.lastUpdated = new Date().toISOString();
+
+                const saveResult = await this.saveInviteData(inviterId, inviteData);
                 
-                return false;
+                if (saveResult) {
+                    console.log("تمت إضافة المدعو بنجاح:", newUser);
+                    return { success: true, user: newUser };
+                } else {
+                    console.log("فشل في حفظ بيانات الدعوة");
+                    return { success: false, reason: "save_failed" };
+                }
             },
 
             // الحصول على عدد المدعوين
@@ -1734,6 +1887,23 @@
             async getInvitedUsers(inviterId) {
                 const inviteData = await this.loadInviteData(inviterId);
                 return inviteData ? inviteData.invitedUsers : [];
+            },
+
+            // التحقق من صحة رابط الدعوة
+            isValidInviteLink(link) {
+                return link && link.includes('start=invite_');
+            },
+
+            // استخراج معرف المُدعِي من الرابط
+            extractInviterIdFromLink() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const startParam = urlParams.get('start');
+                
+                if (startParam && startParam.startsWith('invite_')) {
+                    return startParam.replace('invite_', '');
+                }
+                
+                return null;
             }
         };
 
@@ -2327,47 +2497,116 @@
             updateUI();
         }
 
-        // التحقق من رابط الدعوة عند التحميل
-        async function checkInviteFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const startParam = urlParams.get('start');
+        // نظام الإشعارات المحسن
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas fa-${getNotificationIcon(type)}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
             
-            if (startParam && startParam.startsWith('invite_')) {
-                const inviterId = startParam.replace('invite_', '');
+            document.body.appendChild(notification);
+            
+            // إضافة تأثير الظهور
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            // إزالة الإشعار بعد 5 ثواني
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        function getNotificationIcon(type) {
+            switch (type) {
+                case 'success': return 'check-circle';
+                case 'error': return 'exclamation-circle';
+                case 'warning': return 'exclamation-triangle';
+                default: return 'info-circle';
+            }
+        }
+
+        // التحقق من رابط الدعوة عند التحميل - الإصدار المحسن
+        async function checkInviteFromUrl() {
+            console.log("بدء التحقق من رابط الدعوة...");
+            
+            const inviterId = inviteSystem.extractInviterIdFromLink();
+            
+            if (!inviterId) {
+                console.log("لا يوجد رابط دعوة صالح");
+                return;
+            }
+            
+            const currentUserId = getUserId();
+            const currentUserName = getUserName();
+            
+            console.log("بيانات الدعوة:", { inviterId, currentUserId, currentUserName });
+            
+            // منع المستخدم من دعوة نفسه
+            if (inviterId === currentUserId) {
+                console.log("لا يمكن دعوة نفسك");
+                showNotification("لا يمكنك استخدام رابط دعوتك الخاص!", "error");
+                return;
+            }
+            
+            // التحقق مما إذا كان المستخدم قد دخل عبر هذا الرابط مسبقاً
+            const inviteKey = `invite_claimed_${inviterId}_${currentUserId}`;
+            if (localStorage.getItem(inviteKey)) {
+                console.log("لقد دخلت عبر هذا الرابط مسبقاً");
+                showNotification("لقد استخدمت هذا الرابط من قبل!", "info");
+                return;
+            }
+            
+            // إضافة المستخدم إلى قائمة مدعوي المُدعِي
+            console.log("محاولة إضافة المستخدم إلى قائمة المدعوين...");
+            const result = await inviteSystem.addInvitedUser(inviterId, currentUserId, currentUserName);
+            
+            if (result.success) {
+                console.log("تمت إضافة المدعو بنجاح!");
                 
-                // منع المستخدم من دعوة نفسه
-                if (inviterId === getUserId()) {
-                    console.log("لا يمكن دعوة نفسك");
-                    return;
-                }
+                // حفظ حالة الدعوة لمنع التكرار
+                localStorage.setItem(inviteKey, 'true');
                 
-                // التحقق مما إذا كان المستخدم قد حصل بالفعل على مكافأة من هذا المُدعِي
-                const inviteKey = `invite_claimed_${inviterId}`;
-                if (localStorage.getItem(inviteKey)) {
-                    console.log("لقد حصلت بالفعل على مكافأة الدعوة من هذا المستخدم");
-                    return;
-                }
+                // منح مكافأة للمدعو
+                const secretReward = Math.floor(Math.random() * 500) + 500; // بين 500 و 1000
+                balance += secretReward;
                 
-                // إضافة المستخدم إلى قائمة مدعوي المُدعِي
-                const currentUserName = getUserName();
-                const added = await inviteSystem.addInvitedUser(inviterId, getUserId(), currentUserName);
+                // تحديث الإحصائيات
+                invitesCount++;
+                rewardsTotal += secretReward;
                 
-                if (added) {
-                    // منح مكافأة سرية
-                    const secretReward = Math.floor(Math.random() * 500) + 500;
-                    balance += secretReward;
-                    
-                    // تحديث الإحصائيات
-                    invitesCount++;
-                    rewardsTotal += secretReward;
-                    localStorage.setItem(inviteKey, 'true');
-                    
-                    // إشعار سري
-                    setTimeout(() => {
-                        showSecretRewardNotification(secretReward);
-                    }, 2000);
-                    
-                    updateUI();
+                // إشعار النجاح
+                showNotification(`🎉 تمت إضافتك إلى قائمة المدعوين! مكافأة: +${secretReward} Crynova`, "success");
+                
+                // تحديث الواجهة
+                updateUI();
+                
+                // إظهار تأثير المكافأة
+                setTimeout(() => {
+                    showSecretRewardNotification(secretReward);
+                }, 1000);
+                
+            } else {
+                console.log("فشل في إضافة المدعو:", result.reason);
+                
+                switch (result.reason) {
+                    case "already_invited":
+                        showNotification("لقد انضممت عبر هذا الرابط مسبقاً!", "info");
+                        break;
+                    case "self_invite":
+                        showNotification("لا يمكنك استخدام رابط دعوتك الخاص!", "error");
+                        break;
+                    default:
+                        showNotification("حدث خطأ في نظام الدعوة!", "error");
                 }
             }
         }
@@ -2744,19 +2983,34 @@
             updateLeaderboardDisplay();
         }, 30000);
 
-        // تهيئة اللعبة
+        // تهيئة اللعبة مع إصلاحات نظام الدعوة
         async function initGame() {
-            loadGameData();
+            console.log("بدء تهيئة اللعبة...");
+            
+            // تحميل البيانات أولاً
+            await loadGameData();
+            console.log("تم تحميل بيانات اللعبة");
+            
+            // تحديث الواجهة
             await updateUI();
-            startAutoMining();
+            console.log("تم تحديث الواجهة");
+            
+            // التحقق من رابط الدعوة (يجب أن يكون بعد تحميل البيانات)
+            console.log("التحقق من رابط الدعوة...");
             await checkInviteFromUrl();
+            
+            // بدء الأنظمة الأخرى
+            startAutoMining();
             startResetTimer();
             updateLeaderboardDisplay();
+            
+            console.log("جميع الأنظمة جاهزة");
             
             // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
             setTimeout(() => {
                 loadingElement.style.display = 'none';
                 mainContentElement.style.display = 'grid';
+                console.log("تم عرض المحتوى الرئيسي");
             }, 1500);
         }
         
