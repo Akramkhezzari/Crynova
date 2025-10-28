@@ -1488,22 +1488,25 @@
         // دالة إدارة المستخدمين في Firebase
         async function initializeUserInFirebase(userId) {
             try {
-                const userRef = db.collection('users').doc(userId.toString());
+                const userRef = db.collection('wallets').doc(userId.toString());
                 const doc = await userRef.get();
                 
                 if (!doc.exists) {
-                    // مستخدم جديد - إضافة 100 عملة حقيقية
+                    // مستخدم جديد - إضافة 100 عملة CNC
                     await userRef.set({
                         telegramId: userId,
-                        realBalance: 100
+                        balances: {
+                            CNC: 100
+                        }
                     });
-                    console.log("✅ تم إنشاء مستخدم جديد مع 100 عملة حقيقية");
+                    console.log("✅ تم إنشاء مستخدم جديد مع 100 CNC في wallets");
                     return 100;
                 } else {
                     // مستخدم موجود - إرجاع الرصيد الحالي
                     const userData = doc.data();
-                    console.log("✅ تم تحميل بيانات المستخدم:", userData.realBalance);
-                    return userData.realBalance || 0;
+                    const currentBalance = userData.balances?.CNC || 0;
+                    console.log("✅ تم تحميل بيانات المستخدم من wallets:", currentBalance);
+                    return currentBalance;
                 }
             } catch (error) {
                 console.error("❌ خطأ في Firebase:", error);
@@ -1514,10 +1517,10 @@
         // دالة تحديث الرصيد في Firebase
         async function updateRealBalanceInFirebase(userId, newBalance) {
             try {
-                await db.collection('users').doc(userId.toString()).update({
-                    realBalance: newBalance
+                await db.collection('wallets').doc(userId.toString()).update({
+                    "balances.CNC": newBalance
                 });
-                console.log("✅ تم تحديث الرصيد في Firebase:", newBalance);
+                console.log("✅ تم تحديث الرصيد في wallets:", newBalance);
                 return true;
             } catch (error) {
                 console.error("❌ خطأ في تحديث الرصيد:", error);
@@ -1879,13 +1882,13 @@
         // محاكاة تحويل إلى المحفظة (للتجربة)
         async function simulateWalletTransfer(userId, amount) {
             return new Promise((resolve) => {
-                console.log(`🔄 Simulating transfer of ${amount} Crynova to wallet user ${userId}`);
+                console.log(`🔄 Simulating transfer of ${amount} CNC to wallet user ${userId}`);
                 
                 // حفظ بيانات السحب للمحفظة
                 const withdrawalData = {
                     userId: userId.toString(),
                     amount: amount,
-                    currency: 'Crynova',
+                    currency: 'CNC',
                     transactionId: 'withdraw_' + Date.now(),
                     status: 'pending',
                     timestamp: new Date().toISOString(),
@@ -1916,7 +1919,7 @@
                 const withdrawalData = {
                     userId: getUserId(),
                     amount: 100,
-                    currency: 'Crynova',
+                    currency: 'CNC',
                     timestamp: new Date().toISOString(),
                     status: 'completed'
                 };
@@ -1937,7 +1940,7 @@
                 const transactionData = {
                     type: 'withdrawal',
                     amount: 100,
-                    currency: 'Crynova',
+                    currency: 'CNC',
                     status: 'completed',
                     timestamp: new Date().toISOString(),
                     userId: getUserId(),
