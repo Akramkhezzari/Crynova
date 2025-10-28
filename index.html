@@ -768,6 +768,117 @@
             color: #a0a0a0;
         }
 
+        /* نظام الإيداع المتقدم */
+        .deposit-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .amount-input-container {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        .amount-input-label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .amount-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .amount-input {
+            flex: 1;
+            background: var(--dark);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text);
+            font-size: 1rem;
+            text-align: center;
+            direction: ltr;
+        }
+
+        .amount-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .quick-amount {
+            background: var(--dark);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: 8px;
+            color: var(--text);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .quick-amount:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .quick-amount.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .amount-preview {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--card-border);
+        }
+
+        .preview-label {
+            font-size: 0.8rem;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+        }
+
+        .preview-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .max-btn {
+            background: var(--secondary);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .max-btn:hover {
+            background: var(--primary);
+        }
+
         .conversion-info {
             background: rgba(255, 255, 255, 0.05);
             padding: 15px;
@@ -1358,7 +1469,7 @@
             
             <!-- 2. لوحة الأرباح الجديدة -->
             <div class="earnings-panel">
-                <h2 class="panel-title"><i class="fas fa-money-bill-wave"></i> الأرباح والتحويل</h2>
+                <h2 class="panel-title"><i class="fas fa-money-bill-wave"></i> الأرباح والإيداع</h2>
                 
                 <div class="earnings-stats">
                     <div class="earnings-stat">
@@ -1371,6 +1482,31 @@
                     </div>
                 </div>
                 
+                <div class="deposit-controls">
+                    <div class="amount-input-container">
+                        <label class="amount-input-label">اختر مبلغ الإيداع:</label>
+                        <div class="amount-input-wrapper">
+                            <input type="number" class="amount-input" id="deposit-amount" 
+                                   placeholder="أدخل المبلغ" min="10000" value="10000">
+                            <button class="max-btn" id="max-btn">الحد الأقصى</button>
+                        </div>
+                        
+                        <div class="quick-amounts">
+                            <div class="quick-amount" data-amount="10000">10K</div>
+                            <div class="quick-amount" data-amount="50000">50K</div>
+                            <div class="quick-amount" data-amount="100000">100K</div>
+                            <div class="quick-amount" data-amount="500000">500K</div>
+                            <div class="quick-amount" data-amount="1000000">1M</div>
+                            <div class="quick-amount" data-amount="5000000">5M</div>
+                        </div>
+                    </div>
+                    
+                    <div class="amount-preview">
+                        <div class="preview-label">سوف تحصل على:</div>
+                        <div class="preview-value" id="real-amount-preview">0 عملة حقيقية</div>
+                    </div>
+                </div>
+                
                 <div class="conversion-info">
                     <div class="conversion-rate">
                         <div class="rate-from">10,000 عملة افتراضية</div>
@@ -1379,7 +1515,7 @@
                     </div>
                     <div class="conversion-warning">
                         <i class="fas fa-exclamation-triangle"></i>
-                        تحذير: لا يمكن إرجاع النقاط بعد التحويل!
+                        الحد الأدنى للإيداع: 10,000 عملة افتراضية
                     </div>
                 </div>
                 
@@ -1390,10 +1526,8 @@
                     </button>
                     <button class="convert-btn" id="convert-btn">
                         <i class="fas fa-exchange-alt"></i>
-                        إيداع 10K في المحفظة
+                        إيداع في المحفظة
                     </button>
-                    
-                    <!-- تم إزالة زر السحب بالكامل -->
                 </div>
             </div>
             
@@ -1618,6 +1752,11 @@
         let energyBoostActive = false;
         let energyBoostEndTime = 0;
 
+        // متغيرات نظام الإيداع الجديد
+        let depositAmount = 10000; // المبلغ الافتراضي للإيداع
+        const MIN_DEPOSIT = 10000; // الحد الأدنى للإيداع
+        const CONVERSION_RATE = 10000; // 10,000 افتراضي = 1 حقيقي
+
         // العناصر في واجهة المستخدم
         const balanceElement = document.getElementById('balance');
         const levelElement = document.getElementById('level');
@@ -1641,6 +1780,12 @@
         const openWalletButton = document.getElementById('open-wallet-btn');
         const virtualBalanceElement = document.getElementById('virtual-balance');
         const realBalanceElement = document.getElementById('real-balance');
+
+        // العناصر الجديدة لنظام الإيداع
+        const depositAmountInput = document.getElementById('deposit-amount');
+        const maxButton = document.getElementById('max-btn');
+        const quickAmounts = document.querySelectorAll('.quick-amount');
+        const realAmountPreview = document.getElementById('real-amount-preview');
 
         // ========== دوال الربط مع المحفظة ==========
         
@@ -1890,6 +2035,12 @@
             // تحديث لوحة الأرباح
             updateEarningsPanel();
             
+            // تحديث معاينة المبلغ الحقيقي
+            updateRealAmountPreview();
+            
+            // تحديث الأزرار السريعة
+            updateQuickAmounts();
+            
             // التحقق من انتهاء مدة تعزيز الطاقة
             checkEnergyBoost();
             
@@ -1904,9 +2055,18 @@
             realBalanceElement.textContent = realBalance;
             
             // تحديث حالة زر التحويل
-            convertButton.disabled = balance < 10000; // تغيير من 1,000,000 إلى 10,000
+            convertButton.disabled = balance < MIN_DEPOSIT || depositAmount > balance || depositAmount < MIN_DEPOSIT;
+            
+            // تحديث الحد الأقصى المسموح به
+            depositAmountInput.max = balance;
         }
         
+        // تحديث معاينة المبلغ الحقيقي
+        function updateRealAmountPreview() {
+            const realAmount = Math.floor(depositAmount / CONVERSION_RATE);
+            realAmountPreview.textContent = `${realAmount} عملة حقيقية`;
+        }
+
         // تحديث الإنجازات
         function updateAchievements() {
             // إنجاز 10K نقطة
@@ -2161,6 +2321,247 @@
             }, 3000);
         }
 
+        // ========== نظام الإيداع المتقدم ==========
+        
+        // تحديث المبلغ عند تغيير الإدخال
+        depositAmountInput.addEventListener('input', function() {
+            let value = parseInt(this.value) || 0;
+            
+            // التحقق من الحد الأدنى
+            if (value < MIN_DEPOSIT) {
+                value = MIN_DEPOSIT;
+                this.value = value;
+            }
+            
+            // التحقق من الحد الأقصى (الرصيد المتاح)
+            if (value > balance) {
+                value = balance;
+                this.value = value;
+            }
+            
+            depositAmount = value;
+            updateQuickAmounts();
+            updateRealAmountPreview();
+            updateEarningsPanel();
+        });
+
+        // زر الحد الأقصى
+        maxButton.addEventListener('click', function() {
+            depositAmount = balance;
+            depositAmountInput.value = depositAmount;
+            updateQuickAmounts();
+            updateRealAmountPreview();
+            updateEarningsPanel();
+        });
+
+        // الأزرار السريعة
+        quickAmounts.forEach(button => {
+            button.addEventListener('click', function() {
+                const amount = parseInt(this.dataset.amount);
+                
+                if (amount <= balance) {
+                    depositAmount = amount;
+                    depositAmountInput.value = depositAmount;
+                    updateQuickAmounts();
+                    updateRealAmountPreview();
+                    updateEarningsPanel();
+                } else {
+                    showGameMessage('تحذير', 'لا يوجد رصيد كافي لهذا المبلغ!', 'error');
+                }
+            });
+        });
+
+        // تحديث حالة الأزرار السريعة
+        function updateQuickAmounts() {
+            quickAmounts.forEach(button => {
+                const amount = parseInt(button.dataset.amount);
+                if (amount === depositAmount) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+                
+                // تعطيل الأزرار التي تتجاوز الرصيد المتاح
+                if (amount > balance) {
+                    button.style.opacity = '0.5';
+                    button.style.cursor = 'not-allowed';
+                } else {
+                    button.style.opacity = '1';
+                    button.style.cursor = 'pointer';
+                }
+            });
+        }
+
+        // زر الإيداع في المحفظة
+        convertButton.addEventListener('click', () => {
+            if (depositAmount < MIN_DEPOSIT) {
+                showGameMessage('تحذير', `الحد الأدنى للإيداع هو ${formatNumber(MIN_DEPOSIT)} عملة افتراضية!`, 'error');
+                return;
+            }
+            
+            if (depositAmount > balance) {
+                showGameMessage('تحذير', 'لا يوجد رصيد كافي!', 'error');
+                return;
+            }
+            
+            // تأكيد الإيداع
+            showConversionConfirmation();
+        });
+
+        // عرض تأكيد الإيداع
+        function showConversionConfirmation() {
+            const realAmount = Math.floor(depositAmount / CONVERSION_RATE);
+            
+            const confirmModal = document.createElement('div');
+            confirmModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.9);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+            
+            confirmModal.innerHTML = `
+                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 90%; text-align: center; border: 2px solid var(--accent);">
+                    <div style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3 style="color: var(--accent); margin-bottom: 15px;">تأكيد الإيداع</h3>
+                    <p style="margin-bottom: 10px; color: var(--text);">سوف تقوم بإيداع:</p>
+                    <div style="background: rgba(255, 46, 99, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--accent);">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent);">
+                            ${formatNumber(depositAmount)} عملة افتراضية
+                        </div>
+                        <div style="font-size: 1.5rem; margin: 10px 0; color: var(--primary);">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">
+                            ${realAmount} عملة حقيقية
+                        </div>
+                    </div>
+                    <div style="background: rgba(255, 46, 99, 0.2); padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.8rem; color: #ff8fa3;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        تحذير: لا يمكن إرجاع النقاط بعد الإيداع!
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button id="confirm-convert-btn" 
+                                style="background: var(--accent); color: white; border: none; padding: 12px 25px; 
+                                       border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1;">
+                            <i class="fas fa-check"></i> تأكيد الإيداع
+                        </button>
+                        <button id="cancel-convert-btn" 
+                                style="background: var(--secondary); color: white; border: none; padding: 12px 25px; 
+                                       border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1;">
+                            <i class="fas fa-times"></i> إلغاء
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmModal);
+            
+            // إضافة event listeners للأزرار في النافذة
+            document.getElementById('confirm-convert-btn').addEventListener('click', () => {
+                performConversion();
+                confirmModal.remove();
+            });
+            
+            document.getElementById('cancel-convert-btn').addEventListener('click', () => {
+                confirmModal.remove();
+            });
+            
+            // إغلاق النافذة عند النقر خارجها
+            confirmModal.addEventListener('click', (e) => {
+                if (e.target === confirmModal) {
+                    confirmModal.remove();
+                }
+            });
+        }
+
+        // تنفيذ عملية الإيداع
+        function performConversion() {
+            const realAmount = Math.floor(depositAmount / CONVERSION_RATE);
+            
+            // خصم المبلغ من الرصيد الافتراضي
+            balance -= depositAmount;
+            
+            // إضافة العملات الحقيقية
+            realBalance += realAmount;
+            
+            // تحديث الرصيد في Firebase
+            updateRealBalanceInFirebase(getUserId(), realBalance);
+            
+            // إعادة تعيين المبلغ إلى الحد الأدنى
+            depositAmount = MIN_DEPOSIT;
+            depositAmountInput.value = depositAmount;
+            
+            // تحديث الواجهة
+            updateUI();
+            
+            // إظهار رسالة نجاح
+            showConversionSuccess(realAmount);
+        }
+
+        // إظهار رسالة نجاح الإيداع
+        function showConversionSuccess(realAmount) {
+            const successModal = document.createElement('div');
+            successModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.9);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+            
+            successModal.innerHTML = `
+                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 90%; text-align: center; border: 2px solid var(--primary);">
+                    <div style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3 style="color: var(--primary); margin-bottom: 15px;">تم الإيداع بنجاح!</h3>
+                    <div style="background: rgba(0, 255, 157, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--primary);">
+                        <div style="font-size: 1rem; color: var(--text); margin-bottom: 5px;">تم خصم:</div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent);">
+                            ${formatNumber(depositAmount)} عملة افتراضية
+                        </div>
+                        <div style="font-size: 1rem; color: var(--text); margin: 10px 0;">وإضافة:</div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">
+                            ${realAmount} عملة حقيقية
+                        </div>
+                    </div>
+                    <button id="close-success-btn" 
+                            style="background: var(--primary); color: white; border: none; padding: 12px 25px; 
+                                   border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">
+                        <i class="fas fa-times"></i> إغلاق
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(successModal);
+            
+            // إضافة event listener للزر
+            document.getElementById('close-success-btn').addEventListener('click', () => {
+                successModal.remove();
+            });
+            
+            // إغلاق النافذة تلقائياً بعد 5 ثوان
+            setTimeout(() => {
+                if (document.body.contains(successModal)) {
+                    successModal.remove();
+                }
+            }, 5000);
+        }
+
         // بدء عد تنازلي لتجديد المهام
         function startResetTimer() {
             setInterval(() => {
@@ -2261,163 +2662,6 @@
 
         // زر فتح المحفظة
         openWalletButton.addEventListener('click', openWallet);
-
-        // زر التحويل من عملات افتراضية إلى حقيقية
-        convertButton.addEventListener('click', () => {
-            if (balance < 10000) { // تغيير من 1,000,000 إلى 10,000
-                showGameMessage('تحذير', 'تحتاج إلى 10,000 عملة افتراضية للتحويل!', 'error');
-                return;
-            }
-            
-            // تأكيد التحويل
-            showConversionConfirmation();
-        });
-
-        // عرض تأكيد التحويل
-        function showConversionConfirmation() {
-            const confirmModal = document.createElement('div');
-            confirmModal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.9);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
-            `;
-            
-            confirmModal.innerHTML = `
-                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 90%; text-align: center; border: 2px solid var(--accent);">
-                    <div style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <h3 style="color: var(--accent); margin-bottom: 15px;">تأكيد الإيداع</h3>
-                    <p style="margin-bottom: 10px; color: var(--text);">سوف تقوم بإيداع:</p>
-                    <div style="background: rgba(255, 46, 99, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--accent);">
-                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent);">
-                            10,000 عملة افتراضية
-                        </div>
-                        <div style="font-size: 1.5rem; margin: 10px 0; color: var(--primary);">
-                            <i class="fas fa-arrow-down"></i>
-                        </div>
-                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">
-                            1 عملة حقيقية
-                        </div>
-                    </div>
-                    <div style="background: rgba(255, 46, 99, 0.2); padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.8rem; color: #ff8fa3;">
-                        <i class="fas fa-exclamation-circle"></i>
-                        تحذير: لا يمكن إرجاع النقاط بعد الإيداع!
-                    </div>
-                    <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button id="confirm-convert-btn" 
-                                style="background: var(--accent); color: white; border: none; padding: 12px 25px; 
-                                       border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1;">
-                            <i class="fas fa-check"></i> تأكيد الإيداع
-                        </button>
-                        <button id="cancel-convert-btn" 
-                                style="background: var(--secondary); color: white; border: none; padding: 12px 25px; 
-                                       border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1;">
-                            <i class="fas fa-times"></i> إلغاء
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(confirmModal);
-            
-            // إضافة event listeners للأزرار في النافذة
-            document.getElementById('confirm-convert-btn').addEventListener('click', () => {
-                performConversion();
-                confirmModal.remove();
-            });
-            
-            document.getElementById('cancel-convert-btn').addEventListener('click', () => {
-                confirmModal.remove();
-            });
-            
-            // إغلاق النافذة عند النقر خارجها
-            confirmModal.addEventListener('click', (e) => {
-                if (e.target === confirmModal) {
-                    confirmModal.remove();
-                }
-            });
-        }
-
-        // تنفيذ عملية التحويل
-        function performConversion() {
-            // خصم 10,000 من الرصيد الافتراضي
-            balance -= 10000;
-            
-            // إضافة 1 عملة حقيقية
-            realBalance += 1;
-            
-            // تحديث الرصيد في Firebase
-            updateRealBalanceInFirebase(getUserId(), realBalance);
-            
-            // تحديث الواجهة
-            updateUI();
-            
-            // إظهار رسالة نجاح
-            showConversionSuccess();
-        }
-
-        // إظهار رسالة نجاح التحويل
-        function showConversionSuccess() {
-            const successModal = document.createElement('div');
-            successModal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.9);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
-            `;
-            
-            successModal.innerHTML = `
-                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 90%; text-align: center; border: 2px solid var(--primary);">
-                    <div style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h3 style="color: var(--primary); margin-bottom: 15px;">تم الإيداع بنجاح!</h3>
-                    <div style="background: rgba(0, 255, 157, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--primary);">
-                        <div style="font-size: 1rem; color: var(--text); margin-bottom: 5px;">تم خصم:</div>
-                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent);">
-                            10,000 عملة افتراضية
-                        </div>
-                        <div style="font-size: 1rem; color: var(--text); margin: 10px 0;">وإضافة:</div>
-                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">
-                            1 عملة حقيقية
-                        </div>
-                    </div>
-                    <button id="close-success-btn" 
-                            style="background: var(--primary); color: white; border: none; padding: 12px 25px; 
-                                   border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">
-                        <i class="fas fa-times"></i> إغلاق
-                    </button>
-                </div>
-            `;
-            
-            document.body.appendChild(successModal);
-            
-            // إضافة event listener للزر
-            document.getElementById('close-success-btn').addEventListener('click', () => {
-                successModal.remove();
-            });
-            
-            // إغلاق النافذة تلقائياً بعد 5 ثوان
-            setTimeout(() => {
-                if (document.body.contains(successModal)) {
-                    successModal.remove();
-                }
-            }, 5000);
-        }
 
         // طريقة بديلة للمشاركة
         function fallbackShare(inviteLink, shareText) {
