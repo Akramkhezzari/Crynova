@@ -822,6 +822,29 @@
             gap: 12px;
         }
 
+        /* زر فتح المحفظة الجديد */
+        .wallet-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            border: none;
+            border-radius: 50px;
+            padding: 15px;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(155, 89, 182, 0.4);
+        }
+
+        .wallet-btn:active {
+            transform: scale(0.98);
+        }
+
         .convert-btn {
             width: 100%;
             background: linear-gradient(135deg, #ffd700, #ffa500);
@@ -1388,6 +1411,10 @@
                 </div>
                 
                 <div class="action-buttons">
+                    <button class="wallet-btn" id="open-wallet-btn">
+                        <i class="fas fa-wallet"></i>
+                        فتح المحفظة
+                    </button>
                     <button class="convert-btn" id="convert-btn">
                         <i class="fas fa-exchange-alt"></i>
                         تحويل 1M إلى 100 عملة حقيقية
@@ -1500,6 +1527,7 @@
 
         // ========== إعدادات الربط مع المحفظة ==========
         const WALLET_BOT_TOKEN = "8323306928:AAG0Fkt0gPgrEJEFmf3itqyk2A7Xh8ZgVYI";
+        const WALLET_BOT_USERNAME = "Crynova_Wallet_bot";
         
         // Telegram Web App Integration
         let tg = window.Telegram?.WebApp;
@@ -1643,11 +1671,18 @@
         // أزرار الأرباح الجديدة
         const convertButton = document.getElementById('convert-btn');
         const withdrawButton = document.getElementById('withdraw-btn');
+        const openWalletButton = document.getElementById('open-wallet-btn');
         const virtualBalanceElement = document.getElementById('virtual-balance');
         const realBalanceElement = document.getElementById('real-balance');
 
         // ========== دوال الربط مع المحفظة ==========
         
+        // دالة فتح المحفظة
+        function openWallet() {
+            const walletUrl = `https://t.me/${WALLET_BOT_USERNAME}`;
+            window.open(walletUrl, '_blank');
+        }
+
         // دالة للتحقق من اتصال المحفظة
         async function checkWalletConnection() {
             try {
@@ -2510,6 +2545,9 @@
             window.open('https://t.me/Coin_Crynova', '_blank');
         });
 
+        // زر فتح المحفظة
+        openWalletButton.addEventListener('click', openWallet);
+
         // زر التحويل من عملات افتراضية إلى حقيقية
         convertButton.addEventListener('click', () => {
             if (balance < 1000000) {
@@ -2978,6 +3016,12 @@
             const withdrawButton = document.getElementById('withdraw-btn');
             if (withdrawButton) {
                 withdrawButton.addEventListener('click', withdrawToWallet);
+            }
+            
+            // إضافة event listener لزر فتح المحفظة
+            const openWalletButton = document.getElementById('open-wallet-btn');
+            if (openWalletButton) {
+                openWalletButton.addEventListener('click', openWallet);
             }
             
             // بدء اللعبة
