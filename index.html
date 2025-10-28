@@ -1373,9 +1373,9 @@
                 
                 <div class="conversion-info">
                     <div class="conversion-rate">
-                        <div class="rate-from">1,000,000 عملة افتراضية</div>
+                        <div class="rate-from">10,000 عملة افتراضية</div>
                         <div class="rate-arrow"><i class="fas fa-arrow-left"></i></div>
-                        <div class="rate-to">100 عملة حقيقية</div>
+                        <div class="rate-to">1 عملة حقيقية</div>
                     </div>
                     <div class="conversion-warning">
                         <i class="fas fa-exclamation-triangle"></i>
@@ -1390,7 +1390,7 @@
                     </button>
                     <button class="convert-btn" id="convert-btn">
                         <i class="fas fa-exchange-alt"></i>
-                        تحويل 1M إلى 100 عملة حقيقية
+                        إيداع 10K في المحفظة
                     </button>
                     
                     <!-- تم إزالة زر السحب بالكامل -->
@@ -1904,7 +1904,7 @@
             realBalanceElement.textContent = realBalance;
             
             // تحديث حالة زر التحويل
-            convertButton.disabled = balance < 1000000;
+            convertButton.disabled = balance < 10000; // تغيير من 1,000,000 إلى 10,000
         }
         
         // تحديث الإنجازات
@@ -2264,8 +2264,8 @@
 
         // زر التحويل من عملات افتراضية إلى حقيقية
         convertButton.addEventListener('click', () => {
-            if (balance < 1000000) {
-                showGameMessage('تحذير', 'تحتاج إلى 1,000,000 عملة افتراضية للتحويل!', 'error');
+            if (balance < 10000) { // تغيير من 1,000,000 إلى 10,000
+                showGameMessage('تحذير', 'تحتاج إلى 10,000 عملة افتراضية للتحويل!', 'error');
                 return;
             }
             
@@ -2294,28 +2294,28 @@
                     <div style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                    <h3 style="color: var(--accent); margin-bottom: 15px;">تأكيد التحويل</h3>
-                    <p style="margin-bottom: 10px; color: var(--text);">سوف تقوم بتحويل:</p>
+                    <h3 style="color: var(--accent); margin-bottom: 15px;">تأكيد الإيداع</h3>
+                    <p style="margin-bottom: 10px; color: var(--text);">سوف تقوم بإيداع:</p>
                     <div style="background: rgba(255, 46, 99, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--accent);">
                         <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent);">
-                            1,000,000 عملة افتراضية
+                            10,000 عملة افتراضية
                         </div>
                         <div style="font-size: 1.5rem; margin: 10px 0; color: var(--primary);">
                             <i class="fas fa-arrow-down"></i>
                         </div>
                         <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">
-                            100 عملة حقيقية
+                            1 عملة حقيقية
                         </div>
                     </div>
                     <div style="background: rgba(255, 46, 99, 0.2); padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.8rem; color: #ff8fa3;">
                         <i class="fas fa-exclamation-circle"></i>
-                        تحذير: لا يمكن إرجاع النقاط بعد التحويل!
+                        تحذير: لا يمكن إرجاع النقاط بعد الإيداع!
                     </div>
                     <div style="display: flex; gap: 10px; justify-content: center;">
                         <button id="confirm-convert-btn" 
                                 style="background: var(--accent); color: white; border: none; padding: 12px 25px; 
                                        border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1;">
-                            <i class="fas fa-check"></i> تأكيد التحويل
+                            <i class="fas fa-check"></i> تأكيد الإيداع
                         </button>
                         <button id="cancel-convert-btn" 
                                 style="background: var(--secondary); color: white; border: none; padding: 12px 25px; 
@@ -2348,11 +2348,11 @@
 
         // تنفيذ عملية التحويل
         function performConversion() {
-            // خصم 1,000,000 من الرصيد الافتراضي
-            balance -= 1000000;
+            // خصم 10,000 من الرصيد الافتراضي
+            balance -= 10000;
             
-            // إضافة 100 عملة حقيقية
-            realBalance += 100;
+            // إضافة 1 عملة حقيقية
+            realBalance += 1;
             
             // تحديث الرصيد في Firebase
             updateRealBalanceInFirebase(getUserId(), realBalance);
@@ -2385,15 +2385,15 @@
                     <div style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                    <h3 style="color: var(--primary); margin-bottom: 15px;">تم التحويل بنجاح!</h3>
+                    <h3 style="color: var(--primary); margin-bottom: 15px;">تم الإيداع بنجاح!</h3>
                     <div style="background: rgba(0, 255, 157, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--primary);">
                         <div style="font-size: 1rem; color: var(--text); margin-bottom: 5px;">تم خصم:</div>
                         <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent);">
-                            1,000,000 عملة افتراضية
+                            10,000 عملة افتراضية
                         </div>
                         <div style="font-size: 1rem; color: var(--text); margin: 10px 0;">وإضافة:</div>
                         <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">
-                            100 عملة حقيقية
+                            1 عملة حقيقية
                         </div>
                     </div>
                     <button id="close-success-btn" 
