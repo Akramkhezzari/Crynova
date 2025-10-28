@@ -427,7 +427,7 @@
             gap: 15px;
         }
 
-        .upgrades-panel, .achievements-panel, .daily-missions-panel, .leaderboard-panel, .invite-panel {
+        .upgrades-panel, .achievements-panel, .daily-missions-panel, .earnings-panel, .invite-panel {
             background: var(--card-bg);
             border-radius: 15px;
             padding: 20px;
@@ -720,8 +720,8 @@
             display: none;
         }
 
-        /* لوحة المتصدرين */
-        .leaderboard-panel {
+        /* لوحة الأرباح الجديدة */
+        .earnings-panel {
             background: var(--card-bg);
             border-radius: 15px;
             padding: 20px;
@@ -733,123 +733,100 @@
             flex-direction: column;
         }
 
-        .leaderboard-container {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-            border-radius: 10px;
+        .earnings-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .earnings-stat {
             background: var(--light);
-            padding: 10px;
-            flex: 1;
-            min-height: 200px;
-        }
-
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 12px;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
-        }
-
-        .leaderboard-item:hover {
-            transform: translateX(-3px);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .leaderboard-item.current-user {
-            border-left: 4px solid var(--primary);
-            background: linear-gradient(135deg, rgba(0, 255, 157, 0.1), transparent);
-        }
-
-        .leaderboard-rank {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: var(--secondary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.8rem;
-            margin-left: 10px;
-        }
-
-        .leaderboard-rank.rank-1 {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-        }
-
-        .leaderboard-rank.rank-2 {
-            background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
-        }
-
-        .leaderboard-rank.rank-3 {
-            background: linear-gradient(135deg, #CD7F32, #A0522D);
-        }
-
-        .leaderboard-user {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .leaderboard-username {
-            font-weight: bold;
-            font-size: 0.9rem;
-            color: var(--text);
-        }
-
-        .leaderboard-score {
-            font-size: 0.8rem;
-            color: var(--primary);
-            font-weight: bold;
-        }
-
-        .user-rank-info {
-            background: var(--light);
-            padding: 12px;
-            border-radius: 10px;
+            padding: 15px;
+            border-radius: 12px;
             text-align: center;
-            margin-bottom: 15px;
+            transition: transform 0.3s ease;
             border: 1px solid var(--card-border);
         }
 
-        .user-rank-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 8px;
+        .earnings-stat:hover {
+            transform: translateY(-3px);
         }
 
-        .user-rank-stat {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px;
-            border-radius: 6px;
-        }
-
-        .user-rank-value {
-            font-size: 1.2rem;
+        .earnings-value {
+            font-size: 1.4rem;
             font-weight: bold;
             color: var(--primary);
+            margin-bottom: 5px;
         }
 
-        .user-rank-label {
-            font-size: 0.7rem;
+        .earnings-label {
+            font-size: 0.8rem;
             color: #a0a0a0;
         }
 
-        .refresh-btn {
+        .conversion-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--card-border);
+        }
+
+        .conversion-rate {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .rate-from {
+            color: var(--text);
+            font-weight: bold;
+        }
+
+        .rate-arrow {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .rate-to {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .conversion-warning {
+            background: rgba(255, 46, 99, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: #ff8fa3;
+            text-align: center;
+        }
+
+        .conversion-warning i {
+            color: var(--accent);
+            margin-left: 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .convert-btn {
             width: 100%;
-            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            background: linear-gradient(135deg, #ffd700, #ffa500);
             border: none;
             border-radius: 50px;
-            padding: 10px;
+            padding: 15px;
             color: white;
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -857,37 +834,56 @@
             justify-content: center;
             gap: 8px;
             transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
         }
 
-        .refresh-btn:active {
+        .convert-btn:active {
             transform: scale(0.98);
         }
 
-        .refresh-btn .fa-sync-alt {
-            transition: transform 0.3s ease;
+        .convert-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
-        .refresh-btn:active .fa-sync-alt {
-            transform: rotate(180deg);
+        .withdraw-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent), #ff1a4d);
+            border: none;
+            border-radius: 50px;
+            padding: 15px;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 46, 99, 0.4);
         }
 
-        /* شريط التمرير المخصص */
-        .leaderboard-container::-webkit-scrollbar {
-            width: 6px;
+        .withdraw-btn:active {
+            transform: scale(0.98);
         }
 
-        .leaderboard-container::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
+        .withdraw-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
-        .leaderboard-container::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 3px;
-        }
-
-        .leaderboard-container::-webkit-scrollbar-thumb:hover {
-            background: var(--secondary);
+        .soon-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-right: 8px;
         }
 
         /* لوحة دعوة الأصدقاء */
@@ -1165,7 +1161,7 @@
                 font-size: 2rem;
             }
             
-            .mining-panel, .upgrades-panel, .achievements-panel, .daily-missions-panel, .leaderboard-panel, .invite-panel {
+            .mining-panel, .upgrades-panel, .achievements-panel, .daily-missions-panel, .earnings-panel, .invite-panel {
                 padding: 15px;
             }
         }
@@ -1174,112 +1170,6 @@
             .user-info {
                 grid-template-columns: repeat(5, 1fr);
             }
-        }
-
-        /* أنماط الإشعارات */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 10px;
-            padding: 15px 20px;
-            color: var(--text);
-            box-shadow: var(--shadow);
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            z-index: 10000;
-            max-width: 300px;
-            backdrop-filter: blur(10px);
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            border-left: 4px solid var(--primary);
-        }
-
-        .notification.error {
-            border-left: 4px solid var(--accent);
-        }
-
-        .notification.warning {
-            border-left: 4px solid #ffd700;
-        }
-
-        .notification-content {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .notification-content i {
-            font-size: 1.2rem;
-        }
-
-        .notification.success .notification-content i {
-            color: var(--primary);
-        }
-
-        .notification.error .notification-content i {
-            color: var(--accent);
-        }
-
-        .notification.warning .notification-content i {
-            color: #ffd700;
-        }
-
-        /* أنماط قائمة المدعوين */
-        .invited-user-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            border-left: 3px solid var(--primary);
-            transition: all 0.3s ease;
-        }
-
-        .invited-user-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateX(-3px);
-        }
-
-        .invited-user-info {
-            flex: 1;
-        }
-
-        .invited-user-name {
-            font-weight: bold;
-            color: var(--text);
-            margin-bottom: 4px;
-        }
-
-        .invited-user-date {
-            font-size: 0.8rem;
-            color: #a0a0a0;
-        }
-
-        .invited-user-status {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        .invited-user-status.active {
-            background: rgba(0, 255, 157, 0.2);
-            color: var(--primary);
-        }
-
-        .invited-user-status.inactive {
-            background: rgba(255, 46, 99, 0.2);
-            color: var(--accent);
         }
     </style>
 </head>
@@ -1467,48 +1357,70 @@
                 </div>
             </div>
             
-            <!-- 2. لوحة المتصدرين -->
-            <div class="leaderboard-panel">
-                <h2 class="panel-title"><i class="fas fa-trophy"></i> لوحة المتصدرين</h2>
+            <!-- 2. لوحة الأرباح الجديدة -->
+            <div class="earnings-panel">
+                <h2 class="panel-title"><i class="fas fa-money-bill-wave"></i> الأرباح والتحويل</h2>
                 
-                <div class="leaderboard-container" id="leaderboard-container">
-                    <!-- سيتم ملء المتصدرين هنا ديناميكياً -->
+                <div class="earnings-stats">
+                    <div class="earnings-stat">
+                        <div class="earnings-value" id="virtual-balance">0</div>
+                        <div class="earnings-label">الرصيد الافتراضي</div>
+                    </div>
+                    <div class="earnings-stat">
+                        <div class="earnings-value" id="real-balance">0</div>
+                        <div class="earnings-label">العملات الحقيقية</div>
+                    </div>
                 </div>
                 
-                <div class="user-rank-info" id="user-rank-info">
-                    <!-- سيتم عرض ترتيب المستخدم هنا -->
+                <div class="conversion-info">
+                    <div class="conversion-rate">
+                        <div class="rate-from">1,000,000 عملة افتراضية</div>
+                        <div class="rate-arrow"><i class="fas fa-arrow-left"></i></div>
+                        <div class="rate-to">100 عملة حقيقية</div>
+                    </div>
+                    <div class="conversion-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        تحذير: لا يمكن إرجاع النقاط بعد التحويل!
+                    </div>
                 </div>
                 
-                <button class="refresh-btn" id="refresh-leaderboard">
-                    <i class="fas fa-sync-alt"></i>
-                    تحديث اللوحة
-                </button>
+                <div class="action-buttons">
+                    <button class="convert-btn" id="convert-btn">
+                        <i class="fas fa-exchange-alt"></i>
+                        تحويل 1M إلى 100 عملة حقيقية
+                    </button>
+                    
+                    <button class="withdraw-btn" id="withdraw-btn" disabled>
+                        <span class="soon-badge">قريباً</span>
+                        سحب إلى المحفظة
+                    </button>
+                </div>
             </div>
             
-            <!-- 3. نظام الدعوة -->
+            <!-- 3. نظام المكافآت الخاص -->
             <div class="invite-panel">
                 <div class="invite-header">
-                    <div class="invite-title">نظام الدعوة</div>
-                    <div class="invite-bonus">👥 دعوة الأصدقاء</div>
+                    <div class="invite-title">نظام المكافآت الخاص</div>
+                    <div class="invite-bonus">🔒 مكافآت سرية</div>
                 </div>
                 
                 <div class="invite-description">
-                    <i class="fas fa-user-friends" style="color: var(--primary); margin-left: 5px;"></i>
-                    ادعُ أصدقاءك وانضم إلى مجتمع Coin Crynova!
+                    <i class="fas fa-shield-alt" style="color: var(--primary); margin-left: 5px;"></i>
+                    نظام المكافآت يعمل بصمت... المكافآت تظهر في وقتها لمن يستحقها فقط!
                     <br>
                     <small style="color: #a0a0a0; margin-top: 8px; display: block;">
-                        👥 كل صديق يدعوه يحسب في نشاطك الشخصي
+                        🤫 لا تسأل عن التفاصيل... فقط استمر وسوف تتفاجأ!
                     </small>
                 </div>
                 
                 <div class="invite-stats">
                     <div class="invite-stat">
-                        <div class="invite-stat-value" id="invites-count">0</div>
-                        <div class="invite-stat-label">الأصدقاء المدعون</div>
+                        <div class="invite-stat-value" id="invites-count">?</div>
+                        <div class="invite-stat-label">النشاط</div>
                     </div>
                     <div class="invite-stat">
-                        <div class="invite-stat-value" id="rewards-total">0</div>
-                        <div class="invite-stat-label">إجمالي النشاط</div>
+                        <div class="invite-stat-value" id="rewards-total">🔒</div>
+                        <div class="invite-stat-label">المكافآت</div>
                     </div>
                 </div>
 
@@ -1521,14 +1433,8 @@
                 </div>
                 
                 <button class="invite-btn" id="invite-friends">
-                    <i class="fas fa-users invite-icon"></i>
-                    <span>عرض الأصدقاء المدعون</span>
-                </button>
-
-                <!-- زر مشاركة الرابط -->
-                <button class="invite-btn" id="share-invite" style="margin-top: 10px; background: linear-gradient(135deg, var(--secondary), var(--primary));">
-                    <i class="fas fa-share-alt invite-icon"></i>
-                    <span>مشاركة الرابط</span>
+                    <i class="fas fa-gift invite-icon"></i>
+                    <span>اكتشف المكافآت</span>
                 </button>
             </div>
         </div>
@@ -1562,6 +1468,10 @@
         let pointsPerClick = 1;
         let autoMiningRate = 0;
         let totalClicks = 0;
+        
+        // متغيرات الأرباح الجديدة
+        let virtualBalance = 0; // الرصيد الافتراضي (نفس balance)
+        let realBalance = 0;    // العملات الحقيقية
         
         // نظام المستويات المحسن - من 1 إلى 100
         const levelRequirements = {
@@ -1615,6 +1525,7 @@
             48: 45250000,
             49: 47400000,
             50: 49600000,
+            // المستويات من 51 إلى 100
             51: 52000000,
             52: 54500000,
             53: 57100000,
@@ -1667,9 +1578,26 @@
             100: 292000000
         };
 
+        // دالة حساب المستوى بناءً على الرصيد (بدون مكافآت)
+        function calculateLevel() {
+            let newLevel = 1;
+            
+            // البحث عن أعلى مستوى يمكن تحقيقه بالرصيد الحالي
+            for (let lvl in levelRequirements) {
+                if (balance >= levelRequirements[lvl]) {
+                    newLevel = parseInt(lvl);
+                } else {
+                    break;
+                }
+            }
+            
+            return newLevel;
+        }
+        
         // إحصائيات الدعوة
         let invitesCount = 0;
         let rewardsTotal = 0;
+        const inviteReward = 1000;
         
         // التعدين التلقائي
         let autoMiningInterval;
@@ -1719,201 +1647,12 @@
         let energyBoostActive = false;
         let energyBoostEndTime = 0;
 
-        // نظام لوحة المتصدرين المؤقتة
-        const leaderboardSystem = {
-            updateLeaderboard: function(userId, username, score) {
-                const leaderboard = JSON.parse(localStorage.getItem('global_leaderboard') || '[]');
-                
-                const existingUser = leaderboard.find(u => u.userId === userId);
-                if (existingUser) {
-                    existingUser.score = Math.max(existingUser.score, score);
-                    existingUser.username = username;
-                    existingUser.lastUpdate = Date.now();
-                } else {
-                    leaderboard.push({
-                        userId: userId,
-                        username: username,
-                        score: score,
-                        lastUpdate: Date.now()
-                    });
-                }
-                
-                // ترتيب اللوحة تنازلياً حسب النقاط
-                leaderboard.sort((a, b) => b.score - a.score);
-                
-                // حفظ فقط أفضل 20 لاعب
-                const topPlayers = leaderboard.slice(0, 20);
-                localStorage.setItem('global_leaderboard', JSON.stringify(topPlayers));
-                
-                return topPlayers;
-            },
-            
-            getLeaderboard: function() {
-                return JSON.parse(localStorage.getItem('global_leaderboard') || '[]');
-            },
-            
-            getUserRank: function(userId) {
-                const leaderboard = this.getLeaderboard();
-                const userIndex = leaderboard.findIndex(u => u.userId === userId);
-                return userIndex !== -1 ? userIndex + 1 : null;
-            },
-            
-            getTopPlayers: function(limit = 10) {
-                const leaderboard = this.getLeaderboard();
-                return leaderboard.slice(0, limit);
-            }
-        };
-
-        // نظام الدعوة المحسن مع إصلاحات كاملة
-        const inviteSystem = {
-            // حفظ بيانات الدعوة في السحابة
-            async saveInviteData(inviterId, inviteData) {
-                try {
-                    if (tg && tg.CloudStorage) {
-                        const key = `invite_data_${inviterId}`;
-                        await tg.CloudStorage.setItem(key, JSON.stringify(inviteData));
-                        console.log("تم حفظ بيانات الدعوة في السحابة للمستخدم:", inviterId);
-                        return true;
-                    }
-                } catch (error) {
-                    console.log("خطأ في حفظ بيانات الدعوة في السحابة:", error);
-                }
-                
-                // حفظ نسخة احتياطية محلياً
-                return this.saveInviteDataLocal(inviterId, inviteData);
-            },
-
-            // تحميل بيانات الدعوة من السحابة
-            async loadInviteData(inviterId) {
-                try {
-                    if (tg && tg.CloudStorage) {
-                        const key = `invite_data_${inviterId}`;
-                        const data = await tg.CloudStorage.getItem(key);
-                        if (data) {
-                            console.log("تم تحميل بيانات الدعوة من السحابة للمستخدم:", inviterId);
-                            return JSON.parse(data);
-                        }
-                    }
-                } catch (error) {
-                    console.log("خطأ في تحميل بيانات الدعوة من السحابة:", error);
-                }
-                
-                return this.loadInviteDataLocal(inviterId);
-            },
-
-            // حفظ محلي احتياطي
-            saveInviteDataLocal(inviterId, inviteData) {
-                try {
-                    localStorage.setItem(`invite_data_${inviterId}`, JSON.stringify(inviteData));
-                    console.log("تم حفظ بيانات الدعوة محلياً للمستخدم:", inviterId);
-                    return true;
-                } catch (error) {
-                    console.log("خطأ في الحفظ المحلي:", error);
-                    return false;
-                }
-            },
-
-            // تحميل محلي احتياطي
-            loadInviteDataLocal(inviterId) {
-                try {
-                    const data = localStorage.getItem(`invite_data_${inviterId}`);
-                    return data ? JSON.parse(data) : null;
-                } catch (error) {
-                    console.log("خطأ في التحميل المحلي:", error);
-                    return null;
-                }
-            },
-
-            // إضافة مدعو جديد - الإصلاح هنا
-            async addInvitedUser(inviterId, invitedUserId, invitedUserName) {
-                console.log("محاولة إضافة مدعو جديد:", { inviterId, invitedUserId, invitedUserName });
-                
-                // منع المستخدم من دعوة نفسه
-                if (inviterId === invitedUserId) {
-                    console.log("لا يمكن دعوة نفسك");
-                    return { success: false, reason: "self_invite" };
-                }
-
-                let inviteData = await this.loadInviteData(inviterId);
-                
-                if (!inviteData) {
-                    inviteData = {
-                        inviterId: inviterId,
-                        invitedUsers: [],
-                        totalInvites: 0,
-                        lastUpdated: new Date().toISOString(),
-                        created: new Date().toISOString()
-                    };
-                }
-
-                // التحقق إذا كان المستخدم مدعو مسبقاً
-                const existingUser = inviteData.invitedUsers.find(user => user.userId === invitedUserId);
-                if (existingUser) {
-                    console.log("المستخدم مدعو مسبقاً:", invitedUserId);
-                    return { success: false, reason: "already_invited" };
-                }
-
-                // إضافة المستخدم الجديد
-                const newUser = {
-                    userId: invitedUserId,
-                    userName: invitedUserName,
-                    invitedAt: new Date().toISOString(),
-                    active: true,
-                    rewardGiven: false
-                };
-
-                inviteData.invitedUsers.push(newUser);
-                inviteData.totalInvites = inviteData.invitedUsers.length;
-                inviteData.lastUpdated = new Date().toISOString();
-
-                const saveResult = await this.saveInviteData(inviterId, inviteData);
-                
-                if (saveResult) {
-                    console.log("تمت إضافة المدعو بنجاح:", newUser);
-                    return { success: true, user: newUser };
-                } else {
-                    console.log("فشل في حفظ بيانات الدعوة");
-                    return { success: false, reason: "save_failed" };
-                }
-            },
-
-            // الحصول على عدد المدعوين
-            async getInvitedUsersCount(inviterId) {
-                const inviteData = await this.loadInviteData(inviterId);
-                return inviteData ? inviteData.totalInvites : 0;
-            },
-
-            // الحصول على قائمة المدعوين
-            async getInvitedUsers(inviterId) {
-                const inviteData = await this.loadInviteData(inviterId);
-                return inviteData ? inviteData.invitedUsers : [];
-            },
-
-            // التحقق من صحة رابط الدعوة
-            isValidInviteLink(link) {
-                return link && link.includes('start=invite_');
-            },
-
-            // استخراج معرف المُدعِي من الرابط
-            extractInviterIdFromLink() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const startParam = urlParams.get('start');
-                
-                if (startParam && startParam.startsWith('invite_')) {
-                    return startParam.replace('invite_', '');
-                }
-                
-                return null;
-            }
-        };
-
         // العناصر في واجهة المستخدم
         const balanceElement = document.getElementById('balance');
         const levelElement = document.getElementById('level');
         const energyElement = document.getElementById('energy');
         const mineButton = document.getElementById('mine-btn');
         const inviteFriendsButton = document.getElementById('invite-friends');
-        const shareInviteButton = document.getElementById('share-invite');
         const loadingElement = document.getElementById('loading');
         const mainContentElement = document.getElementById('main-content');
         const inviteLinkElement = document.getElementById('invite-link');
@@ -1925,6 +1664,12 @@
         const buyServerButton = document.getElementById('buy-server');
         const buyFarmButton = document.getElementById('buy-farm');
         const buyDatacenterButton = document.getElementById('buy-datacenter');
+        
+        // أزرار الأرباح الجديدة
+        const convertButton = document.getElementById('convert-btn');
+        const withdrawButton = document.getElementById('withdraw-btn');
+        const virtualBalanceElement = document.getElementById('virtual-balance');
+        const realBalanceElement = document.getElementById('real-balance');
 
         // دالة للحصول على معرف المستخدم الفريد
         function getUserId() {
@@ -1978,15 +1723,14 @@
                 dailyLoginClaimed,
                 energyBoostActive,
                 energyBoostEndTime,
+                virtualBalance,
+                realBalance,
                 userName: getUserName(),
                 lastPlayed: new Date().toISOString()
             };
             
             // حفظ في التخزين المحلي كنسخة احتياطية
             localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
-            
-            // تحديث لوحة المتصدرين
-            leaderboardSystem.updateLeaderboard(getUserId(), getUserName(), balance);
             
             // حفظ في Telegram Cloud Storage إذا كان متاحاً
             if (tg && tg.CloudStorage) {
@@ -2048,6 +1792,10 @@
             invitesCount = gameData.invitesCount || 0;
             rewardsTotal = gameData.rewardsTotal || 0;
             
+            // بيانات الأرباح الجديدة
+            virtualBalance = gameData.virtualBalance || balance;
+            realBalance = gameData.realBalance || 0;
+            
             // بيانات المهام اليومية
             dailyLoginClaimed = gameData.dailyLoginClaimed || false;
             energyBoostActive = gameData.energyBoostActive || false;
@@ -2069,10 +1817,10 @@
         }
 
         // تحديث واجهة المستخدم
-        async function updateUI() {
+        function updateUI() {
             balanceElement.textContent = formatNumber(balance);
             
-            // تحديث المستوى
+            // تحديث المستوى باستخدام النظام الجديد
             const newLevel = calculateLevel();
             if (newLevel !== level) {
                 level = newLevel;
@@ -2106,13 +1854,13 @@
             updateAchievements();
             
             // تحديث إحصائيات الدعوة
-            await updateInviteStats();
+            updateInviteStats();
             
             // تحديث المهام اليومية
             updateDailyMissions();
             
-            // تحديث لوحة المتصدرين
-            updateLeaderboardDisplay();
+            // تحديث لوحة الأرباح
+            updateEarningsPanel();
             
             // التحقق من انتهاء مدة تعزيز الطاقة
             checkEnergyBoost();
@@ -2121,19 +1869,17 @@
             saveGameData();
         }
         
-        // دالة حساب المستوى بناءً على الرصيد
-        function calculateLevel() {
-            let newLevel = 1;
+        // تحديث لوحة الأرباح
+        function updateEarningsPanel() {
+            virtualBalance = balance; // الرصيد الافتراضي هو نفس الرصيد الحالي
+            virtualBalanceElement.textContent = formatNumber(virtualBalance);
+            realBalanceElement.textContent = realBalance;
             
-            for (let lvl in levelRequirements) {
-                if (balance >= levelRequirements[lvl]) {
-                    newLevel = parseInt(lvl);
-                } else {
-                    break;
-                }
-            }
+            // تحديث حالة زر التحويل
+            convertButton.disabled = balance < 1000000;
             
-            return newLevel;
+            // تحديث حالة زر السحب
+            withdrawButton.disabled = realBalance <= 0;
         }
         
         // تحديث الإنجازات
@@ -2166,21 +1912,28 @@
             }
         }
 
-        // تحديث إحصائيات الدعوة
-        async function updateInviteStats() {
+        // تحديث إحصائيات الدعوة لتكون أكثر غموضاً
+        function updateInviteStats() {
             const invitesCountElement = document.getElementById('invites-count');
             const rewardsTotalElement = document.getElementById('rewards-total');
-            const currentUserId = getUserId();
             
-            // الحصول على عدد المدعوين الفعلي من السحابة
-            const invitedCount = await inviteSystem.getInvitedUsersCount(currentUserId);
+            if (invitesCount === 0) {
+                invitesCountElement.textContent = '?';
+                invitesCountElement.style.color = '#a0a0a0';
+            } else if (invitesCount < 3) {
+                invitesCountElement.textContent = '🌟';
+                invitesCountElement.style.color = 'var(--primary)';
+            } else if (invitesCount < 10) {
+                invitesCountElement.textContent = '🌟🌟';
+                invitesCountElement.style.color = 'var(--primary)';
+            } else {
+                invitesCountElement.textContent = '🌟🌟🌟';
+                invitesCountElement.style.color = 'var(--primary)';
+            }
             
-            invitesCountElement.textContent = invitedCount.toString();
-            invitesCountElement.style.color = 'var(--primary)';
-            
-            // إجمالي النشاط هو عدد المدعوين
-            rewardsTotalElement.textContent = invitedCount.toString();
-            rewardsTotalElement.style.color = 'var(--primary)';
+            // إخفاء إجمالي المكافآت
+            rewardsTotalElement.textContent = '🔒';
+            rewardsTotalElement.style.color = '#a0a0a0';
         }
 
         // تحديث واجهة المهام اليومية
@@ -2216,71 +1969,6 @@
             });
         }
 
-        // تحديث وعرض لوحة المتصدرين
-        function updateLeaderboardDisplay() {
-            const leaderboardContainer = document.getElementById('leaderboard-container');
-            const userRankInfo = document.getElementById('user-rank-info');
-            
-            if (!leaderboardContainer) return;
-            
-            const topPlayers = leaderboardSystem.getTopPlayers(10);
-            const currentUserId = getUserId();
-            const userRank = leaderboardSystem.getUserRank(currentUserId);
-            
-            // عرض ترتيب المستخدم
-            if (userRankInfo) {
-                userRankInfo.innerHTML = `
-                    <div style="font-weight: bold; color: var(--primary); margin-bottom: 8px;">
-                        ${userRank ? `ترتيبك: #${userRank}` : 'لم تدخل اللوحة بعد'}
-                    </div>
-                    <div class="user-rank-stats">
-                        <div class="user-rank-stat">
-                            <div class="user-rank-value">${formatNumber(balance)}</div>
-                            <div class="user-rank-label">رصيدك</div>
-                        </div>
-                        <div class="user-rank-stat">
-                            <div class="user-rank-value">${level}</div>
-                            <div class="user-rank-label">المستوى</div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // عرض أفضل 10 لاعبين
-            leaderboardContainer.innerHTML = '';
-            
-            if (topPlayers.length === 0) {
-                leaderboardContainer.innerHTML = `
-                    <div style="text-align: center; color: #a0a0a0; padding: 20px;">
-                        <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
-                        <div>لا توجد بيانات بعد</div>
-                        <div style="font-size: 0.8rem; margin-top: 5px;">استمر في اللعب لدخول اللوحة!</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            topPlayers.forEach((player, index) => {
-                const isCurrentUser = player.userId === currentUserId;
-                const rankClass = index < 3 ? `rank-${index + 1}` : '';
-                
-                const leaderboardItem = document.createElement('div');
-                leaderboardItem.className = `leaderboard-item ${isCurrentUser ? 'current-user' : ''}`;
-                leaderboardItem.innerHTML = `
-                    <div class="leaderboard-rank ${rankClass}">${index + 1}</div>
-                    <div class="leaderboard-user">
-                        <div class="leaderboard-username">
-                            ${player.username}
-                            ${isCurrentUser ? ' (أنت) ' : ''}
-                        </div>
-                        <div class="leaderboard-score">${formatNumber(player.score)} Crynova</div>
-                    </div>
-                `;
-                
-                leaderboardContainer.appendChild(leaderboardItem);
-            });
-        }
-
         // معالجة المكافآت
         function handleMissionReward(event) {
             const missionId = event.currentTarget.getAttribute('data-mission-id');
@@ -2313,7 +2001,7 @@
             showBonusEffect(bonus);
         }
 
-        // المطالبة بتعزيز الطاقة
+        // المطالبة بتعزيز الطاقة - التصحيح النهائي
         function claimMiningBoost(mission) {
             const boost = mission.rewardValue; // 0.05 = 5%
             
@@ -2326,7 +2014,7 @@
             showBoostEffect(boost);
         }
 
-        // التحقق من انتهاء مدة تعزيز الطاقة
+        // التحقق من انتهاء مدة تعزيز الطاقة - التصحيح
         function checkEnergyBoost() {
             if (energyBoostActive && Date.now() > energyBoostEndTime) {
                 // إعادة المعدل إلى الطبيعي (إزالة التعزيز 5%)
@@ -2497,159 +2185,78 @@
             updateUI();
         }
 
-        // نظام الإشعارات المحسن
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <div class="notification-content">
-                    <i class="fas fa-${getNotificationIcon(type)}"></i>
-                    <span>${message}</span>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            // إضافة تأثير الظهور
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 100);
-            
-            // إزالة الإشعار بعد 5 ثواني
-            setTimeout(() => {
-                notification.classList.remove('show');
+        // نسخ رابط الدعوة
+        copyLinkButton.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(inviteLinkElement.value);
+                // تغيير نص الزر مؤقتاً للإشارة إلى النسخ
+                const originalHTML = copyLinkButton.innerHTML;
+                copyLinkButton.innerHTML = '<i class="fas fa-check"></i>';
+                copyLinkButton.style.background = 'var(--primary)';
+                
                 setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
-            }, 5000);
-        }
-
-        function getNotificationIcon(type) {
-            switch (type) {
-                case 'success': return 'check-circle';
-                case 'error': return 'exclamation-circle';
-                case 'warning': return 'exclamation-triangle';
-                default: return 'info-circle';
+                    copyLinkButton.innerHTML = originalHTML;
+                    copyLinkButton.style.background = '';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                // طريقة بديلة للنسخ
+                inviteLinkElement.select();
+                document.execCommand('copy');
             }
-        }
-
-        // التحقق من رابط الدعوة عند التحميل - الإصدار المحسن
-        async function checkInviteFromUrl() {
-            console.log("بدء التحقق من رابط الدعوة...");
+        });
+        
+        // زر مشاركة الرابط
+        inviteFriendsButton.addEventListener('click', () => {
+            const inviteLink = generateInviteLink();
+            const shareText = `🎮 اكتشف عالم Coin Crynova السري! \n\n${inviteLink}\n\n✨ نظام مكافآت سري ينتظر من يجده...`;
             
-            const inviterId = inviteSystem.extractInviterIdFromLink();
-            
-            if (!inviterId) {
-                console.log("لا يوجد رابط دعوة صالح");
-                return;
-            }
-            
-            const currentUserId = getUserId();
-            const currentUserName = getUserName();
-            
-            console.log("بيانات الدعوة:", { inviterId, currentUserId, currentUserName });
-            
-            // منع المستخدم من دعوة نفسه
-            if (inviterId === currentUserId) {
-                console.log("لا يمكن دعوة نفسك");
-                showNotification("لا يمكنك استخدام رابط دعوتك الخاص!", "error");
-                return;
-            }
-            
-            // التحقق مما إذا كان المستخدم قد دخل عبر هذا الرابط مسبقاً
-            const inviteKey = `invite_claimed_${inviterId}_${currentUserId}`;
-            if (localStorage.getItem(inviteKey)) {
-                console.log("لقد دخلت عبر هذا الرابط مسبقاً");
-                showNotification("لقد استخدمت هذا الرابط من قبل!", "info");
-                return;
-            }
-            
-            // إضافة المستخدم إلى قائمة مدعوي المُدعِي
-            console.log("محاولة إضافة المستخدم إلى قائمة المدعوين...");
-            const result = await inviteSystem.addInvitedUser(inviterId, currentUserId, currentUserName);
-            
-            if (result.success) {
-                console.log("تمت إضافة المدعو بنجاح!");
-                
-                // حفظ حالة الدعوة لمنع التكرار
-                localStorage.setItem(inviteKey, 'true');
-                
-                // منح مكافأة للمدعو
-                const secretReward = Math.floor(Math.random() * 500) + 500; // بين 500 و 1000
-                balance += secretReward;
-                
-                // تحديث الإحصائيات
-                invitesCount++;
-                rewardsTotal += secretReward;
-                
-                // إشعار النجاح
-                showNotification(`🎉 تمت إضافتك إلى قائمة المدعوين! مكافأة: +${secretReward} Crynova`, "success");
-                
-                // تحديث الواجهة
-                updateUI();
-                
-                // إظهار تأثير المكافأة
-                setTimeout(() => {
-                    showSecretRewardNotification(secretReward);
-                }, 1000);
-                
+            // محاولة استخدام Web Share API إذا كان متاحاً
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Coin Crynova - عالم الأسرار',
+                    text: shareText,
+                    url: inviteLink
+                }).then(() => {
+                    console.log('تمت المشاركة بنجاح');
+                }).catch((error) => {
+                    console.log('خطأ في المشاركة:', error);
+                    fallbackShare(inviteLink, shareText);
+                });
             } else {
-                console.log("فشل في إضافة المدعو:", result.reason);
-                
-                switch (result.reason) {
-                    case "already_invited":
-                        showNotification("لقد انضممت عبر هذا الرابط مسبقاً!", "info");
-                        break;
-                    case "self_invite":
-                        showNotification("لا يمكنك استخدام رابط دعوتك الخاص!", "error");
-                        break;
-                    default:
-                        showNotification("حدث خطأ في نظام الدعوة!", "error");
-                }
+                fallbackShare(inviteLink, shareText);
             }
-        }
+        });
+        
+        // زر تفاعل القناة - تم إزالة المكافأة التلقائية
+        channelInteractionButton.addEventListener('click', (e) => {
+            // فتح القناة في نافذة جديدة فقط
+            window.open('https://t.me/Coin_Crynova', '_blank');
+            
+            // تم إزالة جزء منح المكافأة التلقائية
+            // لا توجد مكافأة تلقائية الآن
+        });
 
-        // إشعار المكافأة السرية
-        function showSecretRewardNotification(reward) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20%;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(0, 0, 0, 0.9);
-                color: var(--primary);
-                padding: 15px 30px;
-                border-radius: 10px;
-                border: 2px solid var(--primary);
-                font-weight: bold;
-                font-size: 1.1rem;
-                z-index: 10000;
-                animation: slideDown 3s ease-in-out forwards;
-                text-align: center;
-            `;
-            notification.innerHTML = `
-                <div style="margin-bottom: 8px; font-size: 1.5rem;">🎁</div>
-                <div>مكافأة سرية: +${reward} Crynova!</div>
-                <div style="font-size: 0.8rem; color: #a0a0a0; margin-top: 5px;">النظام يراقب نشاطك...</div>
-            `;
+        // زر التحويل من عملات افتراضية إلى حقيقية
+        convertButton.addEventListener('click', () => {
+            if (balance < 1000000) {
+                showMessage('تحذير', 'تحتاج إلى 1,000,000 عملة افتراضية للتحويل!', 'error');
+                return;
+            }
             
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 3000);
-        }
+            // تأكيد التحويل
+            showConversionConfirmation();
+        });
 
-        // عرض قائمة المدعوين
-        async function showInvitedUsersList() {
-            const currentUserId = getUserId();
-            const invitedUsers = await inviteSystem.getInvitedUsers(currentUserId);
-            
-            const modal = document.createElement('div');
-            modal.style.cssText = `
+        // زر السحب
+        withdrawButton.addEventListener('click', () => {
+            showMessage('قريباً', 'ميزة السحب ستكون متاحة قريباً!', 'info');
+        });
+
+        // عرض تأكيد التحويل
+        function showConversionConfirmation() {
+            const confirmModal = document.createElement('div');
+            confirmModal.style.cssText = `
                 position: fixed;
                 top: 0;
                 left: 0;
@@ -2662,67 +2269,136 @@
                 z-index: 10000;
             `;
             
-            modal.innerHTML = `
-                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 90%; max-height: 80%; overflow-y: auto; border: 2px solid var(--primary);">
-                    <div style="color: var(--primary); font-size: 1.5rem; margin-bottom: 15px; text-align: center;">
-                        <i class="fas fa-users"></i> الأصدقاء المدعون
+            confirmModal.innerHTML = `
+                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 90%; text-align: center; border: 2px solid var(--accent);">
+                    <div style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;">
+                        <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                    <div style="margin-bottom: 15px; text-align: center; color: var(--text);">
-                        إجمالي الأصدقاء: <span style="color: var(--primary); font-weight: bold;">${invitedUsers.length}</span>
+                    <h3 style="color: var(--accent); margin-bottom: 15px;">تأكيد التحويل</h3>
+                    <p style="margin-bottom: 10px; color: var(--text);">سوف تقوم بتحويل:</p>
+                    <div style="background: rgba(255, 46, 99, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--accent);">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent);">
+                            1,000,000 عملة افتراضية
+                        </div>
+                        <div style="font-size: 1.5rem; margin: 10px 0; color: var(--primary);">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">
+                            100 عملة حقيقية
+                        </div>
                     </div>
-                    <div style="max-height: 300px; overflow-y: auto;">
-                        ${invitedUsers.length > 0 ? 
-                            invitedUsers.map((user, index) => `
-                                <div class="invited-user-item">
-                                    <div class="invited-user-info">
-                                        <div class="invited-user-name">${user.userName}</div>
-                                        <div class="invited-user-date">${new Date(user.invitedAt).toLocaleDateString('ar-EG')}</div>
-                                    </div>
-                                    <div class="invited-user-status ${user.active ? 'active' : 'inactive'}">
-                                        ${user.active ? 'نشط' : 'غير نشط'}
-                                    </div>
-                                </div>
-                            `).join('') : 
-                            '<div style="text-align: center; color: #a0a0a0; padding: 20px;">لا يوجد أصدقاء مدعون بعد</div>'
-                        }
+                    <div style="background: rgba(255, 46, 99, 0.2); padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.8rem; color: #ff8fa3;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        تحذير: لا يمكن إرجاع النقاط بعد التحويل!
                     </div>
-                    <button id="close-invited-list" style="width: 100%; background: var(--accent); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 15px;">
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button id="confirm-convert-btn" 
+                                style="background: var(--accent); color: white; border: none; padding: 12px 25px; 
+                                       border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1;">
+                            <i class="fas fa-check"></i> تأكيد التحويل
+                        </button>
+                        <button id="cancel-convert-btn" 
+                                style="background: var(--secondary); color: white; border: none; padding: 12px 25px; 
+                                       border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1;">
+                            <i class="fas fa-times"></i> إلغاء
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmModal);
+            
+            // إضافة event listeners للأزرار في النافذة
+            document.getElementById('confirm-convert-btn').addEventListener('click', () => {
+                performConversion();
+                confirmModal.remove();
+            });
+            
+            document.getElementById('cancel-convert-btn').addEventListener('click', () => {
+                confirmModal.remove();
+            });
+            
+            // إغلاق النافذة عند النقر خارجها
+            confirmModal.addEventListener('click', (e) => {
+                if (e.target === confirmModal) {
+                    confirmModal.remove();
+                }
+            });
+        }
+
+        // تنفيذ عملية التحويل
+        function performConversion() {
+            // خصم 1,000,000 من الرصيد الافتراضي
+            balance -= 1000000;
+            
+            // إضافة 100 عملة حقيقية
+            realBalance += 100;
+            
+            // تحديث الواجهة
+            updateUI();
+            
+            // إظهار رسالة نجاح
+            showConversionSuccess();
+        }
+
+        // إظهار رسالة نجاح التحويل
+        function showConversionSuccess() {
+            const successModal = document.createElement('div');
+            successModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.9);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+            
+            successModal.innerHTML = `
+                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 90%; text-align: center; border: 2px solid var(--primary);">
+                    <div style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3 style="color: var(--primary); margin-bottom: 15px;">تم التحويل بنجاح!</h3>
+                    <div style="background: rgba(0, 255, 157, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--primary);">
+                        <div style="font-size: 1rem; color: var(--text); margin-bottom: 5px;">تم خصم:</div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent);">
+                            1,000,000 عملة افتراضية
+                        </div>
+                        <div style="font-size: 1rem; color: var(--text); margin: 10px 0;">وإضافة:</div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">
+                            100 عملة حقيقية
+                        </div>
+                    </div>
+                    <button id="close-success-btn" 
+                            style="background: var(--primary); color: white; border: none; padding: 12px 25px; 
+                                   border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">
                         <i class="fas fa-times"></i> إغلاق
                     </button>
                 </div>
             `;
             
-            document.body.appendChild(modal);
+            document.body.appendChild(successModal);
             
-            document.getElementById('close-invited-list').addEventListener('click', () => {
-                modal.remove();
+            // إضافة event listener للزر
+            document.getElementById('close-success-btn').addEventListener('click', () => {
+                successModal.remove();
             });
             
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.remove();
+            // إغلاق النافذة تلقائياً بعد 5 ثوان
+            setTimeout(() => {
+                if (document.body.contains(successModal)) {
+                    successModal.remove();
                 }
-            });
-        }
-
-        // مشاركة رابط الدعوة
-        function shareInviteLink() {
-            const inviteLink = generateInviteLink();
-            const shareText = `🎮 انضم إلى Coin Crynova - لعبة تعدين العملات الرقمية! \n\n${inviteLink}\n\n✨ استمتع بتجربة تعدين فريدة وحقق أرباح رائعة!`;
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Coin Crynova - لعبة تعدين العملات',
-                    text: shareText,
-                    url: inviteLink
-                });
-            } else {
-                fallbackShare(inviteLink, shareText);
-            }
+            }, 5000);
         }
 
         // طريقة بديلة للمشاركة
         function fallbackShare(inviteLink, shareText) {
+            // إنشاء نافذة مشاركة مخصصة
             const shareModal = document.createElement('div');
             shareModal.style.cssText = `
                 position: fixed;
@@ -2742,8 +2418,8 @@
                     <div style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;">
                         <i class="fas fa-gift"></i>
                     </div>
-                    <h3 style="color: var(--primary); margin-bottom: 15px;">ادعُ أصدقاءك</h3>
-                    <p style="margin-bottom: 15px; color: var(--text);">شارك الرابط مع أصدقائك وانضم إلى مجتمع Coin Crynova!</p>
+                    <h3 style="color: var(--primary); margin-bottom: 15px;">اكتشف الأسرار</h3>
+                    <p style="margin-bottom: 15px; color: var(--text);">شارك الرابط وانتظر المفاجآت...</p>
                     <input type="text" value="${inviteLink}" readonly 
                            style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid var(--secondary); 
                                   border-radius: 8px; background: var(--dark); color: var(--text); text-align: center;
@@ -2790,80 +2466,54 @@
             });
         }
 
-        // إضافة animation جديدة
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideDown {
-                0% { top: -100px; opacity: 0; }
-                20% { top: 20%; opacity: 1; }
-                80% { top: 20%; opacity: 1; }
-                100% { top: -100px; opacity: 0; }
-            }
-            @keyframes rewardPop {
-                0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-                50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-                100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
+        // دالة لعرض الرسائل
+        function showMessage(title, message, type = 'info') {
+            const messageModal = document.createElement('div');
+            const color = type === 'error' ? 'var(--accent)' : type === 'success' ? 'var(--primary)' : 'var(--secondary)';
+            
+            messageModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.9);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+            
+            messageModal.innerHTML = `
+                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 90%; text-align: center; border: 2px solid ${color};">
+                    <div style="color: ${color}; font-size: 2rem; margin-bottom: 15px;">
+                        <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                    </div>
+                    <h3 style="color: ${color}; margin-bottom: 15px;">${title}</h3>
+                    <p style="margin-bottom: 20px; color: var(--text);">${message}</p>
+                    <button id="close-message-btn" 
+                            style="background: ${color}; color: white; border: none; padding: 12px 25px; 
+                                   border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">
+                        <i class="fas fa-times"></i> إغلاق
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(messageModal);
+            
+            // إضافة event listener للزر
+            document.getElementById('close-message-btn').addEventListener('click', () => {
+                messageModal.remove();
+            });
+            
+            // إغلاق النافذة تلقائياً بعد 5 ثوان
+            setTimeout(() => {
+                if (document.body.contains(messageModal)) {
+                    messageModal.remove();
+                }
+            }, 5000);
+        }
         
-        // ========== EVENT LISTENERS ==========
-
-        // نسخ رابط الدعوة
-        copyLinkButton.addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(inviteLinkElement.value);
-                // تغيير نص الزر مؤقتاً للإشارة إلى النسخ
-                const originalHTML = copyLinkButton.innerHTML;
-                copyLinkButton.innerHTML = '<i class="fas fa-check"></i>';
-                copyLinkButton.style.background = 'var(--primary)';
-                
-                setTimeout(() => {
-                    copyLinkButton.innerHTML = originalHTML;
-                    copyLinkButton.style.background = '';
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy: ', err);
-                // طريقة بديلة للنسخ
-                inviteLinkElement.select();
-                document.execCommand('copy');
-            }
-        });
-        
-        // زر عرض الأصدقاء المدعون
-        inviteFriendsButton.addEventListener('click', async () => {
-            await showInvitedUsersList();
-        });
-
-        // زر مشاركة الرابط
-        shareInviteButton.addEventListener('click', () => {
-            shareInviteLink();
-        });
-
-        // زر تفاعل القناة
-        channelInteractionButton.addEventListener('click', (e) => {
-            // فتح القناة في نافذة جديدة فقط
-            window.open('https://t.me/Coin_Crynova', '_blank');
-        });
-
-        // زر تحديث لوحة المتصدرين
-        document.addEventListener('DOMContentLoaded', function() {
-            const refreshButton = document.getElementById('refresh-leaderboard');
-            if (refreshButton) {
-                refreshButton.addEventListener('click', function() {
-                    // تحديث بيانات اللاعب الحالي
-                    leaderboardSystem.updateLeaderboard(getUserId(), getUserName(), balance);
-                    updateLeaderboardDisplay();
-                    
-                    // تأثير للزر
-                    this.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        this.style.transform = 'scale(1)';
-                    }, 150);
-                });
-            }
-        });
-
         // النقر على زر التعدين
         mineButton.addEventListener('click', () => {
             if (energy <= 0) {
@@ -2977,40 +2627,115 @@
             }
         }, 1000);
 
-        // تحديث اللوحة تلقائياً كل 30 ثانية
-        setInterval(() => {
-            leaderboardSystem.updateLeaderboard(getUserId(), getUserName(), balance);
-            updateLeaderboardDisplay();
-        }, 30000);
+        // التحقق من رابط الدعوة عند التحميل
+        function checkInviteFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const startParam = urlParams.get('start');
+            
+            if (startParam && startParam.startsWith('invite_')) {
+                const inviterId = startParam.replace('invite_', '');
+                
+                // منع المستخدم من دعوة نفسه
+                if (inviterId === getUserId()) {
+                    console.log("لا يمكن دعوة نفسك");
+                    return;
+                }
+                
+                // التحقق مما إذا كان المستخدم قد حصل بالفعل على مكافأة من هذا المُدعِي
+                const inviteKey = `invite_claimed_${inviterId}`;
+                if (localStorage.getItem(inviteKey)) {
+                    console.log("لقد حصلت بالفعل على مكافأة الدعوة من هذا المستخدم");
+                    return;
+                }
+                
+                // منح مكافأة سرية بدلاً من المبلغ المعلن
+                const secretReward = Math.floor(Math.random() * 500) + 500; // بين 500 و 1000
+                balance += secretReward;
+                
+                // تحديث الإحصائيات
+                invitesCount++;
+                rewardsTotal += secretReward;
+                localStorage.setItem(inviteKey, 'true');
+                
+                // تحديث بيانات المُدعِي في التخزين المحلي
+                updateInviterRewards(inviterId);
+                
+                // إشعار سري
+                setTimeout(() => {
+                    showSecretRewardNotification(secretReward);
+                }, 2000);
+                
+                updateUI();
+            }
+        }
+        
+        // تحديث مكافآت المُدعِي في التخزين المحلي
+        function updateInviterRewards(inviterId) {
+            // في هذا الإصدار المبسط، سنقوم بتحديث بيانات المُدعِي محلياً
+            console.log(`تم تحديث مكافآت المُدعِي ${inviterId} محلياً`);
+        }
 
-        // تهيئة اللعبة مع إصلاحات نظام الدعوة
-        async function initGame() {
-            console.log("بدء تهيئة اللعبة...");
+        // إشعار المكافأة السرية
+        function showSecretRewardNotification(reward) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20%;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: var(--primary);
+                padding: 15px 30px;
+                border-radius: 10px;
+                border: 2px solid var(--primary);
+                font-weight: bold;
+                font-size: 1.1rem;
+                z-index: 10000;
+                animation: slideDown 3s ease-in-out forwards;
+                text-align: center;
+            `;
+            notification.innerHTML = `
+                <div style="margin-bottom: 8px; font-size: 1.5rem;">🎁</div>
+                <div>مكافأة سرية: +${reward} Crynova!</div>
+                <div style="font-size: 0.8rem; color: #a0a0a0; margin-top: 5px;">النظام يراقب نشاطك...</div>
+            `;
             
-            // تحميل البيانات أولاً
-            await loadGameData();
-            console.log("تم تحميل بيانات اللعبة");
+            document.body.appendChild(notification);
             
-            // تحديث الواجهة
-            await updateUI();
-            console.log("تم تحديث الواجهة");
-            
-            // التحقق من رابط الدعوة (يجب أن يكون بعد تحميل البيانات)
-            console.log("التحقق من رابط الدعوة...");
-            await checkInviteFromUrl();
-            
-            // بدء الأنظمة الأخرى
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 3000);
+        }
+
+        // إضافة animation جديدة
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                0% { top: -100px; opacity: 0; }
+                20% { top: 20%; opacity: 1; }
+                80% { top: 20%; opacity: 1; }
+                100% { top: -100px; opacity: 0; }
+            }
+            @keyframes rewardPop {
+                0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+                50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // تهيئة اللعبة
+        function initGame() {
+            loadGameData();
+            updateUI();
             startAutoMining();
+            checkInviteFromUrl();
             startResetTimer();
-            updateLeaderboardDisplay();
-            
-            console.log("جميع الأنظمة جاهزة");
             
             // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
             setTimeout(() => {
                 loadingElement.style.display = 'none';
                 mainContentElement.style.display = 'grid';
-                console.log("تم عرض المحتوى الرئيسي");
             }, 1500);
         }
         
