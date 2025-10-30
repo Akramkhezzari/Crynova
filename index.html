@@ -1647,15 +1647,15 @@
                 const doc = await userRef.get();
                 
                 if (!doc.exists) {
-                    // مستخدم جديد - إضافة 100 عملة CNC
+                    // مستخدم جديد - إضافة 10 عملة CNC
                     await userRef.set({
                         telegramId: userId,
                         balances: {
-                            CNC: 100
+                            CNC: 10
                         }
                     });
-                    console.log("✅ تم إنشاء مستخدم جديد مع 100 CNC في wallets");
-                    return 100;
+                    console.log("✅ تم إنشاء مستخدم جديد مع 10 CNC في wallets");
+                    return 10;
                 } else {
                     // مستخدم موجود - إرجاع الرصيد الحالي
                     const userData = doc.data();
