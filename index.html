@@ -370,7 +370,7 @@
             font-size: 1.1rem;
         }
 
-        /* زر اليوتيوب - أحمر */
+        /* زر اليوتيوب - أحمر - بدون رابط */
         .youtube-btn {
             width: 100%;
             background: linear-gradient(135deg, #ff0000, #cc0000);
@@ -1577,35 +1577,33 @@
                         <i class="fas fa-exchange-alt"></i>
                         إيداع في المحفظة
                     </button>
-                    
-                    <!-- تم إزالة زر السحب بالكامل -->
                 </div>
             </div>
             
-            <!-- 3. نظام المكافآت الخاص -->
+            <!-- 3. نظام الدعوات والمكافآت -->
             <div class="invite-panel">
                 <div class="invite-header">
-                    <div class="invite-title">نظام المكافآت الخاص</div>
-                    <div class="invite-bonus">🔒 مكافآت سرية</div>
+                    <div class="invite-title">نظام الدعوات والمكافآت</div>
+                    <div class="invite-bonus">🎁 10 عملات لكل دعوة</div>
                 </div>
                 
                 <div class="invite-description">
-                    <i class="fas fa-shield-alt" style="color: var(--primary); margin-left: 5px;"></i>
-                    نظام المكافآت يعمل بصمت... المكافآت تظهر في وقتها لمن يستحقها فقط!
+                    <i class="fas fa-gift" style="color: var(--primary); margin-left: 5px;"></i>
+                    ادعُ أصدقاءك واحصل على <strong>10 عملات</strong> لكل دعوة ناجحة!
                     <br>
                     <small style="color: #666; margin-top: 8px; display: block;">
-                        🤫 لا تسأل عن التفاصيل... فقط استمر وسوف تتفاجأ!
+                        🎯 صديقك يحصل على 50 عملة ترحيبية عند الانضمام
                     </small>
                 </div>
                 
                 <div class="invite-stats">
                     <div class="invite-stat">
-                        <div class="invite-stat-value" id="invites-count">?</div>
-                        <div class="invite-stat-label">النشاط</div>
+                        <div class="invite-stat-value" id="invites-count">0</div>
+                        <div class="invite-stat-label">دعوات ناجحة</div>
                     </div>
                     <div class="invite-stat">
-                        <div class="invite-stat-value" id="rewards-total">🔒</div>
-                        <div class="invite-stat-label">المكافآت</div>
+                        <div class="invite-stat-value" id="rewards-total">0</div>
+                        <div class="invite-stat-label">إجمالي المكافآت</div>
                     </div>
                 </div>
 
@@ -1618,8 +1616,8 @@
                 </div>
                 
                 <button class="invite-btn" id="invite-friends">
-                    <i class="fas fa-gift invite-icon"></i>
-                    <span>اكتشف المكافآت</span>
+                    <i class="fas fa-user-plus invite-icon"></i>
+                    <span>دعوة الأصدقاء</span>
                 </button>
             </div>
         </div>
@@ -1640,46 +1638,81 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // دالة إدارة المستخدمين في Firebase
-        async function initializeUserInFirebase(userId) {
+        // ========== نظام الدعوات المحسن ==========
+
+        // بيانات الدعوات (مدمجة داخل wallets)
+        let invitesData = {
+            successfulInvites: 0,
+            totalRewards: 0,
+            inviteCode: generateInviteCode()
+        };
+
+        // دالة إنشاء كود دعوة فريد
+        function generateInviteCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // دالة تحميل بيانات المستخدم من Firebase (بما في ذلك الدعوات)
+        async function loadUserData() {
             try {
+                const userId = getUserId();
                 const userRef = db.collection('wallets').doc(userId.toString());
                 const doc = await userRef.get();
                 
-                if (!doc.exists) {
-                    // مستخدم جديد - إضافة 10 عملة CNC
-                    await userRef.set({
-                        telegramId: userId,
-                        balances: {
-                            CNC: 10
-                        }
-                    });
-                    console.log("✅ تم إنشاء مستخدم جديد مع 10 CNC في wallets");
-                    return 10;
-                } else {
-                    // مستخدم موجود - إرجاع الرصيد الحالي
+                if (doc.exists) {
                     const userData = doc.data();
+                    
+                    // تحميل بيانات الدعوات من داخل wallets
+                    if (userData.invites) {
+                        invitesData = {
+                            successfulInvites: userData.invites.successfulInvites || 0,
+                            totalRewards: userData.invites.totalRewards || 0,
+                            inviteCode: userData.invites.inviteCode || generateInviteCode()
+                        };
+                    }
+                    
+                    // تحميل الرصيد الحقيقي
                     const currentBalance = userData.balances?.CNC || 0;
                     console.log("✅ تم تحميل بيانات المستخدم من wallets:", currentBalance);
                     return currentBalance;
+                } else {
+                    // إنشاء مستخدم جديد
+                    const initialData = {
+                        telegramId: userId,
+                        balances: {
+                            CNC: 10
+                        },
+                        invites: invitesData,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                    await userRef.set(initialData);
+                    console.log("✅ تم إنشاء مستخدم جديد في wallets");
+                    return 10;
                 }
             } catch (error) {
-                console.error("❌ خطأ في Firebase:", error);
+                console.error("❌ خطأ في تحميل بيانات المستخدم:", error);
                 return 0;
             }
         }
 
-        // دالة تحديث الرصيد في Firebase
-        async function updateRealBalanceInFirebase(userId, newBalance) {
+        // دالة تحديث بيانات المستخدم في Firebase (بما في ذلك الدعوات)
+        async function updateUserData() {
             try {
+                const userId = getUserId();
                 await db.collection('wallets').doc(userId.toString()).update({
-                    "balances.CNC": newBalance
+                    "balances.CNC": realBalance,
+                    "invites": invitesData,
+                    "lastUpdated": firebase.firestore.FieldValue.serverTimestamp()
                 });
-                console.log("✅ تم تحديث الرصيد في wallets:", newBalance);
-                return true;
+                console.log("✅ تم تحديث بيانات المستخدم في wallets");
             } catch (error) {
-                console.error("❌ خطأ في تحديث الرصيد:", error);
-                return false;
+                console.error("❌ خطأ في تحديث بيانات المستخدم:", error);
             }
         }
 
@@ -1749,11 +1782,6 @@
             
             return newLevel;
         }
-        
-        // إحصائيات الدعوة
-        let invitesCount = 0;
-        let rewardsTotal = 0;
-        const inviteReward = 1000;
         
         // التعدين التلقائي
         let autoMiningInterval;
@@ -1860,22 +1888,6 @@
 
         // ========== دوال المساعدة للعبة ==========
         
-        function showGameLoading() {
-            // إظهار مؤشر تحميل في اللعبة
-            const loadingElement = document.getElementById('loading');
-            if (loadingElement) {
-                loadingElement.style.display = 'flex';
-            }
-        }
-
-        function hideGameLoading() {
-            // إخفاء مؤشر تحميل في اللعبة
-            const loadingElement = document.getElementById('loading');
-            if (loadingElement) {
-                loadingElement.style.display = 'none';
-            }
-        }
-
         function showGameMessage(title, message, type = 'info') {
             const messageModal = document.createElement('div');
             const color = type === 'error' ? 'var(--accent)' : type === 'success' ? 'var(--primary)' : 'var(--secondary)';
@@ -1936,9 +1948,9 @@
             return 'مستخدم';
         }
 
-        // إنشاء رابط الدعوة الشخصي
+        // دالة إنشاء رابط دعوة محسن
         function generateInviteLink() {
-            const baseUrl = `https://t.me/${BOT_USERNAME}?start=invite_${getUserId()}`;
+            const baseUrl = `https://t.me/${BOT_USERNAME}?start=ref_${getUserId()}_${invitesData.inviteCode}`;
             return baseUrl;
         }
         
@@ -1965,8 +1977,7 @@
                 pointsPerClick,
                 autoMiningRate,
                 totalClicks,
-                invitesCount,
-                rewardsTotal,
+                invitesData,
                 upgrades,
                 upgradeCosts,
                 dailyLoginClaimed,
@@ -1980,6 +1991,9 @@
             
             // حفظ في التخزين المحلي كنسخة احتياطية
             localStorage.setItem(`coin_crynova_${getUserId()}`, JSON.stringify(gameData));
+            
+            // تحديث بيانات المستخدم في Firebase
+            updateUserData();
         }
         
         // تحميل البيانات من التخزين المحلي
@@ -2002,8 +2016,11 @@
             pointsPerClick = gameData.pointsPerClick || 1;
             autoMiningRate = gameData.autoMiningRate || 0;
             totalClicks = gameData.totalClicks || 0;
-            invitesCount = gameData.invitesCount || 0;
-            rewardsTotal = gameData.rewardsTotal || 0;
+            
+            // بيانات الدعوات
+            if (gameData.invitesData) {
+                invitesData = { ...invitesData, ...gameData.invitesData };
+            }
             
             // بيانات الأرباح الجديدة
             virtualBalance = gameData.virtualBalance || balance;
@@ -2067,7 +2084,7 @@
             updateAchievements();
             
             // تحديث إحصائيات الدعوة
-            updateInviteStats();
+            updateInvitesUI();
             
             // تحديث المهام اليومية
             updateDailyMissions();
@@ -2080,6 +2097,12 @@
             
             // حفظ البيانات
             saveGameData();
+        }
+        
+        // تحديث إحصائيات الدعوات في الواجهة
+        function updateInvitesUI() {
+            document.getElementById('invites-count').textContent = invitesData.successfulInvites;
+            document.getElementById('rewards-total').textContent = invitesData.totalRewards;
         }
         
         // تحديث لوحة الأرباح
@@ -2120,30 +2143,6 @@
                 document.getElementById('achievement-1000000').classList.remove('locked');
                 document.getElementById('achievement-1000000').classList.add('unlocked');
             }
-        }
-
-        // تحديث إحصائيات الدعوة لتكون أكثر غموضاً
-        function updateInviteStats() {
-            const invitesCountElement = document.getElementById('invites-count');
-            const rewardsTotalElement = document.getElementById('rewards-total');
-            
-            if (invitesCount === 0) {
-                invitesCountElement.textContent = '?';
-                invitesCountElement.style.color = '#666';
-            } else if (invitesCount < 3) {
-                invitesCountElement.textContent = '🌟';
-                invitesCountElement.style.color = 'var(--primary)';
-            } else if (invitesCount < 10) {
-                invitesCountElement.textContent = '🌟🌟';
-                invitesCountElement.style.color = 'var(--primary)';
-            } else {
-                invitesCountElement.textContent = '🌟🌟🌟';
-                invitesCountElement.style.color = 'var(--primary)';
-            }
-            
-            // إخفاء إجمالي المكافآت
-            rewardsTotalElement.textContent = '🔒';
-            rewardsTotalElement.style.color = '#666';
         }
 
         // تحديث واجهة المهام اليومية
@@ -2197,7 +2196,6 @@
             
             mission.claimed = true;
             updateUI();
-            showMissionRewardEffect(mission);
         }
 
         // المطالبة بمضاعفة الرصيد
@@ -2206,9 +2204,6 @@
             const bonus = balance * (multiplier - 1);
             balance += bonus;
             dailyLoginClaimed = true;
-            
-            // إظهار تأثير المكافأة
-            showBonusEffect(bonus);
         }
 
         // المطالبة بتعزيز الطاقة - التصحيح النهائي
@@ -2219,9 +2214,6 @@
             autoMiningRate = autoMiningRate * (1 + boost);
             energyBoostActive = true;
             energyBoostEndTime = Date.now() + (24 * 60 * 60 * 1000); // 24 ساعة
-            
-            // إظهار تأثير التعزيز
-            showBoostEffect(boost);
         }
 
         // التحقق من انتهاء مدة تعزيز الطاقة - التصحيح
@@ -2238,112 +2230,6 @@
                     energyMission.available = true;
                 }
             }
-        }
-
-        // تأثيرات المكافآت
-        function showMissionRewardEffect(mission) {
-            const effect = document.createElement('div');
-            effect.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 1.8rem;
-                font-weight: bold;
-                color: var(--primary);
-                background: rgba(0, 0, 0, 0.9);
-                padding: 20px 40px;
-                border-radius: 15px;
-                z-index: 10000;
-                animation: rewardPop 2s ease-out forwards;
-                border: 2px solid var(--primary);
-                text-align: center;
-            `;
-            
-            let rewardText = '';
-            switch (mission.rewardType) {
-                case 'balance_multiplier':
-                    rewardText = `مضاعفة الرصيد ${mission.rewardValue}x!`;
-                    break;
-                case 'mining_boost':
-                    rewardText = `تعزيز الطاقة +${(mission.rewardValue * 100).toFixed(0)}% سرعة تعدين!`;
-                    break;
-            }
-            
-            effect.innerHTML = `
-                <div style="margin-bottom: 10px; font-size: 2.5rem;">🎉</div>
-                <div>${mission.name}</div>
-                <div style="font-size: 1rem; margin-top: 10px;">${rewardText}</div>
-            `;
-            
-            document.body.appendChild(effect);
-            
-            setTimeout(() => {
-                document.body.removeChild(effect);
-            }, 2000);
-        }
-
-        function showBonusEffect(bonus) {
-            const effect = document.createElement('div');
-            effect.style.cssText = `
-                position: fixed;
-                top: 30%;
-                left: 50%;
-                transform: translateX(-50%);
-                font-size: 1.5rem;
-                font-weight: bold;
-                color: #ffd700;
-                background: rgba(0, 0, 0, 0.8);
-                padding: 15px 30px;
-                border-radius: 10px;
-                z-index: 10001;
-                animation: slideDown 2s ease-out forwards;
-                border: 2px solid #ffd700;
-                text-align: center;
-            `;
-            
-            effect.innerHTML = `
-                <div style="margin-bottom: 5px;">💰 مكافأة إضافية!</div>
-                <div>+${formatNumber(bonus)} Crynova</div>
-            `;
-            
-            document.body.appendChild(effect);
-            
-            setTimeout(() => {
-                document.body.removeChild(effect);
-            }, 2000);
-        }
-
-        function showBoostEffect(boost) {
-            const effect = document.createElement('div');
-            effect.style.cssText = `
-                position: fixed;
-                top: 40%;
-                left: 50%;
-                transform: translateX(-50%);
-                font-size: 1.5rem;
-                font-weight: bold;
-                color: var(--secondary);
-                background: rgba(0, 0, 0, 0.8);
-                padding: 15px 30px;
-                border-radius: 10px;
-                z-index: 10001;
-                animation: shake 0.5s ease-in-out;
-                border: 2px solid var(--secondary);
-                text-align: center;
-            `;
-            
-            effect.innerHTML = `
-                <div style="margin-bottom: 5px;">⚡ انفجار الطاقة!</div>
-                <div>+${(boost * 100).toFixed(0)}% سرعة تعدين</div>
-                <div style="font-size: 0.8rem; margin-top: 5px;">لمدة 24 ساعة</div>
-            `;
-            
-            document.body.appendChild(effect);
-            
-            setTimeout(() => {
-                document.body.removeChild(effect);
-            }, 3000);
         }
 
         // بدء عد تنازلي لتجديد المهام
@@ -2395,6 +2281,268 @@
             updateUI();
         }
 
+        // ========== نظام معالجة الدعوات ==========
+
+        // دالة معالجة الدعوة عند دخول المستخدم الجديد
+        async function processInviteFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const startParam = urlParams.get('start');
+            
+            if (startParam && startParam.startsWith('ref_')) {
+                try {
+                    const parts = startParam.split('_');
+                    if (parts.length >= 3) {
+                        const inviterId = parts[1];
+                        const inviteCode = parts[2];
+                        
+                        // منع المستخدم من دعوة نفسه
+                        if (inviterId === getUserId()) {
+                            console.log("⚠️ لا يمكن دعوة نفسك");
+                            return;
+                        }
+                        
+                        // التحقق من عدم المطالبة مسبقاً
+                        const inviteKey = `invite_claimed_${inviterId}_${inviteCode}`;
+                        if (localStorage.getItem(inviteKey)) {
+                            console.log("⚠️ لقد حصلت بالفعل على مكافأة الدعوة من هذا المستخدم");
+                            return;
+                        }
+                        
+                        // منح مكافأة للمستخدم الجديد (50 عملة CNC)
+                        const newUserReward = 50;
+                        balance += newUserReward;
+                        
+                        // حفظ في localStorage لمنع التكرار
+                        localStorage.setItem(inviteKey, 'true');
+                        
+                        // تحديث بيانات المُدعِي
+                        await updateInviterRewards(inviterId, inviteCode);
+                        
+                        updateUI();
+                    }
+                } catch (error) {
+                    console.error("❌ خطأ في معالجة الدعوة:", error);
+                }
+            }
+        }
+
+        // دالة تحديث مكافآت المُدعِي
+        async function updateInviterRewards(inviterId, inviteCode) {
+            try {
+                const inviterRef = db.collection('wallets').doc(inviterId);
+                const inviterDoc = await inviterRef.get();
+                
+                if (inviterDoc.exists) {
+                    const inviterData = inviterDoc.data();
+                    const rewardAmount = 10; // 10 عملات CNC لكل دعوة ناجحة
+                    
+                    // تحديث بيانات المُدعِي في wallets
+                    await inviterRef.update({
+                        "balances.CNC": firebase.firestore.FieldValue.increment(rewardAmount),
+                        "invites.successfulInvites": firebase.firestore.FieldValue.increment(1),
+                        "invites.totalRewards": firebase.firestore.FieldValue.increment(rewardAmount),
+                        "lastUpdated": firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    // إضافة سجل الدعوة
+                    await db.collection('inviteHistory').add({
+                        inviterId: inviterId,
+                        invitedUserId: getUserId(),
+                        inviteCode: inviteCode,
+                        rewardAmount: rewardAmount,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'successful'
+                    });
+                    
+                    console.log(`✅ تم تحديث مكافآت المُدعِي ${inviterId}`);
+                }
+            } catch (error) {
+                console.error("❌ خطأ في تحديث مكافآت المُدعِي:", error);
+            }
+        }
+
+        // دالة الحصول على إحصائيات الدعوات الحية
+        async function refreshInvitesStats() {
+            try {
+                const userId = getUserId();
+                const userRef = db.collection('wallets').doc(userId.toString());
+                const doc = await userRef.get();
+                
+                if (doc.exists) {
+                    const userData = doc.data();
+                    if (userData.invites) {
+                        invitesData.successfulInvites = userData.invites.successfulInvites || 0;
+                        invitesData.totalRewards = userData.invites.totalRewards || 0;
+                        updateInvitesUI();
+                    }
+                }
+            } catch (error) {
+                console.error("❌ خطأ في تحديث إحصائيات الدعوات:", error);
+            }
+        }
+
+        // دالة عرض نافذة نظام الدعوات
+        function showInviteSystemModal() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.95);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: var(--light); padding: 25px; border-radius: 20px; max-width: 95%; width: 400px; text-align: center; border: 2px solid var(--primary);">
+                    <div style="color: var(--primary); font-size: 2.5rem; margin-bottom: 15px;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 style="color: var(--primary); margin-bottom: 20px;">نظام الدعوات والمكافآت</h3>
+                    
+                    <div style="background: rgba(0, 119, 204, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--primary);">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.8rem; font-weight: bold; color: var(--primary);">${invitesData.successfulInvites}</div>
+                                <div style="font-size: 0.8rem; color: #666;">دعوات ناجحة</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700;">${invitesData.totalRewards}</div>
+                                <div style="font-size: 0.8rem; color: #666;">إجمالي المكافآت</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #ffd700;">
+                        <h4 style="color: #ffa500; margin-bottom: 10px;">🎯 كيف تعمل الدعوات:</h4>
+                        <div style="text-align: right; font-size: 0.85rem; color: var(--text); line-height: 1.6;">
+                            <div style="margin-bottom: 8px;">• ادعُ أصدقاءك واحصل على <strong>10 عملات CNC</strong> لكل دعوة ناجحة</div>
+                            <div style="margin-bottom: 8px;">• صديقك يحصل على <strong>50 عملة CNC</strong> ترحيبية</div>
+                            <div>• المكافآت تذهب مباشرة إلى رصيدك في المحفظة</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: var(--dark); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--card-border);">
+                        <div style="font-size: 0.9rem; color: var(--text); margin-bottom: 10px;">رابط الدعوة الخاص بك:</div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="text" id="modal-invite-link" value="${generateInviteLink()}" readonly 
+                                   style="flex: 1; padding: 10px; border: 1px solid var(--secondary); border-radius: 8px; 
+                                          background: var(--light); color: var(--text); font-size: 0.8rem; text-align: center;">
+                            <button id="modal-copy-invite" 
+                                    style="background: var(--primary); color: white; border: none; padding: 10px 15px; 
+                                           border-radius: 8px; cursor: pointer; font-size: 0.9rem;">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button id="share-invite-btn" 
+                                style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; 
+                                       border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; 
+                                       font-weight: bold; flex: 1;">
+                            <i class="fas fa-share"></i> مشاركة
+                        </button>
+                        <button id="close-invite-modal" 
+                                style="background: var(--accent); color: white; border: none; padding: 12px 20px; 
+                                       border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1;">
+                            <i class="fas fa-times"></i> إغلاق
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // إضافة event listeners
+            document.getElementById('modal-copy-invite').addEventListener('click', function() {
+                const linkInput = document.getElementById('modal-invite-link');
+                navigator.clipboard.writeText(linkInput.value).then(() => {
+                    const btn = this;
+                    btn.innerHTML = '<i class="fas fa-check"></i>';
+                    btn.style.background = 'var(--secondary)';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="fas fa-copy"></i>';
+                        btn.style.background = '';
+                    }, 2000);
+                });
+            });
+            
+            document.getElementById('share-invite-btn').addEventListener('click', function() {
+                shareInviteLink();
+            });
+            
+            document.getElementById('close-invite-modal').addEventListener('click', function() {
+                modal.remove();
+            });
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // دالة مشاركة رابط الدعوة
+        function shareInviteLink() {
+            const inviteLink = generateInviteLink();
+            const shareText = `🚀 انضم إلى Coin Crynova - لعبة تعدين العملات الرائعة!\n\n🎁 احصل على 50 عملة CNC مجانية عند الانضمام عبر رابطي:\n${inviteLink}\n\n✨ استمتع بتجربة تعدين فريدة ومكافآت مميزة!`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Coin Crynova - انضم واحصل على 50 عملة CNC مجانية!',
+                    text: shareText,
+                    url: inviteLink
+                });
+            } else {
+                // طريقة بديلة
+                navigator.clipboard.writeText(shareText).then(() => {
+                    showGameMessage('تم النسخ', 'تم نسخ رابط الدعوة إلى الحافظة، يمكنك مشاركته الآن!', 'success');
+                });
+            }
+        }
+
+        // ========== التهيئة النهائية ==========
+        
+        // تحديث دالة التهيئة
+        async function initGame() {
+            loadGameData();
+            
+            // تهيئة Firebase والحصول على الرصيد الحقيقي
+            realBalance = await loadUserData();
+            
+            updateUI();
+            startAutoMining();
+            await processInviteFromUrl(); // معالجة الدعوة إذا كان مستخدم جديد
+            startResetTimer();
+            
+            // فحص اتصال المحفظة
+            await checkWalletConnection();
+            
+            // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
+            setTimeout(() => {
+                loadingElement.style.display = 'none';
+                mainContentElement.style.display = 'grid';
+            }, 1500);
+        }
+
+        // ========== event listeners ==========
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // إضافة event listener لزر فتح المحفظة
+            const openWalletButton = document.getElementById('open-wallet-btn');
+            if (openWalletButton) {
+                openWalletButton.addEventListener('click', openWallet);
+            }
+            
+            // بدء اللعبة
+            initGame();
+        });
+
         // نسخ رابط الدعوة
         copyLinkButton.addEventListener('click', async () => {
             try {
@@ -2418,24 +2566,7 @@
         
         // زر مشاركة الرابط
         inviteFriendsButton.addEventListener('click', () => {
-            const inviteLink = generateInviteLink();
-            const shareText = `🎮 اكتشف عالم Coin Crynova السري! \n\n${inviteLink}\n\n✨ نظام مكافآت سري ينتظر من يجده...`;
-            
-            // محاولة استخدام Web Share API إذا كان متاحاً
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Coin Crynova - عالم الأسرار',
-                    text: shareText,
-                    url: inviteLink
-                }).then(() => {
-                    console.log('تمت المشاركة بنجاح');
-                }).catch((error) => {
-                    console.log('خطأ في المشاركة:', error);
-                    fallbackShare(inviteLink, shareText);
-                });
-            } else {
-                fallbackShare(inviteLink, shareText);
-            }
+            showInviteSystemModal();
         });
         
         // زر تفاعل القناة - تم إزالة المكافأة التلقائية
@@ -2447,402 +2578,6 @@
         // زر فتح المحفظة
         openWalletButton.addEventListener('click', openWallet);
 
-        // ========== دوال تحديد المبلغ المحدثة ==========
-        
-        // متغير لتخزين المبلغ المحدد
-        let selectedWithdrawAmount = 10000;
-        
-        // دالة لعرض محدد المبلغ
-        function showAmountSelector() {
-            const amountModal = document.createElement('div');
-            amountModal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.9);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
-            `;
-            
-            amountModal.innerHTML = `
-                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 95%; width: 400px; text-align: center; border: 2px solid var(--primary);">
-                    <div style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                    <h3 style="color: var(--primary); margin-bottom: 15px;">تحديد مبلغ الإيداع</h3>
-                    
-                    <div class="amount-selector">
-                        <label class="amount-label">المبلغ المطلوب إيداعه:</label>
-                        <div class="amount-input-container">
-                            <input type="number" class="amount-input" id="withdraw-amount" 
-                                   value="10000" min="10000" max="${balance}" step="1000">
-                            <span style="color: var(--text); font-weight: bold;">Crynova</span>
-                        </div>
-                        
-                        <div class="quick-amounts">
-                            <div class="quick-amount" data-amount="10000">10K</div>
-                            <div class="quick-amount" data-amount="50000">50K</div>
-                            <div class="quick-amount" data-amount="100000">100K</div>
-                            <div class="quick-amount" data-amount="500000">500K</div>
-                        </div>
-                        
-                        <div class="conversion-preview">
-                            <div class="conversion-from" id="conversion-from">10,000 عملة افتراضية</div>
-                            <div class="conversion-arrow"><i class="fas fa-arrow-down"></i></div>
-                            <div class="conversion-to" id="conversion-to">1 عملة حقيقية</div>
-                        </div>
-                        
-                        <div class="min-amount-warning">
-                            <i class="fas fa-exclamation-circle"></i>
-                            الحد الأدنى للإيداع: 10,000 عملة
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
-                        <button id="confirm-amount-btn" 
-                                style="background: var(--primary); color: white; border: none; padding: 12px 25px; 
-                                       border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1;">
-                            <i class="fas fa-check"></i> تأكيد المبلغ
-                        </button>
-                        <button id="cancel-amount-btn" 
-                                style="background: var(--accent); color: white; border: none; padding: 12px 25px; 
-                                       border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1;">
-                            <i class="fas fa-times"></i> إلغاء
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(amountModal);
-            
-            // تهيئة محدد المبلغ
-            initializeAmountSelector(amountModal);
-            
-            // إضافة event listeners للأزرار
-            document.getElementById('confirm-amount-btn').addEventListener('click', () => {
-                confirmWithdrawAmount();
-                amountModal.remove();
-            });
-            
-            document.getElementById('cancel-amount-btn').addEventListener('click', () => {
-                amountModal.remove();
-            });
-            
-            // إغلاق النافذة عند النقر خارجها
-            amountModal.addEventListener('click', (e) => {
-                if (e.target === amountModal) {
-                    amountModal.remove();
-                }
-            });
-        }
-        
-        // دالة لتهيئة محدد المبلغ
-        function initializeAmountSelector(modal) {
-            const amountInput = modal.querySelector('#withdraw-amount');
-            const quickAmounts = modal.querySelectorAll('.quick-amount');
-            const conversionFrom = modal.querySelector('#conversion-from');
-            const conversionTo = modal.querySelector('#conversion-to');
-            
-            // تحديث المعاينة عند تغيير المبلغ
-            function updateConversionPreview() {
-                const amount = parseInt(amountInput.value) || 10000;
-                const realCoins = Math.floor(amount / 10000);
-                
-                conversionFrom.textContent = `${formatNumber(amount)} عملة افتراضية`;
-                conversionTo.textContent = `${realCoins} عملة حقيقية`;
-                
-                // تحديث حالة الأزرار السريعة
-                quickAmounts.forEach(btn => {
-                    const btnAmount = parseInt(btn.getAttribute('data-amount'));
-                    btn.classList.toggle('active', btnAmount === amount);
-                });
-                
-                // التحقق من الحد الأدنى
-                if (amount < 10000) {
-                    amountInput.value = 10000;
-                    updateConversionPreview();
-                }
-                
-                // التحقق من الحد الأقصى (الرصيد المتاح)
-                if (amount > balance) {
-                    amountInput.value = balance;
-                    updateConversionPreview();
-                }
-            }
-            
-            // حدث تغيير الإدخال
-            amountInput.addEventListener('input', updateConversionPreview);
-            
-            // أحداث الأزرار السريعة
-            quickAmounts.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const amount = parseInt(btn.getAttribute('data-amount'));
-                    amountInput.value = amount;
-                    updateConversionPreview();
-                });
-            });
-            
-            // التهيئة الأولية
-            updateConversionPreview();
-        }
-        
-        // دالة تأكيد المبلغ المحدد
-        function confirmWithdrawAmount() {
-            const amountInput = document.getElementById('withdraw-amount');
-            selectedWithdrawAmount = parseInt(amountInput.value) || 10000;
-            
-            // التحقق من الشروط
-            if (selectedWithdrawAmount < 10000) {
-                showGameMessage('خطأ', 'الحد الأدنى للإيداع هو 10,000 عملة', 'error');
-                return;
-            }
-            
-            if (selectedWithdrawAmount > balance) {
-                showGameMessage('خطأ', 'رصيدك غير كافي لهذا المبلغ', 'error');
-                return;
-            }
-            
-            // عرض تأكيد الإيداع
-            showConversionConfirmation(selectedWithdrawAmount);
-        }
-        
-        // تعديل دالة تأكيد التحويل لتأخذ المبلغ المحدد
-        function showConversionConfirmation(amount) {
-            const realCoins = Math.floor(amount / 10000);
-            
-            const confirmModal = document.createElement('div');
-            confirmModal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.9);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
-            `;
-            
-            confirmModal.innerHTML = `
-                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 90%; text-align: center; border: 2px solid var(--accent);">
-                    <div style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <h3 style="color: var(--accent); margin-bottom: 15px;">تأكيد الإيداع</h3>
-                    <p style="margin-bottom: 10px; color: var(--text);">سوف تقوم بإيداع:</p>
-                    <div style="background: rgba(255, 71, 87, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--accent);">
-                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent);">
-                            ${formatNumber(amount)} عملة افتراضية
-                        </div>
-                        <div style="font-size: 1.5rem; margin: 10px 0; color: var(--primary);">
-                            <i class="fas fa-arrow-down"></i>
-                        </div>
-                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">
-                            ${realCoins} عملة حقيقية
-                        </div>
-                    </div>
-                    <div style="background: rgba(255, 71, 87, 0.2); padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.8rem; color: #ff4757;">
-                        <i class="fas fa-exclamation-circle"></i>
-                        تحذير: لا يمكن إرجاع النقاط بعد الإيداع!
-                    </div>
-                    <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button id="confirm-convert-btn" 
-                                style="background: var(--accent); color: white; border: none; padding: 12px 25px; 
-                                       border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1;">
-                            <i class="fas fa-check"></i> تأكيد الإيداع
-                        </button>
-                        <button id="cancel-convert-btn" 
-                                style="background: var(--secondary); color: white; border: none; padding: 12px 25px; 
-                                       border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1;">
-                            <i class="fas fa-times"></i> إلغاء
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(confirmModal);
-            
-            // إضافة event listeners للأزرار في النافذة
-            document.getElementById('confirm-convert-btn').addEventListener('click', () => {
-                performConversion(amount);
-                confirmModal.remove();
-            });
-            
-            document.getElementById('cancel-convert-btn').addEventListener('click', () => {
-                confirmModal.remove();
-            });
-            
-            // إغلاق النافذة عند النقر خارجها
-            confirmModal.addEventListener('click', (e) => {
-                if (e.target === confirmModal) {
-                    confirmModal.remove();
-                }
-            });
-        }
-        
-        // تعديل دالة تنفيذ التحويل لتأخذ المبلغ المحدد
-        function performConversion(amount) {
-            const realCoins = Math.floor(amount / 10000);
-            
-            // خصم المبلغ المحدد من الرصيد الافتراضي
-            balance -= amount;
-            
-            // إضافة العملات الحقيقية
-            realBalance += realCoins;
-            
-            // تحديث الرصيد في Firebase
-            updateRealBalanceInFirebase(getUserId(), realBalance);
-            
-            // تحديث الواجهة
-            updateUI();
-            
-            // إظهار رسالة نجاح
-            showConversionSuccess(amount, realCoins);
-        }
-        
-        // تعديل دالة نجاح التحويل
-        function showConversionSuccess(amount, realCoins) {
-            const successModal = document.createElement('div');
-            successModal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.9);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
-            `;
-            
-            successModal.innerHTML = `
-                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 90%; text-align: center; border: 2px solid var(--primary);">
-                    <div style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h3 style="color: var(--primary); margin-bottom: 15px;">تم الإيداع بنجاح!</h3>
-                    <div style="background: rgba(0, 119, 204, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--primary);">
-                        <div style="font-size: 1rem; color: var(--text); margin-bottom: 5px;">تم خصم:</div>
-                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--accent);">
-                            ${formatNumber(amount)} عملة افتراضية
-                        </div>
-                        <div style="font-size: 1rem; color: var(--text); margin: 10px 0;">وإضافة:</div>
-                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">
-                            ${realCoins} عملة حقيقية
-                        </div>
-                    </div>
-                    <button id="close-success-btn" 
-                            style="background: var(--primary); color: white; border: none; padding: 12px 25px; 
-                                   border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">
-                        <i class="fas fa-times"></i> إغلاق
-                    </button>
-                </div>
-            `;
-            
-            document.body.appendChild(successModal);
-            
-            // إضافة event listener للزر
-            document.getElementById('close-success-btn').addEventListener('click', () => {
-                successModal.remove();
-            });
-            
-            // إغلاق النافذة تلقائياً بعد 5 ثوان
-            setTimeout(() => {
-                if (document.body.contains(successModal)) {
-                    successModal.remove();
-                }
-            }, 5000);
-        }
-
-        // ========== تعديل event listener الأصلي ==========
-        
-        // زر التحويل المحدث
-        convertButton.addEventListener('click', () => {
-            if (balance < 10000) {
-                showGameMessage('تحذير', 'تحتاج إلى 10,000 عملة افتراضية على الأقل للإيداع!', 'error');
-                return;
-            }
-            
-            // عرض محدد المبلغ بدلاً من التنفيذ المباشر
-            showAmountSelector();
-        });
-
-        // طريقة بديلة للمشاركة
-        function fallbackShare(inviteLink, shareText) {
-            // إنشاء نافذة مشاركة مخصصة
-            const shareModal = document.createElement('div');
-            shareModal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.9);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
-            `;
-            
-            shareModal.innerHTML = `
-                <div style="background: var(--light); padding: 25px; border-radius: 15px; max-width: 90%; text-align: center; border: 2px solid var(--primary);">
-                    <div style="color: var(--primary); font-size: 2rem; margin-bottom: 15px;">
-                        <i class="fas fa-gift"></i>
-                    </div>
-                    <h3 style="color: var(--primary); margin-bottom: 15px;">اكتشف الأسرار</h3>
-                    <p style="margin-bottom: 15px; color: var(--text);">شارك الرابط وانتظر المفاجآت...</p>
-                    <input type="text" value="${inviteLink}" readonly 
-                           style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid var(--secondary); 
-                                  border-radius: 8px; background: var(--dark); color: var(--text); text-align: center;
-                                  font-size: 0.9rem;">
-                    <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button id="modal-copy-btn" 
-                                style="background: var(--primary); color: white; border: none; padding: 12px 25px; 
-                                       border-radius: 8px; cursor: pointer; font-weight: bold;">
-                            <i class="fas fa-copy"></i> نسخ
-                        </button>
-                        <button id="modal-close-btn" 
-                                style="background: var(--accent); color: white; border: none; padding: 12px 25px; 
-                                       border-radius: 8px; cursor: pointer; font-weight: bold;">
-                            <i class="fas fa-times"></i> إغلاق
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(shareModal);
-            
-            // إضافة event listeners للأزرار في النافذة
-            document.getElementById('modal-copy-btn').addEventListener('click', () => {
-                navigator.clipboard.writeText(inviteLink).then(() => {
-                    // تأثير نسخ ناجح
-                    const btn = document.getElementById('modal-copy-btn');
-                    btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
-                    btn.style.background = 'var(--secondary)';
-                    setTimeout(() => {
-                        shareModal.remove();
-                    }, 1500);
-                });
-            });
-            
-            document.getElementById('modal-close-btn').addEventListener('click', () => {
-                shareModal.remove();
-            });
-            
-            // إغلاق النافذة عند النقر خارجها
-            shareModal.addEventListener('click', (e) => {
-                if (e.target === shareModal) {
-                    shareModal.remove();
-                }
-            });
-        }
-        
         // النقر على زر التعدين
         mineButton.addEventListener('click', () => {
             if (energy <= 0) {
@@ -2955,123 +2690,6 @@
                 updateUI();
             }
         }, 1000);
-
-        // التحقق من رابط الدعوة عند التحميل
-        function checkInviteFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const startParam = urlParams.get('start');
-            
-            if (startParam && startParam.startsWith('invite_')) {
-                const inviterId = startParam.replace('invite_', '');
-                
-                // منع المستخدم من دعوة نفسه
-                if (inviterId === getUserId()) {
-                    console.log("لا يمكن دعوة نفسك");
-                    return;
-                }
-                
-                // التحقق مما إذا كان المستخدم قد حصل بالفعل على مكافأة من هذا المُدعِي
-                const inviteKey = `invite_claimed_${inviterId}`;
-                if (localStorage.getItem(inviteKey)) {
-                    console.log("لقد حصلت بالفعل على مكافأة الدعوة من هذا المستخدم");
-                    return;
-                }
-                
-                // منح مكافأة سرية بدلاً من المبلغ المعلن
-                const secretReward = Math.floor(Math.random() * 500) + 500; // بين 500 و 1000
-                balance += secretReward;
-                
-                // تحديث الإحصائيات
-                invitesCount++;
-                rewardsTotal += secretReward;
-                localStorage.setItem(inviteKey, 'true');
-                
-                // تحديث بيانات المُدعِي في التخزين المحلي
-                updateInviterRewards(inviterId);
-                
-                // إشعار سري
-                setTimeout(() => {
-                    showSecretRewardNotification(secretReward);
-                }, 2000);
-                
-                updateUI();
-            }
-        }
-        
-        // تحديث مكافآت المُدعِي في التخزين المحلي
-        function updateInviterRewards(inviterId) {
-            // في هذا الإصدار المبسط، سنقوم بتحديث بيانات المُدعِي محلياً
-            console.log(`تم تحديث مكافآت المُدعِي ${inviterId} محلياً`);
-        }
-
-        // إشعار المكافأة السرية
-        function showSecretRewardNotification(reward) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20%;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(0, 0, 0, 0.9);
-                color: var(--primary);
-                padding: 15px 30px;
-                border-radius: 10px;
-                border: 2px solid var(--primary);
-                font-weight: bold;
-                font-size: 1.1rem;
-                z-index: 10000;
-                animation: slideDown 3s ease-in-out forwards;
-                text-align: center;
-            `;
-            notification.innerHTML = `
-                <div style="margin-bottom: 8px; font-size: 1.5rem;">🎁</div>
-                <div>مكافأة سرية: +${reward} Crynova!</div>
-                <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">النظام يراقب نشاطك...</div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 3000);
-        }
-
-        // ========== التهيئة النهائية ==========
-        
-        // تحديث دالة التهيئة
-        async function initGame() {
-            loadGameData();
-            
-            // تهيئة Firebase والحصول على الرصيد الحقيقي
-            realBalance = await initializeUserInFirebase(getUserId());
-            
-            updateUI();
-            startAutoMining();
-            checkInviteFromUrl();
-            startResetTimer();
-            
-            // فحص اتصال المحفظة
-            await checkWalletConnection();
-            
-            // إخفاء شاشة التحميل وإظهار المحتوى الرئيسي
-            setTimeout(() => {
-                loadingElement.style.display = 'none';
-                mainContentElement.style.display = 'grid';
-            }, 1500);
-        }
-
-        // ========== event listeners ==========
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            // إضافة event listener لزر فتح المحفظة
-            const openWalletButton = document.getElementById('open-wallet-btn');
-            if (openWalletButton) {
-                openWalletButton.addEventListener('click', openWallet);
-            }
-            
-            // بدء اللعبة
-            initGame();
-        });
 
         // حفظ البيانات عند إغلاق الصفحة
         window.addEventListener('beforeunload', () => {
