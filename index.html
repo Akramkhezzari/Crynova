@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لعبة النقاط اليومية - Crynova</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -1115,6 +1116,71 @@
       animation: spin 1s linear infinite;
       margin-right: 5px;
     }
+
+    /* Telegram WebApp adjustments */
+    .tg-adjust {
+      padding-top: env(safe-area-inset-top, 20px);
+    }
+    
+    .telegram-theme-dark {
+      background: #1a1a1a;
+      color: #ffffff;
+    }
+    
+    .telegram-theme-dark .game-header {
+      background: linear-gradient(90deg, #2d87ff, #7d3dff);
+    }
+    
+    .telegram-theme-dark .daily-checkin-card,
+    .telegram-theme-dark .daily-tasks-card,
+    .telegram-theme-dark .achievements-card,
+    .telegram-theme-dark .leaderboard-card,
+    .telegram-theme-dark .friends-card,
+    .telegram-theme-dark .gifts-card,
+    .telegram-theme-dark .challenges-card,
+    .telegram-theme-dark .groups-card,
+    .telegram-theme-dark .referrals-card,
+    .telegram-theme-dark .shop-card,
+    .telegram-theme-dark .advanced-referral-card {
+      background: #2d2d2d;
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .telegram-theme-dark .task-item,
+    .telegram-theme-dark .achievement-item,
+    .telegram-theme-dark .leaderboard-item,
+    .telegram-theme-dark .gift-item,
+    .telegram-theme-dark .challenge-item,
+    .telegram-theme-dark .group-item,
+    .telegram-theme-dark .shop-item,
+    .telegram-theme-dark .friend-item {
+      background: #3d3d3d;
+      color: #ffffff;
+    }
+    
+    .telegram-theme-dark .referral-link,
+    .telegram-theme-dark .referral-stat,
+    .telegram-theme-dark .referral-link-container,
+    .telegram-theme-dark .referral-link-value,
+    .telegram-theme-dark .referral-stat-card,
+    .telegram-theme-dark .referral-reward-card {
+      background: #3d3d3d;
+      color: #ffffff;
+    }
+    
+    .telegram-theme-dark .progress-bar {
+      background: #3d3d3d;
+    }
+    
+    .telegram-theme-dark .bottom-nav {
+      background: #2d2d2d;
+      border-top-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .telegram-theme-dark .checkin-button:disabled {
+      background: #555555;
+    }
   </style>
 </head>
 <body>
@@ -1392,6 +1458,11 @@
       updateFirebaseStatus('error', '❌ خطأ في الاتصال بالخادم');
     }
 
+    // ========== Telegram WebApp متغيرات ==========
+    let tg = null;
+    let isTelegramWebApp = false;
+    let telegramUser = null;
+
     // ========== دوال المساعدة ==========
     function updateFirebaseStatus(type, message) {
       const statusElement = document.getElementById('firebaseStatus');
@@ -1462,7 +1533,50 @@
       }
     }
 
-    // ========== دوال قاعدة البيانات المبسطة ==========
+    // ========== إعداد Telegram WebApp ==========
+    function initializeTelegramWebApp() {
+      try {
+        if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+          tg = Telegram.WebApp;
+          isTelegramWebApp = true;
+          
+          console.log('✅ Telegram WebApp تم اكتشافه');
+          
+          // توسيع نافذة WebApp
+          tg.expand();
+          
+          // تعيين الألوان بناءً على سمة Telegram
+          if (tg.colorScheme === 'dark') {
+            document.body.classList.add('telegram-theme-dark');
+          }
+          
+          // ضبط لون الخلفية
+          tg.setBackgroundColor('#f8f9fa');
+          
+          // تمكين زر الإغلاق
+          tg.enableClosingConfirmation();
+          
+          // الحصول على بيانات المستخدم
+          telegramUser = tg.initDataUnsafe?.user;
+          
+          if (telegramUser) {
+            console.log('👤 بيانات مستخدم Telegram:', telegramUser);
+            return telegramUser;
+          } else {
+            console.log('⚠️ لا توجد بيانات مستخدم في Telegram WebApp');
+            return null;
+          }
+        } else {
+          console.log('⚠️ Telegram WebApp غير متوفر');
+          return null;
+        }
+      } catch (error) {
+        console.error('❌ خطأ في تهيئة Telegram WebApp:', error);
+        return null;
+      }
+    }
+
+    // ========== دوال قاعدة البيانات ==========
     async function registerUserIfNeeded(userData) {
       try {
         if (!db) {
@@ -1525,7 +1639,7 @@
         const currentPoints = userData.totalPoints || 0;
         const newPoints = currentPoints + pointsChange;
         
-        // تحديث النقاط فقط
+        // تحديث النقاط
         await userRef.update({
           totalPoints: newPoints,
           lastLogin: firebase.firestore.FieldValue.serverTimestamp()
@@ -2286,18 +2400,17 @@
         userUsernameEl.style.display = 'none';
       }
       
-      // رابط الإحالة
+      // رابط الإحالة - تحديث ليعمل مع بوت Telegram
       if (currentUser && currentUser.id) {
-        document.getElementById('friendReferralLink').textContent = 
-          `https://crynova.com/ref/${currentUser.id}`;
-        document.getElementById('referralLink').value = 
-          `https://crynova.com/ref/${currentUser.id}`;
+        // استخدام رابط البوت مع معامل الإحالة
+        const referralLink = `https://t.me/Coin_Crynova_bot?start=${currentUser.id}`;
+        document.getElementById('friendReferralLink').textContent = referralLink;
+        document.getElementById('referralLink').value = referralLink;
       } else {
         const referralCode = gameData.user.telegramId || gameData.user.id || 'unknown';
-        document.getElementById('friendReferralLink').textContent = 
-          `https://crynova.com/ref/${referralCode}`;
-        document.getElementById('referralLink').value = 
-          `https://crynova.com/ref/${referralCode}`;
+        const referralLink = `https://t.me/Coin_Crynova_bot?start=${referralCode}`;
+        document.getElementById('friendReferralLink').textContent = referralLink;
+        document.getElementById('referralLink').value = referralLink;
       }
       
       document.getElementById('totalFriendReferrals').textContent = gameData.user.referrals || 0;
@@ -2700,67 +2813,61 @@
       }
     }
 
-    // ========== تهيئة Telegram WebApp ==========
-    async function initializeTelegramWebApp() {
+    // ========== تهيئة Telegram WebApp مع بوت @Coin_Crynova_bot ==========
+    async function initializeWithTelegramBot() {
       try {
-        console.log('🔄 بدء تهيئة Telegram WebApp...');
+        console.log('🔄 بدء تهيئة مع بوت Telegram @Coin_Crynova_bot...');
         
-        if (!window.Telegram || !Telegram.WebApp) {
-          console.log('❌ Telegram WebApp غير متوفر، استخدام بيانات تجريبية');
-          await useMockData();
-          return;
-        }
+        // محاولة تهيئة Telegram WebApp
+        const telegramUser = initializeTelegramWebApp();
         
-        const tg = Telegram.WebApp;
-        
-        tg.expand();
-        tg.setBackgroundColor('#ffffff');
-        tg.enableClosingConfirmation();
-        
-        const user = tg.initDataUnsafe?.user;
-        const startParam = tg.initDataUnsafe?.start_param;
-        
-        if (!user || !user.id) {
-          console.log('❌ لم يتم العثور على بيانات المستخدم في Telegram');
-          await useMockData();
-          return;
-        }
-        
-        console.log('👤 بيانات مستخدم Telegram:', user);
-        console.log('🔗 معامل الإحالة:', startParam);
-        
-        currentUser = {
-          id: user.id.toString(),
-          telegramId: user.id.toString(),
-          firstName: user.first_name || 'مستخدم',
-          lastName: user.last_name || '',
-          username: user.username || null,
-          languageCode: user.language_code || 'ar'
-        };
-        
-        // تحديث الواجهة مباشرة
-        document.getElementById('userName').textContent = currentUser.firstName || 'مستخدم';
-        document.getElementById('avatarText').textContent = (currentUser.firstName || 'م').charAt(0);
-        document.getElementById('userUsername').textContent = currentUser.username ? `@${currentUser.username}` : '';
-        document.getElementById('userUsername').style.display = currentUser.username ? 'block' : 'none';
-        
-        try {
-          const registeredUser = await registerUserIfNeeded(user);
+        if (telegramUser) {
+          console.log('✅ تم العثور على مستخدم Telegram:', telegramUser);
           
-          if (registeredUser) {
-            console.log('✅ تم تسجيل/تسجيل دخول المستخدم:', registeredUser);
+          currentUser = {
+            id: telegramUser.id.toString(),
+            telegramId: telegramUser.id.toString(),
+            firstName: telegramUser.first_name || 'مستخدم',
+            lastName: telegramUser.last_name || '',
+            username: telegramUser.username || null,
+            languageCode: telegramUser.language_code || 'ar'
+          };
+          
+          // عرض بيانات المستخدم فوراً
+          document.getElementById('userName').textContent = currentUser.firstName || 'مستخدم';
+          document.getElementById('avatarText').textContent = (currentUser.firstName || 'م').charAt(0);
+          document.getElementById('userUsername').textContent = currentUser.username ? `@${currentUser.username}` : '';
+          document.getElementById('userUsername').style.display = currentUser.username ? 'block' : 'none';
+          
+          // التحقق من وجود معامل الإحالة (start parameter)
+          if (tg && tg.initDataUnsafe?.start_param) {
+            const startParam = tg.initDataUnsafe.start_param;
+            console.log('🔗 معامل الإحالة:', startParam);
             
-            // إذا كان هناك معامل إحالة، نقوم بتسجيل الإحالة
             if (startParam && startParam !== '' && startParam !== currentUser.id) {
               const referrerId = startParam;
               if (referrerId !== currentUser.id) {
-                await addReferralToDatabase(referrerId, currentUser.id);
-                showMessage('🎉 تم تسجيل إحالتك بنجاح! شكراً للانضمام.');
+                try {
+                  await addReferralToDatabase(referrerId, currentUser.id);
+                  showMessage('🎉 تم تسجيل إحالتك بنجاح! شكراً للانضمام.');
+                } catch (error) {
+                  console.error('⚠️ خطأ في تسجيل الإحالة:', error);
+                }
               }
             }
           }
-        } catch (error) {
-          console.error('⚠️ خطأ في تسجيل المستخدم:', error);
+          
+          // تسجيل المستخدم في قاعدة البيانات
+          try {
+            await registerUserIfNeeded(telegramUser);
+          } catch (error) {
+            console.error('⚠️ خطأ في تسجيل المستخدم:', error);
+          }
+          
+        } else {
+          // استخدام بيانات تجريبية إذا لم يكن Telegram WebApp متاحاً
+          console.log('⚠️ استخدام بيانات تجريبية');
+          await useMockData();
         }
         
         await initializeGame();
@@ -2848,7 +2955,7 @@
 
     // ========== بدء التطبيق ==========
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 بدء تشغيل لعبة النقاط اليومية...');
+      console.log('🚀 بدء تشغيل لعبة النقاط اليومية Crynova...');
       
       if (!firebaseApp) {
         document.getElementById('userName').textContent = 'خطأ في الاتصال';
@@ -2864,8 +2971,8 @@
         });
       }, 1000);
       
-      // بدء تهيئة التطبيق
-      initializeTelegramWebApp();
+      // بدء تهيئة التطبيق مع بوت Telegram
+      initializeWithTelegramBot();
     });
   </script>
 </body>
