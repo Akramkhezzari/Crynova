@@ -10,7 +10,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <style>
-    /* جميع الأنماط تبقى كما هي */
     * {
       margin: 0;
       padding: 0;
@@ -88,6 +87,14 @@
     .user-details p {
       font-size: 12px;
       opacity: 0.9;
+    }
+
+    .user-username {
+      font-size: 11px !important;
+      color: rgba(255, 255, 255, 0.8) !important;
+      margin-bottom: 2px !important;
+      direction: ltr;
+      text-align: left;
     }
 
     .points-display {
@@ -1050,7 +1057,6 @@
       to { transform: rotate(360deg); }
     }
 
-    /* أنماط إضافية للنظام الجديد */
     .firebase-status {
       position: fixed;
       top: 10px;
@@ -1099,23 +1105,20 @@
   </style>
 </head>
 <body>
-  <!-- شاشة التحميل -->
   <div id="loadingScreen" class="loading-container">
     <div class="loading-spinner"></div>
     <div class="loading-text">جاري إنشاء حسابك...</div>
   </div>
 
-  <!-- حالة Firebase -->
   <div id="firebaseStatus" class="firebase-status"></div>
 
-  <!-- واجهة اللعبة الرئيسية -->
   <div id="gameContainer" class="container" style="display: none;">
-    <!-- شريط العنوان -->
     <div class="game-header">
       <div class="user-info">
         <div class="user-avatar" id="userAvatar">A</div>
         <div class="user-details">
           <h2 id="userName">جاري التحميل...</h2>
+          <div id="userUsername" class="user-username" style="display: none;"></div>
           <p>مستوى: <span id="userLevel" class="english-numbers">1</span></p>
         </div>
       </div>
@@ -1125,20 +1128,15 @@
       </div>
     </div>
 
-    <!-- أقسام الصفحة الرئيسية -->
     <div id="sectionHome">
-      <!-- بطاقة التسجيل اليومي -->
       <div class="daily-checkin-card">
         <div class="card-header">
           <h3><i class="fas fa-calendar-check"></i> التسجيل اليومي</h3>
           <div class="streak-badge" id="streakBadge">🔥 <span class="english-numbers">0</span> أيام متتالية</div>
         </div>
         
-        <!-- تصميم التقويم الجديد -->
         <div class="compact-calendar">
-          <div class="circle-calendar" id="calendarCircles">
-            <!-- الأيام ستضاف هنا ديناميكياً -->
-          </div>
+          <div class="circle-calendar" id="calendarCircles"></div>
           
           <div class="calendar-progress">
             <div class="progress-bar">
@@ -1154,42 +1152,28 @@
         </button>
       </div>
 
-      <!-- المهام اليومية -->
       <div class="daily-tasks-card">
         <h3><i class="fas fa-tasks"></i> المهام اليومية</h3>
-        <div class="tasks-list" id="tasksList">
-          <!-- المهام ستضاف هنا ديناميكياً -->
-        </div>
+        <div class="tasks-list" id="tasksList"></div>
       </div>
 
-      <!-- الإنجازات -->
       <div class="achievements-card">
         <h3><i class="fas fa-trophy"></i> الإنجازات</h3>
-        <div class="achievements-grid" id="achievementsGrid">
-          <!-- الإنجازات ستضاف هنا ديناميكياً -->
-        </div>
+        <div class="achievements-grid" id="achievementsGrid"></div>
       </div>
     </div>
 
-    <!-- قسم الأصدقاء والهدايا -->
     <div class="section-hidden" id="sectionFriends">
-      <!-- بطاقة الأصدقاء -->
       <div class="friends-card">
         <h3><i class="fas fa-user-friends"></i> الأصدقاء</h3>
-        <div class="friends-list" id="friendsList">
-          <!-- قائمة الأصدقاء ستضاف هنا ديناميكياً -->
-        </div>
+        <div class="friends-list" id="friendsList"></div>
       </div>
 
-      <!-- بطاقة الهدايا المتاحة -->
       <div class="gifts-card">
         <h3><i class="fas fa-gift"></i> الهدايا المتاحة</h3>
-        <div class="gifts-list" id="giftsList">
-          <!-- الهدايا ستضاف هنا ديناميكياً -->
-        </div>
+        <div class="gifts-list" id="giftsList"></div>
       </div>
 
-      <!-- بطاقة نظام الإحالة المتقدم -->
       <div class="advanced-referral-card" id="advancedReferralCard">
         <h3><i class="fas fa-user-plus"></i> نظام الإحالة المتقدم</h3>
         
@@ -1213,7 +1197,6 @@
           </div>
         </div>
         
-        <!-- إحصائيات الإحالة -->
         <div class="referral-stats-grid">
           <div class="referral-stat-card">
             <div class="referral-stat-value" id="totalFriendReferrals">0</div>
@@ -1227,25 +1210,17 @@
       </div>
     </div>
 
-    <!-- قسم التحديات -->
     <div class="section-hidden" id="sectionChallenges">
-      <!-- بطاقة التحديات العامة -->
       <div class="challenges-card">
         <h3><i class="fas fa-bolt"></i> التحديات العامة</h3>
-        <div class="challenges-list" id="challengesList">
-          <!-- التحديات ستضاف هنا ديناميكياً -->
-        </div>
+        <div class="challenges-list" id="challengesList"></div>
       </div>
       
-      <!-- بطاقة تحديات الأصدقاء -->
       <div class="challenges-card">
         <h3><i class="fas fa-users"></i> تحديات مع الأصدقاء</h3>
-        <div class="friends-challenges" id="friendsChallenges">
-          <!-- تحديات الأصدقاء ستضاف هنا ديناميكياً -->
-        </div>
+        <div class="friends-challenges" id="friendsChallenges"></div>
       </div>
       
-      <!-- بطاقة لوحة الصدارة -->
       <div class="leaderboard-card">
         <h3><i class="fas fa-crown"></i> لوحة الصدارة</h3>
         <div class="leaderboard-tabs">
@@ -1253,19 +1228,14 @@
           <div class="leaderboard-tab" data-period="weekly">الأسبوع</div>
           <div class="leaderboard-tab" data-period="all">الكل</div>
         </div>
-        <div class="leaderboard-list" id="leaderboardList">
-          <!-- اللاعبون سيضافون هنا ديناميكياً -->
-        </div>
+        <div class="leaderboard-list" id="leaderboardList"></div>
       </div>
     </div>
 
-    <!-- قسم المجموعات -->
     <div class="section-hidden" id="sectionGroups">
       <div class="groups-card">
         <h3><i class="fas fa-users"></i> المجموعات والعصابات</h3>
-        <div class="groups-list" id="groupsList">
-          <!-- المجموعات ستضاف هنا ديناميكياً -->
-        </div>
+        <div class="groups-list" id="groupsList"></div>
         <div style="text-align: center; margin-top: 15px;">
           <button class="challenge-action" id="createGroupBtn" style="width: 100%;">
             <i class="fas fa-plus"></i> إنشاء مجموعة جديدة
@@ -1274,7 +1244,6 @@
       </div>
     </div>
 
-    <!-- قسم الإحالات -->
     <div class="section-hidden" id="sectionReferrals">
       <div class="referrals-card">
         <h3><i class="fas fa-user-plus"></i> نظام الإحالات</h3>
@@ -1303,13 +1272,10 @@
           </div>
         </div>
         <h4 style="margin: 15px 0 10px 0;"><i class="fas fa-award"></i> مكافآت الإحالة</h4>
-        <div class="referral-rewards" id="referralRewardsList">
-          <!-- مكافآت الإحالة ستضاف هنا ديناميكياً -->
-        </div>
+        <div class="referral-rewards" id="referralRewardsList"></div>
       </div>
     </div>
 
-    <!-- قسم متجر المكافآت -->
     <div class="section-hidden" id="sectionShop">
       <div class="shop-card">
         <h3><i class="fas fa-store"></i> متجر المكافآت</h3>
@@ -1319,14 +1285,11 @@
           <div class="leaderboard-tab" data-category="physical">ملموس</div>
           <div class="leaderboard-tab" data-category="discounts">خصومات</div>
         </div>
-        <div class="shop-items" id="shopItems">
-          <!-- عناصر المتجر ستضاف هنا ديناميكياً -->
-        </div>
+        <div class="shop-items" id="shopItems"></div>
       </div>
     </div>
   </div>
 
-  <!-- شريط التنقل السفلي -->
   <div class="bottom-nav" style="display: none;">
     <div class="nav-item active" id="navHome">
       <i class="fas fa-home"></i>
@@ -1350,7 +1313,6 @@
     </div>
   </div>
 
-  <!-- الرسائل العائمة -->
   <div id="floatingMessage" class="floating-message" style="display: none;"></div>
 
   <script>
@@ -1365,7 +1327,6 @@
       databaseURL: "https://bnak-belaiba-default-rtdb.firebaseio.com/"
     };
 
-    // تهيئة Firebase
     let firebaseApp, auth, database, db;
     try {
       firebaseApp = firebase.initializeApp(firebaseConfig);
@@ -1490,7 +1451,6 @@
         
         await checkinRef.set(checkinData);
         
-        // تحديث إحصائيات المستخدم
         const userRef = db.collection('users').doc(userId);
         await userRef.update({
           'gameData.lastCheckin': today,
@@ -1522,14 +1482,12 @@
         const currentPoints = userData.gameData?.points || 0;
         const newPoints = currentPoints + amount;
         
-        // تحديث النقاط
         await userRef.update({
           'gameData.points': newPoints,
           'gameData.level': calculateLevel(newPoints),
           'gameData.totalPointsEarned': firebase.firestore.FieldValue.increment(Math.max(0, amount))
         });
         
-        // تسجيل التحويل
         await createTransaction(userId, {
           type: 'game',
           amount: amount,
@@ -1557,11 +1515,9 @@
         const userId = userData.id.toString();
         const usersRef = db.collection('users').doc(userId);
         
-        // التحقق من وجود المستخدم
         const userDoc = await usersRef.get();
         
         if (!userDoc.exists) {
-          // إنشاء بيانات اللعبة الافتراضية
           const defaultGameData = {
             points: 100,
             level: 1,
@@ -1583,7 +1539,6 @@
             lastActive: Date.now()
           };
           
-          // بيانات المستخدم الجديد
           const newUserData = {
             telegramId: userId,
             firstName: userData.first_name || userData.firstName || 'غير معروف',
@@ -1595,7 +1550,7 @@
             lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
             status: 'active',
             gameData: defaultGameData,
-            referralCode: generateReferralCode(),
+            referralCode: userId, // استخدام ID المستخدم كرمز إحالة
             referredBy: null,
             totalReferrals: 0,
             settings: {
@@ -1611,11 +1566,9 @@
             }
           };
           
-          // إنشاء المستخدم
           await usersRef.set(newUserData);
           console.log('✅ تم تسجيل مستخدم جديد:', userId);
           
-          // إنشاء أول تسجيل تحويل
           await createTransaction(userId, {
             type: 'welcome',
             amount: 100,
@@ -1624,7 +1577,6 @@
           
           return newUserData;
         } else {
-          // تحديث آخر دخول للمستخدم الموجود
           await usersRef.update({
             lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
             'gameData.lastActive': Date.now()
@@ -1716,7 +1668,6 @@
         const snapshot = await tasksRef.get();
         
         if (snapshot.empty) {
-          // إنشاء مهام افتراضية إذا لم تكن موجودة
           await createDefaultTasks();
           return gameData.dailyTasks;
         }
@@ -1741,7 +1692,6 @@
         const snapshot = await achievementsRef.get();
         
         if (snapshot.empty) {
-          // إنشاء إنجازات افتراضية إذا لم تكن موجودة
           await createDefaultAchievements();
           return gameData.achievements;
         }
@@ -1956,11 +1906,9 @@
       ]
     };
 
-    // ========== متغيرات عامة ==========
     let currentUser = null;
     let isOnline = true;
 
-    // ========== نظام المستويات ==========
     function calculateLevel(points) {
       if (points <= 0) return 1;
       if (points >= 5000000) return 100;
@@ -1969,7 +1917,6 @@
       return Math.max(1, Math.min(99, level));
     }
 
-    // ========== تحميل بيانات المستخدم ==========
     async function loadUserData() {
       try {
         if (!currentUser || !currentUser.id) {
@@ -1991,7 +1938,6 @@
         
         const userData = userDoc.data();
         
-        // تحميل بيانات اللعبة
         if (userData.gameData) {
           gameData.user = userData.gameData;
           gameData.user.name = userData.firstName + (userData.lastName ? ' ' + userData.lastName : '');
@@ -2000,12 +1946,10 @@
           gameData.user.referralCode = userData.referralCode;
           gameData.user.referredBy = userData.referredBy;
           
-          // تحميل المهام اليومية من Firestore إذا لم تكن موجودة
           if (!gameData.user.dailyTasks || gameData.user.dailyTasks.length === 0) {
             gameData.user.dailyTasks = await loadDailyTasks();
           }
           
-          // تحميل الإنجازات من Firestore إذا لم تكن موجودة
           if (!gameData.user.achievements || gameData.user.achievements.length === 0) {
             gameData.user.achievements = await loadAchievements();
           }
@@ -2015,9 +1959,8 @@
           console.log('✅ تم تحميل بيانات المستخدم من Firestore');
           return true;
         } else {
-          // إذا لم تكن gameData موجودة، نقوم بإنشائها
           await initializeUserGameData(currentUser.id);
-          return await loadUserData(); // إعادة المحاولة بعد التهيئة
+          return await loadUserData();
         }
         
       } catch (error) {
@@ -2027,7 +1970,6 @@
     }
 
     function loadLocalUserData() {
-      // إنشاء بيانات مستخدم محلية
       const userId = currentUser?.id || 'local_' + Date.now();
       const userName = currentUser?.firstName || 'مستخدم';
       
@@ -2057,7 +1999,6 @@
       return true;
     }
 
-    // ========== حفظ بيانات المستخدم ==========
     async function saveUserData() {
       try {
         if (!currentUser || !currentUser.id) {
@@ -2077,7 +2018,6 @@
           return false;
         }
         
-        // تحديث بيانات اللعبة
         const updateData = {
           gameData: gameData.user,
           'gameData.lastActive': Date.now(),
@@ -2116,7 +2056,6 @@
         if (userDoc.exists) {
           const firestoreData = userDoc.data().gameData;
           
-          // مزامنة البيانات المحلية مع Firestore
           if (firestoreData) {
             gameData.user = { ...gameData.user, ...firestoreData };
             await saveUserData();
@@ -2130,23 +2069,18 @@
       }
     }
 
-    // ========== تحميل بيانات إضافية ==========
     async function loadAdditionalData() {
       try {
         console.log('🔄 تحميل البيانات الإضافية...');
         
-        // تحميل لوحة الصدارة
         gameData.leaderboard.daily = await loadLeaderboard('daily');
         gameData.leaderboard.weekly = await loadLeaderboard('weekly');
         gameData.leaderboard.all = await loadLeaderboard('all');
         
-        // تحميل الأصدقاء
         gameData.friends = await loadFriends();
         
-        // تحميل عناصر المتجر من Firestore
         gameData.shopItems = await loadShopItems();
         
-        // عرض البيانات
         renderLeaderboard('daily');
         renderFriendsAndGifts();
         renderChallenges();
@@ -2160,7 +2094,6 @@
       }
     }
 
-    // ========== تحميل لوحة الصدارة ==========
     async function loadLeaderboard(period = 'all') {
       try {
         if (!db) {
@@ -2228,14 +2161,12 @@
           }
         });
         
-        // ترتيب حسب النقاط
         allUsers.sort((a, b) => b.points - a.points);
         
         leaderboardData.all = allUsers.slice(0, 50);
         leaderboardData.weekly = allUsers.slice(0, 30);
         leaderboardData.daily = allUsers.slice(0, 20);
         
-        // حفظ في Firestore
         const today = new Date().toISOString().split('T')[0];
         const leaderboardRef = db.collection('leaderboard').doc(today);
         await leaderboardRef.set(leaderboardData);
@@ -2258,7 +2189,6 @@
       ];
     }
 
-    // ========== تحميل الأصدقاء ==========
     async function loadFriends() {
       try {
         if (!db) {
@@ -2277,7 +2207,7 @@
               name: user.firstName || 'مستخدم',
               avatar: user.gameData?.avatar || '?',
               points: user.gameData?.points || 0,
-              online: Math.random() > 0.5, // عشوائي للاختبار
+              online: Math.random() > 0.5,
               gifts: Math.floor(Math.random() * 4)
             });
           }
@@ -2660,18 +2590,28 @@
       document.getElementById('totalPoints').textContent = (gameData.user.points || 0).toLocaleString('en-US');
       document.getElementById('streakBadge').innerHTML = `🔥 <span class="english-numbers">${gameData.user.streak || 0}</span> أيام متتالية`;
       
-      // تحديث روابط الإحالة
-      if (currentUser && currentUser.referralCode) {
-        document.getElementById('friendReferralLink').textContent = 
-          `https://crynova.com/invite/${currentUser.referralCode}`;
-        document.getElementById('referralLink').value = 
-          `https://crynova.com/invite/${currentUser.referralCode}`;
+      // تحديث معرف المستخدم تحت الاسم
+      const userUsernameEl = document.getElementById('userUsername');
+      if (currentUser && currentUser.username) {
+        userUsernameEl.textContent = `@${currentUser.username}`;
+        userUsernameEl.style.display = 'block';
       } else {
-        const referralCode = generateReferralCode();
+        userUsernameEl.style.display = 'none';
+      }
+      
+      // رابط الإحالة أصبح رقم ID المستخدم نفسه
+      if (currentUser && currentUser.id) {
+        const referralCode = currentUser.id; // استخدام ID المستخدم كرمز إحالة
         document.getElementById('friendReferralLink').textContent = 
-          `https://crynova.com/invite/${referralCode}`;
+          `https://crynova.com/ref/${referralCode}`;
         document.getElementById('referralLink').value = 
-          `https://crynova.com/invite/${referralCode}`;
+          `https://crynova.com/ref/${referralCode}`;
+      } else {
+        const referralCode = gameData.user.telegramId || gameData.user.id || 'unknown';
+        document.getElementById('friendReferralLink').textContent = 
+          `https://crynova.com/ref/${referralCode}`;
+        document.getElementById('referralLink').value = 
+          `https://crynova.com/ref/${referralCode}`;
       }
       
       document.getElementById('totalFriendReferrals').textContent = gameData.user.referrals || 0;
@@ -2682,10 +2622,8 @@
 
     // ========== إعداد الأحداث ==========
     function setupEventListeners() {
-      // زر التسجيل اليومي
       document.getElementById('checkinButton').addEventListener('click', handleDailyCheckin);
       
-      // أزرار المهام
       document.addEventListener('click', function(e) {
         if (e.target.closest('.task-action')) {
           const button = e.target.closest('.task-action');
@@ -2693,35 +2631,30 @@
           completeTask(taskId);
         }
         
-        // أزرار إرسال الهدايا
         if (e.target.closest('.send-gift-btn')) {
           const button = e.target.closest('.send-gift-btn');
           const friendId = button.getAttribute('data-friend-id');
           sendGiftToFriend(friendId);
         }
         
-        // أزرار الهدايا
         if (e.target.closest('.gift-action') && e.target.closest('.gift-action').getAttribute('data-gift-id')) {
           const button = e.target.closest('.gift-action');
           const giftId = parseInt(button.getAttribute('data-gift-id'));
           sendGift(giftId);
         }
         
-        // أزرار التحديات
         if (e.target.closest('.challenge-action') && e.target.closest('.challenge-action').getAttribute('data-challenge-id')) {
           const button = e.target.closest('.challenge-action');
           const challengeId = parseInt(button.getAttribute('data-challenge-id'));
           startChallenge(challengeId);
         }
         
-        // أزرار متجر المكافآت
         if (e.target.closest('.shop-action')) {
           const button = e.target.closest('.shop-action');
           const itemId = parseInt(button.getAttribute('data-item-id'));
           purchaseItem(itemId);
         }
         
-        // أزرار مكافآت الإحالة
         if (e.target.closest('.gift-action') && e.target.closest('.gift-action').getAttribute('data-reward-id')) {
           const button = e.target.closest('.gift-action');
           const rewardId = parseInt(button.getAttribute('data-reward-id'));
@@ -2729,7 +2662,6 @@
         }
       });
       
-      // ألسنة لوحة الصدارة
       document.querySelectorAll('.leaderboard-tab').forEach(tab => {
         tab.addEventListener('click', function() {
           document.querySelectorAll('.leaderboard-tab').forEach(t => t.classList.remove('active'));
@@ -2740,7 +2672,6 @@
         });
       });
       
-      // ألسنة المتجر
       document.querySelectorAll('.shop-tabs .leaderboard-tab').forEach(tab => {
         tab.addEventListener('click', function() {
           document.querySelectorAll('.shop-tabs .leaderboard-tab').forEach(t => t.classList.remove('active'));
@@ -2751,7 +2682,6 @@
         });
       });
       
-      // شريط التنقل السفلي
       document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
         item.addEventListener('click', function() {
           document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
@@ -2762,7 +2692,6 @@
         });
       });
       
-      // نسخ رابط الإحالة
       document.getElementById('copyReferralLink').addEventListener('click', function() {
         const referralLink = document.getElementById('referralLink');
         referralLink.select();
@@ -2770,7 +2699,6 @@
         showMessage('تم نسخ رابط الإحالة بنجاح!');
       });
       
-      // نسخ رابط الإحالة من قسم الأصدقاء
       document.getElementById('copyFriendReferralLink').addEventListener('click', function() {
         const referralLink = document.getElementById('friendReferralLink').textContent;
         const tempInput = document.createElement('input');
@@ -2782,7 +2710,6 @@
         showMessage('تم نسخ رابط الدعوة بنجاح! شاركه مع أصدقائك.');
       });
       
-      // زر إنشاء مجموعة
       document.getElementById('createGroupBtn').addEventListener('click', function() {
         createNewGroup();
       });
@@ -2850,19 +2777,15 @@
           return;
         }
         
-        // تسجيل الدخول اليومي في Firestore
         await recordDailyCheckin(currentUser.id, totalPoints, newStreak);
         
-        // تحديث النقاط في Firestore
         await updatePoints(currentUser.id, totalPoints, 'التسجيل اليومي');
         
-        // تحديث البيانات المحلية
         gameData.user.points += totalPoints;
         gameData.user.streak = newStreak;
         gameData.user.lastCheckin = today;
         gameData.user.level = calculateLevel(gameData.user.points);
         
-        // تحديث المهمة إن وجدت
         const checkinTask = gameData.user.dailyTasks.find(t => t.type === 'checkin');
         if (checkinTask && !checkinTask.completed) {
           checkinTask.completed = true;
@@ -2899,7 +2822,6 @@
         const userData = userDoc.data();
         const tasks = userData.gameData?.dailyTasks || [];
         
-        // تحديث المهمة
         const updatedTasks = tasks.map(task => {
           if (task.id === taskId) {
             return { ...task, completed: true, completedAt: new Date().toISOString() };
@@ -2907,7 +2829,6 @@
           return task;
         });
         
-        // تحديث المهام في Firestore
         await userRef.update({
           'gameData.dailyTasks': updatedTasks,
           'statistics.totalTasksCompleted': firebase.firestore.FieldValue.increment(1)
@@ -2932,13 +2853,10 @@
       }
       
       try {
-        // تحديث النقاط في Firestore
         await updatePoints(currentUser.id, task.reward, `إكمال المهمة: ${task.title}`);
         
-        // تحديث المهمة في Firestore
         await completeTaskInFirestore(currentUser.id, taskId);
         
-        // تحديث البيانات المحلية
         gameData.user.points += task.reward;
         gameData.user.level = calculateLevel(gameData.user.points);
         task.completed = true;
@@ -2972,10 +2890,8 @@
           return;
         }
         
-        // تحديث النقاط في Firestore
         await updatePoints(currentUser.id, -50, `إرسال هدية إلى ${friend.name}`);
         
-        // تحديث البيانات المحلية
         gameData.user.points -= 50;
         
         const giftTask = gameData.user.dailyTasks.find(t => t.type === 'gift');
@@ -2984,7 +2900,6 @@
           await completeTaskInFirestore(currentUser.id, giftTask.id);
         }
         
-        // تحديث إحصائيات المستخدم
         if (db) {
           const userRef = db.collection('users').doc(currentUser.id);
           await userRef.update({
@@ -3046,21 +2961,17 @@
       
       if (confirm(`هل تريد شراء "${item.title}" مقابل ${item.points.toLocaleString('en-US')} نقطة؟`)) {
         try {
-          // تحديث النقاط في Firestore
           await updatePoints(currentUser.id, -item.points, `شراء من المتجر: ${item.title}`);
           
-          // تحديث البيانات المحلية
           gameData.user.points -= item.points;
           gameData.user.level = calculateLevel(gameData.user.points);
           
-          // تحديث إحصائيات المستخدم
           if (db) {
             const userRef = db.collection('users').doc(currentUser.id);
             await userRef.update({
               'statistics.totalPurchases': firebase.firestore.FieldValue.increment(1)
             });
             
-            // تسجيل عملية الشراء
             await createTransaction(currentUser.id, {
               type: 'purchase',
               amount: -item.points,
@@ -3091,10 +3002,8 @@
       
       try {
         if (typeof reward.reward === 'number') {
-          // تحديث النقاط في Firestore
           await updatePoints(currentUser.id, reward.reward, `مكافأة الإحالة: ${reward.title}`);
           
-          // تحديث البيانات المحلية
           gameData.user.points += reward.reward;
           showMessage(`مبروك! حصلت على ${reward.reward.toLocaleString('en-US')} نقطة مكافأة`);
         } else {
@@ -3124,10 +3033,8 @@
         if (achievement && !achievement.unlocked) {
           achievement.unlocked = true;
           
-          // تحديث النقاط في Firestore
           await updatePoints(currentUser.id, achievement.reward, `إنجاز: ${achievement.title}`);
           
-          // تحديث البيانات المحلية
           gameData.user.points += achievement.reward;
           showMessage(`🎉 إنجاز جديد: ${achievement.title}! ربحت ${achievement.reward.toLocaleString('en-US')} نقطة إضافية`);
           updated = true;
@@ -3139,10 +3046,8 @@
         if (achievement && !achievement.unlocked) {
           achievement.unlocked = true;
           
-          // تحديث النقاط في Firestore
           await updatePoints(currentUser.id, achievement.reward, `إنجاز: ${achievement.title}`);
           
-          // تحديث البيانات المحلية
           gameData.user.points += achievement.reward;
           showMessage(`🎉 إنجاز جديد: ${achievement.title}! ربحت ${achievement.reward.toLocaleString('en-US')} نقطة إضافية`);
           updated = true;
@@ -3154,10 +3059,8 @@
         if (achievement && !achievement.unlocked) {
           achievement.unlocked = true;
           
-          // تحديث النقاط في Firestore
           await updatePoints(currentUser.id, achievement.reward, `إنجاز: ${achievement.title}`);
           
-          // تحديث البيانات المحلية
           gameData.user.points += achievement.reward;
           showMessage(`🎉 إنجاز جديد: ${achievement.title}! ربحت ${achievement.reward.toLocaleString('en-US')} نقطة إضافية`);
           updated = true;
@@ -3169,10 +3072,8 @@
         if (achievement && !achievement.unlocked) {
           achievement.unlocked = true;
           
-          // تحديث النقاط في Firestore
           await updatePoints(currentUser.id, achievement.reward, `إنجاز: ${achievement.title}`);
           
-          // تحديث البيانات المحلية
           gameData.user.points += achievement.reward;
           showMessage(`🎉 إنجاز جديد: ${achievement.title}! ربحت ${achievement.reward.toLocaleString('en-US')} نقطة إضافية`);
           updated = true;
@@ -3194,7 +3095,6 @@
       try {
         console.log('🔄 بدء تهيئة Telegram WebApp...');
         
-        // إذا كان Telegram WebApp غير متوفر، نستخدم بيانات تجريبية
         if (!window.Telegram || !Telegram.WebApp) {
           console.log('❌ Telegram WebApp غير متوفر، استخدام بيانات تجريبية');
           await useMockData();
@@ -3217,7 +3117,6 @@
         
         console.log('👤 بيانات مستخدم Telegram:', user);
         
-        // تحديث المستخدم الحالي
         currentUser = {
           id: user.id.toString(),
           telegramId: user.id.toString(),
@@ -3227,14 +3126,12 @@
           languageCode: user.language_code || 'ar'
         };
         
-        // تسجيل المستخدم في قاعدة البيانات
         try {
           const registeredUser = await registerUserIfNeeded(user);
           
           if (registeredUser) {
             console.log('✅ تم تسجيل/تسجيل دخول المستخدم:', registeredUser);
             
-            // عرض رسالة ترحيب للمستخدمين الجدد
             if (registeredUser.registrationDate) {
               const regDate = registeredUser.registrationDate.toDate();
               const daysSinceReg = Math.floor((new Date() - regDate) / (1000 * 60 * 60 * 24));
@@ -3248,15 +3145,12 @@
           console.error('⚠️ خطأ في تسجيل المستخدم:', error);
         }
         
-        // تحديث واجهة المستخدم
         updateUserInterface(currentUser);
         
-        // تهيئة اللعبة
         await initializeGame();
         
         updateFirebaseStatus('success', '✅ تم تسجيل الدخول بنجاح');
         
-        // مزامنة البيانات وتحديث لوحة الصدارة
         setTimeout(() => {
           syncLocalDataWithFirestore();
           updateLeaderboard();
@@ -3288,7 +3182,6 @@
         languageCode: mockUser.language_code
       };
       
-      // محاولة تسجيل المستخدم التجريبي
       if (db) {
         try {
           await registerUserIfNeeded(mockUser);
@@ -3297,7 +3190,6 @@
         }
       }
       
-      // تهيئة اللعبة
       await initializeGame();
     }
 
@@ -3361,7 +3253,6 @@
         showMessage('حدث خطأ في تحميل اللعبة. يرجى تحديث الصفحة.');
         hideLoading();
         
-        // عرض واجهة اللعبة حتى مع وجود خطأ
         document.getElementById('gameContainer').style.display = 'block';
         document.querySelector('.bottom-nav').style.display = 'flex';
       }
@@ -3371,17 +3262,14 @@
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 بدء تشغيل لعبة النقاط اليومية...');
       
-      // التحقق من تهيئة Firebase
       if (!firebaseApp) {
         document.querySelector('.loading-text').textContent = 'حدث خطأ في الاتصال بالخادم. يرجى تحديث الصفحة.';
         console.error('Firebase not initialized');
         return;
       }
       
-      // إظهار شاشة التحميل
       showLoading();
       
-      // بدء تهيئة Telegram WebApp
       setTimeout(() => {
         initializeTelegramWebApp();
       }, 500);
