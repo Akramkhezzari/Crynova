@@ -1035,6 +1035,7 @@
       justify-content: center;
       align-items: center;
       z-index: 9999;
+      display: none; /* تم إخفائه */
     }
 
     .loading-spinner {
@@ -1102,24 +1103,35 @@
       background: rgba(255, 71, 87, 0.1);
       border: 1px solid var(--danger);
     }
+
+    /* Quick loading indicator */
+    .quick-load {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+      margin-right: 5px;
+    }
   </style>
 </head>
 <body>
-  <div id="loadingScreen" class="loading-container">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">جاري إنشاء حسابك...</div>
-  </div>
-
+  <!-- تم إزالة شاشة التحميل -->
   <div id="firebaseStatus" class="firebase-status"></div>
 
-  <div id="gameContainer" class="container" style="display: none;">
+  <div id="gameContainer" class="container">
     <div class="game-header">
       <div class="user-info">
-        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-avatar" id="userAvatar">
+          <div class="quick-load" style="display: none;"></div>
+          <span id="avatarText">م</span>
+        </div>
         <div class="user-details">
           <h2 id="userName">جاري التحميل...</h2>
           <div id="userUsername" class="user-username" style="display: none;"></div>
-          <p>مستوى: <span id="userLevel" class="english-numbers">1</span></p>
+          <p>مستوى: <span id="userLevel" class="english-numbers">-</span></p>
         </div>
       </div>
       <div class="points-display">
@@ -1154,12 +1166,20 @@
 
       <div class="daily-tasks-card">
         <h3><i class="fas fa-tasks"></i> المهام اليومية</h3>
-        <div class="tasks-list" id="tasksList"></div>
+        <div class="tasks-list" id="tasksList">
+          <div style="text-align: center; padding: 20px; color: var(--text-light)">
+            <div class="quick-load"></div> جاري تحميل المهام...
+          </div>
+        </div>
       </div>
 
       <div class="achievements-card">
         <h3><i class="fas fa-trophy"></i> الإنجازات</h3>
-        <div class="achievements-grid" id="achievementsGrid"></div>
+        <div class="achievements-grid" id="achievementsGrid">
+          <div style="grid-column: span 2; text-align: center; padding: 20px; color: var(--text-light)">
+            <div class="quick-load"></div> جاري تحميل الإنجازات...
+          </div>
+        </div>
       </div>
 
       <div class="leaderboard-card">
@@ -1169,19 +1189,31 @@
           <div class="leaderboard-tab" data-period="weekly">الأسبوع</div>
           <div class="leaderboard-tab" data-period="all">الكل</div>
         </div>
-        <div class="leaderboard-list" id="leaderboardList"></div>
+        <div class="leaderboard-list" id="leaderboardList">
+          <div style="text-align: center; padding: 20px; color: var(--text-light)">
+            <div class="quick-load"></div> جاري تحميل الصدارة...
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="section-hidden" id="sectionFriends">
       <div class="friends-card">
         <h3><i class="fas fa-user-friends"></i> الأصدقاء</h3>
-        <div class="friends-list" id="friendsList"></div>
+        <div class="friends-list" id="friendsList">
+          <div style="text-align: center; padding: 20px; color: var(--text-light)">
+            <div class="quick-load"></div> جاري تحميل قائمة الأصدقاء...
+          </div>
+        </div>
       </div>
 
       <div class="gifts-card">
         <h3><i class="fas fa-gift"></i> الهدايا المتاحة</h3>
-        <div class="gifts-list" id="giftsList"></div>
+        <div class="gifts-list" id="giftsList">
+          <div style="text-align: center; padding: 20px; color: var(--text-light)">
+            <div class="quick-load"></div> جاري تحميل الهدايا...
+          </div>
+        </div>
       </div>
 
       <div class="advanced-referral-card" id="advancedReferralCard">
@@ -1223,29 +1255,31 @@
     <div class="section-hidden" id="sectionChallenges">
       <div class="challenges-card">
         <h3><i class="fas fa-bolt"></i> التحديات العامة</h3>
-        <div class="challenges-list" id="challengesList"></div>
+        <div class="challenges-list" id="challengesList">
+          <div style="text-align: center; padding: 20px; color: var(--text-light)">
+            <div class="quick-load"></div> جاري تحميل التحديات...
+          </div>
+        </div>
       </div>
       
       <div class="challenges-card">
         <h3><i class="fas fa-users"></i> تحديات مع الأصدقاء</h3>
-        <div class="friends-challenges" id="friendsChallenges"></div>
-      </div>
-      
-      <div class="leaderboard-card">
-        <h3><i class="fas fa-crown"></i> لوحة الصدارة</h3>
-        <div class="leaderboard-tabs">
-          <div class="leaderboard-tab active" data-period="daily">اليوم</div>
-          <div class="leaderboard-tab" data-period="weekly">الأسبوع</div>
-          <div class="leaderboard-tab" data-period="all">الكل</div>
+        <div class="friends-challenges" id="friendsChallenges">
+          <div style="text-align: center; padding: 20px; color: var(--text-light)">
+            <div class="quick-load"></div> جاري تحميل تحديات الأصدقاء...
+          </div>
         </div>
-        <div class="leaderboard-list" id="leaderboardList"></div>
       </div>
     </div>
 
     <div class="section-hidden" id="sectionGroups">
       <div class="groups-card">
         <h3><i class="fas fa-users"></i> المجموعات والعصابات</h3>
-        <div class="groups-list" id="groupsList"></div>
+        <div class="groups-list" id="groupsList">
+          <div style="text-align: center; padding: 20px; color: var(--text-light)">
+            <div class="quick-load"></div> جاري تحميل المجموعات...
+          </div>
+        </div>
         <div style="text-align: center; margin-top: 15px;">
           <button class="challenge-action" id="createGroupBtn" style="width: 100%;">
             <i class="fas fa-plus"></i> إنشاء مجموعة جديدة
@@ -1282,7 +1316,11 @@
           </div>
         </div>
         <h4 style="margin: 15px 0 10px 0;"><i class="fas fa-award"></i> مكافآت الإحالة</h4>
-        <div class="referral-rewards" id="referralRewardsList"></div>
+        <div class="referral-rewards" id="referralRewardsList">
+          <div style="text-align: center; padding: 20px; color: var(--text-light)">
+            <div class="quick-load"></div> جاري تحميل مكافآت الإحالة...
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1295,12 +1333,16 @@
           <div class="leaderboard-tab" data-category="physical">ملموس</div>
           <div class="leaderboard-tab" data-category="discounts">خصومات</div>
         </div>
-        <div class="shop-items" id="shopItems"></div>
+        <div class="shop-items" id="shopItems">
+          <div style="text-align: center; padding: 20px; color: var(--text-light)">
+            <div class="quick-load"></div> جاري تحميل المتجر...
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="bottom-nav" style="display: none;">
+  <div class="bottom-nav">
     <div class="nav-item active" id="navHome">
       <i class="fas fa-home"></i>
       <span>الرئيسية</span>
@@ -1373,14 +1415,6 @@
       }
     }
 
-    function showLoading() {
-      document.getElementById('loadingScreen').style.display = 'flex';
-    }
-    
-    function hideLoading() {
-      document.getElementById('loadingScreen').style.display = 'none';
-    }
-
     function showMessage(text) {
       const messageEl = document.getElementById('floatingMessage');
       messageEl.textContent = text;
@@ -1410,6 +1444,22 @@
       setTimeout(() => {
         document.body.removeChild(pointsEl);
       }, 1000);
+    }
+
+    function showQuickLoading(elementId) {
+      const element = document.getElementById(elementId);
+      if (element) {
+        const quickLoad = element.querySelector('.quick-load');
+        if (quickLoad) quickLoad.style.display = 'inline-block';
+      }
+    }
+
+    function hideQuickLoading(elementId) {
+      const element = document.getElementById(elementId);
+      if (element) {
+        const quickLoad = element.querySelector('.quick-load');
+        if (quickLoad) quickLoad.style.display = 'none';
+      }
     }
 
     // ========== دوال قاعدة البيانات المبسطة ==========
@@ -1697,7 +1747,12 @@
           throw new Error("لا يوجد مستخدم مسجل");
         }
         
-        // جلب البيانات من قاعدة البيانات فقط (النقاط، التتابع، الإحالات)
+        // تحديث الواجهة ببيانات أولية
+        document.getElementById('userName').textContent = currentUser.firstName || 'مستخدم';
+        document.getElementById('avatarText').textContent = (currentUser.firstName || 'م').charAt(0);
+        document.querySelector('#userAvatar .quick-load').style.display = 'none';
+        
+        // جلب البيانات من قاعدة البيانات
         const dbStats = await getUserStatsFromDatabase(currentUser.id);
         
         if (dbStats) {
@@ -1945,6 +2000,8 @@
         
         tasksListEl.appendChild(taskEl);
       });
+      
+      hideQuickLoading('tasksList');
     }
 
     function renderAchievements() {
@@ -1970,6 +2027,8 @@
         
         achievementsGridEl.appendChild(achievementEl);
       });
+      
+      hideQuickLoading('achievementsGrid');
     }
 
     async function renderLeaderboard(period) {
@@ -2006,6 +2065,8 @@
         
         leaderboardListEl.appendChild(playerEl);
       });
+      
+      hideQuickLoading('leaderboardList');
     }
 
     function renderFriendsAndGifts() {
@@ -2040,6 +2101,8 @@
           friendsListEl.appendChild(friendEl);
         });
       }
+      
+      hideQuickLoading('friendsList');
       
       const giftsListEl = document.getElementById('giftsList');
       giftsListEl.innerHTML = '';
@@ -2096,11 +2159,16 @@
         
         challengesListEl.appendChild(challengeEl);
       });
+      
+      hideQuickLoading('challengesList');
+      hideQuickLoading('friendsChallenges');
     }
 
     function renderGroups() {
       const groupsListEl = document.getElementById('groupsList');
       groupsListEl.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-light)">لا توجد مجموعات بعد. أنشئ مجموعتك الأولى!</div>';
+      
+      hideQuickLoading('groupsList');
     }
 
     function renderReferrals() {
@@ -2149,6 +2217,8 @@
         
         rewardsListEl.appendChild(rewardEl);
       });
+      
+      hideQuickLoading('referralRewardsList');
     }
 
     function renderShopItems(category = 'all') {
@@ -2193,6 +2263,8 @@
         
         shopItemsEl.appendChild(itemEl);
       });
+      
+      hideQuickLoading('shopItems');
     }
 
     // ========== تحديث معلومات المستخدم ==========
@@ -2200,7 +2272,7 @@
       if (!gameData.user) return;
       
       document.getElementById('userName').textContent = gameData.user.name || currentUser?.firstName || 'مستخدم';
-      document.getElementById('userAvatar').textContent = gameData.user.avatar || (currentUser?.firstName?.charAt(0) || 'م');
+      document.getElementById('avatarText').textContent = gameData.user.avatar || (currentUser?.firstName?.charAt(0) || 'م');
       document.getElementById('userLevel').textContent = gameData.user.level || 1;
       document.getElementById('totalPoints').textContent = (gameData.user.points || 0).toLocaleString('en-US');
       document.getElementById('streakBadge').innerHTML = `🔥 <span class="english-numbers">${gameData.user.streak || 0}</span> أيام متتالية`;
@@ -2518,10 +2590,6 @@
       showMessage(`بدأت تحدي "${challenge.title}"! لديك ${challenge.timeLeft} لإكماله.`);
     }
 
-    async function toggleGroupJoin(groupId) {
-      showMessage('هذه الميزة قيد التطوير. ستكون متاحة قريباً!');
-    }
-
     async function createNewGroup() {
       const groupName = prompt('أدخل اسم المجموعة الجديدة:');
       if (!groupName || groupName.trim() === '') return;
@@ -2670,6 +2738,12 @@
           languageCode: user.language_code || 'ar'
         };
         
+        // تحديث الواجهة مباشرة
+        document.getElementById('userName').textContent = currentUser.firstName || 'مستخدم';
+        document.getElementById('avatarText').textContent = (currentUser.firstName || 'م').charAt(0);
+        document.getElementById('userUsername').textContent = currentUser.username ? `@${currentUser.username}` : '';
+        document.getElementById('userUsername').style.display = currentUser.username ? 'block' : 'none';
+        
         try {
           const registeredUser = await registerUserIfNeeded(user);
           
@@ -2688,8 +2762,6 @@
         } catch (error) {
           console.error('⚠️ خطأ في تسجيل المستخدم:', error);
         }
-        
-        updateUserInterface(currentUser);
         
         await initializeGame();
         
@@ -2721,6 +2793,12 @@
         languageCode: mockUser.language_code
       };
       
+      // تحديث الواجهة مباشرة
+      document.getElementById('userName').textContent = currentUser.firstName || 'مستخدم';
+      document.getElementById('avatarText').textContent = (currentUser.firstName || 'م').charAt(0);
+      document.getElementById('userUsername').textContent = currentUser.username ? `@${currentUser.username}` : '';
+      document.getElementById('userUsername').style.display = currentUser.username ? 'block' : 'none';
+      
       if (db) {
         try {
           await registerUserIfNeeded(mockUser);
@@ -2730,12 +2808,6 @@
       }
       
       await initializeGame();
-    }
-
-    function updateUserInterface(user) {
-      if (user) {
-        console.log('👤 تحديث واجهة المستخدم:', user.firstName);
-      }
     }
 
     // ========== تهيئة اللعبة ==========
@@ -2753,16 +2825,14 @@
         renderDailyTasks();
         renderAchievements();
         
-        await loadAdditionalData();
+        // تحميل البيانات الإضافية في الخلفية
+        setTimeout(async () => {
+          await loadAdditionalData();
+        }, 500);
         
         setupEventListeners();
         checkDailyCheckin();
         hideAllNewSections();
-        
-        document.getElementById('gameContainer').style.display = 'block';
-        document.querySelector('.bottom-nav').style.display = 'flex';
-        
-        hideLoading();
         
         setTimeout(() => {
           showMessage(`مرحباً بك ${gameData.user.name}! استمتع بلعبة النقاط اليومية`);
@@ -2773,10 +2843,6 @@
       } catch (error) {
         console.error('❌ خطأ في تهيئة اللعبة:', error);
         showMessage('حدث خطأ في تحميل اللعبة. يرجى تحديث الصفحة.');
-        hideLoading();
-        
-        document.getElementById('gameContainer').style.display = 'block';
-        document.querySelector('.bottom-nav').style.display = 'flex';
       }
     }
 
@@ -2785,16 +2851,21 @@
       console.log('🚀 بدء تشغيل لعبة النقاط اليومية...');
       
       if (!firebaseApp) {
-        document.querySelector('.loading-text').textContent = 'حدث خطأ في الاتصال بالخادم. يرجى تحديث الصفحة.';
+        document.getElementById('userName').textContent = 'خطأ في الاتصال';
         console.error('Firebase not initialized');
         return;
       }
       
-      showLoading();
-      
+      // إخفاء أي مؤشرات تحميل أولية
       setTimeout(() => {
-        initializeTelegramWebApp();
-      }, 500);
+        const quickLoaders = document.querySelectorAll('.quick-load');
+        quickLoaders.forEach(loader => {
+          loader.style.display = 'none';
+        });
+      }, 1000);
+      
+      // بدء تهيئة التطبيق
+      initializeTelegramWebApp();
     });
   </script>
 </body>
