@@ -8,8 +8,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <style>
-    /* جميع أنماط CSS السابقة تبقى كما هي */
+    /* جميع الأنماط تبقى كما هي من الكود السابق */
     * {
       margin: 0;
       padding: 0;
@@ -1015,103 +1016,6 @@
       direction: ltr;
     }
 
-    .login-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      z-index: 10000;
-    }
-
-    .login-box {
-      background: white;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-    }
-
-    .login-box h2 {
-      color: var(--primary);
-      margin-bottom: 20px;
-      font-size: 24px;
-    }
-
-    .login-input {
-      width: 100%;
-      padding: 15px;
-      margin-bottom: 15px;
-      border: 2px solid var(--border-light);
-      border-radius: 12px;
-      font-size: 16px;
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-
-    .login-input:focus {
-      border-color: var(--primary);
-      outline: none;
-    }
-
-    .login-btn {
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 10px;
-      transition: all 0.3s ease;
-    }
-
-    .login-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 114, 255, 0.3);
-    }
-
-    .login-btn:disabled {
-      background: #cccccc;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .login-error {
-      color: var(--danger);
-      margin-top: 15px;
-      padding: 10px;
-      background: rgba(255, 71, 87, 0.1);
-      border-radius: 8px;
-      font-size: 14px;
-    }
-
-    .login-success {
-      color: var(--success);
-      margin-top: 15px;
-      padding: 10px;
-      background: rgba(38, 161, 123, 0.1);
-      border-radius: 8px;
-      font-size: 14px;
-    }
-
-    .login-note {
-      margin-top: 20px;
-      font-size: 14px;
-      color: var(--text-light);
-    }
-
     .loading-container {
       position: fixed;
       top: 0;
@@ -1145,37 +1049,64 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    /* أنماط إضافية للنظام الجديد */
+    .firebase-status {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 1002;
+      display: none;
+      animation: slideDown 0.5s ease;
+    }
+    
+    .firebase-status.success {
+      background: var(--success);
+      color: white;
+    }
+    
+    .firebase-status.error {
+      background: var(--danger);
+      color: white;
+    }
+    
+    .firebase-status.warning {
+      background: var(--warning);
+      color: white;
+    }
+    
+    .user-search-result {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      display: none;
+    }
+    
+    .user-search-result.found {
+      background: rgba(38, 161, 123, 0.1);
+      border: 1px solid var(--success);
+    }
+    
+    .user-search-result.not-found {
+      background: rgba(255, 71, 87, 0.1);
+      border: 1px solid var(--danger);
+    }
   </style>
 </head>
 <body>
-  <!-- تم إخفاء شاشة تسجيل الدخول عند بدء التشغيل -->
-  <div id="loginScreen" class="login-container" style="display: none;">
-    <div class="login-box">
-      <h2><i class="fas fa-gamepad"></i> تسجيل الدخول اليدوي</h2>
-      <p style="color: var(--text-gray); margin-bottom: 25px;">يمكنك تسجيل الدخول يدوياً إذا كان التسجيل التلقائي لا يعمل</p>
-      
-      <input type="text" id="telegramIdInput" class="login-input" placeholder="معرف Telegram (رقم)" maxlength="20">
-      <input type="text" id="userNameInput" class="login-input" placeholder="اسمك (اختياري)" maxlength="30">
-      
-      <button id="loginBtn" class="login-btn">
-        <i class="fas fa-sign-in-alt"></i> دخول / إنشاء حساب
-      </button>
-      
-      <div id="loginError" class="login-error" style="display: none;"></div>
-      <div id="loginSuccess" class="login-success" style="display: none;"></div>
-      
-      <div class="login-note">
-        <p><i class="fas fa-info-circle"></i> سيتم حفظ تقدمك باستخدام معرف Telegram الخاص بك</p>
-        <p style="font-size: 12px; margin-top: 10px;">يمكنك العثور على معرف Telegram في إعدادات حسابك بتطبيق Telegram</p>
-      </div>
-    </div>
-  </div>
-
   <!-- شاشة التحميل -->
   <div id="loadingScreen" class="loading-container">
     <div class="loading-spinner"></div>
     <div class="loading-text">جاري إنشاء حسابك...</div>
   </div>
+
+  <!-- حالة Firebase -->
+  <div id="firebaseStatus" class="firebase-status"></div>
 
   <!-- واجهة اللعبة الرئيسية -->
   <div id="gameContainer" class="container" style="display: none;">
@@ -1435,19 +1366,306 @@
     };
 
     // تهيئة Firebase
-    let firebaseApp, auth, database;
+    let firebaseApp, auth, database, db;
     try {
       firebaseApp = firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       database = firebase.database();
+      db = firebase.firestore();
       console.log('✅ Firebase تم تهيئته بنجاح');
+      updateFirebaseStatus('success', '✅ تم الاتصال بالخادم');
     } catch (error) {
       console.error('❌ خطأ في تهيئة Firebase:', error);
+      updateFirebaseStatus('error', '❌ خطأ في الاتصال بالخادم');
+    }
+
+    // ========== دوال المساعدة ==========
+    function updateFirebaseStatus(type, message) {
+      const statusElement = document.getElementById('firebaseStatus');
+      if (statusElement) {
+        statusElement.textContent = message;
+        statusElement.className = 'firebase-status';
+        
+        if (type === 'error') {
+          statusElement.classList.add('error');
+        } else if (type === 'warning') {
+          statusElement.classList.add('warning');
+        } else if (type === 'success') {
+          statusElement.classList.add('success');
+        }
+        
+        statusElement.style.display = 'block';
+        
+        setTimeout(() => {
+          statusElement.style.display = 'none';
+        }, 5000);
+      }
+    }
+
+    function showLoading() {
+      document.getElementById('loadingScreen').style.display = 'flex';
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingScreen').style.display = 'none';
+    }
+
+    function showMessage(text) {
+      const messageEl = document.getElementById('floatingMessage');
+      messageEl.textContent = text;
+      messageEl.style.display = 'block';
+      
+      setTimeout(() => {
+        messageEl.style.display = 'none';
+      }, 2500);
+    }
+
+    function animatePoints(points) {
+      const pointsEl = document.createElement('div');
+      pointsEl.className = 'points-animation';
+      pointsEl.textContent = `+${points.toLocaleString('en-US')} نقطة`;
+      pointsEl.style.position = 'fixed';
+      pointsEl.style.top = '50%';
+      pointsEl.style.left = '50%';
+      pointsEl.style.transform = 'translate(-50%, -50%)';
+      pointsEl.style.color = 'var(--success)';
+      pointsEl.style.fontWeight = 'bold';
+      pointsEl.style.fontSize = '24px';
+      pointsEl.style.zIndex = '1000';
+      pointsEl.style.pointerEvents = 'none';
+      
+      document.body.appendChild(pointsEl);
+      
+      setTimeout(() => {
+        document.body.removeChild(pointsEl);
+      }, 1000);
+    }
+
+    // ========== نظام تسجيل المستخدمين ==========
+    async function registerUserIfNeeded(userData) {
+      try {
+        if (!db) {
+          console.warn('⚠️ Firebase غير متصل، لا يمكن تسجيل المستخدم');
+          return null;
+        }
+        
+        const userId = userData.id.toString();
+        const usersRef = db.collection('users').doc(userId);
+        
+        // التحقق من وجود المستخدم
+        const userDoc = await usersRef.get();
+        
+        if (!userDoc.exists) {
+          // بيانات المستخدم الجديد
+          const newUserData = {
+            telegramId: userId,
+            firstName: userData.first_name || userData.firstName || 'غير معروف',
+            lastName: userData.last_name || userData.lastName || '',
+            username: userData.username || null,
+            languageCode: userData.language_code || 'ar',
+            isBot: userData.is_bot || false,
+            registrationDate: firebase.firestore.FieldValue.serverTimestamp(),
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+            status: 'active',
+            walletActive: true,
+            totalTransactions: 0,
+            totalDeposits: 0,
+            totalWithdrawals: 0,
+            referralCode: generateReferralCode(),
+            referredBy: null,
+            referrals: 0,
+            security: {
+              twoFactorEnabled: false,
+              emailVerified: false,
+              phoneVerified: false
+            },
+            settings: {
+              notifications: true,
+              currency: 'USD',
+              language: 'ar',
+              theme: 'light'
+            },
+            // بيانات اللعبة
+            gameData: {
+              points: 100, // نقاط ترحيبية
+              level: 1,
+              streak: 0,
+              lastCheckin: null,
+              avatar: (userData.first_name || 'م').charAt(0),
+              dailyTasks: [],
+              achievements: [],
+              referrals: 0,
+              referralPoints: 0,
+              isReferred: false,
+              firstPurchaseDiscount: 0,
+              createdAt: Date.now(),
+              autoRegistered: true,
+              friends: [],
+              challenges: [],
+              groups: []
+            }
+          };
+          
+          // إنشاء المستخدم
+          await usersRef.set(newUserData);
+          console.log('✅ تم تسجيل مستخدم جديد:', userId);
+          
+          // إنشاء محفظة تلقائية للمستخدم
+          await createUserWallet(userId);
+          
+          return newUserData;
+        } else {
+          // تحديث آخر دخول للمستخدم الموجود
+          await usersRef.update({
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          
+          const existingUser = userDoc.data();
+          console.log('👤 تم تسجيل دخول مستخدم موجود:', userId);
+          return existingUser;
+        }
+      } catch (error) {
+        console.error('❌ خطأ في تسجيل المستخدم:', error);
+        throw error;
+      }
+    }
+
+    async function createUserWallet(userId) {
+      try {
+        const walletRef = db.collection('wallets').doc(userId);
+        const defaultBalances = {
+          BTC: 0,
+          ETH: 0,
+          USDT: 0,
+          CNC: 0,
+          BNB: 0,
+          XRP: 0,
+          ADA: 0,
+          SOL: 0,
+          DOT: 0,
+          DOGE: 0
+        };
+        
+        const walletData = {
+          userId: userId,
+          balances: defaultBalances,
+          totalBalanceUSD: 0,
+          walletAddress: generateWalletAddress(),
+          publicKey: generateRandomKey(),
+          privateKey: null,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          status: 'active',
+          transactions: [],
+          stats: {
+            totalReceived: 0,
+            totalSent: 0,
+            transactionCount: 0
+          }
+        };
+        
+        await walletRef.set(walletData);
+        console.log('✅ تم إنشاء محفظة للمستخدم:', userId);
+        return walletData;
+      } catch (error) {
+        console.error('❌ خطأ في إنشاء المحفظة:', error);
+        throw error;
+      }
+    }
+
+    function generateReferralCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    function generateWalletAddress() {
+      const prefix = 'CRY';
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let address = prefix;
+      for (let i = 0; i < 10; i++) {
+        address += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return address;
+    }
+
+    function generateRandomKey() {
+      return '0x' + [...Array(64)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    }
+
+    async function findUserByTelegramId(telegramId) {
+      try {
+        if (!db) return null;
+        
+        const userRef = db.collection('users').doc(telegramId.toString());
+        const userDoc = await userRef.get();
+        
+        if (userDoc.exists) {
+          return userDoc.data();
+        }
+        return null;
+      } catch (error) {
+        console.error('❌ خطأ في البحث عن المستخدم:', error);
+        return null;
+      }
+    }
+
+    async function findUserByUsername(username) {
+      try {
+        if (!db) return null;
+        
+        const usersRef = db.collection('users');
+        const snapshot = await usersRef.where('username', '==', username).limit(1).get();
+        
+        if (!snapshot.empty) {
+          const userDoc = snapshot.docs[0];
+          return { id: userDoc.id, ...userDoc.data() };
+        }
+        return null;
+      } catch (error) {
+        console.error('❌ خطأ في البحث باسم المستخدم:', error);
+        return null;
+      }
+    }
+
+    async function getUserStats(userId) {
+      try {
+        if (!db) return null;
+        
+        const userRef = db.collection('users').doc(userId.toString());
+        const userDoc = await userRef.get();
+        
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const walletRef = db.collection('wallets').doc(userId.toString());
+          const walletDoc = await walletRef.get();
+          
+          let walletData = {};
+          if (walletDoc.exists) {
+            walletData = walletDoc.data();
+          }
+          
+          return {
+            userInfo: userData,
+            walletInfo: walletData,
+            registrationDate: userData.registrationDate?.toDate?.() || new Date(),
+            totalBalance: walletData.totalBalanceUSD || 0,
+            transactionCount: walletData.stats?.transactionCount || 0
+          };
+        }
+        return null;
+      } catch (error) {
+        console.error('❌ خطأ في جلب إحصائيات المستخدم:', error);
+        return null;
+      }
     }
 
     // ========== بيانات اللعبة ==========
     const gameData = {
-      user: null, // سيتم تحميله من Firebase
+      user: null,
       dailyTasks: [
         { id: 1, title: "سجل دخولك اليوم", description: "احصل على نقاط التسجيل اليومي", icon: "fas fa-calendar-check", reward: 50, completed: false, type: "checkin" },
         { id: 2, title: "شارك التطبيق", description: "شارك الرابط مع 3 أصدقاء", icon: "fas fa-share-alt", reward: 100, completed: false, type: "share" },
@@ -1470,7 +1688,6 @@
         all: []
       },
 
-      // بيانات الأصدقاء والهدايا
       friends: [],
       gifts: [
         { id: 1, title: "هدية الترحيب", description: "50 نقطة ترحيبية", icon: "fas fa-gift", points: 50, sendable: true },
@@ -1478,7 +1695,6 @@
         { id: 3, title: "هدية التحدي", description: "تحدي خاص مع صديق", icon: "fas fa-trophy", points: 150, sendable: true }
       ],
 
-      // بيانات التحديات
       challenges: [
         { id: 1, title: "تحدي التسجيل", description: "سجل دخول 5 أيام متتالية", icon: "fas fa-calendar", reward: 200, type: "daily", timeLeft: "2 يوم" },
         { id: 2, title: "تحدي النقاط", description: "اجمع 1000 نقطة في أسبوع", icon: "fas fa-coins", reward: 500, type: "weekly", timeLeft: "5 أيام" },
@@ -1486,11 +1702,8 @@
       ],
 
       friendChallenges: [],
-
-      // بيانات المجموعات
       groups: [],
 
-      // بيانات الإحالات
       referrals: {
         total: 0,
         active: 0,
@@ -1504,7 +1717,6 @@
         ]
       },
 
-      // بيانات المتجر
       shopItems: [
         { id: 1, title: "قسيمة أمازون 50 ريال", description: "قسيمة شراء من أمازون", icon: "fas fa-shopping-cart", points: 5000, category: "physical" },
         { id: 2, title: "اشتراك ستورى 3 أشهر", description: "اشتراك في تطبيق ستورى", icon: "fas fa-film", points: 3000, category: "digital" },
@@ -1517,9 +1729,8 @@
     // ========== متغيرات عامة ==========
     let currentUser = null;
     let isOnline = true;
-    let autoGeneratedTelegramId = null;
 
-    // ========== نظام المستويات المعدل ==========
+    // ========== نظام المستويات ==========
     function calculateLevel(points) {
       if (points <= 0) return 1;
       if (points >= 5000000) return 100;
@@ -1527,358 +1738,275 @@
       const level = Math.floor(100 * Math.pow(points / 5000000, 1/2.8));
       return Math.max(1, Math.min(99, level));
     }
-    
-    function getPointsForLevel(level) {
-      if (level <= 1) return 0;
-      if (level >= 100) return 5000000;
-      
-      return Math.round(5000000 * Math.pow(level / 100, 2.8));
-    }
 
-    // ========== توليد معرف Telegram تلقائي ==========
-    function generateAutoTelegramId() {
-      // توليد معرف فريد عشوائي
-      const timestamp = Date.now();
-      const randomPart = Math.floor(Math.random() * 1000000);
-      const userId = `${timestamp}${randomPart}`;
-      
-      // تخزين المعرف في localStorage للاستخدام المستقبلي
-      localStorage.setItem('auto_generated_telegram_id', userId);
-      
-      return userId;
-    }
-
-    // ========== توليد اسم عشوائي ==========
-    function generateRandomName() {
-      const arabicNames = [
-        "أحمد", "محمد", "علي", "حسن", "حسين", "مصطفى", "خالد", "عمر", "أسامة", "محمود",
-        "فاطمة", "سارة", "آمنة", "خديجة", "عائشة", "زينب", "مريم", "نورة", "هدى", "رحمة",
-        "يوسف", "إبراهيم", "إسماعيل", "يعقوب", "سليمان", "داود", "عبدالله", "عبدالرحمن", "عبدالعزيز", "عبدالهادي"
-      ];
-      
-      return arabicNames[Math.floor(Math.random() * arabicNames.length)];
-    }
-
-    // ========== التسجيل التلقائي للمستخدم ==========
-    async function autoRegisterUser() {
+    // ========== تهيئة Telegram WebApp ==========
+    async function initializeTelegramWebApp() {
       try {
-        showLoading();
+        console.log('🔄 بدء تهيئة Telegram WebApp...');
         
-        // التحقق مما إذا كان هناك معرف محفوظ مسبقاً
-        let telegramId = localStorage.getItem('auto_generated_telegram_id');
-        let userName = localStorage.getItem('user_name');
-        
-        // إذا لم يكن هناك معرف، قم بتوليد واحد جديد
-        if (!telegramId) {
-          telegramId = generateAutoTelegramId();
+        // إذا كان Telegram WebApp غير متوفر، نستخدم بيانات تجريبية
+        if (!window.Telegram || !Telegram.WebApp) {
+          console.log('❌ Telegram WebApp غير متوفر، استخدام بيانات تجريبية');
+          await useMockData();
+          return;
         }
         
-        // إذا لم يكن هناك اسم، قم بتوليد اسم عشوائي
-        if (!userName) {
-          userName = generateRandomName();
-          localStorage.setItem('user_name', userName);
+        const tg = Telegram.WebApp;
+        
+        tg.expand();
+        tg.setBackgroundColor('#ffffff');
+        tg.enableClosingConfirmation();
+        
+        const user = tg.initDataUnsafe?.user;
+        
+        if (!user || !user.id) {
+          console.log('❌ لم يتم العثور على بيانات المستخدم في Telegram');
+          await useMockData();
+          return;
         }
         
-        console.log(`📱 تسجيل تلقائي للمستخدم: ${userName} (ID: ${telegramId})`);
+        console.log('👤 بيانات مستخدم Telegram:', user);
         
-        // إنشاء معرف فريد للمستخدم
-        const userId = `auto_${telegramId}`;
+        // تحديث المستخدم الحالي
+        currentUser = {
+          id: user.id.toString(),
+          telegramId: user.id.toString(),
+          firstName: user.first_name || 'مستخدم',
+          lastName: user.last_name || '',
+          username: user.username || null,
+          languageCode: user.language_code || 'ar'
+        };
         
-        // التحقق من وجود المستخدم في قاعدة البيانات
-        const userRef = database.ref(`users/${userId}`);
-        const snapshot = await userRef.once('value');
-        
-        if (snapshot.exists()) {
-          // المستخدم موجود، تحميل بياناته
-          currentUser = snapshot.val();
-          currentUser.id = userId;
-          console.log('✅ تم تحميل بيانات المستخدم:', currentUser);
+        // تسجيل المستخدم في قاعدة البيانات
+        try {
+          const registeredUser = await registerUserIfNeeded(user);
           
-          showMessage(`مرحباً بعودتك ${currentUser.name || "صديقنا"}!`);
-        } else {
-          // إنشاء مستخدم جديد
-          const newUser = {
-            id: userId,
-            telegramId: telegramId,
-            name: userName,
-            points: 100, // نقاط ترحيبية
-            level: 1,
-            streak: 0,
-            lastCheckin: null,
-            avatar: userName.charAt(0),
-            referralCode: generateReferralCode(telegramId),
-            referrals: 0,
-            referralPoints: 0,
-            isReferred: false,
-            firstPurchaseDiscount: 0,
-            createdAt: Date.now(),
-            autoRegistered: true, // إشارة إلى أن الحساب تم إنشاؤه تلقائياً
-            dailyTasks: gameData.dailyTasks.map(task => ({ ...task, completed: false })),
-            achievements: gameData.achievements.map(ach => ({ ...ach, unlocked: false })),
-            friends: [],
-            challenges: [],
-            groups: []
-          };
-          
-          // حفظ المستخدم الجديد في قاعدة البيانات
-          await userRef.set(newUser);
-          currentUser = newUser;
-          console.log('✅ تم إنشاء مستخدم جديد تلقائياً:', currentUser);
-          
-          showMessage(`مرحباً بك ${currentUser.name}! لقد حصلت على 100 نقطة ترحيبية!`);
+          if (registeredUser) {
+            console.log('✅ تم تسجيل/تسجيل دخول المستخدم:', registeredUser);
+            
+            // عرض رسالة ترحيب للمستخدمين الجدد
+            if (registeredUser.registrationDate) {
+              const regDate = registeredUser.registrationDate.toDate();
+              const daysSinceReg = Math.floor((new Date() - regDate) / (1000 * 60 * 60 * 24));
+              
+              if (daysSinceReg < 1) {
+                showMessage('🎉 مرحباً بك في Crynova للمرة الأولى!');
+              }
+            }
+          }
+        } catch (error) {
+          console.error('⚠️ خطأ في تسجيل المستخدم:', error);
         }
         
-        // حفظ بيانات المستخدم في localStorage
-        localStorage.setItem('crynova_user_id', userId);
-        localStorage.setItem('crynova_user_name', userName);
-        
-        // تحديث حالة الاتصال
-        await updateUserOnlineStatus(true);
+        // تحديث واجهة المستخدم
+        updateUserInterface(currentUser);
         
         // تهيئة اللعبة
-        setTimeout(() => {
-          initializeGame();
-        }, 1500);
+        await initializeGame();
+        
+        updateFirebaseStatus('success', '✅ تم تسجيل الدخول بنجاح');
         
       } catch (error) {
-        console.error('❌ خطأ في التسجيل التلقائي:', error);
-        showLoginError("حدث خطأ أثناء التسجيل التلقائي. حاول تحديث الصفحة.");
-        showLoginScreen();
+        console.error('❌ خطأ في تهيئة Telegram WebApp:', error);
+        await useMockData();
       }
     }
 
-    // ========== التسجيل اليدوي (للنسخة الاحتياطية) ==========
-    async function loginWithTelegram(telegramId, userName = "") {
+    async function useMockData() {
+      console.log('🔄 استخدام بيانات تجريبية...');
+      
+      const mockUser = {
+        id: 5922049376,
+        first_name: 'Akram',
+        last_name: 'Khezzari', 
+        username: 'A_mja_d_0_5',
+        language_code: 'ar'
+      };
+      
+      currentUser = {
+        id: mockUser.id.toString(),
+        telegramId: mockUser.id.toString(),
+        firstName: mockUser.first_name,
+        lastName: mockUser.last_name,
+        username: mockUser.username,
+        languageCode: mockUser.language_code
+      };
+      
+      // محاولة تسجيل المستخدم التجريبي
+      if (db) {
+        try {
+          await registerUserIfNeeded(mockUser);
+        } catch (error) {
+          console.log('⚠️ لا يمكن تسجيل المستخدم التجريبي:', error);
+        }
+      }
+      
+      // تهيئة اللعبة
+      await initializeGame();
+    }
+
+    function updateUserInterface(user) {
+      if (user) {
+        console.log('👤 تحديث واجهة المستخدم:', user.firstName);
+      }
+    }
+
+    async function searchUser(userId) {
       try {
-        showLoading();
+        let foundUser = null;
         
-        if (!telegramId || telegramId.trim() === "") {
-          throw new Error("الرجاء إدخال معرف Telegram");
+        if (/^\d+$/.test(userId)) {
+          foundUser = await findUserByTelegramId(userId);
+        } else if (/^[a-zA-Z0-9_]+$/.test(userId)) {
+          foundUser = await findUserByUsername(userId);
         }
         
-        telegramId = telegramId.trim().replace(/[^0-9]/g, '');
-        
-        if (telegramId.length < 5) {
-          throw new Error("معرف Telegram غير صحيح");
-        }
-        
-        const userId = `telegram_${telegramId}`;
-        
-        const userRef = database.ref(`users/${userId}`);
-        const snapshot = await userRef.once('value');
-        
-        if (snapshot.exists()) {
-          currentUser = snapshot.val();
-          currentUser.id = userId;
-          console.log('✅ تم تحميل بيانات المستخدم:', currentUser);
-          
-          showLoginMessage(`مرحباً بعودتك ${currentUser.name || "صديقنا"}!`);
-        } else {
-          const newUser = {
-            id: userId,
-            telegramId: telegramId,
-            name: userName || `مستخدم_${telegramId.substring(0, 6)}`,
-            points: 100,
-            level: 1,
-            streak: 0,
-            lastCheckin: null,
-            avatar: (userName || "م").charAt(0),
-            referralCode: generateReferralCode(telegramId),
-            referrals: 0,
-            referralPoints: 0,
-            isReferred: false,
-            firstPurchaseDiscount: 0,
-            createdAt: Date.now(),
-            autoRegistered: false,
-            dailyTasks: gameData.dailyTasks.map(task => ({ ...task, completed: false })),
-            achievements: gameData.achievements.map(ach => ({ ...ach, unlocked: false })),
-            friends: [],
-            challenges: [],
-            groups: []
-          };
-          
-          await userRef.set(newUser);
-          currentUser = newUser;
-          console.log('✅ تم إنشاء مستخدم جديد:', currentUser);
-          
-          showLoginMessage(`مرحباً بك ${currentUser.name}! لقد حصلت على 100 نقطة ترحيبية!`);
-        }
-        
-        localStorage.setItem('crynova_telegram_id', telegramId);
-        if (userName) {
-          localStorage.setItem('crynova_user_name', userName);
-        }
-        
-        await updateUserOnlineStatus(true);
-        
-        setTimeout(() => {
-          hideLoginScreen();
-          initializeGame();
-        }, 1500);
-        
+        return foundUser;
       } catch (error) {
-        console.error('❌ خطأ في تسجيل الدخول:', error);
-        showLoginError(error.message || "حدث خطأ أثناء تسجيل الدخول");
-        hideLoading();
+        console.error('❌ خطأ في البحث:', error);
+        return null;
       }
     }
 
-    // ========== توليد كود إحالة ==========
-    function generateReferralCode(telegramId) {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let code = '';
-      
-      const seed = parseInt(telegramId.substring(0, 6)) || Date.now();
-      const random = new Math.seedrandom(seed);
-      
-      for (let i = 0; i < 8; i++) {
-        code += chars[Math.floor(random() * chars.length)];
-      }
-      
-      return code;
-    }
-
-    // ========== تحديث حالة الاتصال ==========
-    async function updateUserOnlineStatus(online) {
-      if (!currentUser || !currentUser.id) return;
-      
-      try {
-        await database.ref(`users/${currentUser.id}/online`).set(online);
-        await database.ref(`users/${currentUser.id}/lastSeen`).set(Date.now());
-        isOnline = online;
-      } catch (error) {
-        console.error('❌ خطأ في تحديث حالة الاتصال:', error);
-      }
-    }
-
-    // ========== تحميل بيانات المستخدم من Firebase ==========
+    // ========== تحميل بيانات المستخدم ==========
     async function loadUserData() {
       try {
         if (!currentUser || !currentUser.id) {
           throw new Error("لا يوجد مستخدم مسجل");
         }
         
-        const userRef = database.ref(`users/${currentUser.id}`);
-        const snapshot = await userRef.once('value');
-        
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
-          
-          gameData.user = { ...currentUser, ...userData };
-          
-          if (!gameData.user.dailyTasks || gameData.user.dailyTasks.length === 0) {
-            gameData.user.dailyTasks = gameData.dailyTasks.map(task => ({ ...task, completed: false }));
-            await userRef.child('dailyTasks').set(gameData.user.dailyTasks);
-          }
-          
-          if (!gameData.user.achievements || gameData.user.achievements.length === 0) {
-            gameData.user.achievements = gameData.achievements.map(ach => ({ ...ach, unlocked: false }));
-            await userRef.child('achievements').set(gameData.user.achievements);
-          }
-          
-          console.log('✅ تم تحميل بيانات المستخدم من Firebase');
-          
-          gameData.user.level = calculateLevel(gameData.user.points);
-          
-          return true;
+        if (!db) {
+          console.log('⚠️ Firestore غير متصل، استخدام بيانات محلية');
+          return loadLocalUserData();
         }
         
-        return false;
+        const userRef = db.collection('users').doc(currentUser.id);
+        const snapshot = await userRef.get();
+        
+        if (!snapshot.exists()) {
+          console.log('⚠️ المستخدم غير موجود في Firestore، إنشاء بيانات جديدة');
+          return loadLocalUserData();
+        }
+        
+        const userData = snapshot.data();
+        
+        // إذا كان المستخدم لا يحتوي على gameData، نقوم بتهيئتها
+        if (!userData.gameData) {
+          userData.gameData = {
+            points: 100,
+            level: 1,
+            streak: 0,
+            lastCheckin: null,
+            avatar: (userData.firstName || 'م').charAt(0),
+            dailyTasks: gameData.dailyTasks.map(task => ({ ...task, completed: false })),
+            achievements: gameData.achievements.map(ach => ({ ...ach, unlocked: false })),
+            referrals: 0,
+            referralPoints: 0,
+            isReferred: false,
+            firstPurchaseDiscount: 0,
+            createdAt: Date.now(),
+            autoRegistered: true,
+            friends: [],
+            challenges: [],
+            groups: []
+          };
+          
+          await userRef.update({ gameData: userData.gameData });
+        }
+        
+        gameData.user = userData.gameData;
+        gameData.user.name = userData.firstName + (userData.lastName ? ' ' + userData.lastName : '');
+        gameData.user.telegramId = userData.telegramId;
+        gameData.user.username = userData.username;
+        
+        console.log('✅ تم تحميل بيانات المستخدم من Firestore');
+        
+        gameData.user.level = calculateLevel(gameData.user.points);
+        
+        return true;
       } catch (error) {
         console.error('❌ خطأ في تحميل بيانات المستخدم:', error);
-        return false;
+        return loadLocalUserData();
       }
     }
 
-    // ========== حفظ بيانات المستخدم في Firebase ==========
+    function loadLocalUserData() {
+      // إنشاء بيانات مستخدم محلية
+      const userId = currentUser?.id || 'local_' + Date.now();
+      const userName = currentUser?.firstName || 'مستخدم';
+      
+      gameData.user = {
+        id: userId,
+        telegramId: userId,
+        name: userName,
+        points: 100,
+        level: 1,
+        streak: 0,
+        lastCheckin: null,
+        avatar: userName.charAt(0),
+        dailyTasks: gameData.dailyTasks.map(task => ({ ...task, completed: false })),
+        achievements: gameData.achievements.map(ach => ({ ...ach, unlocked: false })),
+        referrals: 0,
+        referralPoints: 0,
+        isReferred: false,
+        firstPurchaseDiscount: 0,
+        createdAt: Date.now(),
+        autoRegistered: true,
+        friends: [],
+        challenges: [],
+        groups: []
+      };
+      
+      console.log('✅ تم تحميل بيانات محلية للمستخدم');
+      return true;
+    }
+
+    // ========== حفظ بيانات المستخدم ==========
     async function saveUserData() {
       try {
         if (!currentUser || !currentUser.id) {
           throw new Error("لا يوجد مستخدم مسجل");
         }
         
-        const userRef = database.ref(`users/${currentUser.id}`);
+        if (!db) {
+          console.log('⚠️ Firestore غير متصل، حفظ بيانات محلية');
+          saveLocalUserData();
+          return true;
+        }
+        
+        const userRef = db.collection('users').doc(currentUser.id);
         
         gameData.user.updatedAt = Date.now();
         
-        await userRef.set(gameData.user);
+        await userRef.update({ 
+          gameData: gameData.user,
+          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        });
         
-        console.log('✅ تم حفظ بيانات المستخدم في Firebase');
+        console.log('✅ تم حفظ بيانات المستخدم في Firestore');
         return true;
       } catch (error) {
         console.error('❌ خطأ في حفظ بيانات المستخدم:', error);
-        showMessage('حدث خطأ في حفظ البيانات');
+        saveLocalUserData();
         return false;
       }
     }
 
-    // ========== تحميل لوحة الصدارة من Firebase ==========
-    async function loadLeaderboard(period = 'all') {
+    function saveLocalUserData() {
       try {
-        const usersRef = database.ref('users');
-        const snapshot = await usersRef.orderByChild('points').limitToLast(20).once('value');
-        
-        const players = [];
-        snapshot.forEach((childSnapshot) => {
-          const user = childSnapshot.val();
-          if (user.points > 0) {
-            players.push({
-              id: childSnapshot.key,
-              name: user.name || 'مستخدم',
-              points: user.points || 0,
-              avatar: user.avatar || '?',
-              level: calculateLevel(user.points || 0)
-            });
-          }
-        });
-        
-        players.sort((a, b) => b.points - a.points);
-        
-        if (period === 'daily') {
-          return players.slice(0, 10);
-        } else if (period === 'weekly') {
-          return players.slice(0, 15);
-        } else {
-          return players.slice(0, 20);
-        }
+        localStorage.setItem('crynova_user_data', JSON.stringify(gameData.user));
+        console.log('✅ تم حفظ بيانات المستخدم محلياً');
+        return true;
       } catch (error) {
-        console.error('❌ خطأ في تحميل لوحة الصدارة:', error);
-        return [];
-      }
-    }
-
-    // ========== تحميل الأصدقاء من Firebase ==========
-    async function loadFriends() {
-      try {
-        const usersRef = database.ref('users');
-        const snapshot = await usersRef.limitToLast(50).once('value');
-        
-        const friends = [];
-        snapshot.forEach((childSnapshot) => {
-          if (childSnapshot.key !== currentUser.id) {
-            const user = childSnapshot.val();
-            friends.push({
-              id: childSnapshot.key,
-              name: user.name || 'مستخدم',
-              avatar: user.avatar || '?',
-              points: user.points || 0,
-              online: user.online || false,
-              gifts: Math.floor(Math.random() * 4)
-            });
-          }
-        });
-        
-        return friends;
-      } catch (error) {
-        console.error('❌ خطأ في تحميل الأصدقاء:', error);
-        return [];
+        console.error('❌ خطأ في حفظ البيانات محلياً:', error);
+        return false;
       }
     }
 
     // ========== تهيئة اللعبة ==========
     async function initializeGame() {
       try {
-        showLoading();
+        console.log('🔄 بدء تهيئة اللعبة...');
         
         const loaded = await loadUserData();
         if (!loaded) {
@@ -1907,49 +2035,41 @@
           showMessage(`مرحباً بك ${gameData.user.name}! استمتع بلعبة النقاط اليومية`);
         }, 1000);
         
+        console.log('✅ تم تهيئة اللعبة بنجاح');
+        
       } catch (error) {
         console.error('❌ خطأ في تهيئة اللعبة:', error);
-        showLoginError("حدث خطأ في تحميل اللعبة. حاول مرة أخرى.");
-        showLoginScreen();
+        showMessage('حدث خطأ في تحميل اللعبة. يرجى تحديث الصفحة.');
+        hideLoading();
+        
+        // عرض واجهة اللعبة حتى مع وجود خطأ
+        document.getElementById('gameContainer').style.display = 'block';
+        document.querySelector('.bottom-nav').style.display = 'flex';
       }
     }
 
-    // ========== تحميل بيانات إضافية ==========
-    async function loadAdditionalData() {
-      try {
-        gameData.leaderboard.daily = await loadLeaderboard('daily');
-        gameData.leaderboard.weekly = await loadLeaderboard('weekly');
-        gameData.leaderboard.all = await loadLeaderboard('all');
-        
-        gameData.friends = await loadFriends();
-        
-        renderLeaderboard('daily');
-        renderFriendsAndGifts();
-        renderChallenges();
-        renderGroups();
-        renderReferrals();
-        renderShopItems();
-        
-      } catch (error) {
-        console.error('❌ خطأ في تحميل البيانات الإضافية:', error);
-      }
-    }
-
-    // ========== تحديث معلومات المستخدم في الواجهة ==========
+    // ========== تحديث معلومات المستخدم ==========
     function updateUserInfo() {
       if (!gameData.user) return;
       
-      document.getElementById('userName').textContent = gameData.user.name;
-      document.getElementById('userAvatar').textContent = gameData.user.avatar || gameData.user.name.charAt(0);
+      document.getElementById('userName').textContent = gameData.user.name || currentUser?.firstName || 'مستخدم';
+      document.getElementById('userAvatar').textContent = gameData.user.avatar || (currentUser?.firstName?.charAt(0) || 'م');
       document.getElementById('userLevel').textContent = gameData.user.level || 1;
       document.getElementById('totalPoints').textContent = (gameData.user.points || 0).toLocaleString('en-US');
       document.getElementById('streakBadge').innerHTML = `🔥 <span class="english-numbers">${gameData.user.streak || 0}</span> أيام متتالية`;
       
-      if (gameData.user.referralCode) {
+      // تحديث روابط الإحالة
+      if (currentUser && currentUser.referralCode) {
         document.getElementById('friendReferralLink').textContent = 
-          `https://crynova.com/invite/${gameData.user.referralCode}`;
+          `https://crynova.com/invite/${currentUser.referralCode}`;
         document.getElementById('referralLink').value = 
-          `https://crynova.com/invite/${gameData.user.referralCode}`;
+          `https://crynova.com/invite/${currentUser.referralCode}`;
+      } else {
+        const referralCode = generateReferralCode();
+        document.getElementById('friendReferralLink').textContent = 
+          `https://crynova.com/invite/${referralCode}`;
+        document.getElementById('referralLink').value = 
+          `https://crynova.com/invite/${referralCode}`;
       }
       
       document.getElementById('totalFriendReferrals').textContent = gameData.user.referrals || 0;
@@ -1958,11 +2078,128 @@
       document.getElementById('referralPoints').textContent = (gameData.user.referralPoints || 0).toLocaleString('en-US');
     }
 
-    // ========== تقويم التسجيل اليومي ==========
+    // ========== تحميل بيانات إضافية ==========
+    async function loadAdditionalData() {
+      try {
+        console.log('🔄 تحميل البيانات الإضافية...');
+        
+        // تحميل لوحة الصدارة
+        gameData.leaderboard.daily = await loadLeaderboard('daily');
+        gameData.leaderboard.weekly = await loadLeaderboard('weekly');
+        gameData.leaderboard.all = await loadLeaderboard('all');
+        
+        // تحميل الأصدقاء
+        gameData.friends = await loadFriends();
+        
+        // عرض البيانات
+        renderLeaderboard('daily');
+        renderFriendsAndGifts();
+        renderChallenges();
+        renderGroups();
+        renderReferrals();
+        renderShopItems();
+        
+        console.log('✅ تم تحميل البيانات الإضافية');
+      } catch (error) {
+        console.error('❌ خطأ في تحميل البيانات الإضافية:', error);
+      }
+    }
+
+    // ========== تحميل لوحة الصدارة ==========
+    async function loadLeaderboard(period = 'all') {
+      try {
+        if (!db) {
+          return getMockLeaderboard();
+        }
+        
+        const usersRef = db.collection('users');
+        const snapshot = await usersRef.get();
+        
+        const players = [];
+        snapshot.forEach((doc) => {
+          const user = doc.data();
+          if (user.gameData && user.gameData.points > 0) {
+            players.push({
+              id: doc.id,
+              name: user.firstName || 'مستخدم',
+              points: user.gameData.points || 0,
+              avatar: user.gameData.avatar || '?',
+              level: calculateLevel(user.gameData.points || 0)
+            });
+          }
+        });
+        
+        players.sort((a, b) => b.points - a.points);
+        
+        if (period === 'daily') {
+          return players.slice(0, 10);
+        } else if (period === 'weekly') {
+          return players.slice(0, 15);
+        } else {
+          return players.slice(0, 20);
+        }
+      } catch (error) {
+        console.error('❌ خطأ في تحميل لوحة الصدارة:', error);
+        return getMockLeaderboard();
+      }
+    }
+
+    function getMockLeaderboard() {
+      return [
+        { id: '1', name: 'أحمد', points: 5000, avatar: 'أ', level: 5 },
+        { id: '2', name: 'محمد', points: 4500, avatar: 'م', level: 4 },
+        { id: '3', name: 'فاطمة', points: 4000, avatar: 'ف', level: 4 },
+        { id: '4', name: 'سارة', points: 3500, avatar: 'س', level: 3 },
+        { id: '5', name: 'علي', points: 3000, avatar: 'ع', level: 3 }
+      ];
+    }
+
+    // ========== تحميل الأصدقاء ==========
+    async function loadFriends() {
+      try {
+        if (!db) {
+          return getMockFriends();
+        }
+        
+        const usersRef = db.collection('users');
+        const snapshot = await usersRef.limit(20).get();
+        
+        const friends = [];
+        snapshot.forEach((doc) => {
+          if (doc.id !== currentUser?.id) {
+            const user = doc.data();
+            friends.push({
+              id: doc.id,
+              name: user.firstName || 'مستخدم',
+              avatar: user.gameData?.avatar || '?',
+              points: user.gameData?.points || 0,
+              online: Math.random() > 0.5, // عشوائي للاختبار
+              gifts: Math.floor(Math.random() * 4)
+            });
+          }
+        });
+        
+        return friends;
+      } catch (error) {
+        console.error('❌ خطأ في تحميل الأصدقاء:', error);
+        return getMockFriends();
+      }
+    }
+
+    function getMockFriends() {
+      return [
+        { id: '1', name: 'أحمد', avatar: 'أ', points: 5000, online: true, gifts: 2 },
+        { id: '2', name: 'محمد', avatar: 'م', points: 4500, online: false, gifts: 1 },
+        { id: '3', name: 'فاطمة', avatar: 'ف', points: 4000, online: true, gifts: 3 },
+        { id: '4', name: 'سارة', avatar: 'س', points: 3500, online: false, gifts: 0 }
+      ];
+    }
+
+    // ========== دالات العرض ==========
     function renderCheckinCalendar() {
       const daysOfWeek = ['أ', 'إ', 'ث', 'أ', 'خ', 'ج', 'س'];
       const today = new Date();
-      const currentDay = today.getDay(); // 0 = الأحد
+      const currentDay = today.getDay();
       
       const calendarEl = document.getElementById('calendarCircles');
       calendarEl.innerHTML = '';
@@ -2014,7 +2251,6 @@
       document.querySelector('.progress-text').innerHTML = `<span class="english-numbers">${checkedDays}</span>/7 أيام هذا الأسبوع`;
     }
 
-    // ========== التحقق من تسجيل اليوم ==========
     function checkDailyCheckin() {
       if (!gameData.user) return;
       
@@ -2032,9 +2268,10 @@
       }
     }
 
-    // ========== المهام اليومية ==========
     function renderDailyTasks() {
-      if (!gameData.user || !gameData.user.dailyTasks) return;
+      if (!gameData.user || !gameData.user.dailyTasks) {
+        gameData.user.dailyTasks = gameData.dailyTasks.map(task => ({ ...task, completed: false }));
+      }
       
       const tasksListEl = document.getElementById('tasksList');
       tasksListEl.innerHTML = '';
@@ -2062,9 +2299,10 @@
       });
     }
 
-    // ========== الإنجازات ==========
     function renderAchievements() {
-      if (!gameData.user || !gameData.user.achievements) return;
+      if (!gameData.user || !gameData.user.achievements) {
+        gameData.user.achievements = gameData.achievements.map(ach => ({ ...ach, unlocked: false }));
+      }
       
       const achievementsGridEl = document.getElementById('achievementsGrid');
       achievementsGridEl.innerHTML = '';
@@ -2086,7 +2324,6 @@
       });
     }
 
-    // ========== لوحة الصدارة ==========
     async function renderLeaderboard(period) {
       const leaderboardListEl = document.getElementById('leaderboardList');
       leaderboardListEl.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-light)">جاري التحميل...</div>';
@@ -2102,7 +2339,7 @@
       
       players.forEach((player, index) => {
         const playerEl = document.createElement('div');
-        playerEl.className = `leaderboard-item ${player.id === gameData.user.id ? 'me' : ''}`;
+        playerEl.className = `leaderboard-item ${player.id === currentUser?.id ? 'me' : ''}`;
         
         const rankClass = index < 3 ? `top-${index + 1}` : '';
         
@@ -2122,7 +2359,6 @@
       });
     }
 
-    // ========== الأصدقاء والهدايا ==========
     function renderFriendsAndGifts() {
       const friendsListEl = document.getElementById('friendsList');
       friendsListEl.innerHTML = '';
@@ -2184,7 +2420,6 @@
       });
     }
 
-    // ========== التحديات ==========
     function renderChallenges() {
       const challengesListEl = document.getElementById('challengesList');
       challengesListEl.innerHTML = '';
@@ -2212,84 +2447,13 @@
         
         challengesListEl.appendChild(challengeEl);
       });
-      
-      const friendsChallengesEl = document.getElementById('friendsChallenges');
-      friendsChallengesEl.innerHTML = '';
-      
-      if (gameData.friendChallenges.length === 0) {
-        friendsChallengesEl.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-light)">لا توجد تحديات مع الأصدقاء بعد</div>';
-      } else {
-        gameData.friendChallenges.forEach(challenge => {
-          const challengeEl = document.createElement('div');
-          challengeEl.className = 'challenge-item';
-          
-          const progressUser = Math.min(100, (challenge.userPoints / (challenge.userPoints + challenge.friendPoints)) * 100);
-          const progressFriend = Math.min(100, (challenge.friendPoints / (challenge.userPoints + challenge.friendPoints)) * 100);
-          
-          challengeEl.innerHTML = `
-            <div class="challenge-info">
-              <div class="challenge-icon">
-                <i class="fas fa-user-friends"></i>
-              </div>
-              <div class="challenge-details">
-                <h4>${challenge.title} - ${challenge.friendName}</h4>
-                <p>${challenge.description}</p>
-                <div style="display: flex; align-items: center; margin-top: 5px; gap: 10px;">
-                  <div style="font-size: 11px; color: var(--primary);">أنت: <span class="english-numbers">${challenge.userPoints}</span></div>
-                  <div style="flex: 1; height: 6px; background: var(--bg-lighter); border-radius: 3px; overflow: hidden;">
-                    <div style="width: ${progressUser}%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary));"></div>
-                  </div>
-                  <div style="font-size: 11px; color: var(--accent);"><span class="english-numbers">${challenge.friendPoints}</span> :${challenge.friendName}</div>
-                </div>
-              </div>
-            </div>
-            <div>
-              <button class="challenge-action ${challenge.status === 'finished' ? 'completed' : ''}" data-friend-challenge-id="${challenge.id}">
-                ${challenge.status === 'finished' ? 'منتهي' : `${challenge.timeLeft}`}
-              </button>
-            </div>
-          `;
-          
-          friendsChallengesEl.appendChild(challengeEl);
-        });
-      }
     }
 
-    // ========== المجموعات ==========
     function renderGroups() {
       const groupsListEl = document.getElementById('groupsList');
-      groupsListEl.innerHTML = '';
-      
-      if (gameData.groups.length === 0) {
-        groupsListEl.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-light)">لا توجد مجموعات بعد. أنشئ مجموعتك الأولى!</div>';
-      } else {
-        gameData.groups.forEach(group => {
-          const groupEl = document.createElement('div');
-          groupEl.className = 'group-item';
-          
-          groupEl.innerHTML = `
-            <div class="group-info">
-              <div class="group-icon">
-                <i class="fas fa-users"></i>
-              </div>
-              <div class="group-details">
-                <h4>${group.name}</h4>
-                <p><span class="english-numbers">${group.members}</span> عضو • <span class="english-numbers">${group.totalPoints.toLocaleString('en-US')}</span> نقطة • المركز <span class="english-numbers">${group.rank}</span></p>
-              </div>
-            </div>
-            <div>
-              <button class="group-action ${group.userInGroup ? 'completed' : ''}" data-group-id="${group.id}">
-                ${group.userInGroup ? 'منضم' : 'انضم'}
-              </button>
-            </div>
-          `;
-          
-          groupsListEl.appendChild(groupEl);
-        });
-      }
+      groupsListEl.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-light)">لا توجد مجموعات بعد. أنشئ مجموعتك الأولى!</div>';
     }
 
-    // ========== الإحالات ==========
     function renderReferrals() {
       if (!gameData.user) return;
       
@@ -2338,7 +2502,6 @@
       });
     }
 
-    // ========== متجر المكافآت ==========
     function renderShopItems(category = 'all') {
       const shopItemsEl = document.getElementById('shopItems');
       shopItemsEl.innerHTML = '';
@@ -2385,9 +2548,6 @@
 
     // ========== إعداد الأحداث ==========
     function setupEventListeners() {
-      // زر تسجيل الدخول اليدوي
-      document.getElementById('loginBtn').addEventListener('click', handleLoginClick);
-      
       // زر التسجيل اليومي
       document.getElementById('checkinButton').addEventListener('click', handleDailyCheckin);
       
@@ -2418,13 +2578,6 @@
           const button = e.target.closest('.challenge-action');
           const challengeId = parseInt(button.getAttribute('data-challenge-id'));
           startChallenge(challengeId);
-        }
-        
-        // أزرار المجموعات
-        if (e.target.closest('.group-action')) {
-          const button = e.target.closest('.group-action');
-          const groupId = parseInt(button.getAttribute('data-group-id'));
-          toggleGroupJoin(groupId);
         }
         
         // أزرار متجر المكافآت
@@ -2499,53 +2652,8 @@
       document.getElementById('createGroupBtn').addEventListener('click', function() {
         createNewGroup();
       });
-      
-      // إدخال معرف Telegram عند الضغط على Enter
-      document.getElementById('telegramIdInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          handleLoginClick();
-        }
-      });
-      
-      // تحديث حالة الاتصال عند إغلاق الصفحة
-      window.addEventListener('beforeunload', function() {
-        updateUserOnlineStatus(false);
-      });
-      
-      // استعادة حالة الاتصال عند فتح الصفحة
-      window.addEventListener('focus', function() {
-        if (currentUser) {
-          updateUserOnlineStatus(true);
-        }
-      });
-      
-      // زر تبديل الحساب (للتجربة)
-      const switchAccountBtn = document.createElement('button');
-      switchAccountBtn.innerHTML = '<i class="fas fa-sync-alt"></i> تبديل الحساب';
-      switchAccountBtn.style.cssText = 'position: fixed; bottom: 70px; right: 20px; background: var(--warning); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; z-index: 1000;';
-      switchAccountBtn.addEventListener('click', function() {
-        if (confirm('هل تريد تبديل الحساب؟ سيتم حذف البيانات المحلية وإنشاء حساب جديد.')) {
-          localStorage.clear();
-          location.reload();
-        }
-      });
-      document.body.appendChild(switchAccountBtn);
     }
 
-    // ========== معالجة تسجيل الدخول اليدوي ==========
-    function handleLoginClick() {
-      const telegramId = document.getElementById('telegramIdInput').value.trim();
-      const userName = document.getElementById('userNameInput').value.trim();
-      
-      if (!telegramId) {
-        showLoginError("الرجاء إدخال معرف Telegram");
-        return;
-      }
-      
-      loginWithTelegram(telegramId, userName);
-    }
-
-    // ========== إخفاء جميع الأقسام الجديدة ==========
     function hideAllNewSections() {
       const newSections = ['sectionFriends', 'sectionChallenges', 'sectionGroups', 'sectionReferrals', 'sectionShop'];
       newSections.forEach(sectionId => {
@@ -2555,7 +2663,6 @@
       document.getElementById('sectionHome').classList.remove('section-hidden');
     }
 
-    // ========== التنقل بين الأقسام ==========
     function navigateToSection(section) {
       const allSections = document.querySelectorAll('#sectionHome, #sectionFriends, #sectionChallenges, #sectionGroups, #sectionReferrals, #sectionShop');
       allSections.forEach(sec => {
@@ -2575,14 +2682,12 @@
       }
       
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      console.log(`التنقل إلى قسم: ${section}`);
     }
 
-    // ========== معالجة التسجيل اليومي ==========
+    // ========== معالجة أحداث اللعبة ==========
     async function handleDailyCheckin() {
       if (!gameData.user) {
-        showMessage('الرجاء تسجيل الدخول أولاً');
+        showMessage('جاري تحميل حسابك...');
         return;
       }
       
@@ -2631,15 +2736,12 @@
         
         checkAchievements();
         
-        await loadAdditionalData();
-        
       } catch (error) {
         console.error('❌ خطأ في تسجيل الدخول اليومي:', error);
         showMessage('حدث خطأ أثناء التسجيل اليومي');
       }
     }
 
-    // ========== إكمال المهمة ==========
     async function completeTask(taskId) {
       if (!gameData.user) return;
       
@@ -2673,7 +2775,6 @@
       }
     }
 
-    // ========== إرسال هدية إلى صديق ==========
     async function sendGiftToFriend(friendId) {
       try {
         const friend = gameData.friends.find(f => f.id === friendId);
@@ -2707,7 +2808,6 @@
       }
     }
 
-    // ========== إرسال هدية ==========
     async function sendGift(giftId) {
       const gift = gameData.gifts.find(g => g.id === giftId);
       if (!gift || !gift.sendable) return;
@@ -2720,34 +2820,17 @@
       showMessage(`اختر صديقاً لإرسال ${gift.title} إليه`);
     }
 
-    // ========== بدء تحدٍ جديد ==========
     async function startChallenge(challengeId) {
       const challenge = gameData.challenges.find(c => c.id === challengeId);
       if (!challenge) return;
       
       showMessage(`بدأت تحدي "${challenge.title}"! لديك ${challenge.timeLeft} لإكماله.`);
-      
-      if (!gameData.user.challenges) {
-        gameData.user.challenges = [];
-      }
-      
-      const userChallenge = {
-        ...challenge,
-        startedAt: Date.now(),
-        completed: false
-      };
-      
-      gameData.user.challenges.push(userChallenge);
-      
-      await saveUserData();
     }
 
-    // ========== الانضمام/مغادرة مجموعة ==========
     async function toggleGroupJoin(groupId) {
       showMessage('هذه الميزة قيد التطوير. ستكون متاحة قريباً!');
     }
 
-    // ========== إنشاء مجموعة جديدة ==========
     async function createNewGroup() {
       const groupName = prompt('أدخل اسم المجموعة الجديدة:');
       if (!groupName || groupName.trim() === '') return;
@@ -2755,7 +2838,6 @@
       showMessage(`تم إنشاء مجموعة "${groupName}" بنجاح!`);
     }
 
-    // ========== شراء عنصر من المتجر ==========
     async function purchaseItem(itemId) {
       const item = gameData.shopItems.find(i => i.id === itemId);
       if (!item) return;
@@ -2785,7 +2867,6 @@
       }
     }
 
-    // ========== استلام مكافأة الإحالة ==========
     async function claimReferralReward(rewardId) {
       const reward = gameData.referrals.rewardsList.find(r => r.id === rewardId);
       if (!reward || !reward.achieved) {
@@ -2814,7 +2895,6 @@
       }
     }
 
-    // ========== التحقق من الإنجازات ==========
     async function checkAchievements() {
       if (!gameData.user || !gameData.user.achievements) return;
       
@@ -2870,103 +2950,24 @@
       }
     }
 
-    // ========== دوال مساعدة للواجهة ==========
-    function showLoginScreen() {
-      document.getElementById('loginScreen').style.display = 'flex';
-      document.getElementById('gameContainer').style.display = 'none';
-      document.querySelector('.bottom-nav').style.display = 'none';
-      document.getElementById('loadingScreen').style.display = 'none';
-      
-      const savedTelegramId = localStorage.getItem('crynova_telegram_id');
-      const savedUserName = localStorage.getItem('crynova_user_name');
-      
-      if (savedTelegramId) {
-        document.getElementById('telegramIdInput').value = savedTelegramId;
-      }
-      
-      if (savedUserName) {
-        document.getElementById('userNameInput').value = savedUserName;
-      }
-    }
-    
-    function hideLoginScreen() {
-      document.getElementById('loginScreen').style.display = 'none';
-    }
-    
-    function showLoginMessage(message) {
-      const successEl = document.getElementById('loginSuccess');
-      successEl.textContent = message;
-      successEl.style.display = 'block';
-      document.getElementById('loginError').style.display = 'none';
-    }
-    
-    function showLoginError(message) {
-      const errorEl = document.getElementById('loginError');
-      errorEl.textContent = message;
-      errorEl.style.display = 'block';
-      document.getElementById('loginSuccess').style.display = 'none';
-    }
-    
-    function showLoading() {
-      document.getElementById('loadingScreen').style.display = 'flex';
-    }
-    
-    function hideLoading() {
-      document.getElementById('loadingScreen').style.display = 'none';
-    }
-
-    // ========== عرض الرسائل العائمة ==========
-    function showMessage(text) {
-      const messageEl = document.getElementById('floatingMessage');
-      messageEl.textContent = text;
-      messageEl.style.display = 'block';
-      
-      setTimeout(() => {
-        messageEl.style.display = 'none';
-      }, 2500);
-    }
-
-    // ========== تأثير النقاط العائم ==========
-    function animatePoints(points) {
-      const pointsEl = document.createElement('div');
-      pointsEl.className = 'points-animation';
-      pointsEl.textContent = `+${points.toLocaleString('en-US')} نقطة`;
-      pointsEl.style.position = 'fixed';
-      pointsEl.style.top = '50%';
-      pointsEl.style.left = '50%';
-      pointsEl.style.transform = 'translate(-50%, -50%)';
-      pointsEl.style.color = 'var(--success)';
-      pointsEl.style.fontWeight = 'bold';
-      pointsEl.style.fontSize = '24px';
-      pointsEl.style.zIndex = '1000';
-      pointsEl.style.pointerEvents = 'none';
-      
-      document.body.appendChild(pointsEl);
-      
-      setTimeout(() => {
-        document.body.removeChild(pointsEl);
-      }, 1000);
-    }
-
     // ========== بدء التطبيق ==========
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 بدء تشغيل لعبة النقاط اليومية...');
       
       // التحقق من تهيئة Firebase
       if (!firebaseApp) {
-        showLoading();
-        showLoginError('حدث خطأ في الاتصال بالخادم. يرجى تحديث الصفحة والمحاولة مرة أخرى.');
-        showLoginScreen();
+        document.querySelector('.loading-text').textContent = 'حدث خطأ في الاتصال بالخادم. يرجى تحديث الصفحة.';
+        console.error('Firebase not initialized');
         return;
       }
       
-      // بدء التسجيل التلقائي للمستخدم
-      setTimeout(() => {
-        autoRegisterUser();
-      }, 1000);
+      // إظهار شاشة التحميل
+      showLoading();
       
-      // إعداد الأحداث
-      setupEventListeners();
+      // بدء تهيئة Telegram WebApp
+      setTimeout(() => {
+        initializeTelegramWebApp();
+      }, 500);
     });
   </script>
 </body>
