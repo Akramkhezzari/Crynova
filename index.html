@@ -1161,6 +1161,16 @@
         <h3><i class="fas fa-trophy"></i> الإنجازات</h3>
         <div class="achievements-grid" id="achievementsGrid"></div>
       </div>
+
+      <div class="leaderboard-card">
+        <h3><i class="fas fa-crown"></i> لوحة الصدارة</h3>
+        <div class="leaderboard-tabs">
+          <div class="leaderboard-tab active" data-period="daily">اليوم</div>
+          <div class="leaderboard-tab" data-period="weekly">الأسبوع</div>
+          <div class="leaderboard-tab" data-period="all">الكل</div>
+        </div>
+        <div class="leaderboard-list" id="leaderboardList"></div>
+      </div>
     </div>
 
     <div class="section-hidden" id="sectionFriends">
@@ -1402,113 +1412,11 @@
       }, 1000);
     }
 
-    // ========== دوال Firestore الأساسية ==========
-    function generateReferralCode() {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let code = '';
-      for (let i = 0; i < 8; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return code;
-    }
-
-    async function createTransaction(userId, transactionData) {
-      try {
-        if (!db) return null;
-        
-        const transactionRef = db.collection('transactions').doc();
-        
-        const transaction = {
-          userId: userId,
-          ...transactionData,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          id: transactionRef.id
-        };
-        
-        await transactionRef.set(transaction);
-        console.log('✅ تم إنشاء تحويل جديد:', transaction.id);
-        return transaction;
-      } catch (error) {
-        console.error('❌ خطأ في إنشاء التحويل:', error);
-        return null;
-      }
-    }
-
-    async function recordDailyCheckin(userId, pointsEarned, streak) {
-      try {
-        if (!db) return false;
-        
-        const today = new Date().toISOString().split('T')[0];
-        const checkinRef = db.collection('dailyCheckins').doc(`${userId}_${today}`);
-        
-        const checkinData = {
-          userId: userId,
-          date: today,
-          pointsEarned: pointsEarned,
-          streak: streak,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        
-        await checkinRef.set(checkinData);
-        
-        const userRef = db.collection('users').doc(userId);
-        await userRef.update({
-          'gameData.lastCheckin': today,
-          'gameData.streak': streak,
-          'statistics.totalCheckins': firebase.firestore.FieldValue.increment(1)
-        });
-        
-        console.log(`✅ تم تسجيل الدخول اليومي للمستخدم ${userId}`);
-        return true;
-      } catch (error) {
-        console.error('❌ خطأ في تسجيل الدخول اليومي:', error);
-        return false;
-      }
-    }
-
-    async function updatePoints(userId, amount, reason) {
-      try {
-        if (!db) return false;
-        
-        const userRef = db.collection('users').doc(userId);
-        const userDoc = await userRef.get();
-        
-        if (!userDoc.exists) {
-          console.error('❌ المستخدم غير موجود');
-          return false;
-        }
-        
-        const userData = userDoc.data();
-        const currentPoints = userData.gameData?.points || 0;
-        const newPoints = currentPoints + amount;
-        
-        await userRef.update({
-          'gameData.points': newPoints,
-          'gameData.level': calculateLevel(newPoints),
-          'gameData.totalPointsEarned': firebase.firestore.FieldValue.increment(Math.max(0, amount))
-        });
-        
-        await createTransaction(userId, {
-          type: 'game',
-          amount: amount,
-          description: reason,
-          balanceBefore: currentPoints,
-          balanceAfter: newPoints
-        });
-        
-        console.log(`✅ تم تحديث النقاط للمستخدم ${userId}: ${currentPoints} → ${newPoints}`);
-        return true;
-      } catch (error) {
-        console.error('❌ خطأ في تحديث النقاط:', error);
-        return false;
-      }
-    }
-
-    // ========== نظام تسجيل المستخدمين ==========
+    // ========== دوال قاعدة البيانات المبسطة ==========
     async function registerUserIfNeeded(userData) {
       try {
         if (!db) {
-          console.warn('⚠️ Firestore غير متصل، لا يمكن تسجيل المستخدم');
+          console.warn('⚠️ Firestore غير متصل، استخدام بيانات محلية فقط');
           return null;
         }
         
@@ -1518,68 +1426,26 @@
         const userDoc = await usersRef.get();
         
         if (!userDoc.exists) {
-          const defaultGameData = {
-            points: 100,
-            level: 1,
-            streak: 0,
-            lastCheckin: null,
-            avatar: (userData.first_name || 'م').charAt(0),
-            dailyTasks: [],
-            achievements: [],
-            referrals: 0,
-            referralPoints: 0,
-            isReferred: false,
-            firstPurchaseDiscount: 0,
-            createdAt: Date.now(),
-            autoRegistered: true,
-            friends: [],
-            challenges: [],
-            groups: [],
-            totalPointsEarned: 100,
-            lastActive: Date.now()
-          };
-          
           const newUserData = {
             telegramId: userId,
             firstName: userData.first_name || userData.firstName || 'غير معروف',
-            lastName: userData.last_name || userData.lastName || '',
             username: userData.username || null,
-            languageCode: userData.language_code || 'ar',
-            isBot: userData.is_bot || false,
+            totalPoints: 100,
+            currentStreak: 0,
+            lastCheckinDate: null,
+            referrals: 0,
+            referralPoints: 0,
             registrationDate: firebase.firestore.FieldValue.serverTimestamp(),
-            lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'active',
-            gameData: defaultGameData,
-            referralCode: userId, // استخدام ID المستخدم كرمز إحالة
-            referredBy: null,
-            totalReferrals: 0,
-            settings: {
-              notifications: true,
-              language: 'ar',
-              theme: 'light'
-            },
-            statistics: {
-              totalCheckins: 0,
-              totalTasksCompleted: 0,
-              totalGiftsSent: 0,
-              totalPurchases: 0
-            }
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
           };
           
           await usersRef.set(newUserData);
-          console.log('✅ تم تسجيل مستخدم جديد:', userId);
-          
-          await createTransaction(userId, {
-            type: 'welcome',
-            amount: 100,
-            description: 'نقاط ترحيبية'
-          });
+          console.log('✅ تم تسجيل مستخدم جديد في قاعدة البيانات:', userId);
           
           return newUserData;
         } else {
           await usersRef.update({
-            lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-            'gameData.lastActive': Date.now()
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
           });
           
           const existingUser = userDoc.data();
@@ -1592,258 +1458,167 @@
       }
     }
 
-    async function findUserByTelegramId(telegramId) {
+    async function updateUserPoints(userId, pointsChange, reason) {
       try {
-        if (!db) return null;
+        if (!db) return false;
         
-        const userRef = db.collection('users').doc(telegramId.toString());
+        const userRef = db.collection('users').doc(userId);
+        
+        // الحصول على النقاط الحالية
         const userDoc = await userRef.get();
-        
-        if (userDoc.exists) {
-          return userDoc.data();
+        if (!userDoc.exists) {
+          console.error('❌ المستخدم غير موجود في قاعدة البيانات');
+          return false;
         }
-        return null;
+        
+        const userData = userDoc.data();
+        const currentPoints = userData.totalPoints || 0;
+        const newPoints = currentPoints + pointsChange;
+        
+        // تحديث النقاط فقط
+        await userRef.update({
+          totalPoints: newPoints,
+          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        // تسجيل العملية في سجل النقاط
+        await db.collection('pointsHistory').add({
+          userId: userId,
+          pointsChange: pointsChange,
+          pointsAfter: newPoints,
+          reason: reason,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log(`✅ تم تحديث النقاط للمستخدم ${userId}: ${currentPoints} → ${newPoints} (${reason})`);
+        return true;
       } catch (error) {
-        console.error('❌ خطأ في البحث عن المستخدم:', error);
-        return null;
+        console.error('❌ خطأ في تحديث النقاط:', error);
+        return false;
       }
     }
 
-    async function findUserByUsername(username) {
+    async function updateUserStreak(userId, newStreak, lastCheckinDate) {
       try {
-        if (!db) return null;
+        if (!db) return false;
         
-        const usersRef = db.collection('users');
-        const snapshot = await usersRef.where('username', '==', username).limit(1).get();
+        const userRef = db.collection('users').doc(userId);
         
-        if (!snapshot.empty) {
-          const userDoc = snapshot.docs[0];
-          return { id: userDoc.id, ...userDoc.data() };
-        }
-        return null;
+        await userRef.update({
+          currentStreak: newStreak,
+          lastCheckinDate: lastCheckinDate,
+          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log(`✅ تم تحديث التتابع للمستخدم ${userId}: ${newStreak} أيام`);
+        return true;
       } catch (error) {
-        console.error('❌ خطأ في البحث باسم المستخدم:', error);
-        return null;
+        console.error('❌ خطأ في تحديث التتابع:', error);
+        return false;
       }
     }
 
-    async function getUserStats(userId) {
+    async function addReferralToDatabase(referrerId, referredId) {
+      try {
+        if (!db) return false;
+        
+        const referralRef = db.collection('referrals').doc();
+        const referralDate = new Date().toISOString().split('T')[0];
+        const pointsAwarded = 100;
+        
+        // إضافة الإحالة
+        await referralRef.set({
+          referrerId: referrerId,
+          referredId: referredId,
+          referralDate: referralDate,
+          pointsAwarded: pointsAwarded,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        // تحديث إحصائيات المُحيل
+        const referrerRef = db.collection('users').doc(referrerId);
+        await referrerRef.update({
+          referrals: firebase.firestore.FieldValue.increment(1),
+          referralPoints: firebase.firestore.FieldValue.increment(pointsAwarded),
+          totalPoints: firebase.firestore.FieldValue.increment(pointsAwarded)
+        });
+        
+        // تسجيل نقاط الإحالة في سجل النقاط
+        await db.collection('pointsHistory').add({
+          userId: referrerId,
+          pointsChange: pointsAwarded,
+          reason: 'مكافأة إحالة',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log(`✅ تم تسجيل إحالة من ${referrerId} إلى ${referredId}`);
+        return true;
+      } catch (error) {
+        console.error('❌ خطأ في تسجيل الإحالة:', error);
+        return false;
+      }
+    }
+
+    async function getUserStatsFromDatabase(userId) {
       try {
         if (!db) return null;
         
-        const userRef = db.collection('users').doc(userId.toString());
+        const userRef = db.collection('users').doc(userId);
         const userDoc = await userRef.get();
         
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          const walletRef = db.collection('wallets').doc(userId.toString());
-          const walletDoc = await walletRef.get();
-          
-          let walletData = {};
-          if (walletDoc.exists) {
-            walletData = walletDoc.data();
-          }
-          
-          return {
-            userInfo: userData,
-            walletInfo: walletData,
-            registrationDate: userData.registrationDate?.toDate?.() || new Date(),
-            totalBalance: walletData.totalBalanceUSD || 0,
-            transactionCount: walletData.stats?.transactionCount || 0
-          };
+        if (!userDoc.exists) {
+          return null;
         }
-        return null;
+        
+        const userData = userDoc.data();
+        
+        // جلب عدد الإحالات
+        const referralsSnapshot = await db.collection('referrals')
+          .where('referrerId', '==', userId)
+          .get();
+        
+        return {
+          totalPoints: userData.totalPoints || 0,
+          currentStreak: userData.currentStreak || 0,
+          lastCheckinDate: userData.lastCheckinDate || null,
+          referrals: referralsSnapshot.size || 0,
+          referralPoints: userData.referralPoints || 0
+        };
       } catch (error) {
         console.error('❌ خطأ في جلب إحصائيات المستخدم:', error);
         return null;
       }
     }
 
-    // ========== دوال تحميل البيانات من Firestore ==========
-    async function loadDailyTasks() {
+    async function getLeaderboardFromDatabase() {
       try {
-        if (!db) return gameData.dailyTasks;
+        if (!db) return [];
         
-        const tasksRef = db.collection('tasks');
-        const snapshot = await tasksRef.get();
+        const usersSnapshot = await db.collection('users')
+          .orderBy('totalPoints', 'desc')
+          .limit(50)
+          .get();
         
-        if (snapshot.empty) {
-          await createDefaultTasks();
-          return gameData.dailyTasks;
-        }
-        
-        const tasks = [];
-        snapshot.forEach(doc => {
-          tasks.push({ id: doc.id, ...doc.data(), completed: false });
-        });
-        
-        return tasks;
-      } catch (error) {
-        console.error('❌ خطأ في تحميل المهام:', error);
-        return gameData.dailyTasks;
-      }
-    }
-
-    async function loadAchievements() {
-      try {
-        if (!db) return gameData.achievements;
-        
-        const achievementsRef = db.collection('achievements');
-        const snapshot = await achievementsRef.get();
-        
-        if (snapshot.empty) {
-          await createDefaultAchievements();
-          return gameData.achievements;
-        }
-        
-        const achievements = [];
-        snapshot.forEach(doc => {
-          achievements.push({ id: doc.id, ...doc.data(), unlocked: false });
-        });
-        
-        return achievements;
-      } catch (error) {
-        console.error('❌ خطأ في تحميل الإنجازات:', error);
-        return gameData.achievements;
-      }
-    }
-
-    async function loadShopItems() {
-      try {
-        if (!db) return gameData.shopItems;
-        
-        const shopRef = db.collection('shop');
-        const snapshot = await shopRef.where('available', '==', true).get();
-        
-        if (snapshot.empty) {
-          await createDefaultShopItems();
-          return gameData.shopItems;
-        }
-        
-        const items = [];
-        snapshot.forEach(doc => {
-          items.push({ id: doc.id, ...doc.data() });
-        });
-        
-        return items;
-      } catch (error) {
-        console.error('❌ خطأ في تحميل عناصر المتجر:', error);
-        return gameData.shopItems;
-      }
-    }
-
-    async function createDefaultTasks() {
-      try {
-        if (!db) return;
-        
-        const tasks = gameData.dailyTasks;
-        
-        for (const task of tasks) {
-          await db.collection('tasks').doc(task.id.toString()).set({
-            title: task.title,
-            description: task.description,
-            type: task.type,
-            reward: task.reward,
-            icon: task.icon,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        const leaderboard = [];
+        usersSnapshot.forEach(doc => {
+          const user = doc.data();
+          leaderboard.push({
+            id: doc.id,
+            name: user.firstName || 'مستخدم',
+            points: user.totalPoints || 0,
+            avatar: (user.firstName || 'م').charAt(0),
+            level: calculateLevel(user.totalPoints || 0)
           });
-        }
-        
-        console.log('✅ تم إنشاء المهام الافتراضية');
-      } catch (error) {
-        console.error('❌ خطأ في إنشاء المهام الافتراضية:', error);
-      }
-    }
-
-    async function createDefaultAchievements() {
-      try {
-        if (!db) return;
-        
-        const achievements = gameData.achievements;
-        
-        for (const achievement of achievements) {
-          await db.collection('achievements').doc(achievement.id.toString()).set({
-            title: achievement.title,
-            description: achievement.description,
-            reward: achievement.reward,
-            icon: achievement.icon,
-            condition: achievement.condition || {},
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        }
-        
-        console.log('✅ تم إنشاء الإنجازات الافتراضية');
-      } catch (error) {
-        console.error('❌ خطأ في إنشاء الإنجازات الافتراضية:', error);
-      }
-    }
-
-    async function createDefaultShopItems() {
-      try {
-        if (!db) return;
-        
-        const shopItems = gameData.shopItems;
-        
-        for (const item of shopItems) {
-          await db.collection('shop').doc(item.id.toString()).set({
-            title: item.title,
-            description: item.description,
-            points: item.points,
-            category: item.category,
-            icon: item.icon,
-            available: true,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        }
-        
-        console.log('✅ تم إنشاء عناصر المتجر الافتراضية');
-      } catch (error) {
-        console.error('❌ خطأ في إنشاء عناصر المتجر:', error);
-      }
-    }
-
-    async function initializeUserGameData(userId) {
-      try {
-        if (!db) return;
-        
-        const userRef = db.collection('users').doc(userId);
-        
-        const gameData = {
-          points: 100,
-          level: 1,
-          streak: 0,
-          lastCheckin: null,
-          avatar: (currentUser?.firstName?.charAt(0) || 'م'),
-          dailyTasks: await loadDailyTasks(),
-          achievements: await loadAchievements(),
-          referrals: 0,
-          referralPoints: 0,
-          isReferred: false,
-          firstPurchaseDiscount: 0,
-          createdAt: Date.now(),
-          autoRegistered: true,
-          friends: [],
-          challenges: [],
-          groups: [],
-          totalPointsEarned: 100,
-          lastActive: Date.now()
-        };
-        
-        await userRef.update({
-          gameData: gameData,
-          'statistics.totalCheckins': 0,
-          'statistics.totalTasksCompleted': 0,
-          'statistics.totalGiftsSent': 0,
-          'statistics.totalPurchases': 0
         });
         
-        console.log('✅ تم تهيئة بيانات اللعبة للمستخدم:', userId);
+        return leaderboard;
       } catch (error) {
-        console.error('❌ خطأ في تهيئة بيانات اللعبة:', error);
+        console.error('❌ خطأ في جلب لوحة الصدارة:', error);
+        return [];
       }
     }
 
-    // ========== بيانات اللعبة ==========
+    // ========== بيانات اللعبة المحلية ==========
     const gameData = {
       user: null,
       dailyTasks: [
@@ -1907,7 +1682,6 @@
     };
 
     let currentUser = null;
-    let isOnline = true;
 
     function calculateLevel(points) {
       if (points <= 0) return 1;
@@ -1923,49 +1697,100 @@
           throw new Error("لا يوجد مستخدم مسجل");
         }
         
-        if (!db) {
-          console.log('⚠️ Firestore غير متصل، استخدام بيانات محلية');
-          return loadLocalUserData();
-        }
+        // جلب البيانات من قاعدة البيانات فقط (النقاط، التتابع، الإحالات)
+        const dbStats = await getUserStatsFromDatabase(currentUser.id);
         
-        const userRef = db.collection('users').doc(currentUser.id);
-        const userDoc = await userRef.get();
-        
-        if (!userDoc.exists) {
-          console.log('⚠️ المستخدم غير موجود في Firestore، إنشاء بيانات جديدة');
-          return loadLocalUserData();
-        }
-        
-        const userData = userDoc.data();
-        
-        if (userData.gameData) {
-          gameData.user = userData.gameData;
-          gameData.user.name = userData.firstName + (userData.lastName ? ' ' + userData.lastName : '');
-          gameData.user.telegramId = userData.telegramId;
-          gameData.user.username = userData.username;
-          gameData.user.referralCode = userData.referralCode;
-          gameData.user.referredBy = userData.referredBy;
-          
-          if (!gameData.user.dailyTasks || gameData.user.dailyTasks.length === 0) {
-            gameData.user.dailyTasks = await loadDailyTasks();
-          }
-          
-          if (!gameData.user.achievements || gameData.user.achievements.length === 0) {
-            gameData.user.achievements = await loadAchievements();
-          }
-          
-          gameData.user.level = calculateLevel(gameData.user.points);
-          
-          console.log('✅ تم تحميل بيانات المستخدم من Firestore');
-          return true;
+        if (dbStats) {
+          // البيانات الأساسية من قاعدة البيانات
+          gameData.user = {
+            id: currentUser.id,
+            telegramId: currentUser.id,
+            name: currentUser.firstName || 'مستخدم',
+            points: dbStats.totalPoints || 100,
+            level: calculateLevel(dbStats.totalPoints || 100),
+            streak: dbStats.currentStreak || 0,
+            lastCheckin: dbStats.lastCheckinDate || null,
+            avatar: (currentUser.firstName || 'م').charAt(0),
+            referrals: dbStats.referrals || 0,
+            referralPoints: dbStats.referralPoints || 0
+          };
         } else {
-          await initializeUserGameData(currentUser.id);
-          return await loadUserData();
+          // إنشاء بيانات افتراضية
+          gameData.user = {
+            id: currentUser.id,
+            telegramId: currentUser.id,
+            name: currentUser.firstName || 'مستخدم',
+            points: 100,
+            level: 1,
+            streak: 0,
+            lastCheckin: null,
+            avatar: (currentUser.firstName || 'م').charAt(0),
+            referrals: 0,
+            referralPoints: 0
+          };
         }
         
+        // تحميل البيانات المحلية (المهام، الإنجازات، إلخ) من localStorage
+        loadLocalGameData();
+        
+        console.log('✅ تم تحميل بيانات المستخدم');
+        return true;
       } catch (error) {
         console.error('❌ خطأ في تحميل بيانات المستخدم:', error);
         return loadLocalUserData();
+      }
+    }
+
+    function loadLocalGameData() {
+      try {
+        // تحميل البيانات المحلية من localStorage
+        const savedData = localStorage.getItem(`crynova_local_data_${currentUser.id}`);
+        if (savedData) {
+          const localData = JSON.parse(savedData);
+          
+          // تحديث البيانات المحلية
+          if (localData.dailyTasks) {
+            gameData.user.dailyTasks = localData.dailyTasks;
+          }
+          if (localData.achievements) {
+            gameData.user.achievements = localData.achievements;
+          }
+          if (localData.friends) {
+            gameData.friends = localData.friends;
+          }
+          if (localData.challenges) {
+            gameData.challenges = localData.challenges;
+          }
+          if (localData.groups) {
+            gameData.groups = localData.groups;
+          }
+        } else {
+          // تهيئة البيانات المحلية الافتراضية
+          gameData.user.dailyTasks = gameData.dailyTasks.map(task => ({ ...task, completed: false }));
+          gameData.user.achievements = gameData.achievements.map(ach => ({ ...ach, unlocked: false }));
+        }
+      } catch (error) {
+        console.error('❌ خطأ في تحميل البيانات المحلية:', error);
+      }
+    }
+
+    function saveLocalGameData() {
+      try {
+        // حفظ البيانات المحلية في localStorage
+        const localData = {
+          dailyTasks: gameData.user.dailyTasks || [],
+          achievements: gameData.user.achievements || [],
+          friends: gameData.friends || [],
+          challenges: gameData.challenges || [],
+          groups: gameData.groups || []
+        };
+        
+        localStorage.setItem(`crynova_local_data_${currentUser.id}`, JSON.stringify(localData));
+        console.log('✅ تم حفظ البيانات المحلية');
+        return true;
+      } catch (error) {
+        console.error('❌ خطأ في حفظ البيانات المحلية:', error);
+        return false;
       }
     }
 
@@ -1982,106 +1807,30 @@
         streak: 0,
         lastCheckin: null,
         avatar: userName.charAt(0),
-        dailyTasks: gameData.dailyTasks.map(task => ({ ...task, completed: false })),
-        achievements: gameData.achievements.map(ach => ({ ...ach, unlocked: false })),
         referrals: 0,
         referralPoints: 0,
-        isReferred: false,
-        firstPurchaseDiscount: 0,
-        createdAt: Date.now(),
-        autoRegistered: true,
-        friends: [],
-        challenges: [],
-        groups: []
+        dailyTasks: gameData.dailyTasks.map(task => ({ ...task, completed: false })),
+        achievements: gameData.achievements.map(ach => ({ ...ach, unlocked: false }))
       };
       
       console.log('✅ تم تحميل بيانات محلية للمستخدم');
       return true;
     }
 
-    async function saveUserData() {
-      try {
-        if (!currentUser || !currentUser.id) {
-          throw new Error("لا يوجد مستخدم مسجل");
-        }
-        
-        if (!db) {
-          console.log('⚠️ Firestore غير متصل، حفظ بيانات محلية');
-          saveLocalUserData();
-          return true;
-        }
-        
-        const userRef = db.collection('users').doc(currentUser.id);
-        
-        if (!gameData.user) {
-          console.error('❌ لا توجد بيانات لحفظها');
-          return false;
-        }
-        
-        const updateData = {
-          gameData: gameData.user,
-          'gameData.lastActive': Date.now(),
-          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        
-        await userRef.update(updateData);
-        
-        console.log('✅ تم حفظ بيانات المستخدم في Firestore');
-        return true;
-      } catch (error) {
-        console.error('❌ خطأ في حفظ بيانات المستخدم:', error);
-        saveLocalUserData();
-        return false;
-      }
-    }
-
-    function saveLocalUserData() {
-      try {
-        localStorage.setItem('crynova_user_data', JSON.stringify(gameData.user));
-        console.log('✅ تم حفظ بيانات المستخدم محلياً');
-        return true;
-      } catch (error) {
-        console.error('❌ خطأ في حفظ البيانات محلياً:', error);
-        return false;
-      }
-    }
-
-    async function syncLocalDataWithFirestore() {
-      try {
-        if (!db || !currentUser?.id) return;
-        
-        const userRef = db.collection('users').doc(currentUser.id);
-        const userDoc = await userRef.get();
-        
-        if (userDoc.exists) {
-          const firestoreData = userDoc.data().gameData;
-          
-          if (firestoreData) {
-            gameData.user = { ...gameData.user, ...firestoreData };
-            await saveUserData();
-            updateUserInfo();
-          }
-        }
-        
-        console.log('✅ تمت مزامنة البيانات مع Firestore');
-      } catch (error) {
-        console.error('❌ خطأ في مزامنة البيانات:', error);
-      }
-    }
-
     async function loadAdditionalData() {
       try {
         console.log('🔄 تحميل البيانات الإضافية...');
         
-        gameData.leaderboard.daily = await loadLeaderboard('daily');
-        gameData.leaderboard.weekly = await loadLeaderboard('weekly');
-        gameData.leaderboard.all = await loadLeaderboard('all');
+        // تحميل لوحة الصدارة من قاعدة البيانات
+        gameData.leaderboard.all = await getLeaderboardFromDatabase();
         
-        gameData.friends = await loadFriends();
+        // تحميل البيانات المحلية
+        loadLocalGameData();
         
-        gameData.shopItems = await loadShopItems();
-        
-        renderLeaderboard('daily');
+        // عرض كل شيء
+        renderDailyTasks();
+        renderAchievements();
+        renderLeaderboard('all');
         renderFriendsAndGifts();
         renderChallenges();
         renderGroups();
@@ -2092,141 +1841,6 @@
       } catch (error) {
         console.error('❌ خطأ في تحميل البيانات الإضافية:', error);
       }
-    }
-
-    async function loadLeaderboard(period = 'all') {
-      try {
-        if (!db) {
-          return getMockLeaderboard();
-        }
-        
-        const usersRef = db.collection('users');
-        const snapshot = await usersRef.get();
-        
-        const players = [];
-        snapshot.forEach((doc) => {
-          const user = doc.data();
-          if (user.gameData && user.gameData.points > 0) {
-            players.push({
-              id: doc.id,
-              name: user.firstName || 'مستخدم',
-              points: user.gameData.points || 0,
-              avatar: user.gameData.avatar || '?',
-              level: calculateLevel(user.gameData.points || 0)
-            });
-          }
-        });
-        
-        players.sort((a, b) => b.points - a.points);
-        
-        if (period === 'daily') {
-          return players.slice(0, 10);
-        } else if (period === 'weekly') {
-          return players.slice(0, 15);
-        } else {
-          return players.slice(0, 20);
-        }
-      } catch (error) {
-        console.error('❌ خطأ في تحميل لوحة الصدارة:', error);
-        return getMockLeaderboard();
-      }
-    }
-
-    async function updateLeaderboard() {
-      try {
-        if (!db) return false;
-        
-        const usersRef = db.collection('users');
-        const snapshot = await usersRef.get();
-        
-        const leaderboardData = {
-          daily: [],
-          weekly: [],
-          all: [],
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        
-        const allUsers = [];
-        
-        snapshot.forEach(doc => {
-          const user = doc.data();
-          if (user.gameData && user.gameData.points > 0) {
-            allUsers.push({
-              id: doc.id,
-              name: user.firstName || 'مستخدم',
-              points: user.gameData.points || 0,
-              level: user.gameData.level || 1,
-              avatar: user.gameData.avatar || '?'
-            });
-          }
-        });
-        
-        allUsers.sort((a, b) => b.points - a.points);
-        
-        leaderboardData.all = allUsers.slice(0, 50);
-        leaderboardData.weekly = allUsers.slice(0, 30);
-        leaderboardData.daily = allUsers.slice(0, 20);
-        
-        const today = new Date().toISOString().split('T')[0];
-        const leaderboardRef = db.collection('leaderboard').doc(today);
-        await leaderboardRef.set(leaderboardData);
-        
-        console.log('✅ تم تحديث لوحة الصدارة');
-        return true;
-      } catch (error) {
-        console.error('❌ خطأ في تحديث لوحة الصدارة:', error);
-        return false;
-      }
-    }
-
-    function getMockLeaderboard() {
-      return [
-        { id: '1', name: 'أحمد', points: 5000, avatar: 'أ', level: 5 },
-        { id: '2', name: 'محمد', points: 4500, avatar: 'م', level: 4 },
-        { id: '3', name: 'فاطمة', points: 4000, avatar: 'ف', level: 4 },
-        { id: '4', name: 'سارة', points: 3500, avatar: 'س', level: 3 },
-        { id: 5, name: 'علي', points: 3000, avatar: 'ع', level: 3 }
-      ];
-    }
-
-    async function loadFriends() {
-      try {
-        if (!db) {
-          return getMockFriends();
-        }
-        
-        const usersRef = db.collection('users');
-        const snapshot = await usersRef.limit(20).get();
-        
-        const friends = [];
-        snapshot.forEach((doc) => {
-          if (doc.id !== currentUser?.id) {
-            const user = doc.data();
-            friends.push({
-              id: doc.id,
-              name: user.firstName || 'مستخدم',
-              avatar: user.gameData?.avatar || '?',
-              points: user.gameData?.points || 0,
-              online: Math.random() > 0.5,
-              gifts: Math.floor(Math.random() * 4)
-            });
-          }
-        });
-        
-        return friends;
-      } catch (error) {
-        console.error('❌ خطأ في تحميل الأصدقاء:', error);
-        return getMockFriends();
-      }
-    }
-
-    function getMockFriends() {
-      return [
-        { id: '1', name: 'أحمد', avatar: 'أ', points: 5000, online: true, gifts: 2 },
-        { id: '2', name: 'محمد', avatar: 'م', points: 4500, online: false, gifts: 1 },
-        { id: '3', name: 'فاطمة', avatar: 'ف', points: 4000, online: true, gifts: 3 },
-        { id: '4', name: 'سارة', avatar: 'س', points: 3500, online: false, gifts: 0 }
-      ];
     }
 
     // ========== دالات العرض ==========
@@ -2362,7 +1976,8 @@
       const leaderboardListEl = document.getElementById('leaderboardList');
       leaderboardListEl.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-light)">جاري التحميل...</div>';
       
-      const players = await loadLeaderboard(period);
+      // استخدام البيانات من قاعدة البيانات
+      const players = await getLeaderboardFromDatabase();
       
       leaderboardListEl.innerHTML = '';
       
@@ -2599,13 +2214,12 @@
         userUsernameEl.style.display = 'none';
       }
       
-      // رابط الإحالة أصبح رقم ID المستخدم نفسه
+      // رابط الإحالة
       if (currentUser && currentUser.id) {
-        const referralCode = currentUser.id; // استخدام ID المستخدم كرمز إحالة
         document.getElementById('friendReferralLink').textContent = 
-          `https://crynova.com/ref/${referralCode}`;
+          `https://crynova.com/ref/${currentUser.id}`;
         document.getElementById('referralLink').value = 
-          `https://crynova.com/ref/${referralCode}`;
+          `https://crynova.com/ref/${currentUser.id}`;
       } else {
         const referralCode = gameData.user.telegramId || gameData.user.id || 'unknown';
         document.getElementById('friendReferralLink').textContent = 
@@ -2777,22 +2391,24 @@
           return;
         }
         
-        await recordDailyCheckin(currentUser.id, totalPoints, newStreak);
+        // تحديث النقاط في قاعدة البيانات
+        await updateUserPoints(currentUser.id, totalPoints, 'التسجيل اليومي');
         
-        await updatePoints(currentUser.id, totalPoints, 'التسجيل اليومي');
+        // تحديث التتابع في قاعدة البيانات
+        await updateUserStreak(currentUser.id, newStreak, today);
         
+        // تحديث البيانات المحلية
         gameData.user.points += totalPoints;
         gameData.user.streak = newStreak;
         gameData.user.lastCheckin = today;
         gameData.user.level = calculateLevel(gameData.user.points);
         
+        // تحديث المهمة اليومية المحلية
         const checkinTask = gameData.user.dailyTasks.find(t => t.type === 'checkin');
         if (checkinTask && !checkinTask.completed) {
           checkinTask.completed = true;
-          await completeTaskInFirestore(currentUser.id, checkinTask.id);
+          saveLocalGameData();
         }
-        
-        await saveUserData();
         
         updateUserInfo();
         checkDailyCheckin();
@@ -2810,38 +2426,6 @@
       }
     }
 
-    async function completeTaskInFirestore(userId, taskId) {
-      try {
-        if (!db) return false;
-        
-        const userRef = db.collection('users').doc(userId);
-        const userDoc = await userRef.get();
-        
-        if (!userDoc.exists) return false;
-        
-        const userData = userDoc.data();
-        const tasks = userData.gameData?.dailyTasks || [];
-        
-        const updatedTasks = tasks.map(task => {
-          if (task.id === taskId) {
-            return { ...task, completed: true, completedAt: new Date().toISOString() };
-          }
-          return task;
-        });
-        
-        await userRef.update({
-          'gameData.dailyTasks': updatedTasks,
-          'statistics.totalTasksCompleted': firebase.firestore.FieldValue.increment(1)
-        });
-        
-        console.log(`✅ تم إكمال المهمة ${taskId} للمستخدم ${userId}`);
-        return true;
-      } catch (error) {
-        console.error('❌ خطأ في إكمال المهمة:', error);
-        return false;
-      }
-    }
-
     async function completeTask(taskId) {
       if (!gameData.user) return;
       
@@ -2853,15 +2437,16 @@
       }
       
       try {
-        await updatePoints(currentUser.id, task.reward, `إكمال المهمة: ${task.title}`);
+        // تحديث النقاط في قاعدة البيانات
+        await updateUserPoints(currentUser.id, task.reward, `إكمال المهمة: ${task.title}`);
         
-        await completeTaskInFirestore(currentUser.id, taskId);
-        
+        // تحديث البيانات المحلية
         gameData.user.points += task.reward;
         gameData.user.level = calculateLevel(gameData.user.points);
         task.completed = true;
         
-        await saveUserData();
+        // حفظ البيانات المحلية
+        saveLocalGameData();
         
         updateUserInfo();
         renderDailyTasks();
@@ -2890,24 +2475,18 @@
           return;
         }
         
-        await updatePoints(currentUser.id, -50, `إرسال هدية إلى ${friend.name}`);
+        // خصم النقاط في قاعدة البيانات
+        await updateUserPoints(currentUser.id, -50, `إرسال هدية إلى ${friend.name}`);
         
+        // تحديث البيانات المحلية
         gameData.user.points -= 50;
         
+        // تحديث المهمة المحلية
         const giftTask = gameData.user.dailyTasks.find(t => t.type === 'gift');
         if (giftTask && !giftTask.completed) {
           giftTask.completed = true;
-          await completeTaskInFirestore(currentUser.id, giftTask.id);
+          saveLocalGameData();
         }
-        
-        if (db) {
-          const userRef = db.collection('users').doc(currentUser.id);
-          await userRef.update({
-            'statistics.totalGiftsSent': firebase.firestore.FieldValue.increment(1)
-          });
-        }
-        
-        await saveUserData();
         
         updateUserInfo();
         renderDailyTasks();
@@ -2961,26 +2540,13 @@
       
       if (confirm(`هل تريد شراء "${item.title}" مقابل ${item.points.toLocaleString('en-US')} نقطة؟`)) {
         try {
-          await updatePoints(currentUser.id, -item.points, `شراء من المتجر: ${item.title}`);
+          // خصم النقاط في قاعدة البيانات
+          await updateUserPoints(currentUser.id, -item.points, `شراء من المتجر: ${item.title}`);
           
+          // تحديث البيانات المحلية
           gameData.user.points -= item.points;
           gameData.user.level = calculateLevel(gameData.user.points);
           
-          if (db) {
-            const userRef = db.collection('users').doc(currentUser.id);
-            await userRef.update({
-              'statistics.totalPurchases': firebase.firestore.FieldValue.increment(1)
-            });
-            
-            await createTransaction(currentUser.id, {
-              type: 'purchase',
-              amount: -item.points,
-              description: `شراء: ${item.title}`,
-              itemId: itemId
-            });
-          }
-          
-          await saveUserData();
           updateUserInfo();
           renderShopItems();
           
@@ -3002,17 +2568,17 @@
       
       try {
         if (typeof reward.reward === 'number') {
-          await updatePoints(currentUser.id, reward.reward, `مكافأة الإحالة: ${reward.title}`);
+          // إضافة النقاط في قاعدة البيانات
+          await updateUserPoints(currentUser.id, reward.reward, `مكافأة الإحالة: ${reward.title}`);
           
+          // تحديث البيانات المحلية
           gameData.user.points += reward.reward;
+          gameData.user.level = calculateLevel(gameData.user.points);
+          
           showMessage(`مبروك! حصلت على ${reward.reward.toLocaleString('en-US')} نقطة مكافأة`);
         } else {
           showMessage(`مبروك! حصلت على ${reward.reward}`);
         }
-        
-        gameData.user.level = calculateLevel(gameData.user.points);
-        
-        await saveUserData();
         
         updateUserInfo();
         renderReferrals();
@@ -3032,11 +2598,6 @@
         const achievement = gameData.user.achievements.find(a => a.id === 1);
         if (achievement && !achievement.unlocked) {
           achievement.unlocked = true;
-          
-          await updatePoints(currentUser.id, achievement.reward, `إنجاز: ${achievement.title}`);
-          
-          gameData.user.points += achievement.reward;
-          showMessage(`🎉 إنجاز جديد: ${achievement.title}! ربحت ${achievement.reward.toLocaleString('en-US')} نقطة إضافية`);
           updated = true;
         }
       }
@@ -3045,11 +2606,6 @@
         const achievement = gameData.user.achievements.find(a => a.id === 2);
         if (achievement && !achievement.unlocked) {
           achievement.unlocked = true;
-          
-          await updatePoints(currentUser.id, achievement.reward, `إنجاز: ${achievement.title}`);
-          
-          gameData.user.points += achievement.reward;
-          showMessage(`🎉 إنجاز جديد: ${achievement.title}! ربحت ${achievement.reward.toLocaleString('en-US')} نقطة إضافية`);
           updated = true;
         }
       }
@@ -3058,11 +2614,6 @@
         const achievement = gameData.user.achievements.find(a => a.id === 4);
         if (achievement && !achievement.unlocked) {
           achievement.unlocked = true;
-          
-          await updatePoints(currentUser.id, achievement.reward, `إنجاز: ${achievement.title}`);
-          
-          gameData.user.points += achievement.reward;
-          showMessage(`🎉 إنجاز جديد: ${achievement.title}! ربحت ${achievement.reward.toLocaleString('en-US')} نقطة إضافية`);
           updated = true;
         }
       }
@@ -3071,21 +2622,12 @@
         const achievement = gameData.user.achievements.find(a => a.id === 3);
         if (achievement && !achievement.unlocked) {
           achievement.unlocked = true;
-          
-          await updatePoints(currentUser.id, achievement.reward, `إنجاز: ${achievement.title}`);
-          
-          gameData.user.points += achievement.reward;
-          showMessage(`🎉 إنجاز جديد: ${achievement.title}! ربحت ${achievement.reward.toLocaleString('en-US')} نقطة إضافية`);
           updated = true;
         }
       }
       
       if (updated) {
-        gameData.user.level = calculateLevel(gameData.user.points);
-        
-        await saveUserData();
-        
-        updateUserInfo();
+        saveLocalGameData();
         renderAchievements();
       }
     }
@@ -3108,6 +2650,7 @@
         tg.enableClosingConfirmation();
         
         const user = tg.initDataUnsafe?.user;
+        const startParam = tg.initDataUnsafe?.start_param;
         
         if (!user || !user.id) {
           console.log('❌ لم يتم العثور على بيانات المستخدم في Telegram');
@@ -3116,6 +2659,7 @@
         }
         
         console.log('👤 بيانات مستخدم Telegram:', user);
+        console.log('🔗 معامل الإحالة:', startParam);
         
         currentUser = {
           id: user.id.toString(),
@@ -3132,12 +2676,12 @@
           if (registeredUser) {
             console.log('✅ تم تسجيل/تسجيل دخول المستخدم:', registeredUser);
             
-            if (registeredUser.registrationDate) {
-              const regDate = registeredUser.registrationDate.toDate();
-              const daysSinceReg = Math.floor((new Date() - regDate) / (1000 * 60 * 60 * 24));
-              
-              if (daysSinceReg < 1) {
-                showMessage('🎉 مرحباً بك في Crynova للمرة الأولى!');
+            // إذا كان هناك معامل إحالة، نقوم بتسجيل الإحالة
+            if (startParam && startParam !== '' && startParam !== currentUser.id) {
+              const referrerId = startParam;
+              if (referrerId !== currentUser.id) {
+                await addReferralToDatabase(referrerId, currentUser.id);
+                showMessage('🎉 تم تسجيل إحالتك بنجاح! شكراً للانضمام.');
               }
             }
           }
@@ -3150,11 +2694,6 @@
         await initializeGame();
         
         updateFirebaseStatus('success', '✅ تم تسجيل الدخول بنجاح');
-        
-        setTimeout(() => {
-          syncLocalDataWithFirestore();
-          updateLeaderboard();
-        }, 3000);
         
       } catch (error) {
         console.error('❌ خطأ في تهيئة Telegram WebApp:', error);
@@ -3196,23 +2735,6 @@
     function updateUserInterface(user) {
       if (user) {
         console.log('👤 تحديث واجهة المستخدم:', user.firstName);
-      }
-    }
-
-    async function searchUser(userId) {
-      try {
-        let foundUser = null;
-        
-        if (/^\d+$/.test(userId)) {
-          foundUser = await findUserByTelegramId(userId);
-        } else if (/^[a-zA-Z0-9_]+$/.test(userId)) {
-          foundUser = await findUserByUsername(userId);
-        }
-        
-        return foundUser;
-      } catch (error) {
-        console.error('❌ خطأ في البحث:', error);
-        return null;
       }
     }
 
