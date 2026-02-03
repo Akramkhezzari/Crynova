@@ -39,25 +39,37 @@
       background: linear-gradient(135deg, #f8f9fa, #e9ecef);
       color: var(--text-dark);
       min-height: 100vh;
-      padding: 20px;
+      padding: 0;
+      padding-top: 90px;
       padding-bottom: 90px;
+      margin: 0;
     }
 
     .container {
-      max-width: 500px;
-      margin: 0 auto;
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+      width: 100%;
     }
 
+    /* الشريط العلوي الثابت */
     .game-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
       background: linear-gradient(90deg, var(--primary), var(--accent));
       color: white;
       padding: 15px 20px;
-      border-radius: 16px;
+      border-radius: 0;
       box-shadow: 0 4px 20px rgba(0, 114, 255, 0.3);
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      margin: 0;
+      height: 90px;
     }
 
     .user-info {
@@ -119,11 +131,15 @@
 
     .daily-checkin-card {
       background: white;
-      border-radius: 16px;
+      border-radius: 0;
       padding: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 0;
       box-shadow: 0 4px 20px var(--shadow-light);
       border: 1px solid rgba(0, 114, 255, 0.1);
+      width: 100%;
+      border-top: none;
+      border-bottom: 1px solid rgba(0, 114, 255, 0.05);
+      margin-top: 0;
     }
 
     .card-header {
@@ -322,11 +338,15 @@
 
     .daily-tasks-card {
       background: white;
-      border-radius: 16px;
+      border-radius: 0;
       padding: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 0;
       box-shadow: 0 4px 20px var(--shadow-light);
       border: 1px solid rgba(0, 114, 255, 0.1);
+      width: 100%;
+      border-top: none;
+      border-bottom: 1px solid rgba(0, 114, 255, 0.05);
+      margin-top: 0;
     }
 
     .tasks-list {
@@ -419,11 +439,15 @@
 
     .achievements-card {
       background: white;
-      border-radius: 16px;
+      border-radius: 0;
       padding: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 0;
       box-shadow: 0 4px 20px var(--shadow-light);
       border: 1px solid rgba(0, 114, 255, 0.1);
+      width: 100%;
+      border-top: none;
+      border-bottom: 1px solid rgba(0, 114, 255, 0.05);
+      margin-top: 0;
     }
 
     .achievements-grid {
@@ -493,11 +517,15 @@
 
     .leaderboard-card {
       background: white;
-      border-radius: 16px;
+      border-radius: 0;
       padding: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 0;
       box-shadow: 0 4px 20px var(--shadow-light);
       border: 1px solid rgba(0, 114, 255, 0.1);
+      width: 100%;
+      border-top: none;
+      border-bottom: 1px solid rgba(0, 114, 255, 0.05);
+      margin-top: 0;
     }
 
     .leaderboard-tabs {
@@ -594,11 +622,15 @@
     .shop-card,
     .advanced-referral-card {
       background: white;
-      border-radius: 16px;
+      border-radius: 0;
       padding: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 0;
       box-shadow: 0 4px 20px var(--shadow-light);
       border: 1px solid rgba(0, 114, 255, 0.1);
+      width: 100%;
+      border-top: none;
+      border-bottom: 1px solid rgba(0, 114, 255, 0.05);
+      margin-top: 0;
     }
 
     .gift-item, .challenge-item, .group-item, .shop-item {
@@ -923,10 +955,10 @@
       border-top: 1px solid var(--border-light);
       box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
       z-index: 1000;
-      max-width: 500px;
-      margin: 0 auto;
+      max-width: 100%;
+      margin: 0;
       display: flex;
-      padding: 12px 20px;
+      padding: 12px 0;
       justify-content: space-around;
     }
 
@@ -961,7 +993,7 @@
 
     .floating-message {
       position: fixed;
-      top: 20px;
+      top: 80px;
       right: 50%;
       transform: translateX(50%);
       background: linear-gradient(90deg, var(--success), #1dd1a1);
@@ -983,7 +1015,7 @@
         opacity: 0;
       }
       to {
-        top: 20px;
+        top: 80px;
         opacity: 1;
       }
     }
@@ -1036,7 +1068,7 @@
       justify-content: center;
       align-items: center;
       z-index: 9999;
-      display: none; /* تم إخفائه */
+      display: none;
     }
 
     .loading-spinner {
@@ -1061,7 +1093,7 @@
 
     .firebase-status {
       position: fixed;
-      top: 10px;
+      top: 80px;
       right: 10px;
       padding: 8px 15px;
       border-radius: 8px;
@@ -1105,7 +1137,6 @@
       border: 1px solid var(--danger);
     }
 
-    /* Quick loading indicator */
     .quick-load {
       display: inline-block;
       width: 12px;
@@ -1117,7 +1148,6 @@
       margin-right: 5px;
     }
 
-    /* Telegram WebApp adjustments */
     .tg-adjust {
       padding-top: env(safe-area-inset-top, 20px);
     }
@@ -1145,6 +1175,7 @@
       background: #2d2d2d;
       color: #ffffff;
       border-color: rgba(255, 255, 255, 0.1);
+      border-radius: 0;
     }
     
     .telegram-theme-dark .task-item,
@@ -1181,31 +1212,68 @@
     .telegram-theme-dark .checkin-button:disabled {
       background: #555555;
     }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 0;
+        padding-top: 85px;
+        padding-bottom: 80px;
+      }
+      
+      .game-header {
+        height: 85px;
+        padding: 12px 15px;
+      }
+      
+      .daily-checkin-card,
+      .daily-tasks-card,
+      .achievements-card,
+      .leaderboard-card,
+      .friends-card,
+      .gifts-card,
+      .challenges-card,
+      .groups-card,
+      .referrals-card,
+      .shop-card,
+      .advanced-referral-card {
+        padding: 15px;
+        margin-bottom: 0;
+      }
+      
+      .bottom-nav {
+        padding: 10px 0;
+      }
+      
+      .floating-message,
+      .firebase-status {
+        top: 75px;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- تم إزالة شاشة التحميل -->
   <div id="firebaseStatus" class="firebase-status"></div>
 
-  <div id="gameContainer" class="container">
-    <div class="game-header">
-      <div class="user-info">
-        <div class="user-avatar" id="userAvatar">
-          <div class="quick-load" style="display: none;"></div>
-          <span id="avatarText">م</span>
-        </div>
-        <div class="user-details">
-          <h2 id="userName">جاري التحميل...</h2>
-          <div id="userUsername" class="user-username" style="display: none;"></div>
-          <p>مستوى: <span id="userLevel" class="english-numbers">-</span></p>
-        </div>
+  <!-- الشريط العلوي الثابت -->
+  <div class="game-header">
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatar">
+        <div class="quick-load" style="display: none;"></div>
+        <span id="avatarText">م</span>
       </div>
-      <div class="points-display">
-        <div class="amount" id="totalPoints">0</div>
-        <div class="label">نقطة</div>
+      <div class="user-details">
+        <h2 id="userName">جاري التحميل...</h2>
+        <div id="userUsername" class="user-username" style="display: none;"></div>
+        <p>مستوى: <span id="userLevel" class="english-numbers">-</span></p>
       </div>
     </div>
+    <div class="points-display">
+      <div class="amount" id="totalPoints">0</div>
+      <div class="label">نقطة</div>
+    </div>
+  </div>
 
+  <div id="gameContainer" class="container">
     <div id="sectionHome">
       <div class="daily-checkin-card">
         <div class="card-header">
@@ -1248,19 +1316,7 @@
         </div>
       </div>
 
-      <div class="leaderboard-card">
-        <h3><i class="fas fa-crown"></i> لوحة الصدارة</h3>
-        <div class="leaderboard-tabs">
-          <div class="leaderboard-tab active" data-period="daily">اليوم</div>
-          <div class="leaderboard-tab" data-period="weekly">الأسبوع</div>
-          <div class="leaderboard-tab" data-period="all">الكل</div>
-        </div>
-        <div class="leaderboard-list" id="leaderboardList">
-          <div style="text-align: center; padding: 20px; color: var(--text-light)">
-            <div class="quick-load"></div> جاري تحميل الصدارة...
-          </div>
-        </div>
-      </div>
+      <!-- تم إزالة لوحة الصدارة من هنا -->
     </div>
 
     <div class="section-hidden" id="sectionFriends">
@@ -1324,6 +1380,21 @@
         <div class="challenges-list" id="challengesList">
           <div style="text-align: center; padding: 20px; color: var(--text-light)">
             <div class="quick-load"></div> جاري تحميل التحديات...
+          </div>
+        </div>
+      </div>
+      
+      <!-- تم نقل لوحة الصدارة إلى هنا -->
+      <div class="leaderboard-card">
+        <h3><i class="fas fa-crown"></i> لوحة الصدارة</h3>
+        <div class="leaderboard-tabs">
+          <div class="leaderboard-tab active" data-period="daily">اليوم</div>
+          <div class="leaderboard-tab" data-period="weekly">الأسبوع</div>
+          <div class="leaderboard-tab" data-period="all">الكل</div>
+        </div>
+        <div class="leaderboard-list" id="leaderboardList">
+          <div style="text-align: center; padding: 20px; color: var(--text-light)">
+            <div class="quick-load"></div> جاري تحميل الصدارة...
           </div>
         </div>
       </div>
