@@ -450,70 +450,124 @@
       margin-top: 0;
     }
 
+    /* === بداية التعديل: إعادة تصميم قسم الإنجازات === */
     .achievements-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      display: flex;
+      flex-direction: column;
       gap: 12px;
       margin-top: 15px;
     }
 
     .achievement-item {
+      display: flex;
+      align-items: center;
       background: var(--bg-lighter);
       border-radius: 12px;
-      padding: 15px;
-      text-align: center;
+      padding: 12px 15px;
       transition: all 0.3s ease;
+      width: 100%;
+      border: 1px solid transparent;
+      position: relative;
     }
 
     .achievement-item:hover {
+      border-color: var(--primary);
       transform: translateY(-2px);
       box-shadow: 0 4px 12px var(--shadow-light);
     }
 
     .achievement-item.locked {
-      opacity: 0.6;
-      filter: grayscale(0.5);
+      opacity: 0.8;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
+
+    .achievement-item.unlocked {
+      background: linear-gradient(135deg, rgba(38, 161, 123, 0.1), rgba(29, 209, 161, 0.05));
+      border-color: var(--success);
     }
 
     .achievement-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      margin: 0 auto 10px;
+      width: 45px;
+      height: 45px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 18px;
       background: linear-gradient(135deg, var(--primary), var(--accent));
       color: white;
+      flex-shrink: 0;
     }
 
     .achievement-item.locked .achievement-icon {
       background: linear-gradient(135deg, #cccccc, #999999);
     }
 
-    .achievement-item h4 {
+    .achievement-item.unlocked .achievement-icon {
+      background: linear-gradient(135deg, var(--success), #1dd1a1);
+    }
+
+    .achievement-details {
+      flex: 1;
+      margin-right: 15px;
+      margin-left: 15px;
+    }
+
+    .achievement-details h4 {
       font-size: 14px;
+      margin-bottom: 4px;
+      color: var(--text-dark);
+    }
+
+    .achievement-details p {
+      font-size: 11px;
+      color: var(--text-light);
+      line-height: 1.4;
       margin-bottom: 5px;
     }
 
-    .achievement-item p {
-      font-size: 12px;
-      color: var(--text-light);
-      margin-bottom: 8px;
-    }
-
     .achievement-reward {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: bold;
       color: var(--warning);
       background: rgba(255, 159, 0, 0.1);
-      padding: 4px 8px;
+      padding: 3px 8px;
       border-radius: 10px;
       display: inline-block;
       font-family: 'Arial', sans-serif;
       direction: ltr;
     }
+
+    .achievement-item.unlocked .achievement-reward {
+      background: rgba(38, 161, 123, 0.2);
+      color: var(--success);
+    }
+
+    .achievement-status {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-right: 5px;
+    }
+
+    .achievement-status.locked {
+      background: rgba(255, 71, 87, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(255, 71, 87, 0.2);
+    }
+
+    .achievement-status.unlocked {
+      background: rgba(38, 161, 123, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(38, 161, 123, 0.2);
+      animation: pulse 2s infinite;
+    }
+    /* === نهاية التعديل: إعادة تصميم قسم الإنجازات === */
 
     .leaderboard-card {
       background: white;
@@ -614,7 +668,6 @@
       direction: ltr;
     }
 
-    .friends-card,
     .gifts-card,
     .challenges-card,
     .groups-card,
@@ -696,54 +749,6 @@
 
     .gift-action:hover, .challenge-action:hover, .group-action:hover, .shop-action:hover {
       transform: scale(1.05);
-    }
-
-    .friends-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .friend-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px;
-      border-radius: 12px;
-      background: var(--bg-lighter);
-    }
-
-    .friend-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .friend-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-    }
-
-    .friend-name {
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    .friend-status {
-      font-size: 11px;
-      color: var(--text-light);
-    }
-
-    .friend-status.online {
-      color: var(--success);
     }
 
     .referral-link {
@@ -1165,7 +1170,6 @@
     .telegram-theme-dark .daily-tasks-card,
     .telegram-theme-dark .achievements-card,
     .telegram-theme-dark .leaderboard-card,
-    .telegram-theme-dark .friends-card,
     .telegram-theme-dark .gifts-card,
     .telegram-theme-dark .challenges-card,
     .telegram-theme-dark .groups-card,
@@ -1184,8 +1188,7 @@
     .telegram-theme-dark .gift-item,
     .telegram-theme-dark .challenge-item,
     .telegram-theme-dark .group-item,
-    .telegram-theme-dark .shop-item,
-    .telegram-theme-dark .friend-item {
+    .telegram-theme-dark .shop-item {
       background: #3d3d3d;
       color: #ffffff;
     }
@@ -1213,6 +1216,346 @@
       background: #555555;
     }
     
+    /* === تحسينات للوضع المظلم في قسم الإنجازات === */
+    .telegram-theme-dark .achievement-item.locked {
+      background: #3d3d3d;
+      opacity: 0.7;
+    }
+    
+    .telegram-theme-dark .achievement-item.unlocked {
+      background: rgba(38, 161, 123, 0.15);
+    }
+    
+    .telegram-theme-dark .achievement-status.locked {
+      background: rgba(255, 71, 87, 0.2);
+    }
+    
+    .telegram-theme-dark .achievement-status.unlocked {
+      background: rgba(38, 161, 123, 0.2);
+    }
+    
+    /* === بداية أنماط المجموعات الجديدة === */
+    .groups-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    @media (min-width: 768px) {
+      .groups-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .group-card {
+      background: var(--bg-lighter);
+      border-radius: 12px;
+      padding: 15px;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      height: fit-content;
+    }
+
+    .group-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px var(--shadow-light);
+      border-color: var(--primary);
+    }
+
+    .group-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .group-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .group-name i {
+      color: var(--primary);
+    }
+
+    .group-rank {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      color: white;
+    }
+
+    .group-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--primary);
+      font-family: 'Arial', sans-serif;
+      direction: ltr;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-light);
+    }
+
+    .group-range {
+      font-size: 12px;
+      color: var(--text-light);
+      text-align: center;
+      margin: 10px 0;
+      padding: 5px;
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: 6px;
+      font-family: 'Arial', sans-serif;
+      direction: ltr;
+    }
+
+    .group-members {
+      margin-top: 15px;
+    }
+
+    .members-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .members-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .member-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 8px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
+    }
+
+    .member-item:hover {
+      background: rgba(0, 114, 255, 0.05);
+      transform: translateX(-2px);
+    }
+
+    .member-item.me {
+      background: rgba(0, 114, 255, 0.1);
+      border-color: rgba(0, 114, 255, 0.2);
+      position: relative;
+    }
+
+    .member-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .member-position {
+      font-weight: bold;
+      color: var(--text-dark);
+      font-size: 12px;
+      width: 32px;
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      direction: ltr;
+    }
+
+    .member-position.core {
+      color: #d4af37;
+      background: rgba(212, 175, 55, 0.1);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .member-position.elite {
+      color: #c0c0c0;
+      background: rgba(192, 192, 192, 0.1);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .member-position.officer {
+      color: #cd7f32;
+      background: rgba(205, 127, 50, 0.1);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .member-position.veteran {
+      color: var(--primary);
+      background: rgba(0, 114, 255, 0.1);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .member-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .member-details {
+      flex: 1;
+    }
+
+    .member-name {
+      font-size: 13px;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .member-title {
+      font-size: 11px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .member-points {
+      font-weight: bold;
+      color: var(--primary);
+      font-size: 13px;
+      font-family: 'Arial', sans-serif;
+      direction: ltr;
+      min-width: 60px;
+      text-align: left;
+    }
+
+    .group-status {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .group-status.empty {
+      background: rgba(255, 71, 87, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(255, 71, 87, 0.2);
+    }
+
+    .group-status.active {
+      background: rgba(38, 161, 123, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(38, 161, 123, 0.2);
+    }
+
+    .group-status.full {
+      background: rgba(255, 159, 0, 0.1);
+      color: var(--warning);
+      border: 1px solid rgba(255, 159, 0, 0.2);
+    }
+
+    .members-scroll {
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .members-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .members-scroll::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 2px;
+    }
+
+    .members-scroll::-webkit-scrollbar-thumb {
+      background: rgba(0, 114, 255, 0.3);
+      border-radius: 2px;
+    }
+
+    .telegram-theme-dark .group-card {
+      background: #3d3d3d;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .telegram-theme-dark .member-item {
+      background: #4d4d4d;
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .telegram-theme-dark .member-item.me {
+      background: rgba(0, 114, 255, 0.2);
+    }
+
+    .telegram-theme-dark .group-card-header {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .telegram-theme-dark .stat-item {
+      background: #4d4d4d;
+    }
+    /* === نهاية أنماط المجموعات الجديدة === */
+
     @media (max-width: 480px) {
       body {
         padding: 0;
@@ -1229,7 +1572,6 @@
       .daily-tasks-card,
       .achievements-card,
       .leaderboard-card,
-      .friends-card,
       .gifts-card,
       .challenges-card,
       .groups-card,
@@ -1247,6 +1589,53 @@
       .floating-message,
       .firebase-status {
         top: 75px;
+      }
+      
+      /* تحسينات للشاشات الصغيرة في قسم الإنجازات */
+      .achievement-item {
+        padding: 10px 12px;
+      }
+      
+      .achievement-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+      }
+      
+      .achievement-details h4 {
+        font-size: 13px;
+      }
+      
+      .achievement-details p {
+        font-size: 10px;
+      }
+      
+      .achievement-status {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+      }
+
+      /* تحسينات للمجموعات */
+      .group-card {
+        padding: 12px;
+      }
+      
+      .group-name {
+        font-size: 15px;
+      }
+      
+      .member-name {
+        font-size: 12px;
+      }
+      
+      .member-title {
+        font-size: 10px;
+      }
+      
+      .member-points {
+        font-size: 12px;
+        min-width: 55px;
       }
     }
   </style>
@@ -1310,7 +1699,7 @@
       <div class="achievements-card">
         <h3><i class="fas fa-trophy"></i> الإنجازات</h3>
         <div class="achievements-grid" id="achievementsGrid">
-          <div style="grid-column: span 2; text-align: center; padding: 20px; color: var(--text-light)">
+          <div style="text-align: center; padding: 20px; color: var(--text-light)">
             <div class="quick-load"></div> جاري تحميل الإنجازات...
           </div>
         </div>
@@ -1320,14 +1709,7 @@
     </div>
 
     <div class="section-hidden" id="sectionFriends">
-      <div class="friends-card">
-        <h3><i class="fas fa-user-friends"></i> الأصدقاء</h3>
-        <div class="friends-list" id="friendsList">
-          <div style="text-align: center; padding: 20px; color: var(--text-light)">
-            <div class="quick-load"></div> جاري تحميل قائمة الأصدقاء...
-          </div>
-        </div>
-      </div>
+      <!-- تم إزالة بطاقة الأصدقاء هنا -->
 
       <div class="gifts-card">
         <h3><i class="fas fa-gift"></i> الهدايا المتاحة</h3>
@@ -1384,7 +1766,9 @@
         </div>
       </div>
       
-      <!-- تم نقل لوحة الصدارة إلى هنا -->
+      <!-- تم إزالة تحديات مع الأصدقاء هنا -->
+      
+      <!-- تم نقل لوحة الصدارة إلى هنا (أسفل تحديات مع الأصدقاء) -->
       <div class="leaderboard-card">
         <h3><i class="fas fa-crown"></i> لوحة الصدارة</h3>
         <div class="leaderboard-tabs">
@@ -1398,32 +1782,26 @@
           </div>
         </div>
       </div>
-      
-      <div class="challenges-card">
-        <h3><i class="fas fa-users"></i> تحديات مع الأصدقاء</h3>
-        <div class="friends-challenges" id="friendsChallenges">
-          <div style="text-align: center; padding: 20px; color: var(--text-light)">
-            <div class="quick-load"></div> جاري تحميل تحديات الأصدقاء...
-          </div>
-        </div>
-      </div>
     </div>
 
+    <!-- === بداية قسم المجموعات المعدل === -->
     <div class="section-hidden" id="sectionGroups">
       <div class="groups-card">
         <h3><i class="fas fa-users"></i> المجموعات والعصابات</h3>
-        <div class="groups-list" id="groupsList">
+        <p style="font-size: 13px; color: var(--text-light); margin-top: 5px; margin-bottom: 15px;">
+          يتم توزيع اللاعبين تلقائياً على المجموعات حسب نقاطهم. أول 50 لاعب في المجموعة الأولى، ثاني 50 لاعب في المجموعة الثانية، وهكذا.
+        </p>
+        
+        <div class="groups-container" id="groupsContainer">
           <div style="text-align: center; padding: 20px; color: var(--text-light)">
             <div class="quick-load"></div> جاري تحميل المجموعات...
           </div>
         </div>
-        <div style="text-align: center; margin-top: 15px;">
-          <button class="challenge-action" id="createGroupBtn" style="width: 100%;">
-            <i class="fas fa-plus"></i> إنشاء مجموعة جديدة
-          </button>
-        </div>
+        
+        <!-- تمت إزالة زر إنشاء المجموعة الجديدة -->
       </div>
     </div>
+    <!-- === نهاية قسم المجموعات المعدل === -->
 
     <div class="section-hidden" id="sectionReferrals">
       <div class="referrals-card">
@@ -1853,6 +2231,171 @@
       }
     }
 
+    // ========== نظام الرتب داخل المجموعات ==========
+    const groupRanks = [
+      // القيادة العليا (Core Management)
+      "Supreme Leader",           // 1
+      "Deputy Leader",            // 2
+      "Chief Strategist",         // 3
+      
+      // النخبة (Elite Unit)
+      "Warlord",                  // 4
+      "Enforcer Alpha",           // 5
+      "Enforcer Beta",            // 6
+      "Enforcer Gamma",           // 7
+      "Shadow Captain",           // 8
+      "Intel Master",             // 9
+      "Treasurer",                // 10
+      
+      // الضباط (Officers)
+      "Officer I",                // 11
+      "Officer II",               // 12
+      "Officer III",              // 13
+      "Officer IV",               // 14
+      "Officer V",                // 15
+      
+      // المحاربون المحترفون (Veterans)
+      "Veteran 16",               // 16
+      "Veteran 17",               // 17
+      "Veteran 18",               // 18
+      "Veteran 19",               // 19
+      "Veteran 20",               // 20
+      "Veteran 21",               // 21
+      "Veteran 22",               // 22
+      "Veteran 23",               // 23
+      "Veteran 24",               // 24
+      "Veteran 25",               // 25
+      "Veteran 26",               // 26
+      "Veteran 27",               // 27
+      "Veteran 28",               // 28
+      "Veteran 29",               // 29
+      "Veteran 30",               // 30
+      "Veteran 31",               // 31
+      "Veteran 32",               // 32
+      "Veteran 33",               // 33
+      "Veteran 34",               // 34
+      "Veteran 35",               // 35
+      "Veteran 36",               // 36
+      "Veteran 37",               // 37
+      "Veteran 38",               // 38
+      "Veteran 39",               // 39
+      "Veteran 40",               // 40
+      "Veteran 41",               // 41
+      "Veteran 42",               // 42
+      "Veteran 43",               // 43
+      "Veteran 44",               // 44
+      "Veteran 45",               // 45
+      "Veteran 46",               // 46
+      "Veteran 47",               // 47
+      "Veteran 48",               // 48
+      "Veteran 49",               // 49
+      "Veteran 50"                // 50
+    ];
+
+    // ========== بيانات المجموعات المعدلة ==========
+    const predefinedGroups = [
+      {
+        id: 1,
+        name: "Black Hand",
+        icon: "fas fa-fist-raised",
+        capacity: 50,
+        members: [],
+        description: "النخبة المطلقة - أول 50 لاعب",
+        color: "#1a1a1a",
+        rankRange: "1-50"
+      },
+      {
+        id: 2,
+        name: "Bratva",
+        icon: "fas fa-crown",
+        capacity: 50,
+        members: [],
+        description: "الصفوة الثانية - المركز 51 إلى 100",
+        color: "#cc0000",
+        rankRange: "51-100"
+      },
+      {
+        id: 3,
+        name: "Cartel",
+        icon: "fas fa-skull-crossbones",
+        capacity: 50,
+        members: [],
+        description: "المستوى الثالث - المركز 101 إلى 150",
+        color: "#00aa00",
+        rankRange: "101-150"
+      },
+      {
+        id: 4,
+        name: "Iron Wolves",
+        icon: "fas fa-wolf-pack-battalion",
+        capacity: 50,
+        members: [],
+        description: "المستوى الرابع - المركز 151 إلى 200",
+        color: "#666666",
+        rankRange: "151-200"
+      },
+      {
+        id: 5,
+        name: "Mafia",
+        icon: "fas fa-user-secret",
+        capacity: 50,
+        members: [],
+        description: "المستوى الخامس - المركز 201 إلى 250",
+        color: "#8b4513",
+        rankRange: "201-250"
+      },
+      {
+        id: 6,
+        name: "Red Dragons",
+        icon: "fas fa-dragon",
+        capacity: 50,
+        members: [],
+        description: "المستوى السادس - المركز 251 إلى 300",
+        color: "#ff0000",
+        rankRange: "251-300"
+      },
+      {
+        id: 7,
+        name: "Shadow Syndicate",
+        icon: "fas fa-mask",
+        capacity: 50,
+        members: [],
+        description: "المستوى السابع - المركز 301 إلى 350",
+        color: "#333333",
+        rankRange: "301-350"
+      },
+      {
+        id: 8,
+        name: "Sicilian Order",
+        icon: "fas fa-shield-alt",
+        capacity: 50,
+        members: [],
+        description: "المستوى الثامن - المركز 351 إلى 400",
+        color: "#ff9900",
+        rankRange: "351-400"
+      },
+      {
+        id: 9,
+        name: "Triads",
+        icon: "fas fa-yin-yang",
+        capacity: 50,
+        members: [],
+        description: "المستوى التاسع - المركز 401 إلى 450",
+        color: "#ff6600",
+        rankRange: "401-450"
+      },
+      {
+        id: 10,
+        name: "Yakuza",
+        icon: "fas fa-user-ninja",
+        capacity: 50,
+        members: [],
+        description: "المستوى العاشر - المركز 451 إلى 500",
+        color: "#000000",
+        rankRange: "451-500"
+      }
+    ];
+
     // ========== بيانات اللعبة المحلية ==========
     const gameData = {
       user: null,
@@ -2057,6 +2600,245 @@
       return true;
     }
 
+    // ========== دالة توزيع اللاعبين على المجموعات حسب النقاط ==========
+    function distributePlayersToGroups(players) {
+      if (!players || players.length === 0) return;
+      
+      // مسح الأعضاء الحاليين من جميع المجموعات
+      predefinedGroups.forEach(group => {
+        group.members = [];
+      });
+      
+      // ترتيب اللاعبين حسب النقاط (تنازلياً)
+      const sortedPlayers = [...players].sort((a, b) => b.points - a.points);
+      
+      // توزيع اللاعبين على المجموعات
+      sortedPlayers.forEach((player, index) => {
+        const groupIndex = Math.floor(index / 50); // كل 50 لاعب في مجموعة
+        if (groupIndex < predefinedGroups.length) {
+          const positionInGroup = index % 50; // المركز داخل المجموعة (0-49)
+          const rankTitle = groupRanks[positionInGroup] || `Veteran ${positionInGroup + 1}`;
+          
+          // تحديد فئة الرتبة
+          let rankCategory = "veteran";
+          if (positionInGroup < 3) rankCategory = "core"; // القيادة العليا
+          else if (positionInGroup < 10) rankCategory = "elite"; // النخبة
+          else if (positionInGroup < 15) rankCategory = "officer"; // الضباط
+          
+          const playerWithRank = {
+            ...player,
+            globalRank: index + 1,
+            groupRank: positionInGroup + 1,
+            rankTitle: rankTitle,
+            rankCategory: rankCategory,
+            isCurrentUser: player.id === (gameData.user?.id || currentUser?.id)
+          };
+          predefinedGroups[groupIndex].members.push(playerWithRank);
+        }
+      });
+      
+      // ترتيب الأعضاء داخل كل مجموعة حسب النقاط (إذا لم يكن مرتباً بالفعل)
+      predefinedGroups.forEach(group => {
+        group.members.sort((a, b) => b.points - a.points);
+      });
+      
+      console.log(`✅ تم توزيع ${sortedPlayers.length} لاعب على ${predefinedGroups.length} مجموعات`);
+    }
+
+    // ========== دالة جلب اللاعبين من قاعدة البيانات ==========
+    async function fetchPlayersForGroups() {
+      try {
+        console.log('🔄 جلب اللاعبين لتوزيعهم على المجموعات...');
+        
+        // محاولة جلب اللاعبين من قاعدة البيانات
+        if (db) {
+          const usersSnapshot = await db.collection('users')
+            .orderBy('totalPoints', 'desc')
+            .limit(500) // نجلب أول 500 لاعب فقط
+            .get();
+          
+          if (!usersSnapshot.empty) {
+            const players = [];
+            
+            usersSnapshot.forEach(doc => {
+              const userData = doc.data();
+              players.push({
+                id: doc.id,
+                name: userData.firstName || 'مستخدم',
+                avatar: (userData.firstName || 'م').charAt(0),
+                points: userData.totalPoints || 0,
+                level: calculateLevel(userData.totalPoints || 0)
+              });
+            });
+            
+            return players;
+          }
+        }
+        
+        // إذا فشل جلب البيانات من قاعدة البيانات، نستخدم بيانات وهمية
+        console.log('⚠️ استخدام بيانات وهمية للاعبين');
+        return generateMockPlayers(300); // 300 لاعب وهمي
+        
+      } catch (error) {
+        console.error('❌ خطأ في جلب اللاعبين:', error);
+        return generateMockPlayers(150); // 150 لاعب وهمي في حالة الخطأ
+      }
+    }
+
+    // ========== دالة إنشاء لاعبين وهميين ==========
+    function generateMockPlayers(count) {
+      const firstNames = ["أحمد", "محمد", "علي", "مصطفى", "خالد", "عمر", "يوسف", "حسن", "إبراهيم", "محمود", "سعيد", "طارق", "رامي", "وليد", "فارس", "ناصر", "سلمان", "فهد", "بندر", "نايف"];
+      const lastNames = ["الفتاح", "الكريم", "العزيز", "الحكيم", "الودود", "الغفور", "الشكور", "العليم", "الحليم", "العظيم", "الغفار", "القهار", "الوهاب", "الرزاق", "الفتاق", "الجبار", "المتكبر", "الخلاق", "الغفور", "الشكور"];
+      
+      const players = [];
+      
+      // التأكد من إضافة المستخدم الحالي
+      if (gameData.user) {
+        players.push({
+          id: gameData.user.id,
+          name: gameData.user.name,
+          avatar: gameData.user.avatar,
+          points: gameData.user.points,
+          level: gameData.user.level,
+          isCurrentUser: true
+        });
+      }
+      
+      // إضافة لاعبين وهميين
+      for (let i = 0; i < count - 1; i++) {
+        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+        const points = Math.floor(Math.random() * 50000) + 1000;
+        
+        players.push({
+          id: `mock_player_${i}`,
+          name: `${firstName} ${lastName}`,
+          avatar: firstName.charAt(0),
+          points: points,
+          level: calculateLevel(points)
+        });
+      }
+      
+      return players;
+    }
+
+    // ========== دالة عرض المجموعات المعدلة ==========
+    function renderGroups() {
+      const groupsContainer = document.getElementById('groupsContainer');
+      groupsContainer.innerHTML = '';
+      
+      if (!predefinedGroups || predefinedGroups.length === 0) {
+        groupsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-light)">لا توجد مجموعات متاحة حالياً</div>';
+        hideQuickLoading('groupsList');
+        return;
+      }
+      
+      predefinedGroups.forEach(group => {
+        const groupEl = document.createElement('div');
+        groupEl.className = 'group-card';
+        groupEl.style.borderLeft = `4px solid ${group.color}`;
+        
+        const isCurrentUserInGroup = group.members.some(member => member.isCurrentUser);
+        const memberCount = group.members.length;
+        const capacityPercent = (memberCount / group.capacity) * 100;
+        
+        // حساب إحصائيات المجموعة
+        const totalPoints = group.members.reduce((sum, member) => sum + member.points, 0);
+        const avgPoints = memberCount > 0 ? Math.floor(totalPoints / memberCount) : 0;
+        const topPlayer = memberCount > 0 ? group.members[0] : null;
+        
+        // تحديد حالة المجموعة
+        let status = "active";
+        let statusText = `عدد الأعضاء: ${memberCount}/${group.capacity}`;
+        
+        if (memberCount === 0) {
+          status = "empty";
+          statusText = "لا يوجد أعضاء بعد";
+        } else if (memberCount >= group.capacity) {
+          status = "full";
+          statusText = "المجموعة ممتلئة";
+        }
+        
+        groupEl.innerHTML = `
+          <div class="group-card-header">
+            <div class="group-name">
+              <i class="${group.icon}"></i>
+              <span>${group.name}</span>
+            </div>
+            <div class="group-rank">المجموعة ${group.id}</div>
+          </div>
+          
+          <div class="group-range">
+            <i class="fas fa-chart-line"></i>
+            ${group.description}
+          </div>
+          
+          <div class="group-stats">
+            <div class="stat-item">
+              <div class="stat-value">${group.capacity}</div>
+              <div class="stat-label">السعة القصوى</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${memberCount}</div>
+              <div class="stat-label">الأعضاء الحاليون</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${avgPoints.toLocaleString('en-US')}</div>
+              <div class="stat-label">متوسط النقاط</div>
+            </div>
+          </div>
+          
+          <div class="group-members">
+            <div class="members-title">
+              <span>أفضل اللاعبين في المجموعة</span>
+              <span style="font-size: 11px; color: var(--text-light)">
+                ${topPlayer ? `الأعلى: ${topPlayer.points.toLocaleString('en-US')}` : 'لا يوجد'}
+              </span>
+            </div>
+            
+            <div class="members-scroll">
+              ${memberCount > 0 ? 
+                group.members.slice(0, 15).map((member, index) => `
+                  <div class="member-item ${member.isCurrentUser ? 'me' : ''}">
+                    <div class="member-info">
+                      <div class="member-position ${member.rankCategory}" title="${member.rankTitle}">
+                        ${member.groupRank}
+                      </div>
+                      <div class="member-avatar">${member.avatar}</div>
+                      <div class="member-details">
+                        <div class="member-name" title="${member.name}">${member.name}</div>
+                        <div class="member-title">${member.rankTitle}</div>
+                      </div>
+                    </div>
+                    <div class="member-points english-numbers">${member.points.toLocaleString('en-US')}</div>
+                  </div>
+                `).join('') : 
+                `<div style="text-align: center; padding: 20px; color: var(--text-light); font-size: 13px;">
+                  <i class="fas fa-user-slash"></i><br/>
+                  لا يوجد أعضاء في هذه المجموعة بعد
+                </div>`
+              }
+              
+              ${memberCount > 15 ? `
+                <div style="text-align: center; padding: 8px; font-size: 11px; color: var(--text-light);">
+                  و <span class="english-numbers">${memberCount - 15}</span> لاعب آخر
+                </div>
+              ` : ''}
+            </div>
+          </div>
+          
+          <div class="group-status ${status}">
+            ${statusText}
+            ${isCurrentUserInGroup ? ' • <i class="fas fa-user-check"></i> أنت هنا' : ''}
+          </div>
+        `;
+        
+        groupsContainer.appendChild(groupEl);
+      });
+      
+      hideQuickLoading('groupsList');
+    }
+
     async function loadAdditionalData() {
       try {
         console.log('🔄 تحميل البيانات الإضافية...');
@@ -2067,13 +2849,17 @@
         // تحميل البيانات المحلية
         loadLocalGameData();
         
+        // جلب اللاعبين وتوزيعهم على المجموعات
+        const players = await fetchPlayersForGroups();
+        distributePlayersToGroups(players);
+        
         // عرض كل شيء
         renderDailyTasks();
         renderAchievements();
         renderLeaderboard('all');
-        renderFriendsAndGifts();
+        renderGifts();
         renderChallenges();
-        renderGroups();
+        renderGroups(); // تم تحديث هذه الدالة
         renderReferrals();
         renderShopItems();
         
@@ -2189,6 +2975,7 @@
       hideQuickLoading('tasksList');
     }
 
+    // === بداية التعديل: دالة renderAchievements المعدلة ===
     function renderAchievements() {
       if (!gameData.user || !gameData.user.achievements) {
         gameData.user.achievements = gameData.achievements.map(ach => ({ ...ach, unlocked: false }));
@@ -2199,15 +2986,20 @@
       
       gameData.user.achievements.forEach(achievement => {
         const achievementEl = document.createElement('div');
-        achievementEl.className = `achievement-item ${achievement.unlocked ? '' : 'locked'}`;
+        achievementEl.className = `achievement-item ${achievement.unlocked ? 'unlocked' : 'locked'}`;
         
         achievementEl.innerHTML = `
           <div class="achievement-icon">
             <i class="${achievement.icon}"></i>
           </div>
-          <h4>${achievement.title}</h4>
-          <p>${achievement.description}</p>
-          <div class="achievement-reward"><span class="english-numbers">+${achievement.reward}</span> نقطة</div>
+          <div class="achievement-details">
+            <h4>${achievement.title}</h4>
+            <p>${achievement.description}</p>
+            <div class="achievement-reward"><span class="english-numbers">+${achievement.reward}</span> نقطة</div>
+          </div>
+          <div class="achievement-status ${achievement.unlocked ? 'unlocked' : 'locked'}">
+            <i class="fas fa-${achievement.unlocked ? 'lock-open' : 'lock'}"></i>
+          </div>
         `;
         
         achievementsGridEl.appendChild(achievementEl);
@@ -2215,6 +3007,7 @@
       
       hideQuickLoading('achievementsGrid');
     }
+    // === نهاية التعديل ===
 
     async function renderLeaderboard(period) {
       const leaderboardListEl = document.getElementById('leaderboardList');
@@ -2254,41 +3047,7 @@
       hideQuickLoading('leaderboardList');
     }
 
-    function renderFriendsAndGifts() {
-      const friendsListEl = document.getElementById('friendsList');
-      friendsListEl.innerHTML = '';
-      
-      if (gameData.friends.length === 0) {
-        friendsListEl.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-light)">لا يوجد أصدقاء بعد. ادعُ أصدقاءك!</div>';
-      } else {
-        gameData.friends.forEach(friend => {
-          const friendEl = document.createElement('div');
-          friendEl.className = 'friend-item';
-          const friendLevel = calculateLevel(friend.points);
-          
-          friendEl.innerHTML = `
-            <div class="friend-info">
-              <div class="friend-avatar">${friend.avatar}</div>
-              <div>
-                <div class="friend-name">${friend.name}</div>
-                <div class="friend-status ${friend.online ? 'online' : ''}">
-                  ${friend.online ? '🟢 متصل الآن' : '⚫ غير متصل'} • <span class="english-numbers">${friend.points.toLocaleString('en-US')}</span> نقطة
-                </div>
-              </div>
-            </div>
-            <div>
-              <button class="gift-action send-gift-btn" data-friend-id="${friend.id}">
-                <i class="fas fa-gift"></i> أرسل هدية
-              </button>
-            </div>
-          `;
-          
-          friendsListEl.appendChild(friendEl);
-        });
-      }
-      
-      hideQuickLoading('friendsList');
-      
+    function renderGifts() {
       const giftsListEl = document.getElementById('giftsList');
       giftsListEl.innerHTML = '';
       
@@ -2315,6 +3074,8 @@
         
         giftsListEl.appendChild(giftEl);
       });
+      
+      hideQuickLoading('giftsList');
     }
 
     function renderChallenges() {
@@ -2346,14 +3107,6 @@
       });
       
       hideQuickLoading('challengesList');
-      hideQuickLoading('friendsChallenges');
-    }
-
-    function renderGroups() {
-      const groupsListEl = document.getElementById('groupsList');
-      groupsListEl.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-light)">لا توجد مجموعات بعد. أنشئ مجموعتك الأولى!</div>';
-      
-      hideQuickLoading('groupsList');
     }
 
     function renderReferrals() {
@@ -2501,12 +3254,6 @@
           completeTask(taskId);
         }
         
-        if (e.target.closest('.send-gift-btn')) {
-          const button = e.target.closest('.send-gift-btn');
-          const friendId = button.getAttribute('data-friend-id');
-          sendGiftToFriend(friendId);
-        }
-        
         if (e.target.closest('.gift-action') && e.target.closest('.gift-action').getAttribute('data-gift-id')) {
           const button = e.target.closest('.gift-action');
           const giftId = parseInt(button.getAttribute('data-gift-id'));
@@ -2578,10 +3325,6 @@
         document.execCommand('copy');
         document.body.removeChild(tempInput);
         showMessage('تم نسخ رابط الدعوة بنجاح! شاركه مع أصدقائك.');
-      });
-      
-      document.getElementById('createGroupBtn').addEventListener('click', function() {
-        createNewGroup();
       });
     }
 
@@ -2718,43 +3461,6 @@
       }
     }
 
-    async function sendGiftToFriend(friendId) {
-      try {
-        const friend = gameData.friends.find(f => f.id === friendId);
-        if (!friend) {
-          showMessage('الصديق غير موجود');
-          return;
-        }
-        
-        if (gameData.user.points < 50) {
-          showMessage('نقاطك غير كافية لإرسال هدية');
-          return;
-        }
-        
-        // خصم النقاط في قاعدة البيانات
-        await updateUserPoints(currentUser.id, -50, `إرسال هدية إلى ${friend.name}`);
-        
-        // تحديث البيانات المحلية
-        gameData.user.points -= 50;
-        
-        // تحديث المهمة المحلية
-        const giftTask = gameData.user.dailyTasks.find(t => t.type === 'gift');
-        if (giftTask && !giftTask.completed) {
-          giftTask.completed = true;
-          saveLocalGameData();
-        }
-        
-        updateUserInfo();
-        renderDailyTasks();
-        
-        showMessage(`تم إرسال هدية إلى ${friend.name} (كلفت 50 نقطة)`);
-        
-      } catch (error) {
-        console.error('❌ خطأ في إرسال الهدية:', error);
-        showMessage('حدث خطأ في إرسال الهدية');
-      }
-    }
-
     async function sendGift(giftId) {
       const gift = gameData.gifts.find(g => g.id === giftId);
       if (!gift || !gift.sendable) return;
@@ -2772,13 +3478,6 @@
       if (!challenge) return;
       
       showMessage(`بدأت تحدي "${challenge.title}"! لديك ${challenge.timeLeft} لإكماله.`);
-    }
-
-    async function createNewGroup() {
-      const groupName = prompt('أدخل اسم المجموعة الجديدة:');
-      if (!groupName || groupName.trim() === '') return;
-      
-      showMessage(`تم إنشاء مجموعة "${groupName}" بنجاح!`);
     }
 
     async function purchaseItem(itemId) {
@@ -2881,6 +3580,9 @@
       if (updated) {
         saveLocalGameData();
         renderAchievements();
+        
+        // عرض رسالة نجاح للمستخدم
+        showMessage('🎉 مبروك! حققت إنجازاً جديداً');
       }
     }
 
