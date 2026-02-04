@@ -1788,9 +1788,6 @@
     <div class="section-hidden" id="sectionGroups">
       <div class="groups-card">
         <h3><i class="fas fa-users"></i> المجموعات والعصابات</h3>
-        <p style="font-size: 13px; color: var(--text-light); margin-top: 5px; margin-bottom: 15px;">
-          يتم توزيع اللاعبين تلقائياً على المجموعات حسب نقاطهم. أول 50 لاعب في المجموعة الأولى، ثاني 50 لاعب في المجموعة الثانية، وهكذا.
-        </p>
         
         <div class="groups-container" id="groupsContainer">
           <div style="text-align: center; padding: 20px; color: var(--text-light)">
@@ -2400,11 +2397,7 @@
     const gameData = {
       user: null,
       dailyTasks: [
-        { id: 1, title: "سجل دخولك اليوم", description: "احصل على نقاط التسجيل اليومي", icon: "fas fa-calendar-check", reward: 50, completed: false, type: "checkin" },
-        { id: 2, title: "شارك التطبيق", description: "شارك الرابط مع 3 أصدقاء", icon: "fas fa-share-alt", reward: 100, completed: false, type: "share" },
-        { id: 3, title: "أكمل ملفك الشخصي", description: "أضف صورة وبياناتك", icon: "fas fa-user-edit", reward: 75, completed: false, type: "profile" },
-        { id: 4, title: "تفقد الصدارة", description: "تفقد لوحة المتصدرين", icon: "fas fa-crown", reward: 30, completed: false, type: "leaderboard" },
-        { id: 5, title: "أرسل هدية", description: "أرسل هدية لصديق", icon: "fas fa-gift", reward: 80, completed: false, type: "gift" }
+        { id: 1, title: "شارك التطبيق", description: "شارك الرابط مع 3 أصدقاء", icon: "fas fa-share-alt", reward: 100, completed: false, type: "share" }
       ],
       
       achievements: [
@@ -2657,7 +2650,7 @@
             .limit(500) // نجلب أول 500 لاعب فقط
             .get();
           
-          if (!usersSnapshot.empty) {
+        if (!usersSnapshot.empty) {
             const players = [];
             
             usersSnapshot.forEach(doc => {
@@ -2744,7 +2737,6 @@
         
         // حساب إحصائيات المجموعة
         const totalPoints = group.members.reduce((sum, member) => sum + member.points, 0);
-        const avgPoints = memberCount > 0 ? Math.floor(totalPoints / memberCount) : 0;
         const topPlayer = memberCount > 0 ? group.members[0] : null;
         
         // تحديد حالة المجموعة
@@ -2783,8 +2775,8 @@
               <div class="stat-label">الأعضاء الحاليون</div>
             </div>
             <div class="stat-item">
-              <div class="stat-value">${avgPoints.toLocaleString('en-US')}</div>
-              <div class="stat-label">متوسط النقاط</div>
+              <div class="stat-value">${totalPoints.toLocaleString('en-US')}</div>
+              <div class="stat-label">إجمالي النقاط</div>
             </div>
           </div>
           
@@ -2859,7 +2851,7 @@
         renderLeaderboard('all');
         renderGifts();
         renderChallenges();
-        renderGroups(); // تم تحديث هذه الدالة
+        renderGroups();
         renderReferrals();
         renderShopItems();
         
@@ -3402,17 +3394,9 @@
         gameData.user.lastCheckin = today;
         gameData.user.level = calculateLevel(gameData.user.points);
         
-        // تحديث المهمة اليومية المحلية
-        const checkinTask = gameData.user.dailyTasks.find(t => t.type === 'checkin');
-        if (checkinTask && !checkinTask.completed) {
-          checkinTask.completed = true;
-          saveLocalGameData();
-        }
-        
         updateUserInfo();
         checkDailyCheckin();
         renderCheckinCalendar();
-        renderDailyTasks();
         
         showMessage(`مبروك! لقد ربحت ${totalPoints.toLocaleString('en-US')} نقطة (${basePoints.toLocaleString('en-US')} + ${streakBonus.toLocaleString('en-US')} مكافأة تتابع)`);
         animatePoints(totalPoints);
