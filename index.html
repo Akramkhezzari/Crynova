@@ -2042,11 +2042,8 @@
             username: userData.username || null,
             totalPoints: 100,
             currentStreak: 0,
-            lastCheckinDate: null,
             referrals: 0,
-            referralPoints: 0,
-            registrationDate: firebase.firestore.FieldValue.serverTimestamp(),
-            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+            referralPoints: 0
           };
           
           await usersRef.set(newUserData);
@@ -2054,10 +2051,6 @@
           
           return newUserData;
         } else {
-          await usersRef.update({
-            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          
           const existingUser = userDoc.data();
           console.log('👤 تم تسجيل دخول مستخدم موجود:', userId);
           return existingUser;
@@ -2085,10 +2078,9 @@
         const currentPoints = userData.totalPoints || 0;
         const newPoints = currentPoints + pointsChange;
         
-        // تحديث النقاط
+        // تحديث النقاط فقط
         await userRef.update({
-          totalPoints: newPoints,
-          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+          totalPoints: newPoints
         });
         
         // تسجيل العملية في سجل النقاط
@@ -2115,9 +2107,7 @@
         const userRef = db.collection('users').doc(userId);
         
         await userRef.update({
-          currentStreak: newStreak,
-          lastCheckinDate: lastCheckinDate,
-          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+          currentStreak: newStreak
         });
         
         console.log(`✅ تم تحديث التتابع للمستخدم ${userId}: ${newStreak} أيام`);
@@ -2190,7 +2180,6 @@
         return {
           totalPoints: userData.totalPoints || 0,
           currentStreak: userData.currentStreak || 0,
-          lastCheckinDate: userData.lastCheckinDate || null,
           referrals: referralsSnapshot.size || 0,
           referralPoints: userData.referralPoints || 0
         };
@@ -2485,7 +2474,6 @@
             points: dbStats.totalPoints || 100,
             level: calculateLevel(dbStats.totalPoints || 100),
             streak: dbStats.currentStreak || 0,
-            lastCheckin: dbStats.lastCheckinDate || null,
             avatar: (currentUser.firstName || 'م').charAt(0),
             referrals: dbStats.referrals || 0,
             referralPoints: dbStats.referralPoints || 0
@@ -2499,7 +2487,6 @@
             points: 100,
             level: 1,
             streak: 0,
-            lastCheckin: null,
             avatar: (currentUser.firstName || 'م').charAt(0),
             referrals: 0,
             referralPoints: 0
@@ -2581,7 +2568,6 @@
         points: 100,
         level: 1,
         streak: 0,
-        lastCheckin: null,
         avatar: userName.charAt(0),
         referrals: 0,
         referralPoints: 0,
@@ -2870,7 +2856,8 @@
       const calendarEl = document.getElementById('calendarCircles');
       calendarEl.innerHTML = '';
       
-      const lastCheckin = gameData.user.lastCheckin;
+      // بدلاً من استخدام قاعدة البيانات، نستخدم localStorage فقط
+      const lastCheckin = localStorage.getItem(`lastCheckin_${currentUser.id}`);
       const lastCheckinDate = lastCheckin ? new Date(lastCheckin) : null;
       const startOfWeek = new Date(today);
       startOfWeek.setDate(today.getDate() - currentDay);
@@ -2921,7 +2908,7 @@
       if (!gameData.user) return;
       
       const today = new Date().toDateString();
-      const lastCheckin = gameData.user.lastCheckin;
+      const lastCheckin = localStorage.getItem(`lastCheckin_${currentUser.id}`);
       const checkinButton = document.getElementById('checkinButton');
       
       if (lastCheckin === today) {
@@ -3358,7 +3345,7 @@
       }
       
       const today = new Date().toISOString().split('T')[0];
-      const lastCheckin = gameData.user.lastCheckin;
+      const lastCheckin = localStorage.getItem(`lastCheckin_${currentUser.id}`);
       
       if (lastCheckin === today) {
         showMessage('لقد سجلت دخولك اليوم بالفعل!');
@@ -3388,10 +3375,12 @@
         // تحديث التتابع في قاعدة البيانات
         await updateUserStreak(currentUser.id, newStreak, today);
         
+        // حفظ آخر تسجيل دخول محلياً فقط
+        localStorage.setItem(`lastCheckin_${currentUser.id}`, today);
+        
         // تحديث البيانات المحلية
         gameData.user.points += totalPoints;
         gameData.user.streak = newStreak;
-        gameData.user.lastCheckin = today;
         gameData.user.level = calculateLevel(gameData.user.points);
         
         updateUserInfo();
@@ -3537,11 +3526,16 @@
         }
       }
       
-      if (gameData.user.streak >= 7) {
-        const achievement = gameData.user.achievements.find(a => a.id === 2);
-        if (achievement && !achievement.unlocked) {
-          achievement.unlocked = true;
-          updated = true;
+      const lastCheckin = localStorage.getItem(`lastCheckin_${currentUser.id}`);
+      if (lastCheckin) {
+        // حساب التتابع من localStorage
+        const streak = gameData.user.streak || 0;
+        if (streak >= 7) {
+          const achievement = gameData.user.achievements.find(a => a.id === 2);
+          if (achievement && !achievement.unlocked) {
+            achievement.unlocked = true;
+            updated = true;
+          }
         }
       }
       
