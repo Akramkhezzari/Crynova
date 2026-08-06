@@ -757,15 +757,123 @@
             color: var(--accent);
             transform: rotate(30deg);
         }
+
+        /* LOADING SCREEN */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+            padding: 20px;
+        }
+        #loadingScreen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #loadingScreen .logo {
+            font-size: 48px;
+            font-weight: 900;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        #loadingScreen .loader {
+            width: 40px;
+            height: 40px;
+            border-width: 4px;
+        }
+        #loadingScreen .status-text {
+            margin-top: 16px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        #loadingScreen .error-box {
+            margin-top: 20px;
+            padding: 16px 24px;
+            background: var(--danger-light);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--danger);
+            max-width: 350px;
+            text-align: center;
+            display: none;
+        }
+        #loadingScreen .error-box .error-icon {
+            font-size: 32px;
+            color: var(--danger);
+            margin-bottom: 8px;
+        }
+        #loadingScreen .error-box .error-message {
+            color: var(--danger);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        #loadingScreen .error-box .error-detail {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        #loadingScreen .retry-btn {
+            margin-top: 16px;
+            padding: 10px 32px;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+        #loadingScreen .retry-btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-glow);
+        }
+        #loadingScreen .telegram-info {
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        #loadingScreen .telegram-info i {
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
+
+<!-- ===== LOADING SCREEN ===== -->
+<div id="loadingScreen">
+    <div class="logo"><i class="fas fa-gem"></i> Crynova</div>
+    <div class="loader"></div>
+    <div class="status-text" id="loadingStatus">جاري الاتصال بـ Telegram...</div>
+    <div class="telegram-info">
+        <i class="fas fa-telegram"></i> يرجى فتح التطبيق من خلال بوت Telegram
+    </div>
+    <div class="error-box" id="errorBox">
+        <div class="error-icon"><i class="fas fa-circle-exclamation"></i></div>
+        <div class="error-message" id="errorMessage">حدث خطأ في الاتصال</div>
+        <div class="error-detail" id="errorDetail">يرجى المحاولة مرة أخرى</div>
+        <button class="retry-btn" onclick="location.reload()">
+            <i class="fas fa-rotate"></i> إعادة المحاولة
+        </button>
+    </div>
+</div>
 
 <!-- ===== TOAST ===== -->
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- ===== APP ===== -->
-<div class="app-container">
+<div class="app-container" style="display:none;" id="appContent">
 
     <!-- ===== HEADER ===== -->
     <header class="app-header">
@@ -1253,7 +1361,7 @@
 </div>
 
 <!-- ===== BOTTOM NAVIGATION ===== -->
-<nav class="bottom-nav" id="bottomNav">
+<nav class="bottom-nav" id="bottomNav" style="display:none;">
     <button class="nav-item active" data-page="home" onclick="navigateTo('home')">
         <i class="fas fa-house"></i>
         <span>الرئيسية</span>
@@ -1279,15 +1387,17 @@
 <!-- ===== JAVASCRIPT ===== -->
 <script>
     // ============================================================
-    // 1. FIREBASE CONFIG - يجب تحديثها بمعلومات مشروعك
+    // 1. FIREBASE CONFIG
     // ============================================================
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "your-project.firebaseapp.com",
-        projectId: "your-project-id",
-        storageBucket: "your-project.appspot.com",
-        messagingSenderId: "your-sender-id",
-        appId: "your-app-id"
+        apiKey: "AIzaSyDCF0h_UPivX8oGoQL8Dn1s0lr79VAXpMY",
+        authDomain: "crynova-4d6b3.firebaseapp.com",
+        databaseURL: "https://crynova-4d6b3-default-rtdb.firebaseio.com",
+        projectId: "crynova-4d6b3",
+        storageBucket: "crynova-4d6b3.firebasestorage.app",
+        messagingSenderId: "858898515024",
+        appId: "1:858898515024:web:03827d57c2737bbc27bd55",
+        measurementId: "G-0NMZ50CL77"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -1305,42 +1415,89 @@
     let currentFilter = 'all';
     let depositData = null;
     let isDarkTheme = false;
-    let isDemoMode = false;
+    let loginAttempts = 0;
 
     // ============================================================
     // 3. TELEGRAM INTEGRATION
     // ============================================================
-    function initTelegram() {
-        if (window.Telegram && window.Telegram.WebApp) {
-            const tg = window.Telegram.WebApp;
-            tg.expand();
-            tg.enableClosingConfirmation();
-            
-            const user = tg.initDataUnsafe?.user;
-            if (user) {
-                return {
-                    id: user.id,
-                    username: user.username || `user_${user.id}`,
-                    firstName: user.first_name || '',
-                    lastName: user.last_name || '',
-                    photoUrl: user.photo_url || ''
-                };
+    function getTelegramUser() {
+        try {
+            // محاولة جلب البيانات من Telegram WebApp
+            if (window.Telegram && window.Telegram.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.expand();
+                tg.enableClosingConfirmation();
+                
+                const initData = tg.initDataUnsafe;
+                if (initData && initData.user) {
+                    const user = initData.user;
+                    console.log('✅ Telegram user data loaded:', user);
+                    return {
+                        id: user.id,
+                        username: user.username || `user_${user.id}`,
+                        firstName: user.first_name || '',
+                        lastName: user.last_name || '',
+                        photoUrl: user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name || 'U'}&background=6c5ce7&color=fff&size=128`,
+                        languageCode: user.language_code || 'ar',
+                        isPremium: user.is_premium || false
+                    };
+                }
             }
+            
+            // محاولة جلب من initData كـ string
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+                const params = new URLSearchParams(window.Telegram.WebApp.initData);
+                const userJson = params.get('user');
+                if (userJson) {
+                    try {
+                        const user = JSON.parse(decodeURIComponent(userJson));
+                        console.log('✅ Telegram user data from initData:', user);
+                        return {
+                            id: user.id,
+                            username: user.username || `user_${user.id}`,
+                            firstName: user.first_name || '',
+                            lastName: user.last_name || '',
+                            photoUrl: user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name || 'U'}&background=6c5ce7&color=fff&size=128`,
+                            languageCode: user.language_code || 'ar',
+                            isPremium: user.is_premium || false
+                        };
+                    } catch (e) {
+                        console.warn('Failed to parse user JSON:', e);
+                    }
+                }
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('Error getting Telegram user:', error);
+            return null;
         }
-        return null;
     }
 
     // ============================================================
-    // 4. AUTHENTICATION - بدون بيانات تجريبية
+    // 4. AUTHENTICATION - تلقائي عبر Telegram فقط
     // ============================================================
     async function authUser() {
-        const tgUser = initTelegram();
+        const statusEl = document.getElementById('loadingStatus');
+        const errorBox = document.getElementById('errorBox');
+        
+        statusEl.textContent = 'جاري الاتصال بـ Telegram...';
+        
+        // محاولة جلب بيانات Telegram
+        const tgUser = getTelegramUser();
         
         if (!tgUser) {
-            showToast('⚠️ يرجى فتح التطبيق من خلال Telegram', 'error');
+            // لا توجد بيانات من Telegram
+            statusEl.textContent = '⚠️ لم يتم العثور على بيانات Telegram';
+            errorBox.style.display = 'block';
+            document.getElementById('errorMessage').textContent = '⚠️ يرجى فتح التطبيق من خلال بوت Telegram';
+            document.getElementById('errorDetail').textContent = 'التطبيق يعمل فقط داخل Telegram WebApp';
             return false;
         }
 
+        statusEl.textContent = '✅ تم جلب بيانات Telegram بنجاح';
+        statusEl.textContent = 'جاري الاتصال بقاعدة البيانات...';
+        
         try {
             const usersRef = db.collection('users');
             const snapshot = await usersRef.where('telegramId', '==', tgUser.id.toString()).get();
@@ -1349,22 +1506,28 @@
                 const doc = snapshot.docs[0];
                 currentUser = { uid: doc.id, ...doc.data() };
                 userData = currentUser;
-                await doc.ref.update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() });
-                showToast('✅ تم تسجيل الدخول بنجاح', 'success');
+                await doc.ref.update({ 
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                    username: tgUser.username,
+                    displayName: tgUser.firstName + (tgUser.lastName ? ' ' + tgUser.lastName : ''),
+                    photoURL: tgUser.photoUrl
+                });
+                statusEl.textContent = '✅ مرحباً ' + userData.displayName;
+                showToast('✅ مرحباً بعودتك ' + userData.displayName, 'success');
             } else {
-                // إنشاء مستخدم جديد
+                statusEl.textContent = 'جاري إنشاء حساب جديد...';
                 const newUser = {
                     telegramId: tgUser.id.toString(),
                     username: tgUser.username,
                     displayName: tgUser.firstName + (tgUser.lastName ? ' ' + tgUser.lastName : ''),
-                    photoURL: tgUser.photoUrl || `https://ui-avatars.com/api/?name=${tgUser.firstName}&background=6c5ce7&color=fff&size=128`,
+                    photoURL: tgUser.photoUrl,
                     joinDate: firebase.firestore.FieldValue.serverTimestamp(),
                     lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
                     level: 1,
                     status: 'active',
                     referralCode: generateReferralCode(tgUser.id),
                     referredBy: null,
-                    currency: 'USDT', // العملة الافتراضية
+                    currency: 'USDT',
                     wallets: {
                         main: 0,
                         reward: 0,
@@ -1384,8 +1547,16 @@
                 const docRef = await db.collection('users').add(newUser);
                 currentUser = { uid: docRef.id, ...newUser };
                 userData = currentUser;
-                showToast('✅ تم إنشاء حسابك بنجاح', 'success');
+                statusEl.textContent = '✅ تم إنشاء حسابك بنجاح';
+                showToast('🎉 أهلاً بك في Crynova Mining!', 'success');
             }
+            
+            // إخفاء شاشة التحميل وإظهار المحتوى
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                document.getElementById('appContent').style.display = 'block';
+                document.getElementById('bottomNav').style.display = 'flex';
+            }, 500);
             
             updateUI();
             loadPackages();
@@ -1397,7 +1568,10 @@
             
         } catch (error) {
             console.error('Auth error:', error);
-            showToast('❌ خطأ في المصادقة: ' + error.message, 'error');
+            statusEl.textContent = '❌ خطأ: ' + error.message;
+            errorBox.style.display = 'block';
+            document.getElementById('errorMessage').textContent = '❌ حدث خطأ في الاتصال';
+            document.getElementById('errorDetail').textContent = error.message || 'يرجى المحاولة مرة أخرى';
             return false;
         }
     }
@@ -1590,28 +1764,24 @@
         const initial = name.charAt(0).toUpperCase() || '?';
         const currency = u.currency || 'USDT';
         
-        // تحديث الصورة الرمزية
-        document.querySelectorAll('#profileAvatar').forEach(el => {
-            if (u.photoURL && u.photoURL.startsWith('http')) {
-                el.style.backgroundImage = `url(${u.photoURL})`;
-                el.style.backgroundSize = 'cover';
-                el.textContent = '';
-            } else {
-                el.textContent = initial;
-                el.style.backgroundImage = '';
-            }
-        });
+        const avatarEl = document.getElementById('profileAvatar');
+        if (u.photoURL && u.photoURL.startsWith('http')) {
+            avatarEl.style.backgroundImage = `url(${u.photoURL})`;
+            avatarEl.style.backgroundSize = 'cover';
+            avatarEl.textContent = '';
+        } else {
+            avatarEl.textContent = initial;
+            avatarEl.style.backgroundImage = '';
+        }
         
         document.getElementById('profileName').textContent = name;
         document.getElementById('userLevelBadge').textContent = u.level || 1;
         document.getElementById('profileLevel').textContent = u.level || 1;
         
-        // تحديث العملة في كل مكان
         document.querySelectorAll('#homeCurrency, #walletTotalCurrency, #miningDailyCurrency').forEach(el => {
             if (el) el.textContent = currency;
         });
         
-        // الرصيد الرئيسي
         const mainBalance = u.wallets?.main || 0;
         document.getElementById('homeBalance').textContent = mainBalance.toFixed(2);
         
@@ -1701,7 +1871,7 @@
     }
 
     // ============================================================
-    // 9. DEPOSIT - ECCP / USDT
+    // 9. DEPOSIT
     // ============================================================
     function updateDepositNetwork() {
         const currency = document.getElementById('depositCurrency').value;
@@ -1743,7 +1913,6 @@
             address = `ECCP:${eccpId}`;
         } else {
             const network = document.getElementById('depositNetwork').value;
-            // عنوان حقيقي من Firestore
             address = '0x' + Array.from({length: 40}, () => 
                 '0123456789abcdef'[Math.floor(Math.random() * 16)]
             ).join('');
@@ -1863,7 +2032,7 @@
     }
 
     // ============================================================
-    // 10. WITHDRAW - ECCP / USDT
+    // 10. WITHDRAW
     // ============================================================
     function updateWithdrawNetwork() {
         const currency = document.getElementById('withdrawCurrency').value;
@@ -2026,6 +2195,12 @@
             renderPackages();
         } catch (error) {
             console.error('Load packages error:', error);
+            // عرض باقات افتراضية في حالة عدم الاتصال
+            allPackages = [
+                { id: 'p1', name: 'مبتدئ', price: 50, currency: 'USDT', duration: 30, hashRate: 10, icon: '🚀', description: 'باقة مثالية للبدء', features: ['قوة تعدين 10 H/s', 'مدة 30 يوم', 'أرباح يومية'] },
+                { id: 'p2', name: 'متقدم', price: 150, currency: 'USDT', duration: 60, hashRate: 35, icon: '⚡', description: 'للمعدنين المحترفين', features: ['قوة تعدين 35 H/s', 'مدة 60 يوم', 'أرباح مضاعفة'] },
+                { id: 'p3', name: 'احترافي', price: 500, currency: 'USDT', duration: 90, hashRate: 100, icon: '🔥', description: 'أقصى قوة تعدين', features: ['قوة تعدين 100 H/s', 'مدة 90 يوم', 'أرباح عالية'] }
+            ];
             renderPackages();
         }
     }
@@ -2347,17 +2522,10 @@
     // ============================================================
     function logoutUser() {
         if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
-            auth.signOut().then(() => {
-                currentUser = null;
-                userData = null;
-                showToast('تم تسجيل الخروج', 'info');
-                location.reload();
-            }).catch(() => {
-                currentUser = null;
-                userData = null;
-                showToast('تم تسجيل الخروج', 'info');
-                location.reload();
-            });
+            currentUser = null;
+            userData = null;
+            showToast('تم تسجيل الخروج', 'info');
+            location.reload();
         }
     }
 
@@ -2365,8 +2533,28 @@
     // 18. INIT
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Crynova Mining V2 - Starting...');
+        console.log('📱 Checking Telegram WebApp...');
+        
+        // التحقق من وجود Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            console.log('✅ Telegram WebApp detected');
+            const tg = window.Telegram.WebApp;
+            console.log('📊 WebApp version:', tg.version);
+            console.log('👤 User data available:', !!tg.initDataUnsafe?.user);
+        } else {
+            console.warn('⚠️ Telegram WebApp not detected');
+            document.getElementById('loadingStatus').textContent = '⚠️ يرجى فتح التطبيق من خلال Telegram';
+            document.getElementById('errorBox').style.display = 'block';
+            document.getElementById('errorMessage').textContent = '⚠️ يرجى فتح التطبيق من خلال بوت Telegram';
+            document.getElementById('errorDetail').textContent = 'التطبيق يعمل فقط داخل Telegram WebApp';
+            return;
+        }
+        
+        // بدء المصادقة
         authUser();
         
+        // إعداد زر العودة في Telegram
         if (window.Telegram?.WebApp) {
             const tg = window.Telegram.WebApp;
             tg.BackButton.onClick(() => {
@@ -2390,8 +2578,9 @@
     }
 
     console.log('🚀 Crynova Mining V2.0 - Production Ready');
+    console.log('📱 Connected to Firebase project: crynova-4d6b3');
     console.log('💳 Support: USDT (TRC20/BEP20) & DZD (ECCP)');
-    console.log('🔒 No demo data - All data from Firebase');
+    console.log('🔑 Login: Automatic via Telegram only');
 </script>
 </body>
 </html>
