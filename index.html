@@ -625,42 +625,6 @@
             background: var(--bg-input);
         }
 
-        /* TOAST */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            width: 90%;
-            max-width: 420px;
-        }
-        .toast {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 16px 20px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            box-shadow: var(--shadow-lg);
-            animation: slideDown 0.4s ease;
-            border-right: 4px solid var(--accent);
-        }
-        .toast i { font-size: 22px; }
-        .toast.success { border-right-color: var(--success); }
-        .toast.success i { color: var(--success); }
-        .toast.error { border-right-color: var(--danger); }
-        .toast.error i { color: var(--danger); }
-        .toast.info { border-right-color: var(--info); }
-        .toast.info i { color: var(--info); }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
         /* LOADING */
         .loader {
             display: inline-block;
@@ -783,9 +747,6 @@
     </style>
 </head>
 <body>
-
-<!-- ===== TOAST ===== -->
-<div class="toast-container" id="toastContainer"></div>
 
 <!-- ===== APP ===== -->
 <div class="app-container">
@@ -1272,10 +1233,6 @@
                 </label>
             </div>
         </div>
-
-        <button class="btn btn-danger" onclick="logoutUser()">
-            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
-        </button>
     </div>
 
 </div>
@@ -1365,7 +1322,7 @@
         const tgUser = getTelegramUser();
         
         if (!tgUser) {
-            showToast('⚠️ يرجى فتح التطبيق من خلال Telegram', 'error');
+            alert('⚠️ يرجى فتح التطبيق من خلال Telegram');
             return false;
         }
 
@@ -1385,7 +1342,7 @@
                     lastLogin: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                showToast(`👋 مرحباً ${userData.displayName || 'مستخدم'}`, 'success');
+                alert('👋 مرحباً ' + (userData.displayName || 'مستخدم'));
             } else {
                 // مستخدم جديد - إنشاء حساب 🆕
                 const displayName = tgUser.firstName + (tgUser.lastName ? ' ' + tgUser.lastName : '');
@@ -1428,7 +1385,7 @@
                 currentUser = { uid: docRef.id, ...newUser };
                 userData = currentUser;
                 
-                showToast('✅ تم إنشاء حسابك بنجاح!', 'success');
+                alert('✅ تم إنشاء حسابك بنجاح!');
             }
             
             // تحديث الواجهة
@@ -1446,7 +1403,7 @@
             
         } catch (error) {
             console.error('Auth error:', error);
-            showToast('❌ خطأ في المصادقة: ' + error.message, 'error');
+            alert('❌ خطأ في المصادقة: ' + error.message);
             return false;
         }
     }
@@ -1535,12 +1492,12 @@
 
     function copyText(text) {
         if (!text || text === 'جاري التحميل...') {
-            showToast('لا يوجد رابط للنسخ', 'error');
+            alert('لا يوجد رابط للنسخ');
             return;
         }
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text).then(() => {
-                showToast('✅ تم النسخ!', 'success');
+                alert('✅ تم النسخ!');
             }).catch(() => fallbackCopy(text));
         } else {
             fallbackCopy(text);
@@ -1554,7 +1511,7 @@
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
-        showToast('✅ تم النسخ!', 'success');
+        alert('✅ تم النسخ!');
     }
 
     function shareReferral() {
@@ -1570,7 +1527,7 @@
                 copyText(link);
             }
         } else {
-            showToast('جاري تحميل الرابط...', 'info');
+            alert('جاري تحميل الرابط...');
         }
     }
 
@@ -1626,35 +1583,7 @@
     }
 
     // ============================================================
-    // 7. TOAST
-    // ============================================================
-    function showToast(message, type = 'info') {
-        const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        
-        const icons = {
-            success: 'fa-circle-check',
-            error: 'fa-circle-exclamation',
-            info: 'fa-circle-info'
-        };
-        
-        toast.innerHTML = `
-            <i class="fas ${icons[type] || icons.info}"></i>
-            <span style="flex:1;font-weight:600;">${message}</span>
-        `;
-        
-        container.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(-10px) scale(0.95)';
-            setTimeout(() => toast.remove(), 300);
-        }, 3500);
-    }
-
-    // ============================================================
-    // 8. NAVIGATION
+    // 7. NAVIGATION
     // ============================================================
     function navigateTo(page) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1680,7 +1609,7 @@
     }
 
     // ============================================================
-    // 9. UI UPDATES
+    // 8. UI UPDATES
     // ============================================================
     function updateUI() {
         if (!userData) return;
@@ -1735,10 +1664,14 @@
         document.getElementById('profileTelegramId').textContent = u.telegramId || '--';
         document.getElementById('profileJoinDate').textContent = formatDate(u.joinDate);
         
+        // رابط الإحالة الجديد باستخدام معرف المستخدم من Telegram
+        const tgUser = getTelegramUser();
         const refLink = document.getElementById('referralLink');
-        if (u.referralCode) {
-            const url = `https://t.me/CrynovaBot?start=${u.referralCode}`;
+        if (tgUser) {
+            const url = `https://t.me/Crynova_bot?start=${tgUser.id}`;
             refLink.value = url;
+        } else {
+            refLink.value = 'https://t.me/Crynova_bot';
         }
     }
 
@@ -1805,7 +1738,7 @@
     }
 
     // ============================================================
-    // 10. DEPOSIT
+    // 9. DEPOSIT
     // ============================================================
     function updateDepositNetwork() {
         const currency = document.getElementById('depositCurrency').value;
@@ -1823,7 +1756,7 @@
 
     function generateDeposit() {
         if (!userData) {
-            showToast('⚠️ يرجى تسجيل الدخول أولاً', 'error');
+            alert('⚠️ يرجى تسجيل الدخول أولاً');
             return;
         }
 
@@ -1831,7 +1764,7 @@
         const amount = parseFloat(document.getElementById('depositAmount').value);
         
         if (!amount || amount < 1) {
-            showToast('⚠️ يرجى إدخال مبلغ صحيح (أقل مبلغ 1)', 'error');
+            alert('⚠️ يرجى إدخال مبلغ صحيح (أقل مبلغ 1)');
             return;
         }
         
@@ -1841,7 +1774,7 @@
         if (currency === 'DZD') {
             eccpId = document.getElementById('depositEccpId').value.trim();
             if (!eccpId) {
-                showToast('⚠️ يرجى إدخال معرف ECCP الخاص بك', 'error');
+                alert('⚠️ يرجى إدخال معرف ECCP الخاص بك');
                 return;
             }
             address = `ECCP:${eccpId}`;
@@ -1875,12 +1808,12 @@
             `;
         }
         
-        showToast(`✅ تم إنشاء طلب إيداع ${amount} ${currency}`, 'success');
+        alert('✅ تم إنشاء طلب إيداع ' + amount + ' ' + currency);
     }
 
     async function submitDepositProof() {
         if (!userData) {
-            showToast('⚠️ يرجى تسجيل الدخول أولاً', 'error');
+            alert('⚠️ يرجى تسجيل الدخول أولاً');
             return;
         }
 
@@ -1888,12 +1821,12 @@
         const file = fileInput.files[0];
         
         if (!file) {
-            showToast('⚠️ يرجى اختيار صورة إثبات الدفع', 'error');
+            alert('⚠️ يرجى اختيار صورة إثبات الدفع');
             return;
         }
         
         if (!depositData) {
-            showToast('⚠️ يرجى إنشاء طلب إيداع أولاً', 'error');
+            alert('⚠️ يرجى إنشاء طلب إيداع أولاً');
             return;
         }
         
@@ -1914,7 +1847,7 @@
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            showToast('✅ تم إرسال طلب الإيداع، في انتظار المراجعة', 'success');
+            alert('✅ تم إرسال طلب الإيداع، في انتظار المراجعة');
             
             document.getElementById('depositProof').value = '';
             document.getElementById('depositDetails').classList.add('hidden');
@@ -1923,7 +1856,7 @@
             
         } catch (error) {
             console.error('Deposit proof error:', error);
-            showToast('❌ حدث خطأ أثناء رفع الإثبات', 'error');
+            alert('❌ حدث خطأ أثناء رفع الإثبات');
         }
     }
 
@@ -1966,7 +1899,7 @@
     }
 
     // ============================================================
-    // 11. WITHDRAW
+    // 10. WITHDRAW
     // ============================================================
     function updateWithdrawNetwork() {
         const currency = document.getElementById('withdrawCurrency').value;
@@ -1987,7 +1920,7 @@
 
     async function requestWithdraw() {
         if (!userData) {
-            showToast('⚠️ يرجى تسجيل الدخول أولاً', 'error');
+            alert('⚠️ يرجى تسجيل الدخول أولاً');
             return;
         }
         
@@ -1995,13 +1928,13 @@
         const amount = parseFloat(document.getElementById('withdrawAmount').value);
         
         if (!amount || amount < 10) {
-            showToast('⚠️ الحد الأدنى للسحب هو 10', 'error');
+            alert('⚠️ الحد الأدنى للسحب هو 10');
             return;
         }
         
         const withdrawable = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
         if (amount > withdrawable) {
-            showToast('⚠️ الرصيد غير كافٍ', 'error');
+            alert('⚠️ الرصيد غير كافٍ');
             return;
         }
         
@@ -2012,7 +1945,7 @@
         if (currency === 'DZD') {
             eccpId = document.getElementById('withdrawEccpId').value.trim();
             if (!eccpId) {
-                showToast('⚠️ يرجى إدخال معرف ECCP للمستلم', 'error');
+                alert('⚠️ يرجى إدخال معرف ECCP للمستلم');
                 return;
             }
             recipient = `ECCP:${eccpId}`;
@@ -2020,7 +1953,7 @@
         } else {
             recipient = document.getElementById('withdrawAddress').value.trim();
             if (!recipient) {
-                showToast('⚠️ يرجى إدخال عنوان المستلم', 'error');
+                alert('⚠️ يرجى إدخال عنوان المستلم');
                 return;
             }
             network = document.getElementById('withdrawNetwork').value;
@@ -2059,7 +1992,7 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            showToast('✅ تم طلب السحب بنجاح، في انتظار المراجعة', 'success');
+            alert('✅ تم طلب السحب بنجاح، في انتظار المراجعة');
             
             userData.wallets.main -= total;
             updateWalletUI();
@@ -2072,7 +2005,7 @@
             
         } catch (error) {
             console.error('Withdraw error:', error);
-            showToast('❌ حدث خطأ أثناء طلب السحب', 'error');
+            alert('❌ حدث خطأ أثناء طلب السحب');
         }
     }
 
@@ -2115,7 +2048,7 @@
     }
 
     // ============================================================
-    // 12. PACKAGES
+    // 11. PACKAGES
     // ============================================================
     async function loadPackages() {
         try {
@@ -2166,23 +2099,23 @@
     }
 
     // ============================================================
-    // 13. PURCHASE
+    // 12. PURCHASE
     // ============================================================
     async function purchasePackage(packageId) {
         if (!userData) {
-            showToast('⚠️ يرجى تسجيل الدخول أولاً', 'error');
+            alert('⚠️ يرجى تسجيل الدخول أولاً');
             return;
         }
         
         const pkg = allPackages.find(p => p.id === packageId);
         if (!pkg) {
-            showToast('⚠️ الباقة غير موجودة', 'error');
+            alert('⚠️ الباقة غير موجودة');
             return;
         }
         
         const mainBalance = userData.wallets?.main || 0;
         if (mainBalance < pkg.price) {
-            showToast(`⚠️ الرصيد غير كافٍ. تحتاج ${pkg.price} ${pkg.currency}`, 'error');
+            alert(`⚠️ الرصيد غير كافٍ. تحتاج ${pkg.price} ${pkg.currency}`);
             return;
         }
         
@@ -2215,7 +2148,7 @@
                 packageId: pkg.id
             });
             
-            showToast(`✅ تم شراء باقة ${pkg.name} بنجاح!`, 'success');
+            alert(`✅ تم شراء باقة ${pkg.name} بنجاح!`);
             
             userData.wallets.main = mainBalance - pkg.price;
             userData.miningData.currentPackage = {
@@ -2233,12 +2166,12 @@
             
         } catch (error) {
             console.error('Purchase error:', error);
-            showToast('❌ حدث خطأ أثناء الشراء', 'error');
+            alert('❌ حدث خطأ أثناء الشراء');
         }
     }
 
     // ============================================================
-    // 14. TRANSACTIONS
+    // 13. TRANSACTIONS
     // ============================================================
     async function loadTransactions() {
         if (!userData) return;
@@ -2334,7 +2267,7 @@
     }
 
     // ============================================================
-    // 15. REFERRALS
+    // 14. REFERRALS
     // ============================================================
     async function loadReferrals() {
         if (!userData) return;
@@ -2377,7 +2310,7 @@
     }
 
     // ============================================================
-    // 16. WITHDRAW CALCULATION
+    // 15. WITHDRAW CALCULATION
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         const amountInput = document.getElementById('withdrawAmount');
@@ -2395,7 +2328,7 @@
     });
 
     // ============================================================
-    // 17. THEME TOGGLE
+    // 16. THEME TOGGLE
     // ============================================================
     function toggleTheme() {
         isDarkTheme = !isDarkTheme;
@@ -2443,34 +2376,11 @@
     }
 
     function toggleLanguage() {
-        showToast('سيتم إضافة اللغة الإنجليزية قريباً 🌐', 'info');
+        alert('سيتم إضافة اللغة الإنجليزية قريباً 🌐');
     }
 
     // ============================================================
-    // 18. LOGOUT
-    // ============================================================
-    function logoutUser() {
-        if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
-            if (miningInterval) {
-                clearInterval(miningInterval);
-                miningInterval = null;
-            }
-            auth.signOut().then(() => {
-                currentUser = null;
-                userData = null;
-                showToast('تم تسجيل الخروج', 'info');
-                location.reload();
-            }).catch(() => {
-                currentUser = null;
-                userData = null;
-                showToast('تم تسجيل الخروج', 'info');
-                location.reload();
-            });
-        }
-    }
-
-    // ============================================================
-    // 19. INIT
+    // 17. INIT
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         authUser();
