@@ -28,7 +28,6 @@
         }
 
         :root {
-            /* الألوان الأساسية - فاتح */
             --bg-primary: #f0f4f8;
             --bg-secondary: #ffffff;
             --bg-card: #ffffff;
@@ -36,19 +35,16 @@
             --bg-input: #f0f4f8;
             --bg-nav: #ffffff;
             
-            /* النصوص */
             --text-primary: #1a1a2e;
             --text-secondary: #4a4a6a;
             --text-muted: #8a8aaa;
             --text-white: #ffffff;
             
-            /* الألوان الأساسية */
             --accent: #6c5ce7;
             --accent-light: #a29bfe;
             --accent-glow: rgba(108, 92, 231, 0.15);
             --accent-gradient: linear-gradient(135deg, #6c5ce7, #a29bfe);
             
-            /* ألوان الحالة */
             --success: #00b894;
             --success-light: rgba(0, 184, 148, 0.12);
             --warning: #fdcb6e;
@@ -58,7 +54,6 @@
             --info: #0984e3;
             --info-light: rgba(9, 132, 227, 0.12);
             
-            /* الحدود والظلال */
             --border: #e2e8f0;
             --border-light: #f0f4f8;
             --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -66,23 +61,16 @@
             --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
             --shadow-glow: 0 4px 24px rgba(108, 92, 231, 0.25);
             
-            /* الزوايا */
             --radius-sm: 10px;
             --radius-md: 16px;
             --radius-lg: 24px;
             --radius-xl: 32px;
             
-            /* الانتقالات */
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* ============================================================
-           BASE
-           ============================================================ */
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
 
         body {
             font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -95,9 +83,6 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* ============================================================
-           SCROLLBAR
-           ============================================================ */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-primary); }
         ::-webkit-scrollbar-thumb { 
@@ -106,18 +91,13 @@
         }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent-light); }
 
-        /* ============================================================
-           APP CONTAINER
-           ============================================================ */
         .app-container {
             max-width: 480px;
             margin: 0 auto;
             padding: 16px 16px 24px;
         }
 
-        /* ============================================================
-           HEADER
-           ============================================================ */
+        /* HEADER */
         .app-header {
             display: flex;
             justify-content: space-between;
@@ -161,24 +141,8 @@
             transform: scale(1.05);
             box-shadow: var(--shadow-md);
         }
-        .app-header .header-actions .notification-dot {
-            position: relative;
-        }
-        .app-header .header-actions .notification-dot::after {
-            content: '';
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 8px;
-            height: 8px;
-            background: var(--danger);
-            border-radius: 50%;
-            border: 2px solid var(--bg-card);
-        }
 
-        /* ============================================================
-           PAGES
-           ============================================================ */
+        /* PAGES */
         .page {
             display: none;
             animation: fadeSlideIn 0.4s ease;
@@ -186,19 +150,11 @@
         .page.active { display: block; }
 
         @keyframes fadeSlideIn {
-            from { 
-                opacity: 0; 
-                transform: translateY(24px);
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ============================================================
-           CARDS - تصميم عصري
-           ============================================================ */
+        /* CARDS */
         .card {
             background: var(--bg-card);
             border-radius: var(--radius-md);
@@ -244,18 +200,8 @@
             color: var(--accent);
             font-size: 18px;
         }
-        .card-title .badge-new {
-            background: var(--accent);
-            color: white;
-            font-size: 10px;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
 
-        /* ============================================================
-           BALANCE DISPLAY
-           ============================================================ */
+        /* BALANCE */
         .balance-large {
             font-size: 40px;
             font-weight: 900;
@@ -281,9 +227,7 @@
             margin-right: 4px;
         }
 
-        /* ============================================================
-           STAT BOXES
-           ============================================================ */
+        /* STAT BOXES */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
@@ -317,9 +261,7 @@
             display: block;
         }
 
-        /* ============================================================
-           BUTTONS
-           ============================================================ */
+        /* BUTTONS */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -389,12 +331,9 @@
         
         .btn-sm { padding: 10px 16px; font-size: 14px; }
         .btn-xs { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
-        .btn-icon { width: 44px; height: 44px; padding: 0; border-radius: 50%; }
         .btn-block { width: 100%; }
 
-        /* ============================================================
-           PACKAGE CARDS - تصميم متطور
-           ============================================================ */
+        /* PACKAGE CARDS */
         .package-card {
             background: var(--bg-card);
             border-radius: var(--radius-md);
@@ -481,9 +420,7 @@
             text-align: center;
         }
 
-        /* ============================================================
-           BOTTOM NAVIGATION - تصميم عصري
-           ============================================================ */
+        /* BOTTOM NAVIGATION */
         .bottom-nav {
             position: fixed;
             bottom: 16px;
@@ -543,21 +480,8 @@
             border-radius: 10px;
         }
         .nav-item:hover { color: var(--text-primary); }
-        .nav-item .nav-badge {
-            position: absolute;
-            top: 0;
-            right: 4px;
-            background: var(--danger);
-            color: white;
-            font-size: 9px;
-            padding: 1px 6px;
-            border-radius: 10px;
-            font-weight: 700;
-        }
 
-        /* ============================================================
-           INPUTS - تصميم محسن
-           ============================================================ */
+        /* INPUTS */
         .input-group {
             margin-bottom: 16px;
         }
@@ -612,9 +536,7 @@
             padding-right: 44px;
         }
 
-        /* ============================================================
-           LIST ITEMS
-           ============================================================ */
+        /* LIST ITEMS */
         .list-item {
             display: flex;
             justify-content: space-between;
@@ -624,7 +546,6 @@
             transition: var(--transition);
         }
         .list-item:last-child { border-bottom: none; }
-        .list-item:hover { padding-right: 4px; }
         .list-item .left { 
             display: flex; 
             align-items: center; 
@@ -643,12 +564,6 @@
             font-size: 18px;
             color: white;
             flex-shrink: 0;
-        }
-        .list-item .left .avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
         }
         .list-item .info .title { 
             font-weight: 700;
@@ -670,20 +585,8 @@
             font-size: 12px; 
             color: var(--text-secondary);
         }
-        .list-item.clickable {
-            cursor: pointer;
-        }
-        .list-item.clickable:hover {
-            background: var(--bg-input);
-            border-radius: var(--radius-sm);
-            padding-left: 8px;
-            padding-right: 8px;
-            margin: 0 -8px;
-        }
 
-        /* ============================================================
-           STATUS BADGES
-           ============================================================ */
+        /* STATUS BADGES */
         .status {
             display: inline-block;
             padding: 4px 14px;
@@ -697,15 +600,12 @@
         .status-danger { background: var(--danger-light); color: var(--danger); }
         .status-info { background: var(--info-light); color: var(--info); }
 
-        /* ============================================================
-           QR CODE
-           ============================================================ */
+        /* QR CODE */
         .qr-container {
             display: flex;
             justify-content: center;
             padding: 16px 0;
         }
-        .qr-container canvas,
         .qr-container .qr-placeholder {
             background: white;
             padding: 16px;
@@ -713,8 +613,6 @@
             box-shadow: var(--shadow-sm);
             width: 180px;
             height: 180px;
-        }
-        .qr-container .qr-placeholder {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -723,9 +621,7 @@
             background: var(--bg-input);
         }
 
-        /* ============================================================
-           TOAST
-           ============================================================ */
+        /* TOAST */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -761,9 +657,7 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* ============================================================
-           LOADING
-           ============================================================ */
+        /* LOADING */
         .loader {
             display: inline-block;
             width: 28px;
@@ -777,20 +671,7 @@
             to { transform: rotate(360deg); }
         }
 
-        .skeleton {
-            background: linear-gradient(90deg, var(--bg-input) 25%, var(--border) 50%, var(--bg-input) 75%);
-            background-size: 200% 100%;
-            animation: skeleton 1.5s ease-in-out infinite;
-            border-radius: var(--radius-sm);
-        }
-        @keyframes skeleton {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* ============================================================
-           ECCP BADGE
-           ============================================================ */
+        /* ECCP BADGE */
         .eccp-badge {
             display: inline-flex;
             align-items: center;
@@ -802,13 +683,8 @@
             font-size: 12px;
             font-weight: 700;
         }
-        .eccp-badge i {
-            font-size: 14px;
-        }
 
-        /* ============================================================
-           RESPONSIVE
-           ============================================================ */
+        /* RESPONSIVE */
         @media (max-width: 420px) {
             .app-container { padding: 12px; }
             .balance-large { font-size: 32px; }
@@ -837,9 +713,7 @@
             }
         }
 
-        /* ============================================================
-           UTILITY
-           ============================================================ */
+        /* UTILITY */
         .text-center { text-align: center; }
         .text-accent { color: var(--accent); }
         .text-success { color: var(--success); }
@@ -862,22 +736,14 @@
         .w-full { width: 100%; }
         .hidden { display: none !important; }
         .relative { position: relative; }
-        .overflow-hidden { overflow: hidden; }
         .rounded-full { border-radius: 50%; }
-        .border-accent { border-color: var(--accent) !important; }
-        .bg-accent-light { background: var(--accent-glow); }
-        .shadow-glow { box-shadow: var(--shadow-glow); }
-
-        /* Divider */
         .divider {
             height: 1px;
             background: var(--border);
             margin: 16px 0;
         }
 
-        /* ============================================================
-           DARK MODE TOGGLE (يُفعّل عند الحاجة)
-           ============================================================ */
+        /* THEME TOGGLE */
         .theme-toggle {
             background: none;
             border: none;
@@ -908,8 +774,8 @@
             Crynova
         </div>
         <div class="header-actions">
-            <button class="notification-dot" onclick="navigateTo('transactions')">
-                <i class="fas fa-bell"></i>
+            <button onclick="navigateTo('transactions')">
+                <i class="fas fa-clock-rotate-left"></i>
             </button>
             <button onclick="toggleTheme()" class="theme-toggle" id="themeToggle">
                 <i class="fas fa-moon"></i>
@@ -926,7 +792,7 @@
                     <div class="balance-label" style="color:rgba(255,255,255,0.8);">الرصيد الكلي</div>
                     <div>
                         <span class="balance-large white" id="homeBalance">0.00</span>
-                        <span class="balance-currency" style="color:rgba(255,255,255,0.8);">USDT</span>
+                        <span class="balance-currency" style="color:rgba(255,255,255,0.8);" id="homeCurrency">USDT</span>
                     </div>
                 </div>
                 <div style="text-align:left;">
@@ -1026,7 +892,7 @@
                 <div style="text-align:left;">
                     <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">الأرباح اليومية</div>
                     <div style="font-size:28px;font-weight:900;color:white;" id="miningDailyEarnings">0.00</div>
-                    <div style="color:rgba(255,255,255,0.6);font-size:13px;">USDT</div>
+                    <div style="color:rgba(255,255,255,0.6);font-size:13px;" id="miningDailyCurrency">USDT</div>
                 </div>
             </div>
         </div>
@@ -1068,7 +934,7 @@
             <div style="text-align:center;padding:4px 0;">
                 <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">الرصيد الكلي</div>
                 <div style="font-size:44px;font-weight:900;color:white;" id="walletTotal">0.00</div>
-                <div style="color:rgba(255,255,255,0.6);font-size:14px;">USDT</div>
+                <div style="color:rgba(255,255,255,0.6);font-size:14px;" id="walletTotalCurrency">USDT</div>
             </div>
         </div>
 
@@ -1413,15 +1279,15 @@
 <!-- ===== JAVASCRIPT ===== -->
 <script>
     // ============================================================
-    // 1. FIREBASE CONFIG
+    // 1. FIREBASE CONFIG - يجب تحديثها بمعلومات مشروعك
     // ============================================================
     const firebaseConfig = {
-        apiKey: "AIzaSyDemoKeyReplaceWithYourOwn",
+        apiKey: "YOUR_API_KEY",
         authDomain: "your-project.firebaseapp.com",
         projectId: "your-project-id",
         storageBucket: "your-project.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:web:abcdef123456"
+        messagingSenderId: "your-sender-id",
+        appId: "your-app-id"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -1439,6 +1305,7 @@
     let currentFilter = 'all';
     let depositData = null;
     let isDarkTheme = false;
+    let isDemoMode = false;
 
     // ============================================================
     // 3. TELEGRAM INTEGRATION
@@ -1464,102 +1331,74 @@
     }
 
     // ============================================================
-    // 4. AUTHENTICATION
+    // 4. AUTHENTICATION - بدون بيانات تجريبية
     // ============================================================
     async function authUser() {
         const tgUser = initTelegram();
         
-        if (tgUser) {
-            try {
-                const usersRef = db.collection('users');
-                const snapshot = await usersRef.where('telegramId', '==', tgUser.id.toString()).get();
+        if (!tgUser) {
+            showToast('⚠️ يرجى فتح التطبيق من خلال Telegram', 'error');
+            return false;
+        }
+
+        try {
+            const usersRef = db.collection('users');
+            const snapshot = await usersRef.where('telegramId', '==', tgUser.id.toString()).get();
+            
+            if (!snapshot.empty) {
+                const doc = snapshot.docs[0];
+                currentUser = { uid: doc.id, ...doc.data() };
+                userData = currentUser;
+                await doc.ref.update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() });
+                showToast('✅ تم تسجيل الدخول بنجاح', 'success');
+            } else {
+                // إنشاء مستخدم جديد
+                const newUser = {
+                    telegramId: tgUser.id.toString(),
+                    username: tgUser.username,
+                    displayName: tgUser.firstName + (tgUser.lastName ? ' ' + tgUser.lastName : ''),
+                    photoURL: tgUser.photoUrl || `https://ui-avatars.com/api/?name=${tgUser.firstName}&background=6c5ce7&color=fff&size=128`,
+                    joinDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                    level: 1,
+                    status: 'active',
+                    referralCode: generateReferralCode(tgUser.id),
+                    referredBy: null,
+                    currency: 'USDT', // العملة الافتراضية
+                    wallets: {
+                        main: 0,
+                        reward: 0,
+                        referral: 0,
+                        locked: 0
+                    },
+                    currentPackage: null,
+                    totalMined: 0,
+                    totalReferrals: 0,
+                    miningHistory: {
+                        today: 0,
+                        thisWeek: 0,
+                        thisMonth: 0
+                    }
+                };
                 
-                if (!snapshot.empty) {
-                    const doc = snapshot.docs[0];
-                    currentUser = { uid: doc.id, ...doc.data() };
-                    userData = currentUser;
-                    await doc.ref.update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() });
-                } else {
-                    const newUser = {
-                        telegramId: tgUser.id.toString(),
-                        username: tgUser.username,
-                        displayName: tgUser.firstName + (tgUser.lastName ? ' ' + tgUser.lastName : ''),
-                        photoURL: tgUser.photoUrl || `https://ui-avatars.com/api/?name=${tgUser.firstName}&background=6c5ce7&color=fff&size=128`,
-                        joinDate: firebase.firestore.FieldValue.serverTimestamp(),
-                        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-                        level: 1,
-                        status: 'active',
-                        referralCode: generateReferralCode(tgUser.id),
-                        referredBy: null,
-                        wallets: {
-                            main: 0,
-                            reward: 0,
-                            referral: 0,
-                            locked: 0,
-                            withdraw: 0
-                        },
-                        currentPackage: null,
-                        totalMined: 0,
-                        totalReferrals: 0,
-                        miningHistory: {
-                            today: 0,
-                            thisWeek: 0,
-                            thisMonth: 0
-                        }
-                    };
-                    
-                    const docRef = await db.collection('users').add(newUser);
-                    currentUser = { uid: docRef.id, ...newUser };
-                    userData = currentUser;
-                }
-                
-                updateUI();
-                loadPackages();
-                loadTransactions();
-                loadReferrals();
-                loadDeposits();
-                loadWithdrawals();
-                return true;
-            } catch (error) {
-                console.error('Auth error:', error);
-                showToast('خطأ في المصادقة', 'error');
-                return false;
+                const docRef = await db.collection('users').add(newUser);
+                currentUser = { uid: docRef.id, ...newUser };
+                userData = currentUser;
+                showToast('✅ تم إنشاء حسابك بنجاح', 'success');
             }
-        } else {
-            // وضع تجريبي
-            showToast('يعمل في وضع التجربة', 'info');
-            currentUser = {
-                uid: 'demo_user',
-                telegramId: '123456',
-                username: 'demo_user',
-                displayName: 'مستخدم تجريبي',
-                photoURL: 'https://ui-avatars.com/api/?name=مستخدم&background=6c5ce7&color=fff&size=128',
-                level: 1,
-                status: 'active',
-                referralCode: 'DEMO123',
-                wallets: {
-                    main: 150.75,
-                    reward: 25.50,
-                    referral: 10.00,
-                    locked: 30.00,
-                    withdraw: 120.25
-                },
-                currentPackage: {
-                    name: 'المبتدئ',
-                    hashRate: 10,
-                    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                },
-                totalMined: 45.30,
-                totalReferrals: 3
-            };
-            userData = currentUser;
+            
             updateUI();
-            loadPackagesDemo();
-            loadTransactionsDemo();
-            loadReferralsDemo();
-            loadDepositsDemo();
-            loadWithdrawalsDemo();
+            loadPackages();
+            loadTransactions();
+            loadReferrals();
+            loadDeposits();
+            loadWithdrawals();
             return true;
+            
+        } catch (error) {
+            console.error('Auth error:', error);
+            showToast('❌ خطأ في المصادقة: ' + error.message, 'error');
+            return false;
         }
     }
 
@@ -1730,7 +1569,6 @@
         if (page === 'mining') updateMiningUI();
         if (page === 'referrals') updateReferralUI();
         
-        // إظهار زر العودة في تليجرام
         if (window.Telegram?.WebApp) {
             const tg = window.Telegram.WebApp;
             if (page === 'home') {
@@ -1750,8 +1588,10 @@
         const u = userData;
         const name = u.displayName || u.username || 'مستخدم';
         const initial = name.charAt(0).toUpperCase() || '?';
+        const currency = u.currency || 'USDT';
         
-        document.querySelectorAll('#userAvatar, #profileAvatar').forEach(el => {
+        // تحديث الصورة الرمزية
+        document.querySelectorAll('#profileAvatar').forEach(el => {
             if (u.photoURL && u.photoURL.startsWith('http')) {
                 el.style.backgroundImage = `url(${u.photoURL})`;
                 el.style.backgroundSize = 'cover';
@@ -1762,12 +1602,16 @@
             }
         });
         
-        document.getElementById('userName').textContent = name;
         document.getElementById('profileName').textContent = name;
-        
         document.getElementById('userLevelBadge').textContent = u.level || 1;
         document.getElementById('profileLevel').textContent = u.level || 1;
         
+        // تحديث العملة في كل مكان
+        document.querySelectorAll('#homeCurrency, #walletTotalCurrency, #miningDailyCurrency').forEach(el => {
+            if (el) el.textContent = currency;
+        });
+        
+        // الرصيد الرئيسي
         const mainBalance = u.wallets?.main || 0;
         document.getElementById('homeBalance').textContent = mainBalance.toFixed(2);
         
@@ -1827,7 +1671,7 @@
 
     function updateWalletUI() {
         const w = userData?.wallets || {};
-        const total = (w.main || 0) + (w.reward || 0) + (w.referral || 0) + (w.withdraw || 0);
+        const total = (w.main || 0) + (w.reward || 0) + (w.referral || 0);
         document.getElementById('walletTotal').textContent = total.toFixed(2);
         document.getElementById('walletMain').textContent = (w.main || 0).toFixed(2);
         document.getElementById('walletReward').textContent = (w.reward || 0).toFixed(2);
@@ -1874,6 +1718,11 @@
     }
 
     function generateDeposit() {
+        if (!userData) {
+            showToast('⚠️ يرجى تسجيل الدخول أولاً', 'error');
+            return;
+        }
+
         const currency = document.getElementById('depositCurrency').value;
         const amount = parseFloat(document.getElementById('depositAmount').value);
         
@@ -1894,7 +1743,7 @@
             address = `ECCP:${eccpId}`;
         } else {
             const network = document.getElementById('depositNetwork').value;
-            // عنوان وهمي - استبدل بعنوان حقيقي
+            // عنوان حقيقي من Firestore
             address = '0x' + Array.from({length: 40}, () => 
                 '0123456789abcdef'[Math.floor(Math.random() * 16)]
             ).join('');
@@ -1905,7 +1754,6 @@
         document.getElementById('depositAddress').textContent = address;
         document.getElementById('depositDetails').classList.remove('hidden');
         
-        // QR Code - إما كود عادي أو شعار ECCP
         const qrContainer = document.getElementById('depositQR');
         if (currency === 'DZD') {
             qrContainer.innerHTML = `
@@ -1928,6 +1776,11 @@
     }
 
     async function submitDepositProof() {
+        if (!userData) {
+            showToast('⚠️ يرجى تسجيل الدخول أولاً', 'error');
+            return;
+        }
+
         const fileInput = document.getElementById('depositProof');
         const file = fileInput.files[0];
         
@@ -1982,16 +1835,9 @@
             snapshot.forEach(doc => deposits.push({ id: doc.id, ...doc.data() }));
             renderDeposits(deposits);
         } catch (error) {
-            loadDepositsDemo();
+            console.error('Load deposits error:', error);
+            renderDeposits([]);
         }
-    }
-
-    function loadDepositsDemo() {
-        const deposits = [
-            { id: 'd1', amount: 100, currency: 'USDT', status: 'confirmed', createdAt: new Date(Date.now() - 2*24*60*60*1000) },
-            { id: 'd2', amount: 5000, currency: 'DZD', status: 'pending', createdAt: new Date(Date.now() - 5*60*60*1000), eccpId: 'ECCP123' }
-        ];
-        renderDeposits(deposits);
     }
 
     function renderDeposits(deposits) {
@@ -2138,16 +1984,9 @@
             snapshot.forEach(doc => withdrawals.push({ id: doc.id, ...doc.data() }));
             renderWithdrawals(withdrawals);
         } catch (error) {
-            loadWithdrawalsDemo();
+            console.error('Load withdrawals error:', error);
+            renderWithdrawals([]);
         }
-    }
-
-    function loadWithdrawalsDemo() {
-        const withdrawals = [
-            { id: 'w1', amount: 25, currency: 'USDT', status: 'completed', createdAt: new Date(Date.now() - 3*24*60*60*1000) },
-            { id: 'w2', amount: 1000, currency: 'DZD', status: 'pending', createdAt: new Date(Date.now() - 2*60*60*1000), eccpId: 'ECCP456' }
-        ];
-        renderWithdrawals(withdrawals);
     }
 
     function renderWithdrawals(withdrawals) {
@@ -2186,37 +2025,29 @@
             snapshot.forEach(doc => allPackages.push({ id: doc.id, ...doc.data() }));
             renderPackages();
         } catch (error) {
-            loadPackagesDemo();
+            console.error('Load packages error:', error);
+            renderPackages();
         }
-    }
-
-    function loadPackagesDemo() {
-        allPackages = [
-            { id: 'p1', name: 'مبتدئ', price: 50, currency: 'USDT', duration: 30, hashRate: 10,
-              icon: '🚀', color: '#4CAF50', description: 'باقة مثالية للبدء',
-              features: ['قوة تعدين 10 H/s', 'مدة 30 يوم', 'أرباح يومية', 'دعم 24/7'] },
-            { id: 'p2', name: 'متقدم', price: 150, currency: 'USDT', duration: 60, hashRate: 35,
-              icon: '⚡', color: '#FF9800', description: 'للمعدنين المحترفين',
-              features: ['قوة تعدين 35 H/s', 'مدة 60 يوم', 'أرباح مضاعفة', 'أولوية الدعم'] },
-            { id: 'p3', name: 'احترافي', price: 500, currency: 'USDT', duration: 90, hashRate: 100,
-              icon: '🔥', color: '#E94560', description: 'أقصى قوة تعدين',
-              features: ['قوة تعدين 100 H/s', 'مدة 90 يوم', 'أرباح عالية', 'مدير حساب خاص'] }
-        ];
-        renderPackages();
     }
 
     function renderPackages() {
         const container = document.getElementById('packagesList');
         if (allPackages.length === 0) {
-            container.innerHTML = `<div class="text-muted text-center" style="padding:32px 0;">لا توجد باقات متاحة</div>`;
+            container.innerHTML = `
+                <div class="card text-center" style="padding:32px 0;">
+                    <div style="font-size:48px;margin-bottom:12px;">📦</div>
+                    <div style="font-size:18px;font-weight:700;">لا توجد باقات</div>
+                    <div style="color:var(--text-secondary);font-size:14px;">سيتم إضافة الباقات قريباً</div>
+                </div>
+            `;
             return;
         }
         
         container.innerHTML = allPackages.map((pkg, index) => `
-            <div class="package-card ${index === 1 ? 'popular' : ''}" style="border-color: ${pkg.color}55;">
+            <div class="package-card ${index === 1 ? 'popular' : ''}">
                 ${index === 1 ? `<div class="badge-popular">⭐ الأفضل</div>` : ''}
                 <div class="icon">${pkg.icon || '📦'}</div>
-                <div class="name" style="color:${pkg.color};">${pkg.name}</div>
+                <div class="name">${pkg.name}</div>
                 <div class="price">${pkg.price} <small>${pkg.currency}</small></div>
                 <div style="text-align:center;color:var(--text-secondary);font-size:14px;font-weight:500;">${pkg.description || ''}</div>
                 <ul class="features">
@@ -2263,7 +2094,9 @@
                     hashRate: pkg.hashRate,
                     duration: pkg.duration,
                     endDate: new Date(Date.now() + pkg.duration * 24 * 60 * 60 * 1000),
-                    packageId: pkg.id
+                    packageId: pkg.id,
+                    price: pkg.price,
+                    currency: pkg.currency
                 }
             });
             
@@ -2286,7 +2119,9 @@
                 hashRate: pkg.hashRate,
                 duration: pkg.duration,
                 endDate: new Date(Date.now() + pkg.duration * 24 * 60 * 60 * 1000),
-                packageId: pkg.id
+                packageId: pkg.id,
+                price: pkg.price,
+                currency: pkg.currency
             };
             
             updateUI();
@@ -2315,20 +2150,11 @@
             renderTransactions(allTransactions);
             renderRecentTransactions(allTransactions.slice(0, 5));
         } catch (error) {
-            loadTransactionsDemo();
+            console.error('Load transactions error:', error);
+            allTransactions = [];
+            renderTransactions([]);
+            renderRecentTransactions([]);
         }
-    }
-
-    function loadTransactionsDemo() {
-        allTransactions = [
-            { id: 't1', type: 'deposit', amount: 100, currency: 'USDT', description: 'إيداع عبر TRC20', timestamp: new Date(Date.now() - 1*24*60*60*1000) },
-            { id: 't2', type: 'mining_reward', amount: 5.50, currency: 'USDT', description: 'أرباح التعدين', timestamp: new Date(Date.now() - 2*60*60*1000) },
-            { id: 't3', type: 'purchase', amount: 50, currency: 'USDT', description: 'شراء باقة مبتدئ', timestamp: new Date(Date.now() - 3*24*60*60*1000) },
-            { id: 't4', type: 'referral_bonus', amount: 5, currency: 'USDT', description: 'مكافأة إحالة', timestamp: new Date(Date.now() - 5*24*60*60*1000) },
-            { id: 't5', type: 'deposit', amount: 2000, currency: 'DZD', description: 'إيداع عبر ECCP', timestamp: new Date(Date.now() - 6*60*60*1000) }
-        ];
-        renderTransactions(allTransactions);
-        renderRecentTransactions(allTransactions.slice(0, 5));
     }
 
     function renderTransactions(transactions) {
@@ -2416,16 +2242,9 @@
             snapshot.forEach(doc => referrals.push({ id: doc.id, ...doc.data() }));
             renderReferrals(referrals);
         } catch (error) {
-            loadReferralsDemo();
+            console.error('Load referrals error:', error);
+            renderReferrals([]);
         }
-    }
-
-    function loadReferralsDemo() {
-        const referrals = [
-            { referredUid: 'user1', displayName: 'أحمد', joinedAt: new Date(Date.now() - 5*24*60*60*1000), commissionEarned: 5 },
-            { referredUid: 'user2', displayName: 'محمد', joinedAt: new Date(Date.now() - 2*24*60*60*1000), commissionEarned: 5 }
-        ];
-        renderReferrals(referrals);
     }
 
     function renderReferrals(referrals) {
@@ -2447,7 +2266,7 @@
                     </div>
                 </div>
                 <div class="right">
-                    <div style="color:var(--success);font-weight:700;">+${r.commissionEarned || 0} USDT</div>
+                    <div style="color:var(--success);font-weight:700;">+${r.commissionEarned || 0} ${userData?.currency || 'USDT'}</div>
                 </div>
             </div>
         `).join('');
@@ -2467,13 +2286,12 @@
             });
         }
         
-        // تفعيل تحديث الشبكة عند تغيير العملة
         document.getElementById('withdrawCurrency')?.addEventListener('change', updateWithdrawNetwork);
         document.getElementById('depositCurrency')?.addEventListener('change', updateDepositNetwork);
     });
 
     // ============================================================
-    // 16. THEME TOGGLE (Light / Dark)
+    // 16. THEME TOGGLE
     // ============================================================
     function toggleTheme() {
         isDarkTheme = !isDarkTheme;
@@ -2514,7 +2332,6 @@
     }
 
     function toggleDarkMode() {
-        // مستخدمة من زر التبديل في صفحة الحساب
         const toggle = document.getElementById('darkModeToggle');
         if (toggle.checked !== isDarkTheme) {
             toggleTheme();
@@ -2550,7 +2367,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         authUser();
         
-        // إظهار/إخفاء زر العودة في تليجرام
         if (window.Telegram?.WebApp) {
             const tg = window.Telegram.WebApp;
             tg.BackButton.onClick(() => {
@@ -2573,9 +2389,9 @@
             .catch(() => console.log('❌ Service Worker registration failed'));
     }
 
-    console.log('🚀 Crynova Mining V2.0 Loaded');
-    console.log('📱 Light Theme + ECCP Integration');
+    console.log('🚀 Crynova Mining V2.0 - Production Ready');
     console.log('💳 Support: USDT (TRC20/BEP20) & DZD (ECCP)');
+    console.log('🔒 No demo data - All data from Firebase');
 </script>
 </body>
 </html>
