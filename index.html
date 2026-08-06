@@ -625,42 +625,6 @@
             background: var(--bg-input);
         }
 
-        /* TOAST */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            width: 90%;
-            max-width: 420px;
-        }
-        .toast {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 16px 20px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            box-shadow: var(--shadow-lg);
-            animation: slideDown 0.4s ease;
-            border-right: 4px solid var(--accent);
-        }
-        .toast i { font-size: 22px; }
-        .toast.success { border-right-color: var(--success); }
-        .toast.success i { color: var(--success); }
-        .toast.error { border-right-color: var(--danger); }
-        .toast.error i { color: var(--danger); }
-        .toast.info { border-right-color: var(--info); }
-        .toast.info i { color: var(--info); }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
         /* LOADING */
         .loader {
             display: inline-block;
@@ -783,9 +747,6 @@
     </style>
 </head>
 <body>
-
-<!-- ===== TOAST ===== -->
-<div class="toast-container" id="toastContainer"></div>
 
 <!-- ===== APP ===== -->
 <div class="app-container">
@@ -1272,10 +1233,6 @@
                 </label>
             </div>
         </div>
-
-        <button class="btn btn-danger" onclick="logoutUser()">
-            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
-        </button>
     </div>
 
 </div>
@@ -1307,7 +1264,7 @@
 <!-- ===== JAVASCRIPT ===== -->
 <script>
     // ============================================================
-    // 1. FIREBASE CONFIG - تم تحديثها لمشروع crynova-4d6b3
+    // 1. FIREBASE CONFIG
     // ============================================================
     const firebaseConfig = {
         apiKey: "AIzaSyDCF0h_UPivX8oGoQL8Dn1s0lr79VAXpMY",
@@ -1336,7 +1293,7 @@
     let miningInterval = null;
 
     // ============================================================
-    // 3. TELEGRAM INTEGRATION - جلب بيانات المستخدم
+    // 3. TELEGRAM INTEGRATION
     // ============================================================
     function getTelegramUser() {
         if (window.Telegram && window.Telegram.WebApp) {
@@ -1359,35 +1316,31 @@
     }
 
     // ============================================================
-    // 4. AUTHENTICATION - تسجيل الدخول ببيانات Telegram
+    // 4. AUTHENTICATION
     // ============================================================
     async function authUser() {
         const tgUser = getTelegramUser();
         
         if (!tgUser) {
-            showToast('⚠️ يرجى فتح التطبيق من خلال Telegram', 'error');
+            console.error('يرجى فتح التطبيق من خلال Telegram');
             return false;
         }
 
         try {
-            // البحث عن المستخدم في قاعدة البيانات
             const usersRef = db.collection('users');
             const snapshot = await usersRef.where('telegramId', '==', tgUser.id.toString()).get();
             
             if (!snapshot.empty) {
-                // مستخدم موجود ✅
                 const doc = snapshot.docs[0];
                 currentUser = { uid: doc.id, ...doc.data() };
                 userData = currentUser;
                 
-                // تحديث آخر تسجيل دخول
                 await doc.ref.update({ 
                     lastLogin: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                showToast(`👋 مرحباً ${userData.displayName || 'مستخدم'}`, 'success');
+                console.log('👋 مرحباً ' + (userData.displayName || 'مستخدم'));
             } else {
-                // مستخدم جديد - إنشاء حساب 🆕
                 const displayName = tgUser.firstName + (tgUser.lastName ? ' ' + tgUser.lastName : '');
                 
                 const newUser = {
@@ -1399,17 +1352,15 @@
                     lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
                     level: 1,
                     status: 'active',
-                    referralCode: generateReferralCode(tgUser.id),
+                    referralCode: tgUser.id.toString(),
                     referredBy: null,
                     currency: 'USDT',
-                    // رصيد المحفظة
                     wallets: {
                         main: 0,
                         reward: 0,
                         referral: 0,
                         locked: 0
                     },
-                    // بيانات التعدين
                     miningData: {
                         currentPackage: null,
                         totalMined: 0,
@@ -1428,10 +1379,9 @@
                 currentUser = { uid: docRef.id, ...newUser };
                 userData = currentUser;
                 
-                showToast('✅ تم إنشاء حسابك بنجاح!', 'success');
+                console.log('✅ تم إنشاء حسابك بنجاح!');
             }
             
-            // تحديث الواجهة
             updateUI();
             loadPackages();
             loadTransactions();
@@ -1439,14 +1389,12 @@
             loadDeposits();
             loadWithdrawals();
             
-            // بدء محاكاة التعدين التلقائي
             startMiningSimulation();
             
             return true;
             
         } catch (error) {
             console.error('Auth error:', error);
-            showToast('❌ خطأ في المصادقة: ' + error.message, 'error');
             return false;
         }
     }
@@ -1454,15 +1402,6 @@
     // ============================================================
     // 5. HELPERS
     // ============================================================
-    function generateReferralCode(id) {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let code = '';
-        for (let i = 0; i < 6; i++) {
-            code += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return code + id.toString().slice(-4);
-    }
-
     function formatDate(timestamp) {
         if (!timestamp) return '--';
         const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -1535,12 +1474,11 @@
 
     function copyText(text) {
         if (!text || text === 'جاري التحميل...') {
-            showToast('لا يوجد رابط للنسخ', 'error');
             return;
         }
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text).then(() => {
-                showToast('✅ تم النسخ!', 'success');
+                console.log('تم النسخ');
             }).catch(() => fallbackCopy(text));
         } else {
             fallbackCopy(text);
@@ -1554,7 +1492,7 @@
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
-        showToast('✅ تم النسخ!', 'success');
+        console.log('تم النسخ');
     }
 
     function shareReferral() {
@@ -1569,8 +1507,6 @@
             } else {
                 copyText(link);
             }
-        } else {
-            showToast('جاري تحميل الرابط...', 'info');
         }
     }
 
@@ -1626,35 +1562,7 @@
     }
 
     // ============================================================
-    // 7. TOAST
-    // ============================================================
-    function showToast(message, type = 'info') {
-        const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        
-        const icons = {
-            success: 'fa-circle-check',
-            error: 'fa-circle-exclamation',
-            info: 'fa-circle-info'
-        };
-        
-        toast.innerHTML = `
-            <i class="fas ${icons[type] || icons.info}"></i>
-            <span style="flex:1;font-weight:600;">${message}</span>
-        `;
-        
-        container.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(-10px) scale(0.95)';
-            setTimeout(() => toast.remove(), 300);
-        }, 3500);
-    }
-
-    // ============================================================
-    // 8. NAVIGATION
+    // 7. NAVIGATION
     // ============================================================
     function navigateTo(page) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1680,7 +1588,7 @@
     }
 
     // ============================================================
-    // 9. UI UPDATES
+    // 8. UI UPDATES
     // ============================================================
     function updateUI() {
         if (!userData) return;
@@ -1690,7 +1598,6 @@
         const initial = name.charAt(0).toUpperCase() || '?';
         const currency = u.currency || 'USDT';
         
-        // تحديث الصورة الرمزية
         document.querySelectorAll('#profileAvatar, #headerAvatar').forEach(el => {
             if (u.photoURL && u.photoURL.startsWith('http')) {
                 el.style.backgroundImage = `url(${u.photoURL})`;
@@ -1708,16 +1615,13 @@
         document.getElementById('profileLevel').textContent = u.level || 1;
         document.getElementById('headerUserLevel').textContent = `المستوى ${u.level || 1}`;
         
-        // تحديث العملة
         document.querySelectorAll('#homeCurrency, #walletTotalCurrency, #miningDailyCurrency').forEach(el => {
             if (el) el.textContent = currency;
         });
         
-        // الرصيد الرئيسي
         const mainBalance = u.wallets?.main || 0;
         document.getElementById('homeBalance').textContent = mainBalance.toFixed(2);
         
-        // بيانات التعدين
         const miningData = u.miningData || {};
         document.getElementById('homeMined').textContent = (miningData.totalMined || 0).toFixed(2);
         document.getElementById('homeReferrals').textContent = miningData.totalReferrals || 0;
@@ -1735,10 +1639,13 @@
         document.getElementById('profileTelegramId').textContent = u.telegramId || '--';
         document.getElementById('profileJoinDate').textContent = formatDate(u.joinDate);
         
+        // رابط الإحالة تابع للبوت @Crynova_bot مع معرف Telegram
         const refLink = document.getElementById('referralLink');
-        if (u.referralCode) {
-            const url = `https://t.me/CrynovaBot?start=${u.referralCode}`;
+        if (u.telegramId) {
+            const url = `https://t.me/Crynova_bot?start=${u.telegramId}`;
             refLink.value = url;
+        } else {
+            refLink.value = 'جاري التحميل...';
         }
     }
 
@@ -1805,7 +1712,7 @@
     }
 
     // ============================================================
-    // 10. DEPOSIT
+    // 9. DEPOSIT
     // ============================================================
     function updateDepositNetwork() {
         const currency = document.getElementById('depositCurrency').value;
@@ -1823,7 +1730,7 @@
 
     function generateDeposit() {
         if (!userData) {
-            showToast('⚠️ يرجى تسجيل الدخول أولاً', 'error');
+            console.error('يرجى تسجيل الدخول أولاً');
             return;
         }
 
@@ -1831,7 +1738,7 @@
         const amount = parseFloat(document.getElementById('depositAmount').value);
         
         if (!amount || amount < 1) {
-            showToast('⚠️ يرجى إدخال مبلغ صحيح (أقل مبلغ 1)', 'error');
+            console.error('يرجى إدخال مبلغ صحيح (أقل مبلغ 1)');
             return;
         }
         
@@ -1841,7 +1748,7 @@
         if (currency === 'DZD') {
             eccpId = document.getElementById('depositEccpId').value.trim();
             if (!eccpId) {
-                showToast('⚠️ يرجى إدخال معرف ECCP الخاص بك', 'error');
+                console.error('يرجى إدخال معرف ECCP الخاص بك');
                 return;
             }
             address = `ECCP:${eccpId}`;
@@ -1875,12 +1782,12 @@
             `;
         }
         
-        showToast(`✅ تم إنشاء طلب إيداع ${amount} ${currency}`, 'success');
+        console.log(`تم إنشاء طلب إيداع ${amount} ${currency}`);
     }
 
     async function submitDepositProof() {
         if (!userData) {
-            showToast('⚠️ يرجى تسجيل الدخول أولاً', 'error');
+            console.error('يرجى تسجيل الدخول أولاً');
             return;
         }
 
@@ -1888,12 +1795,12 @@
         const file = fileInput.files[0];
         
         if (!file) {
-            showToast('⚠️ يرجى اختيار صورة إثبات الدفع', 'error');
+            console.error('يرجى اختيار صورة إثبات الدفع');
             return;
         }
         
         if (!depositData) {
-            showToast('⚠️ يرجى إنشاء طلب إيداع أولاً', 'error');
+            console.error('يرجى إنشاء طلب إيداع أولاً');
             return;
         }
         
@@ -1914,7 +1821,7 @@
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            showToast('✅ تم إرسال طلب الإيداع، في انتظار المراجعة', 'success');
+            console.log('تم إرسال طلب الإيداع، في انتظار المراجعة');
             
             document.getElementById('depositProof').value = '';
             document.getElementById('depositDetails').classList.add('hidden');
@@ -1923,7 +1830,6 @@
             
         } catch (error) {
             console.error('Deposit proof error:', error);
-            showToast('❌ حدث خطأ أثناء رفع الإثبات', 'error');
         }
     }
 
@@ -1966,7 +1872,7 @@
     }
 
     // ============================================================
-    // 11. WITHDRAW
+    // 10. WITHDRAW
     // ============================================================
     function updateWithdrawNetwork() {
         const currency = document.getElementById('withdrawCurrency').value;
@@ -1987,7 +1893,7 @@
 
     async function requestWithdraw() {
         if (!userData) {
-            showToast('⚠️ يرجى تسجيل الدخول أولاً', 'error');
+            console.error('يرجى تسجيل الدخول أولاً');
             return;
         }
         
@@ -1995,13 +1901,13 @@
         const amount = parseFloat(document.getElementById('withdrawAmount').value);
         
         if (!amount || amount < 10) {
-            showToast('⚠️ الحد الأدنى للسحب هو 10', 'error');
+            console.error('الحد الأدنى للسحب هو 10');
             return;
         }
         
         const withdrawable = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
         if (amount > withdrawable) {
-            showToast('⚠️ الرصيد غير كافٍ', 'error');
+            console.error('الرصيد غير كافٍ');
             return;
         }
         
@@ -2012,7 +1918,7 @@
         if (currency === 'DZD') {
             eccpId = document.getElementById('withdrawEccpId').value.trim();
             if (!eccpId) {
-                showToast('⚠️ يرجى إدخال معرف ECCP للمستلم', 'error');
+                console.error('يرجى إدخال معرف ECCP للمستلم');
                 return;
             }
             recipient = `ECCP:${eccpId}`;
@@ -2020,7 +1926,7 @@
         } else {
             recipient = document.getElementById('withdrawAddress').value.trim();
             if (!recipient) {
-                showToast('⚠️ يرجى إدخال عنوان المستلم', 'error');
+                console.error('يرجى إدخال عنوان المستلم');
                 return;
             }
             network = document.getElementById('withdrawNetwork').value;
@@ -2059,7 +1965,7 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            showToast('✅ تم طلب السحب بنجاح، في انتظار المراجعة', 'success');
+            console.log('تم طلب السحب بنجاح، في انتظار المراجعة');
             
             userData.wallets.main -= total;
             updateWalletUI();
@@ -2072,7 +1978,6 @@
             
         } catch (error) {
             console.error('Withdraw error:', error);
-            showToast('❌ حدث خطأ أثناء طلب السحب', 'error');
         }
     }
 
@@ -2115,7 +2020,7 @@
     }
 
     // ============================================================
-    // 12. PACKAGES
+    // 11. PACKAGES
     // ============================================================
     async function loadPackages() {
         try {
@@ -2166,23 +2071,23 @@
     }
 
     // ============================================================
-    // 13. PURCHASE
+    // 12. PURCHASE
     // ============================================================
     async function purchasePackage(packageId) {
         if (!userData) {
-            showToast('⚠️ يرجى تسجيل الدخول أولاً', 'error');
+            console.error('يرجى تسجيل الدخول أولاً');
             return;
         }
         
         const pkg = allPackages.find(p => p.id === packageId);
         if (!pkg) {
-            showToast('⚠️ الباقة غير موجودة', 'error');
+            console.error('الباقة غير موجودة');
             return;
         }
         
         const mainBalance = userData.wallets?.main || 0;
         if (mainBalance < pkg.price) {
-            showToast(`⚠️ الرصيد غير كافٍ. تحتاج ${pkg.price} ${pkg.currency}`, 'error');
+            console.error(`الرصيد غير كافٍ. تحتاج ${pkg.price} ${pkg.currency}`);
             return;
         }
         
@@ -2215,7 +2120,7 @@
                 packageId: pkg.id
             });
             
-            showToast(`✅ تم شراء باقة ${pkg.name} بنجاح!`, 'success');
+            console.log(`تم شراء باقة ${pkg.name} بنجاح!`);
             
             userData.wallets.main = mainBalance - pkg.price;
             userData.miningData.currentPackage = {
@@ -2233,12 +2138,11 @@
             
         } catch (error) {
             console.error('Purchase error:', error);
-            showToast('❌ حدث خطأ أثناء الشراء', 'error');
         }
     }
 
     // ============================================================
-    // 14. TRANSACTIONS
+    // 13. TRANSACTIONS
     // ============================================================
     async function loadTransactions() {
         if (!userData) return;
@@ -2334,7 +2238,7 @@
     }
 
     // ============================================================
-    // 15. REFERRALS
+    // 14. REFERRALS
     // ============================================================
     async function loadReferrals() {
         if (!userData) return;
@@ -2377,7 +2281,7 @@
     }
 
     // ============================================================
-    // 16. WITHDRAW CALCULATION
+    // 15. WITHDRAW CALCULATION
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         const amountInput = document.getElementById('withdrawAmount');
@@ -2395,7 +2299,7 @@
     });
 
     // ============================================================
-    // 17. THEME TOGGLE
+    // 16. THEME TOGGLE
     // ============================================================
     function toggleTheme() {
         isDarkTheme = !isDarkTheme;
@@ -2443,34 +2347,11 @@
     }
 
     function toggleLanguage() {
-        showToast('سيتم إضافة اللغة الإنجليزية قريباً 🌐', 'info');
+        console.log('سيتم إضافة اللغة الإنجليزية قريباً 🌐');
     }
 
     // ============================================================
-    // 18. LOGOUT
-    // ============================================================
-    function logoutUser() {
-        if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
-            if (miningInterval) {
-                clearInterval(miningInterval);
-                miningInterval = null;
-            }
-            auth.signOut().then(() => {
-                currentUser = null;
-                userData = null;
-                showToast('تم تسجيل الخروج', 'info');
-                location.reload();
-            }).catch(() => {
-                currentUser = null;
-                userData = null;
-                showToast('تم تسجيل الخروج', 'info');
-                location.reload();
-            });
-        }
-    }
-
-    // ============================================================
-    // 19. INIT
+    // 17. INIT
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         authUser();
@@ -2492,6 +2373,7 @@
     console.log('👤 يتم جلب بيانات المستخدم من Telegram');
     console.log('📝 الاسم: ' + (getTelegramUser()?.firstName || 'غير معروف'));
     console.log('🆔 المعرف: ' + (getTelegramUser()?.id || 'غير معروف'));
+    console.log('🔗 رابط الإحالة: https://t.me/Crynova_bot?start=' + (getTelegramUser()?.id || 'معرف_المستخدم'));
 </script>
 </body>
 </html>
