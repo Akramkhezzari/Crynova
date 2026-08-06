@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Crynova Mining V2</title>
     
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -121,6 +124,7 @@
         .app-header .header-actions {
             display: flex;
             gap: 8px;
+            align-items: center;
         }
         .app-header .header-actions button {
             width: 40px;
@@ -684,6 +688,38 @@
             font-weight: 700;
         }
 
+        /* USER INFO IN HEADER */
+        .user-mini {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .user-mini .avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .user-mini .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .user-mini .user-level {
+            font-size: 10px;
+            color: var(--text-secondary);
+            background: var(--bg-input);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 420px) {
             .app-container { padding: 12px; }
@@ -703,6 +739,8 @@
             .nav-item i { font-size: 18px; }
             .card { padding: 16px; }
             .btn { padding: 12px 18px; font-size: 14px; }
+            .user-mini .user-name { font-size: 11px; }
+            .user-mini .avatar-small { width: 28px; height: 28px; font-size: 12px; }
         }
 
         @media (min-width: 768px) {
@@ -742,149 +780,31 @@
             background: var(--border);
             margin: 16px 0;
         }
-
-        /* THEME TOGGLE */
-        .theme-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 20px;
-            color: var(--text-secondary);
-            transition: var(--transition);
-            padding: 4px;
-        }
-        .theme-toggle:hover {
-            color: var(--accent);
-            transform: rotate(30deg);
-        }
-
-        /* LOADING SCREEN */
-        #loadingScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--bg-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
-            padding: 20px;
-        }
-        #loadingScreen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        #loadingScreen .logo {
-            font-size: 48px;
-            font-weight: 900;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 20px;
-        }
-        #loadingScreen .loader {
-            width: 40px;
-            height: 40px;
-            border-width: 4px;
-        }
-        #loadingScreen .status-text {
-            margin-top: 16px;
-            color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 14px;
-        }
-        #loadingScreen .error-box {
-            margin-top: 20px;
-            padding: 16px 24px;
-            background: var(--danger-light);
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--danger);
-            max-width: 350px;
-            text-align: center;
-            display: none;
-        }
-        #loadingScreen .error-box .error-icon {
-            font-size: 32px;
-            color: var(--danger);
-            margin-bottom: 8px;
-        }
-        #loadingScreen .error-box .error-message {
-            color: var(--danger);
-            font-weight: 600;
-            font-size: 14px;
-        }
-        #loadingScreen .error-box .error-detail {
-            color: var(--text-secondary);
-            font-size: 13px;
-            margin-top: 4px;
-        }
-        #loadingScreen .retry-btn {
-            margin-top: 16px;
-            padding: 10px 32px;
-            background: var(--accent-gradient);
-            color: white;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: inherit;
-            transition: var(--transition);
-        }
-        #loadingScreen .retry-btn:hover {
-            transform: scale(1.05);
-            box-shadow: var(--shadow-glow);
-        }
-        #loadingScreen .telegram-info {
-            margin-top: 12px;
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-        #loadingScreen .telegram-info i {
-            margin-left: 4px;
-        }
     </style>
 </head>
 <body>
-
-<!-- ===== LOADING SCREEN ===== -->
-<div id="loadingScreen">
-    <div class="logo"><i class="fas fa-gem"></i> Crynova</div>
-    <div class="loader"></div>
-    <div class="status-text" id="loadingStatus">جاري الاتصال بـ Telegram...</div>
-    <div class="telegram-info">
-        <i class="fas fa-telegram"></i> يرجى فتح التطبيق من خلال بوت Telegram
-    </div>
-    <div class="error-box" id="errorBox">
-        <div class="error-icon"><i class="fas fa-circle-exclamation"></i></div>
-        <div class="error-message" id="errorMessage">حدث خطأ في الاتصال</div>
-        <div class="error-detail" id="errorDetail">يرجى المحاولة مرة أخرى</div>
-        <button class="retry-btn" onclick="location.reload()">
-            <i class="fas fa-rotate"></i> إعادة المحاولة
-        </button>
-    </div>
-</div>
 
 <!-- ===== TOAST ===== -->
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- ===== APP ===== -->
-<div class="app-container" style="display:none;" id="appContent">
+<div class="app-container">
 
     <!-- ===== HEADER ===== -->
     <header class="app-header">
         <div class="logo">
             <i class="fas fa-gem"></i>
-            Crynova
+            Crynova Mining
         </div>
         <div class="header-actions">
-            <button onclick="navigateTo('transactions')">
-                <i class="fas fa-clock-rotate-left"></i>
-            </button>
+            <!-- مستخدم مصغر -->
+            <div class="user-mini" onclick="navigateTo('profile')">
+                <div class="avatar-small" id="headerAvatar">?</div>
+                <div>
+                    <div class="user-name" id="headerUserName">مستخدم</div>
+                    <div class="user-level" id="headerUserLevel">المستوى 1</div>
+                </div>
+            </div>
             <button onclick="toggleTheme()" class="theme-toggle" id="themeToggle">
                 <i class="fas fa-moon"></i>
             </button>
@@ -1361,7 +1281,7 @@
 </div>
 
 <!-- ===== BOTTOM NAVIGATION ===== -->
-<nav class="bottom-nav" id="bottomNav" style="display:none;">
+<nav class="bottom-nav" id="bottomNav">
     <button class="nav-item active" data-page="home" onclick="navigateTo('home')">
         <i class="fas fa-house"></i>
         <span>الرئيسية</span>
@@ -1390,14 +1310,12 @@
     // 1. FIREBASE CONFIG
     // ============================================================
     const firebaseConfig = {
-        apiKey: "AIzaSyDCF0h_UPivX8oGoQL8Dn1s0lr79VAXpMY",
-        authDomain: "crynova-4d6b3.firebaseapp.com",
-        databaseURL: "https://crynova-4d6b3-default-rtdb.firebaseio.com",
-        projectId: "crynova-4d6b3",
-        storageBucket: "crynova-4d6b3.firebasestorage.app",
-        messagingSenderId: "858898515024",
-        appId: "1:858898515024:web:03827d57c2737bbc27bd55",
-        measurementId: "G-0NMZ50CL77"
+        apiKey: "AIzaSyBX8v0qIVjG-Z46fVDeEUDKcPxa_FQF9Qc",
+        authDomain: "bnak-belaiba.firebaseapp.com",
+        projectId: "bnak-belaiba",
+        storageBucket: "bnak-belaiba.firebasestorage.app",
+        messagingSenderId: "286736432059",
+        appId: "1:286736432059:web:ec1ed4292850f00008229e"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -1415,112 +1333,68 @@
     let currentFilter = 'all';
     let depositData = null;
     let isDarkTheme = false;
-    let loginAttempts = 0;
+    let miningInterval = null;
 
     // ============================================================
-    // 3. TELEGRAM INTEGRATION
+    // 3. TELEGRAM INTEGRATION - جلب بيانات المستخدم
     // ============================================================
     function getTelegramUser() {
-        try {
-            // محاولة جلب البيانات من Telegram WebApp
-            if (window.Telegram && window.Telegram.WebApp) {
-                const tg = window.Telegram.WebApp;
-                tg.expand();
-                tg.enableClosingConfirmation();
-                
-                const initData = tg.initDataUnsafe;
-                if (initData && initData.user) {
-                    const user = initData.user;
-                    console.log('✅ Telegram user data loaded:', user);
-                    return {
-                        id: user.id,
-                        username: user.username || `user_${user.id}`,
-                        firstName: user.first_name || '',
-                        lastName: user.last_name || '',
-                        photoUrl: user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name || 'U'}&background=6c5ce7&color=fff&size=128`,
-                        languageCode: user.language_code || 'ar',
-                        isPremium: user.is_premium || false
-                    };
-                }
-            }
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.expand();
+            tg.enableClosingConfirmation();
             
-            // محاولة جلب من initData كـ string
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
-                const params = new URLSearchParams(window.Telegram.WebApp.initData);
-                const userJson = params.get('user');
-                if (userJson) {
-                    try {
-                        const user = JSON.parse(decodeURIComponent(userJson));
-                        console.log('✅ Telegram user data from initData:', user);
-                        return {
-                            id: user.id,
-                            username: user.username || `user_${user.id}`,
-                            firstName: user.first_name || '',
-                            lastName: user.last_name || '',
-                            photoUrl: user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name || 'U'}&background=6c5ce7&color=fff&size=128`,
-                            languageCode: user.language_code || 'ar',
-                            isPremium: user.is_premium || false
-                        };
-                    } catch (e) {
-                        console.warn('Failed to parse user JSON:', e);
-                    }
-                }
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                return {
+                    id: user.id,
+                    username: user.username || '',
+                    firstName: user.first_name || '',
+                    lastName: user.last_name || '',
+                    photoUrl: user.photo_url || ''
+                };
             }
-            
-            return null;
-        } catch (error) {
-            console.error('Error getting Telegram user:', error);
-            return null;
         }
+        return null;
     }
 
     // ============================================================
-    // 4. AUTHENTICATION - تلقائي عبر Telegram فقط
+    // 4. AUTHENTICATION - تسجيل الدخول ببيانات Telegram
     // ============================================================
     async function authUser() {
-        const statusEl = document.getElementById('loadingStatus');
-        const errorBox = document.getElementById('errorBox');
-        
-        statusEl.textContent = 'جاري الاتصال بـ Telegram...';
-        
-        // محاولة جلب بيانات Telegram
         const tgUser = getTelegramUser();
         
         if (!tgUser) {
-            // لا توجد بيانات من Telegram
-            statusEl.textContent = '⚠️ لم يتم العثور على بيانات Telegram';
-            errorBox.style.display = 'block';
-            document.getElementById('errorMessage').textContent = '⚠️ يرجى فتح التطبيق من خلال بوت Telegram';
-            document.getElementById('errorDetail').textContent = 'التطبيق يعمل فقط داخل Telegram WebApp';
+            showToast('⚠️ يرجى فتح التطبيق من خلال Telegram', 'error');
             return false;
         }
 
-        statusEl.textContent = '✅ تم جلب بيانات Telegram بنجاح';
-        statusEl.textContent = 'جاري الاتصال بقاعدة البيانات...';
-        
         try {
+            // البحث عن المستخدم في قاعدة البيانات
             const usersRef = db.collection('users');
             const snapshot = await usersRef.where('telegramId', '==', tgUser.id.toString()).get();
             
             if (!snapshot.empty) {
+                // مستخدم موجود ✅
                 const doc = snapshot.docs[0];
                 currentUser = { uid: doc.id, ...doc.data() };
                 userData = currentUser;
+                
+                // تحديث آخر تسجيل دخول
                 await doc.ref.update({ 
-                    lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-                    username: tgUser.username,
-                    displayName: tgUser.firstName + (tgUser.lastName ? ' ' + tgUser.lastName : ''),
-                    photoURL: tgUser.photoUrl
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                statusEl.textContent = '✅ مرحباً ' + userData.displayName;
-                showToast('✅ مرحباً بعودتك ' + userData.displayName, 'success');
+                
+                showToast(`👋 مرحباً ${userData.displayName || 'مستخدم'}`, 'success');
             } else {
-                statusEl.textContent = 'جاري إنشاء حساب جديد...';
+                // مستخدم جديد - إنشاء حساب 🆕
+                const displayName = tgUser.firstName + (tgUser.lastName ? ' ' + tgUser.lastName : '');
+                
                 const newUser = {
                     telegramId: tgUser.id.toString(),
                     username: tgUser.username,
-                    displayName: tgUser.firstName + (tgUser.lastName ? ' ' + tgUser.lastName : ''),
-                    photoURL: tgUser.photoUrl,
+                    displayName: displayName || 'مستخدم',
+                    photoURL: tgUser.photoUrl || `https://ui-avatars.com/api/?name=${displayName || 'U'}&background=6c5ce7&color=fff&size=128`,
                     joinDate: firebase.firestore.FieldValue.serverTimestamp(),
                     lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
                     level: 1,
@@ -1528,50 +1402,51 @@
                     referralCode: generateReferralCode(tgUser.id),
                     referredBy: null,
                     currency: 'USDT',
+                    // رصيد المحفظة
                     wallets: {
                         main: 0,
                         reward: 0,
                         referral: 0,
                         locked: 0
                     },
-                    currentPackage: null,
-                    totalMined: 0,
-                    totalReferrals: 0,
-                    miningHistory: {
-                        today: 0,
-                        thisWeek: 0,
-                        thisMonth: 0
+                    // بيانات التعدين
+                    miningData: {
+                        currentPackage: null,
+                        totalMined: 0,
+                        totalReferrals: 0,
+                        miningHistory: {
+                            today: 0,
+                            thisWeek: 0,
+                            thisMonth: 0
+                        },
+                        lastMiningUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                        activeSince: firebase.firestore.FieldValue.serverTimestamp()
                     }
                 };
                 
                 const docRef = await db.collection('users').add(newUser);
                 currentUser = { uid: docRef.id, ...newUser };
                 userData = currentUser;
-                statusEl.textContent = '✅ تم إنشاء حسابك بنجاح';
-                showToast('🎉 أهلاً بك في Crynova Mining!', 'success');
+                
+                showToast('✅ تم إنشاء حسابك بنجاح!', 'success');
             }
             
-            // إخفاء شاشة التحميل وإظهار المحتوى
-            setTimeout(() => {
-                document.getElementById('loadingScreen').classList.add('hidden');
-                document.getElementById('appContent').style.display = 'block';
-                document.getElementById('bottomNav').style.display = 'flex';
-            }, 500);
-            
+            // تحديث الواجهة
             updateUI();
             loadPackages();
             loadTransactions();
             loadReferrals();
             loadDeposits();
             loadWithdrawals();
+            
+            // بدء محاكاة التعدين التلقائي
+            startMiningSimulation();
+            
             return true;
             
         } catch (error) {
             console.error('Auth error:', error);
-            statusEl.textContent = '❌ خطأ: ' + error.message;
-            errorBox.style.display = 'block';
-            document.getElementById('errorMessage').textContent = '❌ حدث خطأ في الاتصال';
-            document.getElementById('errorDetail').textContent = error.message || 'يرجى المحاولة مرة أخرى';
+            showToast('❌ خطأ في المصادقة: ' + error.message, 'error');
             return false;
         }
     }
@@ -1700,7 +1575,58 @@
     }
 
     // ============================================================
-    // 6. TOAST
+    // 6. MINING SIMULATION
+    // ============================================================
+    function startMiningSimulation() {
+        if (miningInterval) {
+            clearInterval(miningInterval);
+        }
+        
+        miningInterval = setInterval(async () => {
+            if (!userData || !userData.miningData) return;
+            
+            const pkg = userData.miningData.currentPackage;
+            if (!pkg) return;
+            
+            const now = new Date();
+            const end = pkg.endDate?.toDate ? pkg.endDate.toDate() : new Date(pkg.endDate);
+            if (now > end) {
+                document.getElementById('miningStatus').textContent = 'منتهي';
+                document.getElementById('miningStatus').className = 'status status-danger';
+                return;
+            }
+            
+            const hashRate = pkg.hashRate || 0;
+            const reward = hashRate * 0.001;
+            
+            if (reward > 0) {
+                try {
+                    const userRef = db.collection('users').doc(userData.uid);
+                    await userRef.update({
+                        'wallets.reward': firebase.firestore.FieldValue.increment(reward),
+                        'miningData.totalMined': firebase.firestore.FieldValue.increment(reward),
+                        'miningData.miningHistory.today': firebase.firestore.FieldValue.increment(reward),
+                        'miningData.miningHistory.thisWeek': firebase.firestore.FieldValue.increment(reward),
+                        'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(reward)
+                    });
+                    
+                    if (!userData.wallets) userData.wallets = { main: 0, reward: 0, referral: 0, locked: 0 };
+                    userData.wallets.reward = (userData.wallets.reward || 0) + reward;
+                    userData.miningData.totalMined = (userData.miningData.totalMined || 0) + reward;
+                    userData.miningData.miningHistory.today = (userData.miningData.miningHistory.today || 0) + reward;
+                    userData.miningData.miningHistory.thisWeek = (userData.miningData.miningHistory.thisWeek || 0) + reward;
+                    userData.miningData.miningHistory.thisMonth = (userData.miningData.miningHistory.thisMonth || 0) + reward;
+                    
+                    updateUI();
+                } catch (error) {
+                    console.error('Mining error:', error);
+                }
+            }
+        }, 30000);
+    }
+
+    // ============================================================
+    // 7. TOAST
     // ============================================================
     function showToast(message, type = 'info') {
         const container = document.getElementById('toastContainer');
@@ -1728,7 +1654,7 @@
     }
 
     // ============================================================
-    // 7. NAVIGATION
+    // 8. NAVIGATION
     // ============================================================
     function navigateTo(page) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1754,7 +1680,7 @@
     }
 
     // ============================================================
-    // 8. UI UPDATES
+    // 9. UI UPDATES
     // ============================================================
     function updateUI() {
         if (!userData) return;
@@ -1764,31 +1690,39 @@
         const initial = name.charAt(0).toUpperCase() || '?';
         const currency = u.currency || 'USDT';
         
-        const avatarEl = document.getElementById('profileAvatar');
-        if (u.photoURL && u.photoURL.startsWith('http')) {
-            avatarEl.style.backgroundImage = `url(${u.photoURL})`;
-            avatarEl.style.backgroundSize = 'cover';
-            avatarEl.textContent = '';
-        } else {
-            avatarEl.textContent = initial;
-            avatarEl.style.backgroundImage = '';
-        }
+        // تحديث الصورة الرمزية
+        document.querySelectorAll('#profileAvatar, #headerAvatar').forEach(el => {
+            if (u.photoURL && u.photoURL.startsWith('http')) {
+                el.style.backgroundImage = `url(${u.photoURL})`;
+                el.style.backgroundSize = 'cover';
+                el.textContent = '';
+            } else {
+                el.textContent = initial;
+                el.style.backgroundImage = '';
+            }
+        });
         
         document.getElementById('profileName').textContent = name;
+        document.getElementById('headerUserName').textContent = name;
         document.getElementById('userLevelBadge').textContent = u.level || 1;
         document.getElementById('profileLevel').textContent = u.level || 1;
+        document.getElementById('headerUserLevel').textContent = `المستوى ${u.level || 1}`;
         
+        // تحديث العملة
         document.querySelectorAll('#homeCurrency, #walletTotalCurrency, #miningDailyCurrency').forEach(el => {
             if (el) el.textContent = currency;
         });
         
+        // الرصيد الرئيسي
         const mainBalance = u.wallets?.main || 0;
         document.getElementById('homeBalance').textContent = mainBalance.toFixed(2);
         
-        document.getElementById('homeMined').textContent = (u.totalMined || 0).toFixed(2);
-        document.getElementById('homeReferrals').textContent = u.totalReferrals || 0;
+        // بيانات التعدين
+        const miningData = u.miningData || {};
+        document.getElementById('homeMined').textContent = (miningData.totalMined || 0).toFixed(2);
+        document.getElementById('homeReferrals').textContent = miningData.totalReferrals || 0;
         
-        const pkg = u.currentPackage;
+        const pkg = miningData.currentPackage;
         if (pkg && pkg.name) {
             document.getElementById('homePackage').textContent = pkg.name;
         } else {
@@ -1809,7 +1743,7 @@
     }
 
     function updateMiningStatus() {
-        const pkg = userData?.currentPackage;
+        const pkg = userData?.miningData?.currentPackage;
         const statusEl = document.getElementById('miningStatus');
         const hashRateEl = document.getElementById('miningHashRate');
         const endsEl = document.getElementById('miningEnds');
@@ -1854,24 +1788,24 @@
     }
 
     function updateMiningUI() {
-        const pkg = userData?.currentPackage;
+        const pkg = userData?.miningData?.currentPackage;
         const hashRate = pkg?.hashRate || 0;
         document.getElementById('miningDetailHashRate').textContent = hashRate.toFixed(2);
-        const dailyEarnings = hashRate * 0.5;
+        const dailyEarnings = hashRate * 1.44;
         document.getElementById('miningDailyEarnings').textContent = dailyEarnings.toFixed(2);
-        document.getElementById('miningTotalMined').textContent = (userData?.totalMined || 0).toFixed(2);
-        document.getElementById('miningToday').textContent = (userData?.miningHistory?.today || 0).toFixed(2);
-        document.getElementById('miningThisWeek').textContent = (userData?.miningHistory?.thisWeek || 0).toFixed(2);
-        document.getElementById('miningThisMonth').textContent = (userData?.miningHistory?.thisMonth || 0).toFixed(2);
+        document.getElementById('miningTotalMined').textContent = (userData?.miningData?.totalMined || 0).toFixed(2);
+        document.getElementById('miningToday').textContent = (userData?.miningData?.miningHistory?.today || 0).toFixed(2);
+        document.getElementById('miningThisWeek').textContent = (userData?.miningData?.miningHistory?.thisWeek || 0).toFixed(2);
+        document.getElementById('miningThisMonth').textContent = (userData?.miningData?.miningHistory?.thisMonth || 0).toFixed(2);
     }
 
     function updateReferralUI() {
-        document.getElementById('refCount').textContent = userData?.totalReferrals || 0;
+        document.getElementById('refCount').textContent = userData?.miningData?.totalReferrals || 0;
         document.getElementById('refEarnings').textContent = (userData?.wallets?.referral || 0).toFixed(2);
     }
 
     // ============================================================
-    // 9. DEPOSIT
+    // 10. DEPOSIT
     // ============================================================
     function updateDepositNetwork() {
         const currency = document.getElementById('depositCurrency').value;
@@ -2032,7 +1966,7 @@
     }
 
     // ============================================================
-    // 10. WITHDRAW
+    // 11. WITHDRAW
     // ============================================================
     function updateWithdrawNetwork() {
         const currency = document.getElementById('withdrawCurrency').value;
@@ -2181,7 +2115,7 @@
     }
 
     // ============================================================
-    // 11. PACKAGES
+    // 12. PACKAGES
     // ============================================================
     async function loadPackages() {
         try {
@@ -2195,12 +2129,6 @@
             renderPackages();
         } catch (error) {
             console.error('Load packages error:', error);
-            // عرض باقات افتراضية في حالة عدم الاتصال
-            allPackages = [
-                { id: 'p1', name: 'مبتدئ', price: 50, currency: 'USDT', duration: 30, hashRate: 10, icon: '🚀', description: 'باقة مثالية للبدء', features: ['قوة تعدين 10 H/s', 'مدة 30 يوم', 'أرباح يومية'] },
-                { id: 'p2', name: 'متقدم', price: 150, currency: 'USDT', duration: 60, hashRate: 35, icon: '⚡', description: 'للمعدنين المحترفين', features: ['قوة تعدين 35 H/s', 'مدة 60 يوم', 'أرباح مضاعفة'] },
-                { id: 'p3', name: 'احترافي', price: 500, currency: 'USDT', duration: 90, hashRate: 100, icon: '🔥', description: 'أقصى قوة تعدين', features: ['قوة تعدين 100 H/s', 'مدة 90 يوم', 'أرباح عالية'] }
-            ];
             renderPackages();
         }
     }
@@ -2238,7 +2166,7 @@
     }
 
     // ============================================================
-    // 12. PURCHASE
+    // 13. PURCHASE
     // ============================================================
     async function purchasePackage(packageId) {
         if (!userData) {
@@ -2262,9 +2190,10 @@
         
         try {
             const userRef = db.collection('users').doc(userData.uid);
+            
             await userRef.update({
                 'wallets.main': firebase.firestore.FieldValue.increment(-pkg.price),
-                currentPackage: {
+                'miningData.currentPackage': {
                     name: pkg.name,
                     hashRate: pkg.hashRate,
                     duration: pkg.duration,
@@ -2289,7 +2218,7 @@
             showToast(`✅ تم شراء باقة ${pkg.name} بنجاح!`, 'success');
             
             userData.wallets.main = mainBalance - pkg.price;
-            userData.currentPackage = {
+            userData.miningData.currentPackage = {
                 name: pkg.name,
                 hashRate: pkg.hashRate,
                 duration: pkg.duration,
@@ -2309,7 +2238,7 @@
     }
 
     // ============================================================
-    // 13. TRANSACTIONS
+    // 14. TRANSACTIONS
     // ============================================================
     async function loadTransactions() {
         if (!userData) return;
@@ -2405,7 +2334,7 @@
     }
 
     // ============================================================
-    // 14. REFERRALS
+    // 15. REFERRALS
     // ============================================================
     async function loadReferrals() {
         if (!userData) return;
@@ -2448,7 +2377,7 @@
     }
 
     // ============================================================
-    // 15. WITHDRAW CALCULATION
+    // 16. WITHDRAW CALCULATION
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         const amountInput = document.getElementById('withdrawAmount');
@@ -2466,7 +2395,7 @@
     });
 
     // ============================================================
-    // 16. THEME TOGGLE
+    // 17. THEME TOGGLE
     // ============================================================
     function toggleTheme() {
         isDarkTheme = !isDarkTheme;
@@ -2518,43 +2447,34 @@
     }
 
     // ============================================================
-    // 17. LOGOUT
+    // 18. LOGOUT
     // ============================================================
     function logoutUser() {
         if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
-            currentUser = null;
-            userData = null;
-            showToast('تم تسجيل الخروج', 'info');
-            location.reload();
+            if (miningInterval) {
+                clearInterval(miningInterval);
+                miningInterval = null;
+            }
+            auth.signOut().then(() => {
+                currentUser = null;
+                userData = null;
+                showToast('تم تسجيل الخروج', 'info');
+                location.reload();
+            }).catch(() => {
+                currentUser = null;
+                userData = null;
+                showToast('تم تسجيل الخروج', 'info');
+                location.reload();
+            });
         }
     }
 
     // ============================================================
-    // 18. INIT
+    // 19. INIT
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 Crynova Mining V2 - Starting...');
-        console.log('📱 Checking Telegram WebApp...');
-        
-        // التحقق من وجود Telegram WebApp
-        if (window.Telegram && window.Telegram.WebApp) {
-            console.log('✅ Telegram WebApp detected');
-            const tg = window.Telegram.WebApp;
-            console.log('📊 WebApp version:', tg.version);
-            console.log('👤 User data available:', !!tg.initDataUnsafe?.user);
-        } else {
-            console.warn('⚠️ Telegram WebApp not detected');
-            document.getElementById('loadingStatus').textContent = '⚠️ يرجى فتح التطبيق من خلال Telegram';
-            document.getElementById('errorBox').style.display = 'block';
-            document.getElementById('errorMessage').textContent = '⚠️ يرجى فتح التطبيق من خلال بوت Telegram';
-            document.getElementById('errorDetail').textContent = 'التطبيق يعمل فقط داخل Telegram WebApp';
-            return;
-        }
-        
-        // بدء المصادقة
         authUser();
         
-        // إعداد زر العودة في Telegram
         if (window.Telegram?.WebApp) {
             const tg = window.Telegram.WebApp;
             tg.BackButton.onClick(() => {
@@ -2568,19 +2488,10 @@
         }
     });
 
-    // ============================================================
-    // 19. SERVICE WORKER (PWA)
-    // ============================================================
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-            .then(() => console.log('✅ Service Worker registered'))
-            .catch(() => console.log('❌ Service Worker registration failed'));
-    }
-
-    console.log('🚀 Crynova Mining V2.0 - Production Ready');
-    console.log('📱 Connected to Firebase project: crynova-4d6b3');
-    console.log('💳 Support: USDT (TRC20/BEP20) & DZD (ECCP)');
-    console.log('🔑 Login: Automatic via Telegram only');
+    console.log('🚀 Crynova Mining V2.0');
+    console.log('👤 يتم جلب بيانات المستخدم من Telegram');
+    console.log('📝 الاسم: ' + (getTelegramUser()?.firstName || 'غير معروف'));
+    console.log('🆔 المعرف: ' + (getTelegramUser()?.id || 'غير معروف'));
 </script>
 </body>
 </html>
