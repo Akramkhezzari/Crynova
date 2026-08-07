@@ -4,14 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crynova Mining</title>
-    
-    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- Firebase SDK (يتم تحميله أولاً) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
     <style>
         body { font-family: Arial; padding: 20px; direction: rtl; background: #f0f4f8; }
         .container { max-width: 480px; margin: 0 auto; }
@@ -20,7 +15,6 @@
         .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 8px; }
         .btn-primary { background: #6c5ce7; color: white; }
         .btn-success { background: #00b894; color: white; }
-        .btn-danger { background: #e17055; color: white; }
         input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         .flex { display: flex; gap: 10px; }
         .flex-1 { flex: 1; }
@@ -31,6 +25,10 @@
         .mt-8 { margin-top: 8px; }
         .mb-8 { margin-bottom: 8px; }
         .hidden { display: none; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1a1a2e; color: white; padding: 12px 24px; border-radius: 12px; font-weight: 600; z-index: 2000; animation: slideDown 0.3s ease; }
+        .toast.success { background: #00b894; }
+        .toast.error { background: #e17055; }
+        @keyframes slideDown { from { opacity: 0; transform: translate(-50%, -20px); } to { opacity: 1; transform: translate(-50%, 0); } }
     </style>
 </head>
 <body>
@@ -41,7 +39,6 @@
     <div class="card gradient text-center">
         <h1 style="margin:0;">💎 Crynova Mining</h1>
         <div id="userInfo" style="margin-top:8px;">👤 جاري التحميل...</div>
-        <div id="referralCodeDisplay" style="font-size:12px;opacity:0.8;margin-top:4px;"></div>
     </div>
 
     <!-- الإحالات -->
@@ -69,13 +66,6 @@
         </div>
     </div>
 
-    <!-- اختبار يدوي -->
-    <div class="card">
-        <h3 style="margin:0 0 8px 0;">🧪 اختبار الإحالة</h3>
-        <input type="number" id="testReferralCode" placeholder="أدخل كود الإحالة (رقم)" style="background:#f5f5f5;">
-        <button class="btn btn-primary mt-8" onclick="testReferral()">🔗 تسجيل الإحالة يدوياً</button>
-    </div>
-
     <!-- Debug -->
     <div id="debug">⏳ جاري التهيئة...</div>
 
@@ -94,7 +84,6 @@
         appId: "1:858898515024:web:03827d57c2737bbc27bd55"
     };
     
-    // تهيئة Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     
@@ -159,7 +148,7 @@
         // 1. تسجيل المستخدم
         await registerUser();
         
-        // 2. معالجة الإحالة من الرابط
+        // 2. ⭐ معالجة الإحالة من الرابط (الجزء المهم)
         await processReferralFromURL();
         
         // 3. جلب البيانات من Firebase
@@ -195,49 +184,55 @@
     }
 
     // ============================================================
-    // 7. معالجة الإحالة من الرابط
+    // 7. ⭐ معالجة الإحالة من الرابط (الجزء المهم)
     // ============================================================
     async function processReferralFromURL() {
+        // قراءة كود الإحالة من الرابط
         const urlParams = new URLSearchParams(window.location.search);
         const referralCode = urlParams.get('start');
         
         debug('🔍 كود الإحالة من الرابط: ' + (referralCode || 'لا يوجد'));
         
-        if (!referralCode) {
-            debug('ℹ️ لا يوجد كود إحالة');
-            return;
-        }
-        
-        if (referralCode === tgUser.id.toString()) {
-            debug('⚠️ هذا هو كودك الخاص');
-            return;
-        }
-        
-        debug(`🔗 محاولة تسجيل الإحالة: ${tgUser.id} ← ${referralCode}`);
-        
-        try {
-            const response = await fetch(`${API_URL}/api/referral`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    telegramId: tgUser.id.toString(),
-                    referralCode: referralCode
-                })
-            });
+        // إذا كان هناك كود إحالة في الرابط
+        if (referralCode) {
+            debug(`🔗 تم العثور على كود: ${referralCode}`);
             
-            const data = await response.json();
-            debug('📨 رد الخادم: ' + JSON.stringify(data));
-            
-            if (data.success) {
-                debug('✅ تم تسجيل الإحالة بنجاح!');
-                alert('🎉 تم تسجيل الإحالة بنجاح!');
-            } else {
-                debug('⚠️ فشل: ' + data.message);
-                alert('⚠️ ' + data.message);
+            // التحقق من أن المستخدم ليس هو صاحب الكود
+            if (referralCode === tgUser.id.toString()) {
+                debug('⚠️ هذا هو كودك الخاص، لن يتم التسجيل');
+                showToast('⚠️ هذا هو رابطك الخاص', 'error');
+                return;
             }
-        } catch (error) {
-            debug('❌ خطأ في الاتصال: ' + error.message);
-            alert('❌ خطأ في الاتصال بالخادم');
+            
+            // محاولة تسجيل الإحالة
+            debug(`🔗 محاولة تسجيل الإحالة: ${tgUser.id} ← ${referralCode}`);
+            
+            try {
+                const response = await fetch(`${API_URL}/api/referral`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        telegramId: tgUser.id.toString(),
+                        referralCode: referralCode
+                    })
+                });
+                
+                const data = await response.json();
+                debug('📨 رد الخادم: ' + JSON.stringify(data));
+                
+                if (data.success) {
+                    debug('✅ تم تسجيل الإحالة بنجاح!');
+                    showToast('🎉 تم تسجيل الإحالة بنجاح!', 'success');
+                } else {
+                    debug('⚠️ فشل تسجيل الإحالة: ' + data.message);
+                    showToast('⚠️ ' + data.message, 'error');
+                }
+            } catch (error) {
+                debug('❌ خطأ في الاتصال بالخادم: ' + error.message);
+                showToast('❌ خطأ في الاتصال بالخادم', 'error');
+            }
+        } else {
+            debug('ℹ️ لا يوجد كود إحالة في الرابط');
         }
     }
 
@@ -277,58 +272,16 @@
     function updateReferralLink() {
         const link = `${BOT_URL}?start=${tgUser.id}`;
         document.getElementById('referralLink').value = link;
-        document.getElementById('referralCodeDisplay').textContent = `🔗 كودك: ${tgUser.id}`;
     }
 
     // ============================================================
-    // 10. اختبار يدوي
-    // ============================================================
-    async function testReferral() {
-        const code = document.getElementById('testReferralCode').value.trim();
-        if (!code) {
-            alert('⚠️ يرجى إدخال كود الإحالة');
-            return;
-        }
-        if (code === tgUser.id.toString()) {
-            alert('⚠️ لا يمكنك استخدام كودك الخاص');
-            return;
-        }
-        
-        debug(`🧪 اختبار يدوي: ${tgUser.id} ← ${code}`);
-        
-        try {
-            const response = await fetch(`${API_URL}/api/referral`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    telegramId: tgUser.id.toString(),
-                    referralCode: code
-                })
-            });
-            
-            const data = await response.json();
-            debug('📨 نتيجة الاختبار: ' + JSON.stringify(data));
-            
-            if (data.success) {
-                alert('🎉 تم تسجيل الإحالة بنجاح!');
-                setTimeout(() => location.reload(), 1000);
-            } else {
-                alert('⚠️ ' + data.message);
-            }
-        } catch (error) {
-            debug('❌ خطأ: ' + error.message);
-            alert('❌ خطأ في الاتصال بالخادم');
-        }
-    }
-
-    // ============================================================
-    // 11. مساعدة
+    // 10. مساعدة
     // ============================================================
     function copyLink() {
         const link = document.getElementById('referralLink').value;
         if (navigator.clipboard) {
             navigator.clipboard.writeText(link);
-            alert('📋 تم نسخ الرابط!');
+            showToast('📋 تم نسخ الرابط!', 'success');
         } else {
             alert('📋 ' + link);
         }
@@ -341,6 +294,16 @@
         } else {
             copyLink();
         }
+    }
+
+    function showToast(message, type = '') {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     }
 
     console.log('✅ Crynova Mining جاهز!');
