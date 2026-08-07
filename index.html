@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crynova Mining</title>
+    
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Firebase SDK (مهم جداً!) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <style>
         body { font-family: Arial; padding: 20px; direction: rtl; }
         .card { background: #f5f5f5; padding: 20px; border-radius: 12px; margin-bottom: 16px; }
@@ -17,32 +24,39 @@
         .status { padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; }
         .success { background: #00b89422; color: #00b894; }
         .error { background: #e1705522; color: #e17055; }
+        .gradient { background: linear-gradient(135deg,#6c5ce7,#a29bfe); color: white; }
+        .flex { display: flex; gap: 10px; }
+        .flex-1 { flex: 1; }
+        .text-center { text-align: center; }
     </style>
 </head>
 <body>
 
 <div style="max-width:480px;margin:0 auto;">
 
-    <div class="card" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:white;text-align:center;">
+    <!-- HEADER -->
+    <div class="card gradient text-center">
         <h1>💎 Crynova Mining</h1>
         <div id="userInfo">👤 جاري التحميل...</div>
         <div id="referralCodeDisplay" style="font-size:12px;opacity:0.8;margin-top:4px;"></div>
     </div>
 
+    <!-- الإحالات -->
     <div class="card">
         <h3>👥 الإحالات</h3>
-        <div style="display:flex;gap:10px;margin:12px 0;">
-            <div style="flex:1;background:#e8e8e8;padding:12px;border-radius:8px;text-align:center;">
+        <div class="flex">
+            <div class="flex-1" style="background:#e8e8e8;padding:12px;border-radius:8px;text-align:center;">
                 <div style="font-size:24px;font-weight:bold;color:#6c5ce7;" id="refCount">0</div>
                 <div style="font-size:12px;color:#666;">المدعوين</div>
             </div>
-            <div style="flex:1;background:#e8e8e8;padding:12px;border-radius:8px;text-align:center;">
+            <div class="flex-1" style="background:#e8e8e8;padding:12px;border-radius:8px;text-align:center;">
                 <div style="font-size:24px;font-weight:bold;color:#00b894;" id="refEarnings">0.00</div>
                 <div style="font-size:12px;color:#666;">العمولات</div>
             </div>
         </div>
     </div>
 
+    <!-- رابط الدعوة -->
     <div class="card">
         <h3>🔗 رابط الدعوة</h3>
         <input type="text" id="referralLink" readonly value="جاري التحميل..." onclick="this.select();">
@@ -50,6 +64,7 @@
         <button class="btn btn-success" onclick="shareLink()">📤 مشاركة الرابط</button>
     </div>
 
+    <!-- اختبار يدوي -->
     <div class="card">
         <h3>🧪 اختبار الإحالة</h3>
         <input type="text" id="testReferralCode" placeholder="أدخل كود الإحالة (رقم تيليجرام)">
@@ -62,6 +77,24 @@
 </div>
 
 <script>
+    // ============================================================
+    // تهيئة Firebase (قبل أي شيء!)
+    // ============================================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyDCF0h_UPivX8oGoQL8Dn1s0lr79VAXpMY",
+        authDomain: "crynova-4d6b3.firebaseapp.com",
+        projectId: "crynova-4d6b3",
+        storageBucket: "crynova-4d6b3.firebasestorage.app",
+        messagingSenderId: "858898515024",
+        appId: "1:858898515024:web:03827d57c2737bbc27bd55"
+    };
+    
+    // تهيئة Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    console.log('✅ Firebase initialized');
+    
     // ============================================================
     // الإعدادات
     // ============================================================
@@ -204,12 +237,12 @@
     }
 
     // ============================================================
-    // 3. جلب بيانات المستخدم
+    // 3. جلب بيانات المستخدم (باستخدام Firebase)
     // ============================================================
     async function loadUserData() {
         try {
             debug('📥 جلب بيانات المستخدم...');
-            const snapshot = await firebase.firestore().collection('users')
+            const snapshot = await db.collection('users')
                 .where('telegramId', '==', tgUser.id.toString())
                 .get();
             
@@ -218,6 +251,8 @@
                 userData = { uid: doc.id, ...doc.data() };
                 debug('👤 بيانات المستخدم: ' + JSON.stringify(userData));
                 updateUI();
+            } else {
+                debug('⚠️ المستخدم غير موجود في Firebase');
             }
         } catch (error) {
             debug('❌ خطأ في جلب البيانات: ' + error.message);
@@ -303,20 +338,7 @@
         }
     }
 
-    // ============================================================
-    // تهيئة Firebase
-    // ============================================================
-    const firebaseConfig = {
-        apiKey: "AIzaSyDCF0h_UPivX8oGoQL8Dn1s0lr79VAXpMY",
-        authDomain: "crynova-4d6b3.firebaseapp.com",
-        projectId: "crynova-4d6b3",
-        storageBucket: "crynova-4d6b3.firebasestorage.app",
-        messagingSenderId: "858898515024",
-        appId: "1:858898515024:web:03827d57c2737bbc27bd55"
-    };
-    firebase.initializeApp(firebaseConfig);
-
-    debug('✅ جاهز!');
+    console.log('✅ Crynova Mining جاهز!');
 </script>
 
 </body>
