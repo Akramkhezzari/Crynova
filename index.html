@@ -1566,59 +1566,62 @@
     }
 
     // ============================================================
-    // 4.2 REFERRAL HANDLING (مُحسّن)
+    // 4.2 REFERRAL HANDLING - الحل المركّز
     // ============================================================
-    async function handleReferralOnLoad() {
-        const tgUser = getTelegramUser();
-        if (!tgUser) {
-            console.log('⚠️ لا يوجد مستخدم تيليجرام');
-            return;
-        }
+    function getReferralCodeFromURL() {
+        // محاولة القراءة من window.location
+        const params = new URLSearchParams(window.location.search);
+        let code = params.get('start');
         
-        const urlParams = new URLSearchParams(window.location.search);
-        const referralCode = urlParams.get('start');
-        
-        if (referralCode && referralCode !== tgUser.id.toString()) {
-            console.log(`🔗 كود الإحالة: ${referralCode}`);
-            
+        // إذا لم يجد، حاول القراءة من Telegram WebApp
+        if (!code && window.Telegram?.WebApp) {
             try {
-                const response = await fetch(`${API_URL}/api/referral`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        telegramId: tgUser.id.toString(),
-                        referralCode: referralCode
-                    })
-                });
-                
-                const data = await response.json();
-                console.log('📨 نتيجة الإحالة:', data);
-                
-                if (data.success) {
-                    showToast('🎉 تم تسجيل الإحالة بنجاح! حصلت على مكافأة 5 USDT!', 'success');
-                    
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
-                } else {
-                    if (data.message === 'لا يمكن إحالة نفسك') {
-                        showToast('⚠️ لا يمكنك استخدام رابط الإحالة الخاص بك', 'warning');
-                    } else if (data.message === 'تم تسجيل الإحالة مسبقاً') {
-                        showToast('ℹ️ تم تسجيل الإحالة مسبقاً', 'info');
-                    } else {
-                        showToast(`⚠️ ${data.message || 'فشل تسجيل الإحالة'}`, 'error');
-                    }
+                const tg = window.Telegram.WebApp;
+                const initData = tg.initDataUnsafe || {};
+                if (initData.start_param) {
+                    code = initData.start_param;
                 }
-                
-            } catch (error) {
-                console.error('❌ خطأ في الإحالة:', error);
-                showToast('❌ حدث خطأ في تسجيل الإحالة، حاول مرة أخرى', 'error');
+            } catch (e) {
+                console.warn('⚠️ لم نتمكن من قراءة start_param من Telegram:', e);
             }
+        }
+        return code;
+    }
+
+    async function processReferral(telegramId, referralCode) {
+        console.log(`🔗 محاولة تسجيل إحالة: المستخدم ${telegramId} بواسطة الكود ${referralCode}`);
+        try {
+            const response = await fetch(`${API_URL}/api/referral`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    telegramId: telegramId.toString(),
+                    referralCode: referralCode
+                })
+            });
+            const data = await response.json();
+            console.log('📨 نتيجة الإحالة:', data);
+            
+            if (data.success) {
+                showToast('🎉 تم تسجيل الإحالة بنجاح! حصلت على مكافأة 5 USDT!', 'success');
+                setTimeout(() => window.location.reload(), 2000);
+            } else {
+                if (data.message === 'لا يمكن إحالة نفسك') {
+                    showToast('⚠️ لا يمكنك استخدام رابط الإحالة الخاص بك', 'warning');
+                } else if (data.message === 'تم تسجيل الإحالة مسبقاً') {
+                    showToast('ℹ️ تم تسجيل الإحالة مسبقاً', 'info');
+                } else {
+                    showToast(`⚠️ ${data.message || 'فشل تسجيل الإحالة'}`, 'error');
+                }
+            }
+        } catch (error) {
+            console.error('❌ خطأ في الإحالة:', error);
+            showToast('❌ حدث خطأ في تسجيل الإحالة، حاول مرة أخرى', 'error');
         }
     }
 
     // ============================================================
-    // 5. AUTHENTICATION (مُحسّن)
+    // 5. AUTHENTICATION (مع تركيز الإحالة)
     // ============================================================
     async function authUser() {
         const tgUser = getTelegramUser();
@@ -1683,8 +1686,18 @@
                 console.log('✅ تم إنشاء حسابك بنجاح!');
             }
             
-            // ✅ معالجة الإحالة فوراً بعد تسجيل المستخدم
-            await handleReferralOnLoad();
+            // ============================================================
+            // 🔥 الجزء الحاسم: معالجة الإحالة فوراً بعد المصادقة
+            // ============================================================
+            const referralCode = getReferralCodeFromURL();
+            if (referralCode && referralCode !== tgUser.id.toString()) {
+                console.log(`🎯 تم اكتشاف كود إحالة: ${referralCode}`);
+                await processReferral(tgUser.id.toString(), referralCode);
+            } else if (referralCode === tgUser.id.toString()) {
+                console.log('ℹ️ هذا هو رابطك الخاص، لا حاجة لتسجيل إحالة');
+            } else {
+                console.log('ℹ️ لا يوجد كود إحالة في الرابط');
+            }
             
             updateUI();
             loadPackages();
@@ -2712,7 +2725,7 @@
     }
 
     // ============================================================
-    // 16. REFERRALS (مُحسّن - من الأحدث إلى الأقدم)
+    // 16. REFERRALS (من الأحدث إلى الأقدم)
     // ============================================================
     async function loadReferrals() {
         if (!userData) return;
