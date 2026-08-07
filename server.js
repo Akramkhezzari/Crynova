@@ -1,61 +1,101 @@
 const express = require('express');
 const cors = require('cors');
-const admin = require('firebase-admin');
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+console.log('🚀 Starting Crynova Server...');
+
 // ============================================================
-// اتصال Firebase
+// اتصال Firebase - الطريقة الصحيحة
 // ============================================================
 
+const admin = require('firebase-admin');
+
+// ===== محاولة تحميل المفتاح =====
 let serviceAccount = null;
+let firebaseError = null;
 
-// من متغير البيئة (في Render)
+// الطريقة 1: من متغير البيئة
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     try {
         serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-        console.log('✅ Firebase from env');
+        console.log('✅ Firebase: تم التحميل من متغير البيئة');
     } catch (e) {
-        console.log('⚠️ Env failed');
+        firebaseError = e.message;
+        console.log('❌ فشل تحميل من متغير البيئة:', e.message);
     }
 }
 
-// من الملف (للتطوير المحلي)
+// الطريقة 2: من الملف (للتجربة المحلية)
 if (!serviceAccount) {
     try {
         serviceAccount = require('./service-account-key.json');
-        console.log('✅ Firebase from file');
+        console.log('✅ Firebase: تم التحميل من الملف');
     } catch (e) {
-        console.log('⚠️ File failed');
+        console.log('⚠️ فشل تحميل من الملف:', e.message);
     }
 }
 
+// ===== تهيئة Firebase =====
 let db = null;
 
 if (serviceAccount) {
     try {
+        // التأكد من أن private_key يحتوي على التنسيق الصحيح
+        if (serviceAccount.private_key) {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        }
+        
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)
         });
+        
         db = admin.firestore();
-        console.log('✅ Firebase connected!');
-    } catch (e) {
-        console.log('❌ Firebase init failed:', e.message);
+        console.log('✅ Firebase: متصل بنجاح!');
+        
+        // اختبار الاتصال
+        db.collection('test').doc('test').set({ test: true })
+            .then(() => console.log('✅ Firebase: اختبار الكتابة نجح!'))
+            .catch(err => console.log('⚠️ Firebase: اختبار الكتابة فشل:', err.message));
+            
+    } catch (error) {
+        console.error('❌ Firebase: فشل التهيئة:', error.message);
+        firebaseError = error.message;
     }
+} else {
+    console.error('❌ Firebase: لا يوجد مفتاح!');
+    firebaseError = 'No service account found';
 }
 
 // ============================================================
 // API Routes
 // ============================================================
 
-// Health Check
+// Health Check - يعرض حالة Firebase
 app.get('/health', (req, res) => {
-    res.json({
+    const status = {
         status: 'healthy',
         firebase: db ? 'connected' : 'disconnected',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        debug: {
+            hasEnvKey: !!process.env.FIREBASE_SERVICE_ACCOUNT,
+            hasServiceAccount: !!serviceAccount,
+            error: firebaseError || 'none',
+            envKeys: Object.keys(process.env).filter(k => k.includes('FIREBASE'))
+        }
+    };
+    res.json(status);
+});
+
+// الصفحة الرئيسية
+app.get('/', (req, res) => {
+    res.json({
+        status: 'running',
+        message: 'Crynova Referral Server',
+        version: '1.0.0',
+        firebase: db ? 'connected' : 'disconnected'
     });
 });
 
@@ -73,7 +113,8 @@ app.post('/api/referral', async (req, res) => {
     if (!db) {
         return res.status(500).json({ 
             success: false, 
-            message: 'قاعدة البيانات غير متصلة' 
+            message: 'قاعدة البيانات غير متصلة',
+            firebase: 'disconnected'
         });
     }
 
@@ -141,6 +182,7 @@ app.post('/api/referral', async (req, res) => {
             status: 'active'
         });
 
+        console.log(`✅ إحالة جديدة: ${telegramId} ← ${referralCode}`);
         res.json({ 
             success: true, 
             message: 'تم تسجيل الإحالة!',
@@ -215,15 +257,6 @@ app.get('/api/referrals/:telegramId', async (req, res) => {
     }
 });
 
-// الصفحة الرئيسية
-app.get('/', (req, res) => {
-    res.json({
-        status: 'running',
-        message: 'Crynova Referral Server',
-        version: '1.0.0'
-    });
-});
-
 // ============================================================
 // تشغيل الخادم
 // ============================================================
@@ -234,5 +267,9 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log('='.repeat(50));
     console.log(`✅ خادم يعمل على المنفذ: ${PORT}`);
     console.log(`📡 Firebase: ${db ? 'متصل ✅' : 'غير متصل ❌'}`);
+    if (!db) {
+        console.log(`⚠️ خطأ: ${firebaseError || 'unknown'}`);
+        console.log(`📌 متغيرات البيئة المتوفرة:`, Object.keys(process.env).filter(k => k.includes('FIREBASE')));
+    }
     console.log('='.repeat(50));
 });
