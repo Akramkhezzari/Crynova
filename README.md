@@ -1,8 +1,6 @@
 # 🚀 Crynova Referral Server
 
-خادم إحالات متكامل لتطبيق Crynova Mining، يدير تسجيل الإحالات وتحديثها في Firebase.
-
----
+خادم إحالات متكامل لتطبيق Crynova Mining.
 
 ## 📋 الميزات
 
@@ -12,26 +10,16 @@
 - ✅ تحديث حالة الإحالات
 - ✅ لوحة المتصدرين
 - ✅ متكامل مع Firebase
-- ✅ دعم كامل لـ USDT و DZD
 
----
+## 🛠️ التقنيات
 
-## 🛠️ التقنيات المستخدمة
+- Node.js + Express.js
+- Firebase Admin SDK
+- Render (استضافة)
 
-| التقنية | الغرض |
-|----------|-------|
-| **Node.js** | بيئة تشغيل الخادم |
-| **Express.js** | إطار عمل الـ API |
-| **Firebase Admin SDK** | التواصل مع قاعدة البيانات |
-| **Render** | استضافة الخادم |
-| **GitHub** | إدارة الكود المصدري |
-
----
-
-## 📦 التثبيت والتشغيل
-
-### 1. استنساخ المشروع
+## 📦 التثبيت
 
 ```bash
 git clone https://github.com/Akramkhezzari/crynova-backend.git
 cd crynova-backend
+npm install
