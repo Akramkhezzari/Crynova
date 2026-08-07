@@ -17,7 +17,7 @@ const admin = require('firebase-admin');
 let serviceAccount = null;
 let firebaseError = null;
 
-// الطريقة 1: من متغير البيئة
+// الطريقة 1: من متغير البيئة (في Render)
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     try {
         serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -99,7 +99,107 @@ app.get('/', (req, res) => {
     });
 });
 
-// تسجيل إحالة
+// ============================================================
+// 1. تسجيل مستخدم جديد
+// ============================================================
+app.post('/api/user/register', async (req, res) => {
+    const { telegramId, firstName, username } = req.body;
+    
+    if (!telegramId) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'معرف المستخدم مطلوب' 
+        });
+    }
+
+    if (!db) {
+        return res.status(500).json({ 
+            success: false, 
+            message: 'قاعدة البيانات غير متصلة' 
+        });
+    }
+
+    try {
+        const usersRef = db.collection('users');
+        
+        // البحث عن المستخدم
+        const userSnapshot = await usersRef
+            .where('telegramId', '==', telegramId)
+            .get();
+
+        // إذا كان المستخدم موجوداً
+        if (!userSnapshot.empty) {
+            return res.json({
+                success: true,
+                message: 'المستخدم موجود بالفعل',
+                data: userSnapshot.docs[0].data()
+            });
+        }
+
+        // تسجيل مستخدم جديد
+        const displayName = firstName || username || 'مستخدم';
+        
+        const newUser = {
+            telegramId: telegramId,
+            username: username || '',
+            displayName: displayName,
+            joinDate: admin.firestore.FieldValue.serverTimestamp(),
+            lastLogin: admin.firestore.FieldValue.serverTimestamp(),
+            level: 1,
+            status: 'active',
+            referralCode: telegramId,
+            referredBy: null,
+            currency: 'USDT',
+            wallets: {
+                main: 0,
+                reward: 0,
+                referral: 0,
+                locked: 0,
+                dzd: 0,
+                dzdReward: 0,
+                dzdReferral: 0,
+                dzdLocked: 0
+            },
+            miningData: {
+                currentPackage: null,
+                totalMined: 0,
+                totalMinedDZD: 0,
+                totalReferrals: 0,
+                miningHistory: {
+                    today: 0,
+                    todayDZD: 0,
+                    thisWeek: 0,
+                    thisWeekDZD: 0,
+                    thisMonth: 0,
+                    thisMonthDZD: 0
+                },
+                lastMiningUpdate: admin.firestore.FieldValue.serverTimestamp(),
+                activeSince: admin.firestore.FieldValue.serverTimestamp()
+            }
+        };
+        
+        const docRef = await usersRef.add(newUser);
+        
+        console.log(`✅ مستخدم جديد: ${displayName} (${telegramId})`);
+        
+        res.json({
+            success: true,
+            message: 'تم تسجيل المستخدم بنجاح',
+            data: { id: docRef.id, ...newUser }
+        });
+
+    } catch (error) {
+        console.error('❌ خطأ في التسجيل:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// ============================================================
+// 2. تسجيل إحالة جديدة
+// ============================================================
 app.post('/api/referral', async (req, res) => {
     const { telegramId, referralCode } = req.body;
     
@@ -113,15 +213,16 @@ app.post('/api/referral', async (req, res) => {
     if (!db) {
         return res.status(500).json({ 
             success: false, 
-            message: 'قاعدة البيانات غير متصلة',
-            firebase: 'disconnected'
+            message: 'قاعدة البيانات غير متصلة' 
         });
     }
 
     try {
+        console.log(`📨 معالجة الإحالة: ${telegramId} ← ${referralCode}`);
+        
         const usersRef = db.collection('users');
         
-        // البحث عن المُحيل
+        // ===== البحث عن المُحيل =====
         const referrerSnapshot = await usersRef
             .where('telegramId', '==', referralCode)
             .get();
@@ -134,8 +235,9 @@ app.post('/api/referral', async (req, res) => {
         }
 
         const referrerDoc = referrerSnapshot.docs[0];
+        const referrerData = referrerDoc.data();
 
-        // البحث عن المستخدم
+        // ===== البحث عن المستخدم الجديد =====
         const userSnapshot = await usersRef
             .where('telegramId', '==', telegramId)
             .get();
@@ -150,6 +252,7 @@ app.post('/api/referral', async (req, res) => {
         const userDoc = userSnapshot.docs[0];
         const userData = userDoc.data();
 
+        // ===== التحقق من عدم استخدام كود سابق =====
         if (userData.referredBy) {
             return res.status(400).json({ 
                 success: false, 
@@ -157,21 +260,23 @@ app.post('/api/referral', async (req, res) => {
             });
         }
 
-        // تحديث المستخدم الجديد
+        // ===== تحديث المستخدم الجديد =====
         await userDoc.ref.update({
             referredBy: referralCode,
             referrerUid: referrerDoc.id,
+            referralUsed: true,
             referralDate: admin.firestore.FieldValue.serverTimestamp()
         });
 
-        // تحديث المُحيل
+        // ===== تحديث المُحيل =====
         await referrerDoc.ref.update({
             'miningData.totalReferrals': admin.firestore.FieldValue.increment(1),
-            'wallets.referral': admin.firestore.FieldValue.increment(5)
+            'wallets.referral': admin.firestore.FieldValue.increment(5),
+            'wallets.dzdReferral': admin.firestore.FieldValue.increment(1250)
         });
 
-        // إضافة سجل الإحالة
-        await db.collection('referrals').add({
+        // ===== إضافة سجل الإحالة =====
+        const referralRef = await db.collection('referrals').add({
             referrerUid: referrerDoc.id,
             referrerTelegramId: referralCode,
             refereeUid: userDoc.id,
@@ -182,15 +287,27 @@ app.post('/api/referral', async (req, res) => {
             status: 'active'
         });
 
-        console.log(`✅ إحالة جديدة: ${telegramId} ← ${referralCode}`);
+        // ===== تسجيل المعاملة =====
+        await db.collection('transactions').add({
+            uid: referrerDoc.id,
+            type: 'referral_bonus',
+            amount: 5,
+            currency: 'USDT',
+            description: `مكافأة إحالة ${userData.displayName || 'مستخدم جديد'}`,
+            timestamp: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        console.log(`✅ تم تسجيل الإحالة بنجاح! ${telegramId} ← ${referralCode}`);
+        
         res.json({ 
             success: true, 
             message: 'تم تسجيل الإحالة!',
-            bonus: 5 
+            bonus: 5,
+            referralId: referralRef.id
         });
 
     } catch (error) {
-        console.error('❌ خطأ:', error);
+        console.error('❌ خطأ في الإحالة:', error);
         res.status(500).json({ 
             success: false, 
             message: error.message 
@@ -198,7 +315,9 @@ app.post('/api/referral', async (req, res) => {
     }
 });
 
-// جلب الإحالات
+// ============================================================
+// 3. جلب إحصائيات الإحالات لمستخدم
+// ============================================================
 app.get('/api/referrals/:telegramId', async (req, res) => {
     const { telegramId } = req.params;
     
@@ -225,34 +344,159 @@ app.get('/api/referrals/:telegramId', async (req, res) => {
         const userDoc = userSnapshot.docs[0];
         const userData = userDoc.data();
 
+        // جلب قائمة الإحالات
         const referralsSnapshot = await db.collection('referrals')
             .where('referrerUid', '==', userDoc.id)
+            .orderBy('joinedAt', 'desc')
             .get();
 
         const referrals = [];
         let totalCommission = 0;
+        let activeCount = 0;
         
         referralsSnapshot.forEach(doc => {
             const data = doc.data();
             totalCommission += data.commissionEarned || 0;
-            referrals.push({ id: doc.id, ...data });
+            if (data.status === 'active') activeCount++;
+            referrals.push({
+                id: doc.id,
+                ...data,
+                joinedAt: data.joinedAt?.toDate?.() || data.joinedAt
+            });
+        });
+
+        // حساب إحصائيات إضافية
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const thisWeekStart = new Date(today);
+        thisWeekStart.setDate(today.getDate() - today.getDay());
+        const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        const todayReferrals = referrals.filter(r => {
+            const d = new Date(r.joinedAt);
+            return d >= today;
+        });
+
+        const weekReferrals = referrals.filter(r => {
+            const d = new Date(r.joinedAt);
+            return d >= thisWeekStart;
+        });
+
+        const monthReferrals = referrals.filter(r => {
+            const d = new Date(r.joinedAt);
+            return d >= thisMonthStart;
         });
 
         res.json({
             success: true,
             data: {
                 totalReferrals: userData.miningData?.totalReferrals || 0,
+                activeReferrals: activeCount,
                 totalCommission: totalCommission,
-                referrals: referrals,
-                referralLink: `https://t.me/Crynova_bot?start=${telegramId}`
+                todayReferrals: todayReferrals.length,
+                weekReferrals: weekReferrals.length,
+                monthReferrals: monthReferrals.length,
+                referralLink: `https://t.me/Crynova_bot?start=${telegramId}`,
+                referrals: referrals.slice(0, 20)
             }
         });
 
     } catch (error) {
-        console.error('❌ خطأ:', error);
+        console.error('❌ خطأ في جلب الإحصائيات:', error);
         res.status(500).json({ 
             success: false, 
             message: error.message 
+        });
+    }
+});
+
+// ============================================================
+// 4. تحديث حالة إحالة
+// ============================================================
+app.put('/api/referral/:referralId/status', async (req, res) => {
+    const { referralId } = req.params;
+    const { status } = req.body;
+    
+    if (!db) {
+        return res.status(500).json({ 
+            success: false, 
+            message: 'قاعدة البيانات غير متصلة' 
+        });
+    }
+
+    try {
+        const validStatuses = ['active', 'pending', 'completed', 'cancelled'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'حالة غير صالحة',
+                validStatuses: validStatuses
+            });
+        }
+
+        await db.collection('referrals').doc(referralId).update({
+            status: status,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        res.json({ 
+            success: true, 
+            message: `تم تحديث الحالة إلى ${status}` 
+        });
+
+    } catch (error) {
+        console.error('❌ خطأ في تحديث الحالة:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: error.message 
+        });
+    }
+});
+
+// ============================================================
+// 5. لوحة المتصدرين
+// ============================================================
+app.get('/api/leaderboard', async (req, res) => {
+    if (!db) {
+        return res.status(500).json({
+            success: false,
+            message: 'قاعدة البيانات غير متصلة'
+        });
+    }
+
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        
+        const snapshot = await db.collection('users')
+            .orderBy('miningData.totalReferrals', 'desc')
+            .limit(limit)
+            .get();
+
+        const leaderboard = [];
+        let rank = 1;
+        
+        for (const doc of snapshot.docs) {
+            const data = doc.data();
+            leaderboard.push({
+                rank: rank++,
+                name: data.displayName || 'مستخدم',
+                telegramId: data.telegramId,
+                referrals: data.miningData?.totalReferrals || 0,
+                commission: data.wallets?.referral || 0,
+                level: data.level || 1
+            });
+        }
+
+        res.json({
+            success: true,
+            data: leaderboard
+        });
+
+    } catch (error) {
+        console.error('❌ خطأ في لوحة المتصدرين:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
         });
     }
 });
@@ -269,7 +513,14 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`📡 Firebase: ${db ? 'متصل ✅' : 'غير متصل ❌'}`);
     if (!db) {
         console.log(`⚠️ خطأ: ${firebaseError || 'unknown'}`);
-        console.log(`📌 متغيرات البيئة المتوفرة:`, Object.keys(process.env).filter(k => k.includes('FIREBASE')));
     }
+    console.log('='.repeat(50));
+    console.log('📌 النقاط النهائية (Endpoints):');
+    console.log(`  POST /api/user/register        - تسجيل مستخدم`);
+    console.log(`  POST /api/referral             - تسجيل إحالة`);
+    console.log(`  GET  /api/referrals/:id        - جلب الإحصائيات`);
+    console.log(`  PUT  /api/referral/:id/status  - تحديث الحالة`);
+    console.log(`  GET  /api/leaderboard          - لوحة المتصدرين`);
+    console.log(`  GET  /health                   - التحقق من الصحة`);
     console.log('='.repeat(50));
 });
