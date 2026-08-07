@@ -8,67 +8,72 @@
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Firebase SDK (مهم جداً!) -->
+    <!-- Firebase SDK (يتم تحميله أولاً) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
     <style>
-        body { font-family: Arial; padding: 20px; direction: rtl; }
-        .card { background: #f5f5f5; padding: 20px; border-radius: 12px; margin-bottom: 16px; }
+        body { font-family: Arial; padding: 20px; direction: rtl; background: #f0f4f8; }
+        .container { max-width: 480px; margin: 0 auto; }
+        .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .gradient { background: linear-gradient(135deg,#6c5ce7,#a29bfe); color: white; }
         .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 8px; }
         .btn-primary { background: #6c5ce7; color: white; }
         .btn-success { background: #00b894; color: white; }
-        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; margin-top: 8px; font-size: 16px; }
-        .hidden { display: none; }
-        #debug { background: #1a1a2e; color: #00ff00; padding: 12px; border-radius: 8px; font-size: 12px; font-family: monospace; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; margin-top: 16px; }
-        .status { padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; }
-        .success { background: #00b89422; color: #00b894; }
-        .error { background: #e1705522; color: #e17055; }
-        .gradient { background: linear-gradient(135deg,#6c5ce7,#a29bfe); color: white; }
+        .btn-danger { background: #e17055; color: white; }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         .flex { display: flex; gap: 10px; }
         .flex-1 { flex: 1; }
         .text-center { text-align: center; }
+        #debug { background: #1a1a2e; color: #00ff00; padding: 12px; border-radius: 8px; font-size: 11px; font-family: monospace; white-space: pre-wrap; word-break: break-all; max-height: 150px; overflow-y: auto; margin-top: 16px; }
+        .big-number { font-size: 28px; font-weight: 900; }
+        .label { font-size: 12px; color: #666; margin-top: 4px; }
+        .mt-8 { margin-top: 8px; }
+        .mb-8 { margin-bottom: 8px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div style="max-width:480px;margin:0 auto;">
+<div class="container">
 
     <!-- HEADER -->
     <div class="card gradient text-center">
-        <h1>💎 Crynova Mining</h1>
-        <div id="userInfo">👤 جاري التحميل...</div>
+        <h1 style="margin:0;">💎 Crynova Mining</h1>
+        <div id="userInfo" style="margin-top:8px;">👤 جاري التحميل...</div>
         <div id="referralCodeDisplay" style="font-size:12px;opacity:0.8;margin-top:4px;"></div>
     </div>
 
     <!-- الإحالات -->
     <div class="card">
-        <h3>👥 الإحالات</h3>
+        <h3 style="margin:0 0 12px 0;">👥 الإحالات</h3>
         <div class="flex">
-            <div class="flex-1" style="background:#e8e8e8;padding:12px;border-radius:8px;text-align:center;">
-                <div style="font-size:24px;font-weight:bold;color:#6c5ce7;" id="refCount">0</div>
-                <div style="font-size:12px;color:#666;">المدعوين</div>
+            <div class="flex-1" style="background:#f0f4f8;padding:16px;border-radius:8px;text-align:center;">
+                <div class="big-number" style="color:#6c5ce7;" id="refCount">0</div>
+                <div class="label">المدعوين</div>
             </div>
-            <div class="flex-1" style="background:#e8e8e8;padding:12px;border-radius:8px;text-align:center;">
-                <div style="font-size:24px;font-weight:bold;color:#00b894;" id="refEarnings">0.00</div>
-                <div style="font-size:12px;color:#666;">العمولات</div>
+            <div class="flex-1" style="background:#f0f4f8;padding:16px;border-radius:8px;text-align:center;">
+                <div class="big-number" style="color:#00b894;" id="refEarnings">0.00</div>
+                <div class="label">العمولات (USDT)</div>
             </div>
         </div>
     </div>
 
     <!-- رابط الدعوة -->
     <div class="card">
-        <h3>🔗 رابط الدعوة</h3>
-        <input type="text" id="referralLink" readonly value="جاري التحميل..." onclick="this.select();">
-        <button class="btn btn-primary" onclick="copyLink()">📋 نسخ الرابط</button>
-        <button class="btn btn-success" onclick="shareLink()">📤 مشاركة الرابط</button>
+        <h3 style="margin:0 0 8px 0;">🔗 رابط الدعوة</h3>
+        <input type="text" id="referralLink" readonly value="جاري التحميل..." onclick="this.select();" style="background:#f5f5f5;">
+        <div class="flex" style="margin-top:8px;">
+            <button class="btn btn-primary" onclick="copyLink()" style="flex:1;">📋 نسخ</button>
+            <button class="btn btn-success" onclick="shareLink()" style="flex:1;">📤 مشاركة</button>
+        </div>
     </div>
 
     <!-- اختبار يدوي -->
     <div class="card">
-        <h3>🧪 اختبار الإحالة</h3>
-        <input type="text" id="testReferralCode" placeholder="أدخل كود الإحالة (رقم تيليجرام)">
-        <button class="btn btn-primary" onclick="testReferral()">🔗 تسجيل الإحالة يدوياً</button>
+        <h3 style="margin:0 0 8px 0;">🧪 اختبار الإحالة</h3>
+        <input type="number" id="testReferralCode" placeholder="أدخل كود الإحالة (رقم)" style="background:#f5f5f5;">
+        <button class="btn btn-primary mt-8" onclick="testReferral()">🔗 تسجيل الإحالة يدوياً</button>
     </div>
 
     <!-- Debug -->
@@ -78,7 +83,7 @@
 
 <script>
     // ============================================================
-    // تهيئة Firebase (قبل أي شيء!)
+    // 1. تهيئة Firebase
     // ============================================================
     const firebaseConfig = {
         apiKey: "AIzaSyDCF0h_UPivX8oGoQL8Dn1s0lr79VAXpMY",
@@ -96,7 +101,7 @@
     console.log('✅ Firebase initialized');
     
     // ============================================================
-    // الإعدادات
+    // 2. الإعدادات
     // ============================================================
     const API_URL = 'https://crynova-1.onrender.com';
     const BOT_URL = 'https://t.me/Crynova_bot/Crynova';
@@ -104,17 +109,18 @@
     let userData = null;
 
     // ============================================================
-    // عرض رسائل التصحيح
+    // 3. عرض رسائل التصحيح
     // ============================================================
     function debug(msg) {
         const el = document.getElementById('debug');
-        el.textContent += '\n' + msg;
+        const time = new Date().toLocaleTimeString();
+        el.textContent += `\n[${time}] ${msg}`;
         el.scrollTop = el.scrollHeight;
         console.log(msg);
     }
 
     // ============================================================
-    // الحصول على مستخدم تيليجرام
+    // 4. الحصول على مستخدم تيليجرام
     // ============================================================
     function getTelegramUser() {
         if (window.Telegram && window.Telegram.WebApp) {
@@ -134,7 +140,7 @@
     }
 
     // ============================================================
-    // التشغيل الرئيسي
+    // 5. التشغيل الرئيسي
     // ============================================================
     (async function init() {
         debug('🚀 بدء التشغيل...');
@@ -156,7 +162,7 @@
         // 2. معالجة الإحالة من الرابط
         await processReferralFromURL();
         
-        // 3. جلب البيانات
+        // 3. جلب البيانات من Firebase
         await loadUserData();
         
         // 4. تحديث الرابط
@@ -166,7 +172,7 @@
     })();
 
     // ============================================================
-    // 1. تسجيل المستخدم
+    // 6. تسجيل المستخدم
     // ============================================================
     async function registerUser() {
         try {
@@ -189,7 +195,7 @@
     }
 
     // ============================================================
-    // 2. معالجة الإحالة من الرابط
+    // 7. معالجة الإحالة من الرابط
     // ============================================================
     async function processReferralFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -225,7 +231,6 @@
             if (data.success) {
                 debug('✅ تم تسجيل الإحالة بنجاح!');
                 alert('🎉 تم تسجيل الإحالة بنجاح!');
-                setTimeout(() => window.location.reload(), 1500);
             } else {
                 debug('⚠️ فشل: ' + data.message);
                 alert('⚠️ ' + data.message);
@@ -237,7 +242,7 @@
     }
 
     // ============================================================
-    // 3. جلب بيانات المستخدم (باستخدام Firebase)
+    // 8. جلب بيانات المستخدم من Firebase
     // ============================================================
     async function loadUserData() {
         try {
@@ -249,7 +254,7 @@
             if (!snapshot.empty) {
                 const doc = snapshot.docs[0];
                 userData = { uid: doc.id, ...doc.data() };
-                debug('👤 بيانات المستخدم: ' + JSON.stringify(userData));
+                debug('✅ تم جلب البيانات');
                 updateUI();
             } else {
                 debug('⚠️ المستخدم غير موجود في Firebase');
@@ -260,7 +265,7 @@
     }
 
     // ============================================================
-    // 4. تحديث الواجهة
+    // 9. تحديث الواجهة
     // ============================================================
     function updateUI() {
         if (!userData) return;
@@ -276,7 +281,7 @@
     }
 
     // ============================================================
-    // 5. اختبار يدوي
+    // 10. اختبار يدوي
     // ============================================================
     async function testReferral() {
         const code = document.getElementById('testReferralCode').value.trim();
@@ -306,7 +311,7 @@
             
             if (data.success) {
                 alert('🎉 تم تسجيل الإحالة بنجاح!');
-                location.reload();
+                setTimeout(() => location.reload(), 1000);
             } else {
                 alert('⚠️ ' + data.message);
             }
@@ -317,7 +322,7 @@
     }
 
     // ============================================================
-    // 6. مساعدة
+    // 11. مساعدة
     // ============================================================
     function copyLink() {
         const link = document.getElementById('referralLink').value;
