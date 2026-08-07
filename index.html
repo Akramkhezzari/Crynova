@@ -1,192 +1,87 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crynova Mining</title>
-    
-    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; padding: 16px; direction: rtl; }
-        .container { max-width: 480px; margin: 0 auto; }
-        .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .gradient { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; }
-        .btn { display: inline-block; padding: 12px 20px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; font-family: inherit; }
+        body { font-family: Arial; padding: 20px; direction: rtl; }
+        .card { background: #f5f5f5; padding: 20px; border-radius: 12px; margin-bottom: 16px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 8px; }
         .btn-primary { background: #6c5ce7; color: white; }
         .btn-success { background: #00b894; color: white; }
-        .btn-outline { background: transparent; border: 2px solid #e2e8f0; color: #1a1a2e; }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .stat-box { background: #f0f4f8; border-radius: 10px; padding: 14px; text-align: center; }
-        .stat-box .number { font-size: 24px; font-weight: 800; color: #6c5ce7; }
-        .stat-box .label { font-size: 12px; color: #4a4a6a; margin-top: 4px; }
-        .input-group { margin-bottom: 16px; }
-        .input-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #4a4a6a; }
-        .input-group input, .input-group select { width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; font-family: inherit; background: #f0f4f8; }
-        .hidden { display: none !important; }
-        .text-center { text-align: center; }
-        .text-muted { color: #8a8aaa; }
-        .mt-8 { margin-top: 8px; }
-        .mt-16 { margin-top: 16px; }
-        .mb-8 { margin-bottom: 8px; }
-        .balance-large { font-size: 42px; font-weight: 900; }
-        .balance-label { font-size: 14px; opacity: 0.8; }
-        .nav-btn { background: none; border: none; font-size: 12px; cursor: pointer; color: #8a8aaa; font-family: inherit; padding: 8px 16px; border-radius: 8px; transition: all 0.3s; }
-        .nav-btn.active { color: #6c5ce7; background: rgba(108,92,231,0.1); }
-        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-        .status-success { background: rgba(0,184,148,0.15); color: #00b894; }
-        .status-danger { background: rgba(225,112,85,0.15); color: #e17055; }
-        .status-pending { background: rgba(253,203,110,0.15); color: #b7950b; }
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: white; display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid #e2e8f0; z-index: 1000; }
-        .bottom-nav button { background: none; border: none; font-size: 12px; cursor: pointer; color: #8a8aaa; font-family: inherit; padding: 4px 12px; border-radius: 8px; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-        .bottom-nav button i { font-size: 20px; }
-        .bottom-nav button.active { color: #6c5ce7; }
-        .bottom-nav button.active i { color: #6c5ce7; }
-        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1a1a2e; color: white; padding: 12px 24px; border-radius: 12px; font-weight: 600; z-index: 2000; animation: slideDown 0.3s ease; }
-        .toast.success { background: #00b894; }
-        .toast.error { background: #e17055; }
-        @keyframes slideDown { from { opacity: 0; transform: translate(-50%, -20px); } to { opacity: 1; transform: translate(-50%, 0); } }
-        .copy-btn { background: #6c5ce7; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: 600; }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; margin-top: 8px; font-size: 16px; }
+        .hidden { display: none; }
+        #debug { background: #1a1a2e; color: #00ff00; padding: 12px; border-radius: 8px; font-size: 12px; font-family: monospace; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; margin-top: 16px; }
+        .status { padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+        .success { background: #00b89422; color: #00b894; }
+        .error { background: #e1705522; color: #e17055; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div style="max-width:480px;margin:0 auto;">
 
-    <!-- HEADER -->
-    <div class="card gradient" style="text-align:center;padding:20px;">
-        <div style="font-size:22px;font-weight:900;">💎 Crynova Mining</div>
-        <div id="userInfo" style="margin-top:6px;font-size:14px;opacity:0.9;">👤 جاري التحميل...</div>
-        <div id="debugInfo" style="margin-top:4px;font-size:11px;opacity:0.6;word-break:break-all;"></div>
+    <div class="card" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:white;text-align:center;">
+        <h1>💎 Crynova Mining</h1>
+        <div id="userInfo">👤 جاري التحميل...</div>
+        <div id="referralCodeDisplay" style="font-size:12px;opacity:0.8;margin-top:4px;"></div>
     </div>
 
-    <!-- HOME -->
-    <div id="page-home">
-        <div class="card gradient">
-            <div class="balance-label">الرصيد الكلي</div>
-            <div>
-                <span class="balance-large" id="homeBalance">0.00</span>
-                <span id="homeCurrency">USDT</span>
+    <div class="card">
+        <h3>👥 الإحالات</h3>
+        <div style="display:flex;gap:10px;margin:12px 0;">
+            <div style="flex:1;background:#e8e8e8;padding:12px;border-radius:8px;text-align:center;">
+                <div style="font-size:24px;font-weight:bold;color:#6c5ce7;" id="refCount">0</div>
+                <div style="font-size:12px;color:#666;">المدعوين</div>
+            </div>
+            <div style="flex:1;background:#e8e8e8;padding:12px;border-radius:8px;text-align:center;">
+                <div style="font-size:24px;font-weight:bold;color:#00b894;" id="refEarnings">0.00</div>
+                <div style="font-size:12px;color:#666;">العمولات</div>
             </div>
         </div>
-
-        <div class="grid-3">
-            <div class="stat-box"><div class="number" id="homeMined">0.00</div><div class="label">⛏️ التعدين</div></div>
-            <div class="stat-box"><div class="number" id="homeReferrals">0</div><div class="label">👥 الإحالات</div></div>
-            <div class="stat-box"><div class="number" id="homePackage" style="font-size:16px;">-</div><div class="label">📦 الباقة</div></div>
-        </div>
-
-        <div class="card">
-            <div class="flex-between"><span style="font-weight:700;">🔵 حالة التعدين</span><span id="miningStatus" class="status-badge status-success">نشط</span></div>
-            <div class="flex-between" style="margin-top:8px;"><span style="color:#4a4a6a;">قوة التعدين</span><span id="miningHashRate">0.00 H/s</span></div>
-            <div class="flex-between"><span style="color:#4a4a6a;">ينتهي في</span><span id="miningEnds">--</span></div>
-        </div>
-
-        <div class="card">
-            <div class="flex-between"><span style="font-weight:700;">🕐 آخر العمليات</span></div>
-            <div id="recentTransactions" style="padding:12px 0;color:#8a8aaa;text-align:center;">لا توجد عمليات</div>
-        </div>
     </div>
 
-    <!-- REFERRALS -->
-    <div id="page-referrals" class="hidden">
-        <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;">👥 الإحالات</h2>
-        
-        <div class="card" style="background:rgba(108,92,231,0.08);border:2px solid #6c5ce7;">
-            <div class="text-center">
-                <div style="font-size:48px;">🎁</div>
-                <div style="font-size:18px;font-weight:900;">اربح 5 USDT عن كل صديق</div>
-                <div style="color:#4a4a6a;font-size:14px;">احصل على عمولة 10% من أرباحهم</div>
-            </div>
-        </div>
-
-        <div class="grid-3">
-            <div class="stat-box"><div class="number" id="refCount">0</div><div class="label">👤 المدعوين</div></div>
-            <div class="stat-box"><div class="number" id="refEarnings">0.00</div><div class="label">💰 العمولات</div></div>
-            <div class="stat-box"><div class="number" id="refPending">0</div><div class="label">⏳ معلق</div></div>
-        </div>
-
-        <div class="card">
-            <div style="font-weight:600;margin-bottom:8px;">🔗 رابط الدعوة الخاص بك</div>
-            <div style="display:flex;gap:8px;">
-                <input type="text" id="referralLink" readonly value="جاري التحميل..." style="flex:1;padding:12px;border:2px solid #e2e8f0;border-radius:10px;background:#f0f4f8;font-family:inherit;font-size:13px;">
-                <button class="copy-btn" onclick="copyLink()">📋 نسخ</button>
-            </div>
-            <button class="btn btn-success mt-8" onclick="shareLink()">📤 مشاركة الرابط</button>
-        </div>
-
-        <div class="card">
-            <div style="font-weight:700;margin-bottom:12px;">📋 قائمة المدعوين</div>
-            <div id="referralsList" style="padding:12px 0;color:#8a8aaa;text-align:center;">لم تدعو أحداً بعد</div>
-        </div>
+    <div class="card">
+        <h3>🔗 رابط الدعوة</h3>
+        <input type="text" id="referralLink" readonly value="جاري التحميل..." onclick="this.select();">
+        <button class="btn btn-primary" onclick="copyLink()">📋 نسخ الرابط</button>
+        <button class="btn btn-success" onclick="shareLink()">📤 مشاركة الرابط</button>
     </div>
 
-    <!-- WALLET -->
-    <div id="page-wallet" class="hidden">
-        <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;">💰 المحفظة</h2>
-        <div class="card gradient"><div class="text-center"><div class="balance-label">الرصيد الكلي</div><div class="balance-large" id="walletTotal">0.00</div><div id="walletCurrency">USDT</div></div></div>
-        <div class="grid-3">
-            <div class="stat-box"><div class="number" id="walletMain">0.00</div><div class="label">الرئيسية</div></div>
-            <div class="stat-box"><div class="number" id="walletReward">0.00</div><div class="label">المكافآت</div></div>
-            <div class="stat-box"><div class="number" id="walletReferral">0.00</div><div class="label">الإحالات</div></div>
-        </div>
+    <div class="card">
+        <h3>🧪 اختبار الإحالة</h3>
+        <input type="text" id="testReferralCode" placeholder="أدخل كود الإحالة (رقم تيليجرام)">
+        <button class="btn btn-primary" onclick="testReferral()">🔗 تسجيل الإحالة يدوياً</button>
     </div>
 
-    <!-- PROFILE -->
-    <div id="page-profile" class="hidden">
-        <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;">👤 الحساب</h2>
-        <div class="card text-center" style="padding:24px;">
-            <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#6c5ce7,#a29bfe);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:white;margin:0 auto 12px;" id="profileAvatar">?</div>
-            <div style="font-size:20px;font-weight:900;" id="profileName">المستخدم</div>
-            <div style="color:#4a4a6a;" id="profileTelegram">@username</div>
-            <div style="margin-top:8px;"><span class="status-badge status-success">المستوى <span id="profileLevel">1</span></span></div>
-        </div>
-        <div class="card">
-            <div class="flex-between" style="padding:8px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#4a4a6a;">📅 تاريخ التسجيل</span><span id="profileJoinDate" style="font-weight:600;">--</span></div>
-            <div class="flex-between" style="padding:8px 0;"><span style="color:#4a4a6a;">🆔 معرف Telegram</span><span id="profileTelegramId" style="font-weight:600;">--</span></div>
-        </div>
-    </div>
-
-    <!-- BOTTOM NAV -->
-    <div class="bottom-nav">
-        <button class="nav-btn active" data-page="home" onclick="navigateTo('home')"><span>🏠</span> الرئيسية</button>
-        <button class="nav-btn" data-page="referrals" onclick="navigateTo('referrals')"><span>👥</span> الإحالات</button>
-        <button class="nav-btn" data-page="wallet" onclick="navigateTo('wallet')"><span>💰</span> المحفظة</button>
-        <button class="nav-btn" data-page="profile" onclick="navigateTo('profile')"><span>👤</span> الحساب</button>
-    </div>
+    <!-- Debug -->
+    <div id="debug">⏳ جاري التهيئة...</div>
 
 </div>
 
-<!-- ============================================================ -->
-<!-- JAVASCRIPT -->
-<!-- ============================================================ -->
 <script>
     // ============================================================
-    // 1. CONFIG
+    // الإعدادات
     // ============================================================
-    const firebaseConfig = {
-        apiKey: "AIzaSyDCF0h_UPivX8oGoQL8Dn1s0lr79VAXpMY",
-        authDomain: "crynova-4d6b3.firebaseapp.com",
-        projectId: "crynova-4d6b3",
-        storageBucket: "crynova-4d6b3.firebasestorage.app",
-        messagingSenderId: "858898515024",
-        appId: "1:858898515024:web:03827d57c2737bbc27bd55"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
     const API_URL = 'https://crynova-1.onrender.com';
+    const BOT_URL = 'https://t.me/Crynova_bot/Crynova';
+    let tgUser = null;
     let userData = null;
 
     // ============================================================
-    // 2. TELEGRAM
+    // عرض رسائل التصحيح
+    // ============================================================
+    function debug(msg) {
+        const el = document.getElementById('debug');
+        el.textContent += '\n' + msg;
+        el.scrollTop = el.scrollHeight;
+        console.log(msg);
+    }
+
+    // ============================================================
+    // الحصول على مستخدم تيليجرام
     // ============================================================
     function getTelegramUser() {
         if (window.Telegram && window.Telegram.WebApp) {
@@ -202,49 +97,47 @@
                 };
             }
         }
-        // للاختبار المحلي
         return null;
     }
 
     // ============================================================
-    // 3. MAIN
+    // التشغيل الرئيسي
     // ============================================================
     (async function init() {
-        console.log('🚀 بدء التشغيل...');
+        debug('🚀 بدء التشغيل...');
         
-        const tgUser = getTelegramUser();
-        console.log('👤 المستخدم:', tgUser);
+        tgUser = getTelegramUser();
+        debug('👤 المستخدم: ' + JSON.stringify(tgUser));
         
         if (!tgUser) {
             document.getElementById('userInfo').textContent = '⚠️ يرجى فتح التطبيق من تيليجرام';
-            document.getElementById('debugInfo').textContent = '⚠️ لا يوجد مستخدم تيليجرام';
+            debug('❌ لا يوجد مستخدم تيليجرام');
             return;
         }
         
-        document.getElementById('userInfo').textContent = `👤 ${tgUser.firstName || 'مستخدم'}`;
-        document.getElementById('debugInfo').textContent = `🆔 ${tgUser.id}`;
+        document.getElementById('userInfo').textContent = `👤 ${tgUser.firstName || 'مستخدم'} (${tgUser.id})`;
         
         // 1. تسجيل المستخدم
-        await registerUser(tgUser);
+        await registerUser();
         
-        // 2. معالجة الإحالة
-        await processReferral(tgUser);
+        // 2. معالجة الإحالة من الرابط
+        await processReferralFromURL();
         
         // 3. جلب البيانات
-        await loadUserData(tgUser.id.toString());
+        await loadUserData();
         
         // 4. تحديث الرابط
-        updateReferralLink(tgUser.id.toString());
+        updateReferralLink();
         
-        console.log('✅ تم التشغيل بنجاح!');
+        debug('✅ تم التشغيل بنجاح!');
     })();
 
     // ============================================================
-    // 4. تسجيل المستخدم
+    // 1. تسجيل المستخدم
     // ============================================================
-    async function registerUser(tgUser) {
+    async function registerUser() {
         try {
-            console.log('📤 تسجيل المستخدم...');
+            debug('📤 تسجيل المستخدم...');
             const response = await fetch(`${API_URL}/api/user/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -255,35 +148,33 @@
                 })
             });
             const data = await response.json();
-            console.log('✅ تسجيل المستخدم:', data);
+            debug('✅ تسجيل المستخدم: ' + JSON.stringify(data));
             return data;
         } catch (error) {
-            console.error('❌ خطأ في التسجيل:', error);
-            document.getElementById('debugInfo').textContent = '❌ خطأ في التسجيل: ' + error.message;
+            debug('❌ خطأ في التسجيل: ' + error.message);
         }
     }
 
     // ============================================================
-    // 5. معالجة الإحالة
+    // 2. معالجة الإحالة من الرابط
     // ============================================================
-    async function processReferral(tgUser) {
+    async function processReferralFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         const referralCode = urlParams.get('start');
         
-        console.log('🔍 كود الإحالة من الرابط:', referralCode);
-        document.getElementById('debugInfo').textContent += ` | 🔗 ${referralCode || 'لا يوجد'}`;
+        debug('🔍 كود الإحالة من الرابط: ' + (referralCode || 'لا يوجد'));
         
         if (!referralCode) {
-            console.log('ℹ️ لا يوجد كود إحالة');
+            debug('ℹ️ لا يوجد كود إحالة');
             return;
         }
         
         if (referralCode === tgUser.id.toString()) {
-            console.log('⚠️ هذا هو كودك الخاص');
+            debug('⚠️ هذا هو كودك الخاص');
             return;
         }
         
-        console.log(`🔗 محاولة تسجيل الإحالة: ${tgUser.id} ← ${referralCode}`);
+        debug(`🔗 محاولة تسجيل الإحالة: ${tgUser.id} ← ${referralCode}`);
         
         try {
             const response = await fetch(`${API_URL}/api/referral`, {
@@ -296,87 +187,110 @@
             });
             
             const data = await response.json();
-            console.log('📨 رد الخادم:', data);
-            document.getElementById('debugInfo').textContent += ` | 📨 ${data.success ? '✅' : '❌'}`;
+            debug('📨 رد الخادم: ' + JSON.stringify(data));
             
             if (data.success) {
-                console.log('✅ تم تسجيل الإحالة بنجاح!');
-                showToast('🎉 تم تسجيل الإحالة بنجاح!', 'success');
+                debug('✅ تم تسجيل الإحالة بنجاح!');
+                alert('🎉 تم تسجيل الإحالة بنجاح!');
+                setTimeout(() => window.location.reload(), 1500);
             } else {
-                console.log('⚠️ فشل:', data.message);
-                showToast('⚠️ ' + data.message, 'error');
+                debug('⚠️ فشل: ' + data.message);
+                alert('⚠️ ' + data.message);
             }
         } catch (error) {
-            console.error('❌ خطأ في الاتصال:', error);
-            document.getElementById('debugInfo').textContent += ' | ❌ خطأ في الاتصال';
-            showToast('❌ خطأ في الاتصال بالخادم', 'error');
+            debug('❌ خطأ في الاتصال: ' + error.message);
+            alert('❌ خطأ في الاتصال بالخادم');
         }
     }
 
     // ============================================================
-    // 6. جلب البيانات
+    // 3. جلب بيانات المستخدم
     // ============================================================
-    async function loadUserData(telegramId) {
+    async function loadUserData() {
         try {
-            const snapshot = await db.collection('users').where('telegramId', '==', telegramId).get();
+            debug('📥 جلب بيانات المستخدم...');
+            const snapshot = await firebase.firestore().collection('users')
+                .where('telegramId', '==', tgUser.id.toString())
+                .get();
+            
             if (!snapshot.empty) {
                 const doc = snapshot.docs[0];
                 userData = { uid: doc.id, ...doc.data() };
-                console.log('👤 بيانات المستخدم:', userData);
+                debug('👤 بيانات المستخدم: ' + JSON.stringify(userData));
                 updateUI();
             }
         } catch (error) {
-            console.error('❌ خطأ في جلب البيانات:', error);
+            debug('❌ خطأ في جلب البيانات: ' + error.message);
         }
     }
 
     // ============================================================
-    // 7. UI
+    // 4. تحديث الواجهة
     // ============================================================
     function updateUI() {
         if (!userData) return;
         const u = userData;
-        const balance = (u.wallets?.main || 0) + (u.wallets?.reward || 0) + (u.wallets?.referral || 0);
-        document.getElementById('homeBalance').textContent = balance.toFixed(2);
-        document.getElementById('homeReferrals').textContent = u.miningData?.totalReferrals || 0;
         document.getElementById('refCount').textContent = u.miningData?.totalReferrals || 0;
         document.getElementById('refEarnings').textContent = (u.wallets?.referral || 0).toFixed(2);
-        document.getElementById('walletTotal').textContent = balance.toFixed(2);
-        document.getElementById('walletMain').textContent = (u.wallets?.main || 0).toFixed(2);
-        document.getElementById('walletReward').textContent = (u.wallets?.reward || 0).toFixed(2);
-        document.getElementById('walletReferral').textContent = (u.wallets?.referral || 0).toFixed(2);
-        
-        const name = u.displayName || u.username || 'مستخدم';
-        document.getElementById('profileName').textContent = name;
-        document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
-        document.getElementById('profileTelegram').textContent = u.username ? `@${u.username}` : 'غير متاح';
-        document.getElementById('profileTelegramId').textContent = u.telegramId || '--';
-        document.getElementById('profileLevel').textContent = u.level || 1;
-        document.getElementById('profileJoinDate').textContent = u.joinDate ? new Date(u.joinDate.toDate()).toLocaleDateString('ar-EG') : '--';
     }
 
-    function updateReferralLink(telegramId) {
-        const link = `https://t.me/Crynova_bot/Crynova?start=${telegramId}`;
+    function updateReferralLink() {
+        const link = `${BOT_URL}?start=${tgUser.id}`;
         document.getElementById('referralLink').value = link;
+        document.getElementById('referralCodeDisplay').textContent = `🔗 كودك: ${tgUser.id}`;
     }
 
     // ============================================================
-    // 8. HELPERS
+    // 5. اختبار يدوي
     // ============================================================
-    function navigateTo(page) {
-        document.querySelectorAll('[id^="page-"]').forEach(el => el.classList.add('hidden'));
-        const target = document.getElementById(`page-${page}`);
-        if (target) target.classList.remove('hidden');
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.page === page);
-        });
+    async function testReferral() {
+        const code = document.getElementById('testReferralCode').value.trim();
+        if (!code) {
+            alert('⚠️ يرجى إدخال كود الإحالة');
+            return;
+        }
+        if (code === tgUser.id.toString()) {
+            alert('⚠️ لا يمكنك استخدام كودك الخاص');
+            return;
+        }
+        
+        debug(`🧪 اختبار يدوي: ${tgUser.id} ← ${code}`);
+        
+        try {
+            const response = await fetch(`${API_URL}/api/referral`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    telegramId: tgUser.id.toString(),
+                    referralCode: code
+                })
+            });
+            
+            const data = await response.json();
+            debug('📨 نتيجة الاختبار: ' + JSON.stringify(data));
+            
+            if (data.success) {
+                alert('🎉 تم تسجيل الإحالة بنجاح!');
+                location.reload();
+            } else {
+                alert('⚠️ ' + data.message);
+            }
+        } catch (error) {
+            debug('❌ خطأ: ' + error.message);
+            alert('❌ خطأ في الاتصال بالخادم');
+        }
     }
 
+    // ============================================================
+    // 6. مساعدة
+    // ============================================================
     function copyLink() {
         const link = document.getElementById('referralLink').value;
         if (navigator.clipboard) {
             navigator.clipboard.writeText(link);
-            showToast('📋 تم نسخ الرابط!', 'success');
+            alert('📋 تم نسخ الرابط!');
+        } else {
+            alert('📋 ' + link);
         }
     }
 
@@ -389,17 +303,20 @@
         }
     }
 
-    function showToast(message, type = '') {
-        const existing = document.querySelector('.toast');
-        if (existing) existing.remove();
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
+    // ============================================================
+    // تهيئة Firebase
+    // ============================================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyDCF0h_UPivX8oGoQL8Dn1s0lr79VAXpMY",
+        authDomain: "crynova-4d6b3.firebaseapp.com",
+        projectId: "crynova-4d6b3",
+        storageBucket: "crynova-4d6b3.firebasestorage.app",
+        messagingSenderId: "858898515024",
+        appId: "1:858898515024:web:03827d57c2737bbc27bd55"
+    };
+    firebase.initializeApp(firebaseConfig);
 
-    console.log('✅ Crynova Mining جاهز!');
+    debug('✅ جاهز!');
 </script>
 
 </body>
