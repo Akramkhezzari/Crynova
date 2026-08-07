@@ -1426,7 +1426,6 @@
 
     const POSTAL_ACCOUNT = '0799999002385412178';
     const EXCHANGE_RATE = 250;
-    const API_URL = 'https://crynova-1.onrender.com';
 
     // ============================================================
     // 3. TELEGRAM INTEGRATION
@@ -1452,82 +1451,7 @@
     }
 
     // ============================================================
-    // 4. ربط الإحالات بالخادم الخلفي
-    // ============================================================
-    
-    async function registerUserWithServer(telegramId, firstName, username) {
-        try {
-            const response = await fetch(`${API_URL}/api/user/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    telegramId: telegramId.toString(),
-                    firstName: firstName || '',
-                    username: username || ''
-                })
-            });
-            
-            const data = await response.json();
-            console.log('✅ تسجيل المستخدم:', data);
-            return data;
-            
-        } catch (error) {
-            console.error('❌ خطأ في التسجيل:', error);
-            return { success: false, message: error.message };
-        }
-    }
-
-    async function handleReferralOnLoad() {
-        const tgUser = getTelegramUser();
-        if (!tgUser) {
-            console.log('⚠️ لا يوجد مستخدم تيليجرام');
-            return;
-        }
-        
-        // 1. تسجيل المستخدم في Firebase
-        await registerUserWithServer(
-            tgUser.id,
-            tgUser.firstName,
-            tgUser.username
-        );
-        
-        // 2. التحقق من كود الإحالة
-        const urlParams = new URLSearchParams(window.location.search);
-        const referralCode = urlParams.get('start');
-        
-        if (referralCode && referralCode !== tgUser.id.toString()) {
-            console.log(`🔗 كود الإحالة: ${referralCode}`);
-            
-            try {
-                const response = await fetch(`${API_URL}/api/referral`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        telegramId: tgUser.id.toString(),
-                        referralCode: referralCode
-                    })
-                });
-                
-                const data = await response.json();
-                console.log('📨 نتيجة الإحالة:', data);
-                
-                if (data.success) {
-                    alert('🎉 تم تسجيل الإحالة بنجاح!');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    console.log('⚠️', data.message);
-                }
-                
-            } catch (error) {
-                console.error('❌ خطأ في الإحالة:', error);
-            }
-        }
-    }
-
-    // ============================================================
-    // 5. AUTHENTICATION
+    // 4. AUTHENTICATION
     // ============================================================
     async function authUser() {
         const tgUser = getTelegramUser();
@@ -1590,10 +1514,10 @@
                 userData = currentUser;
                 
                 console.log('✅ تم إنشاء حسابك بنجاح!');
+                
+                // معالجة الإحالة محلياً
+                await handleReferralLocally();
             }
-            
-            // ✅ معالجة الإحالة
-            await handleReferralOnLoad();
             
             updateUI();
             loadPackages();
@@ -1609,6 +1533,90 @@
         } catch (error) {
             console.error('Auth error:', error);
             return false;
+        }
+    }
+
+    // ============================================================
+    // 5. REFERRAL HANDLING (LOCAL - FIREBASE ONLY)
+    // ============================================================
+    async function handleReferralLocally() {
+        if (!userData) return;
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const referralCode = urlParams.get('start');
+        
+        if (!referralCode || referralCode === userData.telegramId) {
+            console.log('ℹ️ لا يوجد كود إحالة أو الكود خاص بالمستخدم نفسه');
+            return;
+        }
+        
+        console.log(`🔗 معالجة الإحالة: ${referralCode}`);
+        
+        try {
+            // البحث عن المُحيل
+            const referrerSnapshot = await db.collection('users')
+                .where('referralCode', '==', referralCode)
+                .get();
+                
+            if (referrerSnapshot.empty) {
+                console.log('⚠️ لم يتم العثور على المُحيل');
+                return;
+            }
+            
+            const referrerDoc = referrerSnapshot.docs[0];
+            
+            // التحقق من عدم وجود إحالة مسبقة
+            const existingReferral = await db.collection('referrals')
+                .where('referredUid', '==', userData.uid)
+                .get();
+                
+            if (!existingReferral.empty) {
+                console.log('⚠️ هذا المستخدم تمت إحالته مسبقاً');
+                return;
+            }
+            
+            // تحديث بيانات المستخدم الحالي
+            await db.collection('users').doc(userData.uid).update({
+                referredBy: referralCode
+            });
+            
+            // إضافة سجل الإحالة
+            await db.collection('referrals').add({
+                referrerUid: referrerDoc.id,
+                referredUid: userData.uid,
+                displayName: userData.displayName || 'مستخدم',
+                joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                commissionEarned: 5
+            });
+            
+            // تحديث المُحيل
+            await referrerDoc.ref.update({
+                'miningData.totalReferrals': firebase.firestore.FieldValue.increment(1),
+                'wallets.referral': firebase.firestore.FieldValue.increment(5),
+                'wallets.dzdReferral': firebase.firestore.FieldValue.increment(5 * EXCHANGE_RATE)
+            });
+            
+            // إضافة معاملة للمُحيل
+            await db.collection('transactions').add({
+                uid: referrerDoc.id,
+                type: 'referral_bonus',
+                amount: 5,
+                currency: 'USDT',
+                description: `عمولة إحالة - ${userData.displayName || 'مستخدم جديد'}`,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            // تحديث userData محلياً
+            userData.referredBy = referralCode;
+            
+            console.log('✅ تمت معالجة الإحالة بنجاح!');
+            console.log('📊 تقرير الإحالات:');
+            console.log('- عدد المحالين:', (userData.miningData?.totalReferrals || 0) + 1);
+            console.log('- عمولات USDT:', (userData.wallets?.referral || 0) + 5);
+            console.log('- عمولات DZD:', (userData.wallets?.dzdReferral || 0) + (5 * EXCHANGE_RATE));
+            
+        } catch (error) {
+            console.error('❌ خطأ في معالجة الإحالة:', error);
         }
     }
 
@@ -2657,7 +2665,7 @@
                     </div>
                 </div>
                 <div class="right">
-                    <div style="color:var(--success);font-weight:700;">+${r.commissionEarned || 0} ${userData?.currency || 'USDT'}</div>
+                    <div style="color:var(--success);font-weight:700;">+${r.commissionEarned || 0} USDT</div>
                 </div>
             </div>
         `).join('');
@@ -2755,7 +2763,8 @@
     });
 
     console.log('🚀 Crynova Mining V2.0');
-    console.log('🔗 API_URL:', API_URL);
+    console.log('✅ الإحالات تعمل محلياً عبر Firebase');
+    console.log('💰 مكافأة الإحالة: 5 USDT + 1250 DZD');
 </script>
 </body>
 </html>
