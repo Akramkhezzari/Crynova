@@ -8,16 +8,15 @@ app.use(express.json());
 console.log('🚀 Starting Crynova Server...');
 
 // ============================================================
-// اتصال Firebase - الطريقة الصحيحة
+// اتصال Firebase
 // ============================================================
 
 const admin = require('firebase-admin');
 
-// ===== محاولة تحميل المفتاح =====
 let serviceAccount = null;
 let firebaseError = null;
 
-// الطريقة 1: من متغير البيئة (في Render)
+// من متغير البيئة (في Render)
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     try {
         serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -28,7 +27,7 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     }
 }
 
-// الطريقة 2: من الملف (للتجربة المحلية)
+// من الملف (للتجربة المحلية)
 if (!serviceAccount) {
     try {
         serviceAccount = require('./service-account-key.json');
@@ -43,7 +42,6 @@ let db = null;
 
 if (serviceAccount) {
     try {
-        // التأكد من أن private_key يحتوي على التنسيق الصحيح
         if (serviceAccount.private_key) {
             serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
         }
@@ -73,7 +71,7 @@ if (serviceAccount) {
 // API Routes
 // ============================================================
 
-// Health Check - يعرض حالة Firebase
+// Health Check
 app.get('/health', (req, res) => {
     const status = {
         status: 'healthy',
@@ -82,8 +80,7 @@ app.get('/health', (req, res) => {
         debug: {
             hasEnvKey: !!process.env.FIREBASE_SERVICE_ACCOUNT,
             hasServiceAccount: !!serviceAccount,
-            error: firebaseError || 'none',
-            envKeys: Object.keys(process.env).filter(k => k.includes('FIREBASE'))
+            error: firebaseError || 'none'
         }
     };
     res.json(status);
@@ -121,13 +118,8 @@ app.post('/api/user/register', async (req, res) => {
 
     try {
         const usersRef = db.collection('users');
-        
-        // البحث عن المستخدم
-        const userSnapshot = await usersRef
-            .where('telegramId', '==', telegramId)
-            .get();
+        const userSnapshot = await usersRef.where('telegramId', '==', telegramId).get();
 
-        // إذا كان المستخدم موجوداً
         if (!userSnapshot.empty) {
             return res.json({
                 success: true,
@@ -136,7 +128,6 @@ app.post('/api/user/register', async (req, res) => {
             });
         }
 
-        // تسجيل مستخدم جديد
         const displayName = firstName || username || 'مستخدم';
         
         const newUser = {
@@ -151,14 +142,8 @@ app.post('/api/user/register', async (req, res) => {
             referredBy: null,
             currency: 'USDT',
             wallets: {
-                main: 0,
-                reward: 0,
-                referral: 0,
-                locked: 0,
-                dzd: 0,
-                dzdReward: 0,
-                dzdReferral: 0,
-                dzdLocked: 0
+                main: 0, reward: 0, referral: 0, locked: 0,
+                dzd: 0, dzdReward: 0, dzdReferral: 0, dzdLocked: 0
             },
             miningData: {
                 currentPackage: null,
@@ -166,12 +151,9 @@ app.post('/api/user/register', async (req, res) => {
                 totalMinedDZD: 0,
                 totalReferrals: 0,
                 miningHistory: {
-                    today: 0,
-                    todayDZD: 0,
-                    thisWeek: 0,
-                    thisWeekDZD: 0,
-                    thisMonth: 0,
-                    thisMonthDZD: 0
+                    today: 0, todayDZD: 0,
+                    thisWeek: 0, thisWeekDZD: 0,
+                    thisMonth: 0, thisMonthDZD: 0
                 },
                 lastMiningUpdate: admin.firestore.FieldValue.serverTimestamp(),
                 activeSince: admin.firestore.FieldValue.serverTimestamp()
@@ -179,7 +161,6 @@ app.post('/api/user/register', async (req, res) => {
         };
         
         const docRef = await usersRef.add(newUser);
-        
         console.log(`✅ مستخدم جديد: ${displayName} (${telegramId})`);
         
         res.json({
@@ -222,10 +203,8 @@ app.post('/api/referral', async (req, res) => {
         
         const usersRef = db.collection('users');
         
-        // ===== البحث عن المُحيل =====
-        const referrerSnapshot = await usersRef
-            .where('telegramId', '==', referralCode)
-            .get();
+        // البحث عن المُحيل
+        const referrerSnapshot = await usersRef.where('telegramId', '==', referralCode).get();
 
         if (referrerSnapshot.empty) {
             return res.status(404).json({ 
@@ -235,12 +214,9 @@ app.post('/api/referral', async (req, res) => {
         }
 
         const referrerDoc = referrerSnapshot.docs[0];
-        const referrerData = referrerDoc.data();
 
-        // ===== البحث عن المستخدم الجديد =====
-        const userSnapshot = await usersRef
-            .where('telegramId', '==', telegramId)
-            .get();
+        // البحث عن المستخدم
+        const userSnapshot = await usersRef.where('telegramId', '==', telegramId).get();
 
         if (userSnapshot.empty) {
             return res.status(404).json({ 
@@ -252,7 +228,7 @@ app.post('/api/referral', async (req, res) => {
         const userDoc = userSnapshot.docs[0];
         const userData = userDoc.data();
 
-        // ===== التحقق من عدم استخدام كود سابق =====
+        // التحقق من عدم استخدام كود سابق
         if (userData.referredBy) {
             return res.status(400).json({ 
                 success: false, 
@@ -260,7 +236,7 @@ app.post('/api/referral', async (req, res) => {
             });
         }
 
-        // ===== تحديث المستخدم الجديد =====
+        // تحديث المستخدم الجديد
         await userDoc.ref.update({
             referredBy: referralCode,
             referrerUid: referrerDoc.id,
@@ -268,14 +244,14 @@ app.post('/api/referral', async (req, res) => {
             referralDate: admin.firestore.FieldValue.serverTimestamp()
         });
 
-        // ===== تحديث المُحيل =====
+        // تحديث المُحيل
         await referrerDoc.ref.update({
             'miningData.totalReferrals': admin.firestore.FieldValue.increment(1),
             'wallets.referral': admin.firestore.FieldValue.increment(5),
             'wallets.dzdReferral': admin.firestore.FieldValue.increment(1250)
         });
 
-        // ===== إضافة سجل الإحالة =====
+        // إضافة سجل الإحالة
         const referralRef = await db.collection('referrals').add({
             referrerUid: referrerDoc.id,
             referrerTelegramId: referralCode,
@@ -287,7 +263,7 @@ app.post('/api/referral', async (req, res) => {
             status: 'active'
         });
 
-        // ===== تسجيل المعاملة =====
+        // تسجيل المعاملة
         await db.collection('transactions').add({
             uid: referrerDoc.id,
             type: 'referral_bonus',
@@ -316,7 +292,7 @@ app.post('/api/referral', async (req, res) => {
 });
 
 // ============================================================
-// 3. جلب إحصائيات الإحالات لمستخدم
+// 3. جلب إحصائيات الإحالات
 // ============================================================
 app.get('/api/referrals/:telegramId', async (req, res) => {
     const { telegramId } = req.params;
@@ -330,9 +306,7 @@ app.get('/api/referrals/:telegramId', async (req, res) => {
     
     try {
         const usersRef = db.collection('users');
-        const userSnapshot = await usersRef
-            .where('telegramId', '==', telegramId)
-            .get();
+        const userSnapshot = await usersRef.where('telegramId', '==', telegramId).get();
 
         if (userSnapshot.empty) {
             return res.status(404).json({ 
@@ -344,7 +318,6 @@ app.get('/api/referrals/:telegramId', async (req, res) => {
         const userDoc = userSnapshot.docs[0];
         const userData = userDoc.data();
 
-        // جلب قائمة الإحالات
         const referralsSnapshot = await db.collection('referrals')
             .where('referrerUid', '==', userDoc.id)
             .orderBy('joinedAt', 'desc')
@@ -365,7 +338,6 @@ app.get('/api/referrals/:telegramId', async (req, res) => {
             });
         });
 
-        // حساب إحصائيات إضافية
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const thisWeekStart = new Date(today);
