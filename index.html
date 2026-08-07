@@ -1422,11 +1422,11 @@
     let depositData = null;
     let isDarkTheme = false;
     let miningInterval = null;
-    let selectedCurrency = 'USDT'; // العملة المختارة من صفحة الحساب
+    let selectedCurrency = 'USDT';
 
-    // حساب بريدي ثابت
     const POSTAL_ACCOUNT = '0799999002385412178';
-    const EXCHANGE_RATE = 250; // 1 USDT = 250 DZD
+    const EXCHANGE_RATE = 250;
+    const API_URL = 'https://crynova-1.onrender.com';
 
     // ============================================================
     // 3. TELEGRAM INTEGRATION
@@ -1452,7 +1452,82 @@
     }
 
     // ============================================================
-    // 4. AUTHENTICATION
+    // 4. ربط الإحالات بالخادم الخلفي
+    // ============================================================
+    
+    async function registerUserWithServer(telegramId, firstName, username) {
+        try {
+            const response = await fetch(`${API_URL}/api/user/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    telegramId: telegramId.toString(),
+                    firstName: firstName || '',
+                    username: username || ''
+                })
+            });
+            
+            const data = await response.json();
+            console.log('✅ تسجيل المستخدم:', data);
+            return data;
+            
+        } catch (error) {
+            console.error('❌ خطأ في التسجيل:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
+    async function handleReferralOnLoad() {
+        const tgUser = getTelegramUser();
+        if (!tgUser) {
+            console.log('⚠️ لا يوجد مستخدم تيليجرام');
+            return;
+        }
+        
+        // 1. تسجيل المستخدم في Firebase
+        await registerUserWithServer(
+            tgUser.id,
+            tgUser.firstName,
+            tgUser.username
+        );
+        
+        // 2. التحقق من كود الإحالة
+        const urlParams = new URLSearchParams(window.location.search);
+        const referralCode = urlParams.get('start');
+        
+        if (referralCode && referralCode !== tgUser.id.toString()) {
+            console.log(`🔗 كود الإحالة: ${referralCode}`);
+            
+            try {
+                const response = await fetch(`${API_URL}/api/referral`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        telegramId: tgUser.id.toString(),
+                        referralCode: referralCode
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('📨 نتيجة الإحالة:', data);
+                
+                if (data.success) {
+                    alert('🎉 تم تسجيل الإحالة بنجاح!');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    console.log('⚠️', data.message);
+                }
+                
+            } catch (error) {
+                console.error('❌ خطأ في الإحالة:', error);
+            }
+        }
+    }
+
+    // ============================================================
+    // 5. AUTHENTICATION
     // ============================================================
     async function authUser() {
         const tgUser = getTelegramUser();
@@ -1492,14 +1567,8 @@
                     referredBy: null,
                     currency: 'USDT',
                     wallets: {
-                        main: 0,
-                        reward: 0,
-                        referral: 0,
-                        locked: 0,
-                        dzd: 0,
-                        dzdReward: 0,
-                        dzdReferral: 0,
-                        dzdLocked: 0
+                        main: 0, reward: 0, referral: 0, locked: 0,
+                        dzd: 0, dzdReward: 0, dzdReferral: 0, dzdLocked: 0
                     },
                     miningData: {
                         currentPackage: null,
@@ -1507,12 +1576,9 @@
                         totalMinedDZD: 0,
                         totalReferrals: 0,
                         miningHistory: {
-                            today: 0,
-                            todayDZD: 0,
-                            thisWeek: 0,
-                            thisWeekDZD: 0,
-                            thisMonth: 0,
-                            thisMonthDZD: 0
+                            today: 0, todayDZD: 0,
+                            thisWeek: 0, thisWeekDZD: 0,
+                            thisMonth: 0, thisMonthDZD: 0
                         },
                         lastMiningUpdate: firebase.firestore.FieldValue.serverTimestamp(),
                         activeSince: firebase.firestore.FieldValue.serverTimestamp()
@@ -1525,6 +1591,9 @@
                 
                 console.log('✅ تم إنشاء حسابك بنجاح!');
             }
+            
+            // ✅ معالجة الإحالة
+            await handleReferralOnLoad();
             
             updateUI();
             loadPackages();
@@ -1544,7 +1613,7 @@
     }
 
     // ============================================================
-    // 5. HELPERS
+    // 6. HELPERS
     // ============================================================
     function formatDate(timestamp) {
         if (!timestamp) return '--';
@@ -1668,12 +1737,11 @@
     }
 
     // ============================================================
-    // 6. CURRENCY SELECTOR
+    // 7. CURRENCY SELECTOR
     // ============================================================
     function setCurrency(currency) {
         selectedCurrency = currency;
         
-        // تحديث الأزرار في صفحة الحساب
         const usdtBtn = document.getElementById('currencyUsdtBtn');
         const dzdBtn = document.getElementById('currencyDzdBtn');
         
@@ -1682,7 +1750,6 @@
         
         document.getElementById('currentCurrencyDisplay').textContent = currency;
         
-        // تحديث جميع الصفحات
         updateHomeUI();
         updateWalletUI();
         updateMiningUI();
@@ -1693,7 +1760,7 @@
     }
 
     // ============================================================
-    // 7. MINING SIMULATION
+    // 8. MINING SIMULATION
     // ============================================================
     function startMiningSimulation() {
         if (miningInterval) {
@@ -1755,7 +1822,7 @@
     }
 
     // ============================================================
-    // 8. NAVIGATION
+    // 9. NAVIGATION
     // ============================================================
     function navigateTo(page) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1782,7 +1849,7 @@
     }
 
     // ============================================================
-    // 9. UI UPDATES
+    // 10. UI UPDATES
     // ============================================================
     function updateUI() {
         if (!userData) return;
@@ -1862,7 +1929,6 @@
             document.getElementById('homePackage').textContent = 'لا توجد';
         }
         
-        // تحديث البطاقة حسب العملة
         const card = document.getElementById('homeBalanceCard');
         if (isDZD) {
             card.className = 'card dzd-gradient';
@@ -1992,7 +2058,7 @@
     }
 
     // ============================================================
-    // 10. DEPOSIT
+    // 11. DEPOSIT
     // ============================================================
     function updateDepositNetwork() {
         const currency = document.getElementById('depositCurrency').value;
@@ -2145,7 +2211,7 @@
     }
 
     // ============================================================
-    // 11. WITHDRAW
+    // 12. WITHDRAW
     // ============================================================
     function updateWithdrawNetwork() {
         const currency = document.getElementById('withdrawCurrency').value;
@@ -2308,7 +2374,7 @@
     }
 
     // ============================================================
-    // 12. PACKAGES
+    // 13. PACKAGES
     // ============================================================
     async function loadPackages() {
         try {
@@ -2366,7 +2432,7 @@
     }
 
     // ============================================================
-    // 13. PURCHASE
+    // 14. PURCHASE
     // ============================================================
     async function purchasePackage(packageId) {
         if (!userData) {
@@ -2459,7 +2525,7 @@
     }
 
     // ============================================================
-    // 14. TRANSACTIONS
+    // 15. TRANSACTIONS
     // ============================================================
     async function loadTransactions() {
         if (!userData) return;
@@ -2555,7 +2621,7 @@
     }
 
     // ============================================================
-    // 15. REFERRALS
+    // 16. REFERRALS
     // ============================================================
     async function loadReferrals() {
         if (!userData) return;
@@ -2598,7 +2664,7 @@
     }
 
     // ============================================================
-    // 16. WITHDRAW CALCULATION
+    // 17. WITHDRAW CALCULATION
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         const amountInput = document.getElementById('withdrawAmount');
@@ -2616,7 +2682,7 @@
     });
 
     // ============================================================
-    // 17. THEME TOGGLE
+    // 18. THEME TOGGLE
     // ============================================================
     function toggleTheme() {
         isDarkTheme = !isDarkTheme;
@@ -2668,12 +2734,11 @@
     }
 
     // ============================================================
-    // 18. INIT
+    // 19. INIT
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         authUser();
         
-        // تعيين العملة الافتراضية
         setCurrency('USDT');
         
         if (window.Telegram?.WebApp) {
@@ -2689,10 +2754,8 @@
         }
     });
 
-    console.log('🚀 Crynova Mining V2.0 - دعم كامل لـ USDT و DZD');
-    console.log('🏦 رقم الحساب البريدي الثابت:', POSTAL_ACCOUNT);
-    console.log('💱 سعر الصرف: 1 USDT =', EXCHANGE_RATE, 'DZD');
-    console.log('💱 العملة الحالية:', selectedCurrency);
+    console.log('🚀 Crynova Mining V2.0');
+    console.log('🔗 API_URL:', API_URL);
 </script>
 </body>
 </html>
