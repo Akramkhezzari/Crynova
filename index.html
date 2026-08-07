@@ -56,6 +56,8 @@
             --danger-light: rgba(225, 112, 85, 0.12);
             --info: #0984e3;
             --info-light: rgba(9, 132, 227, 0.12);
+            --dzd-color: #e17055;
+            --dzd-light: rgba(225, 112, 85, 0.12);
             
             --border: #e2e8f0;
             --border-light: #f0f4f8;
@@ -186,6 +188,20 @@
             -webkit-text-fill-color: white;
             background: none;
         }
+        .card.dzd-gradient {
+            background: linear-gradient(135deg, #e17055, #d63031);
+            border: none;
+            color: var(--text-white);
+        }
+        .card.dzd-gradient .card-title i,
+        .card.dzd-gradient .text-muted,
+        .card.dzd-gradient .balance-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .card.dzd-gradient .balance-large {
+            -webkit-text-fill-color: white;
+            background: none;
+        }
 
         .card-header {
             display: flex;
@@ -253,6 +269,9 @@
             font-weight: 800;
             color: var(--accent);
         }
+        .stat-box .number.dzd {
+            color: var(--dzd-color);
+        }
         .stat-box .label {
             font-size: 12px;
             color: var(--text-secondary);
@@ -312,6 +331,16 @@
         .btn-danger:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(225, 112, 85, 0.35);
+        }
+        
+        .btn-dzd {
+            background: linear-gradient(135deg, #e17055, #d63031);
+            color: white;
+            box-shadow: 0 4px 24px rgba(225, 112, 85, 0.3);
+        }
+        .btn-dzd:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(225, 112, 85, 0.4);
         }
         
         .btn-outline {
@@ -426,6 +455,9 @@
             font-weight: 900;
             color: var(--accent);
             margin: 8px 0;
+        }
+        .package-card .price.dzd-price {
+            color: var(--dzd-color);
         }
         .package-card .price small {
             font-size: 14px;
@@ -712,6 +744,42 @@
             border-radius: 10px;
         }
 
+        /* CURRENCY SELECTOR IN PROFILE */
+        .currency-selector {
+            display: flex;
+            gap: 8px;
+            padding: 4px 0;
+        }
+        .currency-selector button {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .currency-selector button.active-usdt {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+        .currency-selector button.active-dzd {
+            border-color: var(--dzd-color);
+            background: var(--dzd-light);
+            color: var(--dzd-color);
+        }
+        .currency-selector button:hover:not(.active-usdt):not(.active-dzd) {
+            border-color: var(--text-muted);
+        }
+        .currency-selector button i {
+            margin-left: 6px;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 420px) {
             .app-container { padding: 12px; }
@@ -733,6 +801,7 @@
             .btn { padding: 12px 18px; font-size: 14px; }
             .user-mini .user-name { font-size: 11px; }
             .user-mini .avatar-small { width: 28px; height: 28px; font-size: 12px; }
+            .currency-selector button { font-size: 12px; padding: 6px 10px; }
         }
 
         @media (min-width: 768px) {
@@ -751,6 +820,7 @@
         .text-warning { color: var(--warning); }
         .text-muted { color: var(--text-secondary); }
         .text-white { color: white; }
+        .text-dzd { color: var(--dzd-color); }
         .mt-8 { margin-top: 8px; }
         .mt-16 { margin-top: 16px; }
         .mt-24 { margin-top: 24px; }
@@ -772,6 +842,7 @@
             background: var(--border);
             margin: 16px 0;
         }
+        .clickable { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -786,7 +857,6 @@
             Crynova Mining
         </div>
         <div class="header-actions">
-            <!-- مستخدم مصغر -->
             <div class="user-mini" onclick="navigateTo('profile')">
                 <div class="avatar-small" id="headerAvatar">?</div>
                 <div>
@@ -803,7 +873,7 @@
     <!-- ========== PAGE: HOME ========== -->
     <div class="page active" id="page-home">
         <!-- بطاقة الرصيد الرئيسية -->
-        <div class="card gradient">
+        <div class="card gradient" id="homeBalanceCard">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                 <div>
                     <div class="balance-label" style="color:rgba(255,255,255,0.8);">الرصيد الكلي</div>
@@ -883,8 +953,8 @@
     <div class="page" id="page-packages">
         <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
             <i class="fas fa-cubes text-accent"></i> الباقات
-            <span class="eccp-badge"><i class="fas fa-credit-card"></i> الدفع بـ USDT / DZD</span>
         </h2>
+        
         <div id="packagesList">
             <div class="text-center text-muted" style="padding:40px 0;">
                 <div class="loader"></div>
@@ -899,7 +969,7 @@
             <i class="fas fa-microchip text-accent"></i> التعدين
         </h2>
         
-        <div class="card gradient">
+        <div class="card gradient" id="miningCard">
             <div class="flex-between">
                 <div>
                     <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">قوة التعدين</div>
@@ -946,8 +1016,8 @@
         <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
             <i class="fas fa-wallet text-accent"></i> المحفظة
         </h2>
-        
-        <div class="card gradient">
+
+        <div class="card gradient" id="walletBalanceCard">
             <div style="text-align:center;padding:4px 0;">
                 <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">الرصيد الكلي</div>
                 <div style="font-size:44px;font-weight:900;color:white;" id="walletTotal">0.00</div>
@@ -1259,11 +1329,33 @@
         </div>
 
         <div class="card">
-            <div class="list-item clickable" onclick="toggleLanguage()">
+            <!-- ===== مبدل العملة ===== -->
+            <div style="padding:4px 0 12px 0;border-bottom:1px solid var(--border-light);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <div style="display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;">
+                        <i class="fas fa-coins" style="color:var(--text-muted);width:20px;"></i>
+                        العملة
+                    </div>
+                    <span style="font-size:13px;color:var(--text-secondary);" id="currentCurrencyDisplay">USDT</span>
+                </div>
+                <div class="currency-selector">
+                    <button onclick="setCurrency('USDT')" id="currencyUsdtBtn" class="active-usdt">
+                        <i class="fas fa-dollar-sign"></i> USDT
+                    </button>
+                    <button onclick="setCurrency('DZD')" id="currencyDzdBtn">
+                        <i class="fas fa-dinar-sign"></i> DZD
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== اللغة ===== -->
+            <div class="list-item clickable" onclick="toggleLanguage()" style="padding-top:14px;">
                 <span class="left"><i class="fas fa-globe" style="color:var(--text-muted);width:20px;"></i> اللغة</span>
                 <span style="font-weight:600;">العربية <i class="fas fa-chevron-left" style="font-size:12px;color:var(--text-muted);"></i></span>
             </div>
-            <div class="list-item" style="border-bottom:none;">
+
+            <!-- ===== الوضع المظلم ===== -->
+            <div class="list-item" style="border-bottom:none;padding-bottom:0;">
                 <span class="left"><i class="fas fa-moon" style="color:var(--text-muted);width:20px;"></i> الوضع المظلم</span>
                 <label style="position:relative;display:inline-block;width:48px;height:26px;">
                     <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()" style="opacity:0;width:0;height:0;">
@@ -1330,9 +1422,11 @@
     let depositData = null;
     let isDarkTheme = false;
     let miningInterval = null;
+    let selectedCurrency = 'USDT'; // العملة المختارة من صفحة الحساب
 
     // حساب بريدي ثابت
     const POSTAL_ACCOUNT = '0799999002385412178';
+    const EXCHANGE_RATE = 250; // 1 USDT = 250 DZD
 
     // ============================================================
     // 3. TELEGRAM INTEGRATION
@@ -1401,16 +1495,24 @@
                         main: 0,
                         reward: 0,
                         referral: 0,
-                        locked: 0
+                        locked: 0,
+                        dzd: 0,
+                        dzdReward: 0,
+                        dzdReferral: 0,
+                        dzdLocked: 0
                     },
                     miningData: {
                         currentPackage: null,
                         totalMined: 0,
+                        totalMinedDZD: 0,
                         totalReferrals: 0,
                         miningHistory: {
                             today: 0,
+                            todayDZD: 0,
                             thisWeek: 0,
-                            thisMonth: 0
+                            thisWeekDZD: 0,
+                            thisMonth: 0,
+                            thisMonthDZD: 0
                         },
                         lastMiningUpdate: firebase.firestore.FieldValue.serverTimestamp(),
                         activeSince: firebase.firestore.FieldValue.serverTimestamp()
@@ -1552,7 +1654,6 @@
         }
     }
 
-    // نسخ رقم الحساب البريدي
     function copyDepositAccount() {
         copyText(POSTAL_ACCOUNT);
         const btn = event.target.closest('.copy-btn');
@@ -1567,7 +1668,32 @@
     }
 
     // ============================================================
-    // 6. MINING SIMULATION
+    // 6. CURRENCY SELECTOR
+    // ============================================================
+    function setCurrency(currency) {
+        selectedCurrency = currency;
+        
+        // تحديث الأزرار في صفحة الحساب
+        const usdtBtn = document.getElementById('currencyUsdtBtn');
+        const dzdBtn = document.getElementById('currencyDzdBtn');
+        
+        usdtBtn.className = currency === 'USDT' ? 'active-usdt' : '';
+        dzdBtn.className = currency === 'DZD' ? 'active-dzd' : '';
+        
+        document.getElementById('currentCurrencyDisplay').textContent = currency;
+        
+        // تحديث جميع الصفحات
+        updateHomeUI();
+        updateWalletUI();
+        updateMiningUI();
+        updateReferralUI();
+        renderPackages();
+        
+        console.log(`💱 تم تغيير العملة إلى ${currency}`);
+    }
+
+    // ============================================================
+    // 7. MINING SIMULATION
     // ============================================================
     function startMiningSimulation() {
         if (miningInterval) {
@@ -1590,24 +1716,35 @@
             
             const hashRate = pkg.hashRate || 0;
             const reward = hashRate * 0.001;
+            const rewardDZD = reward * EXCHANGE_RATE;
             
             if (reward > 0) {
                 try {
                     const userRef = db.collection('users').doc(userData.uid);
                     await userRef.update({
                         'wallets.reward': firebase.firestore.FieldValue.increment(reward),
+                        'wallets.dzdReward': firebase.firestore.FieldValue.increment(rewardDZD),
                         'miningData.totalMined': firebase.firestore.FieldValue.increment(reward),
+                        'miningData.totalMinedDZD': firebase.firestore.FieldValue.increment(rewardDZD),
                         'miningData.miningHistory.today': firebase.firestore.FieldValue.increment(reward),
+                        'miningData.miningHistory.todayDZD': firebase.firestore.FieldValue.increment(rewardDZD),
                         'miningData.miningHistory.thisWeek': firebase.firestore.FieldValue.increment(reward),
-                        'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(reward)
+                        'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(rewardDZD),
+                        'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(reward),
+                        'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(rewardDZD)
                     });
                     
-                    if (!userData.wallets) userData.wallets = { main: 0, reward: 0, referral: 0, locked: 0 };
+                    if (!userData.wallets) userData.wallets = { main: 0, reward: 0, referral: 0, locked: 0, dzd: 0, dzdReward: 0, dzdReferral: 0, dzdLocked: 0 };
                     userData.wallets.reward = (userData.wallets.reward || 0) + reward;
+                    userData.wallets.dzdReward = (userData.wallets.dzdReward || 0) + rewardDZD;
                     userData.miningData.totalMined = (userData.miningData.totalMined || 0) + reward;
+                    userData.miningData.totalMinedDZD = (userData.miningData.totalMinedDZD || 0) + rewardDZD;
                     userData.miningData.miningHistory.today = (userData.miningData.miningHistory.today || 0) + reward;
+                    userData.miningData.miningHistory.todayDZD = (userData.miningData.miningHistory.todayDZD || 0) + rewardDZD;
                     userData.miningData.miningHistory.thisWeek = (userData.miningData.miningHistory.thisWeek || 0) + reward;
+                    userData.miningData.miningHistory.thisWeekDZD = (userData.miningData.miningHistory.thisWeekDZD || 0) + rewardDZD;
                     userData.miningData.miningHistory.thisMonth = (userData.miningData.miningHistory.thisMonth || 0) + reward;
+                    userData.miningData.miningHistory.thisMonthDZD = (userData.miningData.miningHistory.thisMonthDZD || 0) + rewardDZD;
                     
                     updateUI();
                 } catch (error) {
@@ -1618,7 +1755,7 @@
     }
 
     // ============================================================
-    // 7. NAVIGATION
+    // 8. NAVIGATION
     // ============================================================
     function navigateTo(page) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1632,6 +1769,7 @@
         if (page === 'wallet') updateWalletUI();
         if (page === 'mining') updateMiningUI();
         if (page === 'referrals') updateReferralUI();
+        if (page === 'profile') updateProfileUI();
         
         if (window.Telegram?.WebApp) {
             const tg = window.Telegram.WebApp;
@@ -1644,7 +1782,7 @@
     }
 
     // ============================================================
-    // 8. UI UPDATES
+    // 9. UI UPDATES
     // ============================================================
     function updateUI() {
         if (!userData) return;
@@ -1652,7 +1790,6 @@
         const u = userData;
         const name = u.displayName || u.username || 'مستخدم';
         const initial = name.charAt(0).toUpperCase() || '?';
-        const currency = u.currency || 'USDT';
         
         document.querySelectorAll('#profileAvatar, #headerAvatar').forEach(el => {
             if (u.photoURL && u.photoURL.startsWith('http')) {
@@ -1671,31 +1808,20 @@
         document.getElementById('profileLevel').textContent = u.level || 1;
         document.getElementById('headerUserLevel').textContent = `المستوى ${u.level || 1}`;
         
-        document.querySelectorAll('#homeCurrency, #walletTotalCurrency, #miningDailyCurrency').forEach(el => {
-            if (el) el.textContent = currency;
-        });
-        
-        const mainBalance = u.wallets?.main || 0;
-        document.getElementById('homeBalance').textContent = mainBalance.toFixed(2);
-        
-        const miningData = u.miningData || {};
-        document.getElementById('homeMined').textContent = (miningData.totalMined || 0).toFixed(2);
-        document.getElementById('homeReferrals').textContent = miningData.totalReferrals || 0;
-        
-        const pkg = miningData.currentPackage;
-        if (pkg && pkg.name) {
-            document.getElementById('homePackage').textContent = pkg.name;
-        } else {
-            document.getElementById('homePackage').textContent = 'لا توجد';
-        }
-        
-        updateMiningStatus();
-        
+        updateProfileUI();
+        updateHomeUI();
+        updateWalletUI();
+        updateMiningUI();
+        updateReferralUI();
+    }
+
+    function updateProfileUI() {
+        if (!userData) return;
+        const u = userData;
         document.getElementById('profileTelegram').textContent = u.username ? `@${u.username}` : 'غير متاح';
         document.getElementById('profileTelegramId').textContent = u.telegramId || '--';
         document.getElementById('profileJoinDate').textContent = formatDate(u.joinDate);
         
-        // رابط الإحالة
         const refLink = document.getElementById('referralLink');
         if (u.telegramId) {
             const url = `https://t.me/Crynova_bot?start=${u.telegramId}`;
@@ -1703,6 +1829,48 @@
         } else {
             refLink.value = 'جاري التحميل...';
         }
+        
+        document.getElementById('currentCurrencyDisplay').textContent = selectedCurrency;
+    }
+
+    function updateHomeUI() {
+        if (!userData) return;
+        const u = userData;
+        const currency = selectedCurrency;
+        const isDZD = currency === 'DZD';
+        
+        let balance = 0;
+        let mined = 0;
+        
+        if (isDZD) {
+            balance = (u.wallets?.dzd || 0) + (u.wallets?.dzdReward || 0) + (u.wallets?.dzdReferral || 0);
+            mined = u.miningData?.totalMinedDZD || 0;
+        } else {
+            balance = (u.wallets?.main || 0) + (u.wallets?.reward || 0) + (u.wallets?.referral || 0);
+            mined = u.miningData?.totalMined || 0;
+        }
+        
+        document.getElementById('homeBalance').textContent = balance.toFixed(2);
+        document.getElementById('homeCurrency').textContent = currency;
+        document.getElementById('homeMined').textContent = mined.toFixed(2);
+        document.getElementById('homeReferrals').textContent = u.miningData?.totalReferrals || 0;
+        
+        const pkg = u.miningData?.currentPackage;
+        if (pkg && pkg.name) {
+            document.getElementById('homePackage').textContent = pkg.name;
+        } else {
+            document.getElementById('homePackage').textContent = 'لا توجد';
+        }
+        
+        // تحديث البطاقة حسب العملة
+        const card = document.getElementById('homeBalanceCard');
+        if (isDZD) {
+            card.className = 'card dzd-gradient';
+        } else {
+            card.className = 'card gradient';
+        }
+        
+        updateMiningStatus();
     }
 
     function updateMiningStatus() {
@@ -1737,38 +1905,94 @@
     }
 
     function updateWalletUI() {
-        const w = userData?.wallets || {};
-        const total = (w.main || 0) + (w.reward || 0) + (w.referral || 0);
-        document.getElementById('walletTotal').textContent = total.toFixed(2);
-        document.getElementById('walletMain').textContent = (w.main || 0).toFixed(2);
-        document.getElementById('walletReward').textContent = (w.reward || 0).toFixed(2);
-        document.getElementById('walletReferral').textContent = (w.referral || 0).toFixed(2);
-        document.getElementById('walletLocked').textContent = (w.locked || 0).toFixed(2);
+        if (!userData) return;
+        const w = userData.wallets || {};
+        const currency = selectedCurrency;
+        const isDZD = currency === 'DZD';
         
-        const withdrawable = (w.main || 0) + (w.reward || 0) + (w.referral || 0);
-        document.getElementById('withdrawableBalance').textContent = withdrawable.toFixed(2);
+        let total = 0, main = 0, reward = 0, referral = 0, locked = 0, withdrawable = 0;
+        
+        if (isDZD) {
+            main = w.dzd || 0;
+            reward = w.dzdReward || 0;
+            referral = w.dzdReferral || 0;
+            locked = w.dzdLocked || 0;
+            total = main + reward + referral;
+            withdrawable = total;
+        } else {
+            main = w.main || 0;
+            reward = w.reward || 0;
+            referral = w.referral || 0;
+            locked = w.locked || 0;
+            total = main + reward + referral;
+            withdrawable = total;
+        }
+        
+        document.getElementById('walletTotal').textContent = total.toFixed(2);
+        document.getElementById('walletTotalCurrency').textContent = currency;
+        document.getElementById('walletMain').textContent = main.toFixed(2);
+        document.getElementById('walletReward').textContent = reward.toFixed(2);
+        document.getElementById('walletReferral').textContent = referral.toFixed(2);
+        document.getElementById('walletLocked').textContent = locked.toFixed(2);
         document.getElementById('walletWithdrawable').textContent = withdrawable.toFixed(2);
+        document.getElementById('withdrawableBalance').textContent = withdrawable.toFixed(2);
+        
+        const card = document.getElementById('walletBalanceCard');
+        if (isDZD) {
+            card.className = 'card dzd-gradient';
+        } else {
+            card.className = 'card gradient';
+        }
     }
 
     function updateMiningUI() {
-        const pkg = userData?.miningData?.currentPackage;
+        if (!userData) return;
+        const md = userData.miningData || {};
+        const pkg = md.currentPackage;
         const hashRate = pkg?.hashRate || 0;
+        const currency = selectedCurrency;
+        const isDZD = currency === 'DZD';
+        
         document.getElementById('miningDetailHashRate').textContent = hashRate.toFixed(2);
         const dailyEarnings = hashRate * 1.44;
-        document.getElementById('miningDailyEarnings').textContent = dailyEarnings.toFixed(2);
-        document.getElementById('miningTotalMined').textContent = (userData?.miningData?.totalMined || 0).toFixed(2);
-        document.getElementById('miningToday').textContent = (userData?.miningData?.miningHistory?.today || 0).toFixed(2);
-        document.getElementById('miningThisWeek').textContent = (userData?.miningData?.miningHistory?.thisWeek || 0).toFixed(2);
-        document.getElementById('miningThisMonth').textContent = (userData?.miningData?.miningHistory?.thisMonth || 0).toFixed(2);
+        const dailyEarningsDZD = dailyEarnings * EXCHANGE_RATE;
+        document.getElementById('miningDailyEarnings').textContent = isDZD ? dailyEarningsDZD.toFixed(2) : dailyEarnings.toFixed(2);
+        document.getElementById('miningDailyCurrency').textContent = currency;
+        
+        document.getElementById('miningTotalMined').textContent = isDZD 
+            ? (md.totalMinedDZD || 0).toFixed(2) 
+            : (md.totalMined || 0).toFixed(2);
+        document.getElementById('miningToday').textContent = isDZD 
+            ? (md.miningHistory?.todayDZD || 0).toFixed(2) 
+            : (md.miningHistory?.today || 0).toFixed(2);
+        document.getElementById('miningThisWeek').textContent = isDZD 
+            ? (md.miningHistory?.thisWeekDZD || 0).toFixed(2) 
+            : (md.miningHistory?.thisWeek || 0).toFixed(2);
+        document.getElementById('miningThisMonth').textContent = isDZD 
+            ? (md.miningHistory?.thisMonthDZD || 0).toFixed(2) 
+            : (md.miningHistory?.thisMonth || 0).toFixed(2);
+        
+        const card = document.getElementById('miningCard');
+        if (isDZD) {
+            card.className = 'card dzd-gradient';
+        } else {
+            card.className = 'card gradient';
+        }
     }
 
     function updateReferralUI() {
-        document.getElementById('refCount').textContent = userData?.miningData?.totalReferrals || 0;
-        document.getElementById('refEarnings').textContent = (userData?.wallets?.referral || 0).toFixed(2);
+        if (!userData) return;
+        const currency = selectedCurrency;
+        const isDZD = currency === 'DZD';
+        const earnings = isDZD 
+            ? (userData.wallets?.dzdReferral || 0) 
+            : (userData.wallets?.referral || 0);
+        document.getElementById('refCount').textContent = userData.miningData?.totalReferrals || 0;
+        document.getElementById('refEarnings').textContent = earnings.toFixed(2);
     }
 
     // ============================================================
-    // 9. DEPOSIT
+    // 10. DEPOSIT
     // ============================================================
     function updateDepositNetwork() {
         const currency = document.getElementById('depositCurrency').value;
@@ -1778,7 +2002,6 @@
         if (currency === 'DZD') {
             networkGroup.style.display = 'none';
             eccpGroup.style.display = 'block';
-            // تعيين رقم الحساب تلقائياً
             document.getElementById('depositEccpId').value = POSTAL_ACCOUNT;
         } else {
             networkGroup.style.display = 'block';
@@ -1866,7 +2089,7 @@
                 network: depositData.currency === 'DZD' ? 'CCP' : document.getElementById('depositNetwork').value,
                 walletAddress: depositData.address,
                 eccpId: depositData.eccpId || null,
-                transactionId: transactionId, // رقم العملية بدلاً من الصورة
+                transactionId: transactionId,
                 status: 'pending',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
@@ -1922,7 +2145,7 @@
     }
 
     // ============================================================
-    // 10. WITHDRAW
+    // 11. WITHDRAW
     // ============================================================
     function updateWithdrawNetwork() {
         const currency = document.getElementById('withdrawCurrency').value;
@@ -1955,7 +2178,13 @@
             return;
         }
         
-        const withdrawable = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
+        let withdrawable = 0;
+        if (currency === 'USDT') {
+            withdrawable = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
+        } else {
+            withdrawable = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+        }
+        
         if (amount > withdrawable) {
             console.error('الرصيد غير كافٍ');
             return;
@@ -1989,9 +2218,14 @@
         
         try {
             const userRef = db.collection('users').doc(userData.uid);
-            await userRef.update({
-                'wallets.main': firebase.firestore.FieldValue.increment(-total)
-            });
+            const updateData = {};
+            
+            if (currency === 'USDT') {
+                updateData['wallets.main'] = firebase.firestore.FieldValue.increment(-total);
+            } else {
+                updateData['wallets.dzd'] = firebase.firestore.FieldValue.increment(-total);
+            }
+            await userRef.update(updateData);
             
             await db.collection('withdrawals').add({
                 uid: userData.uid,
@@ -2011,13 +2245,17 @@
                 amount: total,
                 currency: currency,
                 description: `سحب إلى ${recipient.substring(0, 10)}...`,
-                balanceAfter: userData.wallets.main - total,
+                balanceAfter: withdrawable - total,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             
             console.log('تم طلب السحب بنجاح، في انتظار المراجعة');
             
-            userData.wallets.main -= total;
+            if (currency === 'USDT') {
+                userData.wallets.main -= total;
+            } else {
+                userData.wallets.dzd -= total;
+            }
             updateWalletUI();
             loadWithdrawals();
             loadTransactions();
@@ -2070,7 +2308,7 @@
     }
 
     // ============================================================
-    // 11. PACKAGES
+    // 12. PACKAGES
     // ============================================================
     async function loadPackages() {
         try {
@@ -2101,27 +2339,34 @@
             return;
         }
         
-        container.innerHTML = allPackages.map((pkg, index) => `
+        const currency = selectedCurrency;
+        const isDZD = currency === 'DZD';
+        
+        container.innerHTML = allPackages.map((pkg, index) => {
+            const price = isDZD ? (pkg.price * EXCHANGE_RATE) : pkg.price;
+            const priceCurrency = isDZD ? 'DZD' : pkg.currency;
+            
+            return `
             <div class="package-card ${index === 1 ? 'popular' : ''}">
                 ${index === 1 ? `<div class="badge-popular">⭐ الأفضل</div>` : ''}
                 <div class="icon">${pkg.icon || '📦'}</div>
                 <div class="name">${pkg.name}</div>
-                <div class="price">${pkg.price} <small>${pkg.currency}</small></div>
+                <div class="price ${isDZD ? 'dzd-price' : ''}">${price.toFixed(2)} <small>${priceCurrency}</small></div>
                 <div style="text-align:center;color:var(--text-secondary);font-size:14px;font-weight:500;">${pkg.description || ''}</div>
                 <ul class="features">
                     ${pkg.features?.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('') || ''}
                     <li><i class="fas fa-clock"></i> مدة ${pkg.duration} يوم</li>
                     <li><i class="fas fa-microchip"></i> ${pkg.hashRate} H/s</li>
                 </ul>
-                <button class="btn ${index === 1 ? 'btn-primary' : 'btn-outline'}" onclick="purchasePackage('${pkg.id}')">
+                <button class="btn ${index === 1 ? (isDZD ? 'btn-dzd' : 'btn-primary') : 'btn-outline'}" onclick="purchasePackage('${pkg.id}')">
                     <i class="fas fa-cart-plus"></i> شراء الآن
                 </button>
             </div>
-        `).join('');
+        `}).join('');
     }
 
     // ============================================================
-    // 12. PURCHASE
+    // 13. PURCHASE
     // ============================================================
     async function purchasePackage(packageId) {
         if (!userData) {
@@ -2135,52 +2380,74 @@
             return;
         }
         
-        const mainBalance = userData.wallets?.main || 0;
-        if (mainBalance < pkg.price) {
-            console.error(`الرصيد غير كافٍ. تحتاج ${pkg.price} ${pkg.currency}`);
+        const currency = selectedCurrency;
+        const isDZD = currency === 'DZD';
+        const price = isDZD ? (pkg.price * EXCHANGE_RATE) : pkg.price;
+        const priceCurrency = isDZD ? 'DZD' : pkg.currency;
+        
+        let balance = 0;
+        if (isDZD) {
+            balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+        } else {
+            balance = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
+        }
+        
+        if (balance < price) {
+            console.error(`الرصيد غير كافٍ. تحتاج ${price.toFixed(2)} ${priceCurrency}`);
             return;
         }
         
-        if (!confirm(`هل أنت متأكد من شراء باقة "${pkg.name}" بسعر ${pkg.price} ${pkg.currency}؟`)) return;
+        if (!confirm(`هل أنت متأكد من شراء باقة "${pkg.name}" بسعر ${price.toFixed(2)} ${priceCurrency}؟`)) return;
         
         try {
             const userRef = db.collection('users').doc(userData.uid);
+            const updateData = {};
             
-            await userRef.update({
-                'wallets.main': firebase.firestore.FieldValue.increment(-pkg.price),
-                'miningData.currentPackage': {
-                    name: pkg.name,
-                    hashRate: pkg.hashRate,
-                    duration: pkg.duration,
-                    endDate: new Date(Date.now() + pkg.duration * 24 * 60 * 60 * 1000),
-                    packageId: pkg.id,
-                    price: pkg.price,
-                    currency: pkg.currency
-                }
-            });
+            if (isDZD) {
+                updateData['wallets.dzd'] = firebase.firestore.FieldValue.increment(-price);
+            } else {
+                updateData['wallets.main'] = firebase.firestore.FieldValue.increment(-price);
+            }
+            
+            updateData['miningData.currentPackage'] = {
+                name: pkg.name,
+                hashRate: pkg.hashRate,
+                duration: pkg.duration,
+                endDate: new Date(Date.now() + pkg.duration * 24 * 60 * 60 * 1000),
+                packageId: pkg.id,
+                price: price,
+                currency: priceCurrency
+            };
+            
+            await userRef.update(updateData);
             
             await db.collection('transactions').add({
                 uid: userData.uid,
                 type: 'purchase',
-                amount: pkg.price,
-                currency: pkg.currency,
+                amount: price,
+                currency: priceCurrency,
                 description: `شراء باقة ${pkg.name}`,
-                balanceAfter: mainBalance - pkg.price,
+                balanceAfter: balance - price,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 packageId: pkg.id
             });
             
             console.log(`تم شراء باقة ${pkg.name} بنجاح!`);
             
-            userData.wallets.main = mainBalance - pkg.price;
+            if (isDZD) {
+                userData.wallets.dzd = (userData.wallets.dzd || 0) - price;
+            } else {
+                userData.wallets.main = (userData.wallets.main || 0) - price;
+            }
+            
             userData.miningData.currentPackage = {
                 name: pkg.name,
                 hashRate: pkg.hashRate,
                 duration: pkg.duration,
                 endDate: new Date(Date.now() + pkg.duration * 24 * 60 * 60 * 1000),
                 packageId: pkg.id,
-                price: pkg.price,
-                currency: pkg.currency
+                price: price,
+                currency: priceCurrency
             };
             
             updateUI();
@@ -2192,7 +2459,7 @@
     }
 
     // ============================================================
-    // 13. TRANSACTIONS
+    // 14. TRANSACTIONS
     // ============================================================
     async function loadTransactions() {
         if (!userData) return;
@@ -2271,7 +2538,7 @@
                 </div>
                 <div class="right">
                     <div style="font-size:14px;font-weight:700;color:${t.type === 'withdraw' ? 'var(--danger)' : 'var(--success)'}">
-                        ${t.type === 'withdraw' ? '−' : '+'}${t.amount.toFixed(2)}
+                        ${t.type === 'withdraw' ? '−' : '+'}${t.amount.toFixed(2)} ${t.currency || 'USDT'}
                     </div>
                 </div>
             </div>
@@ -2288,7 +2555,7 @@
     }
 
     // ============================================================
-    // 14. REFERRALS
+    // 15. REFERRALS
     // ============================================================
     async function loadReferrals() {
         if (!userData) return;
@@ -2331,7 +2598,7 @@
     }
 
     // ============================================================
-    // 15. WITHDRAW CALCULATION
+    // 16. WITHDRAW CALCULATION
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         const amountInput = document.getElementById('withdrawAmount');
@@ -2349,7 +2616,7 @@
     });
 
     // ============================================================
-    // 16. THEME TOGGLE
+    // 17. THEME TOGGLE
     // ============================================================
     function toggleTheme() {
         isDarkTheme = !isDarkTheme;
@@ -2401,10 +2668,13 @@
     }
 
     // ============================================================
-    // 17. INIT
+    // 18. INIT
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         authUser();
+        
+        // تعيين العملة الافتراضية
+        setCurrency('USDT');
         
         if (window.Telegram?.WebApp) {
             const tg = window.Telegram.WebApp;
@@ -2419,8 +2689,10 @@
         }
     });
 
-    console.log('🚀 Crynova Mining V2.0 - تم التحديث لمشروع crynova-4d6b3');
+    console.log('🚀 Crynova Mining V2.0 - دعم كامل لـ USDT و DZD');
     console.log('🏦 رقم الحساب البريدي الثابت:', POSTAL_ACCOUNT);
+    console.log('💱 سعر الصرف: 1 USDT =', EXCHANGE_RATE, 'DZD');
+    console.log('💱 العملة الحالية:', selectedCurrency);
 </script>
 </body>
 </html>
