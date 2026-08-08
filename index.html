@@ -1643,7 +1643,7 @@
                         level: 1,
                         status: 'active',
                         referralCode: tgUser.id.toString(),
-                        referredBy: null,
+                        referrerBy: null,   // ✅ تم التعديل: استخدام referrerBy بدلاً من referredBy
                         currency: 'USDT',
                         wallets: {
                             main: 0,
@@ -1730,9 +1730,9 @@
                 return;
             }
 
-            // منع معالجة الإحالة إذا كان المستخدم قد تمت إحالته مسبقاً
-            if (userData.referredBy) {
-                console.log('ℹ️ هذا المستخدم تمت إحالته مسبقاً، تجاهل.');
+            // منع معالجة الإحالة إذا كان المستخدم قد تمت إحالته مسبقاً (باستخدام الحقل الصحيح referrerBy)
+            if (userData.referrerBy) {
+                console.log('ℹ️ هذا المستخدم تمت إحالته مسبقاً (referrerBy = ' + userData.referrerBy + ')، تجاهل.');
                 return;
             }
 
@@ -1743,10 +1743,11 @@
             if (!referralCode && window.Telegram?.WebApp) {
                 const tg = window.Telegram.WebApp;
                 referralCode = tg.initDataUnsafe?.start_param;
+                if (referralCode) console.log('📱 قرأت start_param من WebApp: ' + referralCode);
             }
 
             if (!referralCode) {
-                console.log('ℹ️ لا يوجد كود إحالة');
+                console.log('ℹ️ لا يوجد كود إحالة (start) في الرابط أو start_param.');
                 return;
             }
 
@@ -1758,13 +1759,14 @@
             console.log(`🔗 معالجة الإحالة: ${referralCode}`);
 
             try {
-                // البحث عن المُحيل
+                // البحث عن المُحيل باستخدام referralCode (وهو telegramId الخاص به)
                 const referrerSnapshot = await db.collection('users')
                     .where('referralCode', '==', referralCode)
                     .get();
 
                 if (referrerSnapshot.empty) {
-                    console.log('⚠️ لم يتم العثور على المُحيل');
+                    console.log('⚠️ لم يتم العثور على المُحيل بهذا الكود: ' + referralCode);
+                    showToast('لم يتم العثور على المستخدم الذي دعاك. تأكد من تسجيله أولاً.');
                     return;
                 }
 
@@ -1776,7 +1778,7 @@
                     .get();
 
                 if (!existingReferral.empty) {
-                    console.log('⚠️ هذا المستخدم تمت إحالته مسبقاً (تم العثور على سجل)');
+                    console.log('⚠️ هذا المستخدم تمت إحالته مسبقاً (تم العثور على سجل referrals)');
                     return;
                 }
 
@@ -1790,9 +1792,9 @@
 
                     if (!userDoc.exists || !referrerDocData.exists) return;
 
-                    // تحديث المستخدم الحالي (تعيين المُحيل)
+                    // تحديث المستخدم الحالي (تعيين المُحيل) - نستخدم referrerBy
                     transaction.update(userRef, {
-                        referredBy: referralCode
+                        referrerBy: referralCode
                     });
 
                     // تحديث المُحيل (زيادة عدد الإحالات والمكافآت)
@@ -1828,7 +1830,7 @@
                 showToast('🎉 تم تفعيل الإحالة! شكراً لدعوتك.');
 
                 // تحديث بيانات المستخدم محلياً
-                userData.referredBy = referralCode;
+                userData.referrerBy = referralCode;
                 updateUI();
                 loadReferrals();
                 loadTransactions();
@@ -1967,19 +1969,21 @@
         function showToast(msg) {
             const toast = document.createElement('div');
             toast.style.cssText = `
-                    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-                    background: var(--accent); color: white; padding: 12px 24px;
-                    border-radius: 30px; font-weight: 700; z-index: 9999;
-                    box-shadow: var(--shadow-lg); font-family: 'Cairo', sans-serif;
-                    animation: fadeSlideIn 0.3s ease;
-                `;
+                        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+                        background: var(--accent); color: white; padding: 12px 24px;
+                        border-radius: 30px; font-weight: 700; z-index: 9999;
+                        box-shadow: var(--shadow-lg); font-family: 'Cairo', sans-serif;
+                        animation: fadeSlideIn 0.3s ease;
+                        max-width: 90%;
+                        text-align: center;
+                    `;
             toast.textContent = msg;
             document.body.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';
                 toast.style.transition = 'opacity 0.3s';
                 setTimeout(() => toast.remove(), 300);
-            }, 2500);
+            }, 3000);
         }
 
         // ============================================================
@@ -3217,11 +3221,12 @@
             }
         });
 
-        console.log('🚀 Crynova Mining V2.0 (مع إصلاح الإحالات)');
+        console.log('🚀 Crynova Mining V2.0 (مع إصلاح الإحالات - استخدام referrerBy)');
         console.log('✅ الإحالات تعمل الآن للمستخدمين الجدد والموجودين');
         console.log('✅ دعم start_param من Telegram WebApp');
         console.log('💰 مكافأة الإحالة: 5 USDT + ' + (5 * 250) + ' DZD');
         console.log('🔒 جميع العمليات المالية تستخدم معاملات Firestore');
+        console.log('🔑 حقل الإحالة المستخدم: referrerBy (متوافق مع قاعدة البيانات)');
     </script>
 </body>
 </html>
