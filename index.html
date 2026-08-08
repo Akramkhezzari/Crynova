@@ -1678,10 +1678,10 @@
                     userData = currentUser;
 
                     console.log('✅ تم إنشاء حسابك بنجاح!');
-
-                    // معالجة الإحالة
-                    await handleReferralLocally();
                 }
+
+                // ✅ معالجة الإحالة في كل مرة (سواء كان المستخدم جديداً أو موجوداً)
+                await handleReferralLocally();
 
                 // الاستماع لتحديثات المستخدم في الوقت الفعلي
                 listenToUserUpdates();
@@ -1721,19 +1721,37 @@
         }
 
         // ============================================================
-        // 5. REFERRAL HANDLING (معاملات)
+        // 5. REFERRAL HANDLING (معاملة + دعم start_param)
         // ============================================================
         async function handleReferralLocally() {
+            // تأكد من وجود بيانات المستخدم
             if (!userData || !userData.uid) {
                 console.log('⏳ انتظار اكتمال بيانات المستخدم...');
                 return;
             }
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const referralCode = urlParams.get('start');
+            // منع معالجة الإحالة إذا كان المستخدم قد تمت إحالته مسبقاً
+            if (userData.referredBy) {
+                console.log('ℹ️ هذا المستخدم تمت إحالته مسبقاً، تجاهل.');
+                return;
+            }
 
-            if (!referralCode || referralCode === userData.telegramId) {
-                console.log('ℹ️ لا يوجد كود إحالة أو الكود خاص بالمستخدم نفسه');
+            // محاولة قراءة كود الإحالة من URL أو من Telegram WebApp
+            const urlParams = new URLSearchParams(window.location.search);
+            let referralCode = urlParams.get('start');
+
+            if (!referralCode && window.Telegram?.WebApp) {
+                const tg = window.Telegram.WebApp;
+                referralCode = tg.initDataUnsafe?.start_param;
+            }
+
+            if (!referralCode) {
+                console.log('ℹ️ لا يوجد كود إحالة');
+                return;
+            }
+
+            if (referralCode === userData.telegramId) {
+                console.log('ℹ️ كود الإحالة خاص بالمستخدم نفسه، تجاهل.');
                 return;
             }
 
@@ -1752,13 +1770,13 @@
 
                 const referrerDoc = referrerSnapshot.docs[0];
 
-                // التحقق من عدم وجود إحالة مسبقة
+                // التحقق من عدم وجود إحالة مسبقة (للتأكيد)
                 const existingReferral = await db.collection('referrals')
                     .where('referredUid', '==', userData.uid)
                     .get();
 
                 if (!existingReferral.empty) {
-                    console.log('⚠️ هذا المستخدم تمت إحالته مسبقاً');
+                    console.log('⚠️ هذا المستخدم تمت إحالته مسبقاً (تم العثور على سجل)');
                     return;
                 }
 
@@ -1767,18 +1785,17 @@
                     const userRef = db.collection('users').doc(userData.uid);
                     const referrerRef = referrerDoc.ref;
 
-                    // قراءة البيانات الحالية
                     const userDoc = await transaction.get(userRef);
                     const referrerDocData = await transaction.get(referrerRef);
 
                     if (!userDoc.exists || !referrerDocData.exists) return;
 
-                    // تحديث المستخدم الحالي
+                    // تحديث المستخدم الحالي (تعيين المُحيل)
                     transaction.update(userRef, {
                         referredBy: referralCode
                     });
 
-                    // تحديث المُحيل
+                    // تحديث المُحيل (زيادة عدد الإحالات والمكافآت)
                     transaction.update(referrerRef, {
                         'miningData.totalReferrals': firebase.firestore.FieldValue.increment(1),
                         'wallets.referral': firebase.firestore.FieldValue.increment(5),
@@ -1808,9 +1825,18 @@
                 });
 
                 console.log('✅ تمت معالجة الإحالة بنجاح!');
+                showToast('🎉 تم تفعيل الإحالة! شكراً لدعوتك.');
+
+                // تحديث بيانات المستخدم محلياً
+                userData.referredBy = referralCode;
+                updateUI();
+                loadReferrals();
+                loadTransactions();
+                updateWalletUI();
 
             } catch (error) {
                 console.error('❌ خطأ في معالجة الإحالة:', error);
+                showToast('حدث خطأ أثناء معالجة الإحالة، حاول مرة أخرى.');
             }
         }
 
@@ -1941,12 +1967,12 @@
         function showToast(msg) {
             const toast = document.createElement('div');
             toast.style.cssText = `
-                position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-                background: var(--accent); color: white; padding: 12px 24px;
-                border-radius: 30px; font-weight: 700; z-index: 9999;
-                box-shadow: var(--shadow-lg); font-family: 'Cairo', sans-serif;
-                animation: fadeSlideIn 0.3s ease;
-            `;
+                    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+                    background: var(--accent); color: white; padding: 12px 24px;
+                    border-radius: 30px; font-weight: 700; z-index: 9999;
+                    box-shadow: var(--shadow-lg); font-family: 'Cairo', sans-serif;
+                    animation: fadeSlideIn 0.3s ease;
+                `;
             toast.textContent = msg;
             document.body.appendChild(toast);
             setTimeout(() => {
@@ -2035,7 +2061,7 @@
                                 'miningData.totalMinedDZD': firebase.firestore.FieldValue.increment(rewardDZD),
                                 'miningData.miningHistory.today': firebase.firestore.FieldValue.increment(reward),
                                 'miningData.miningHistory.todayDZD': firebase.firestore.FieldValue.increment(
-                                rewardDZD),
+                                    rewardDZD),
                                 'miningData.miningHistory.thisWeek': firebase.firestore.FieldValue.increment(reward),
                                 'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(
                                     rewardDZD),
@@ -2056,7 +2082,7 @@
                         if (!userData.miningData.miningHistory) userData.miningData.miningHistory = { today: 0,
                             todayDZD: 0, thisWeek: 0, thisWeekDZD: 0, thisMonth: 0, thisMonthDZD: 0 };
                         userData.miningData.miningHistory.today = (userData.miningData.miningHistory.today || 0) +
-                        reward;
+                            reward;
                         userData.miningData.miningHistory.todayDZD = (userData.miningData.miningHistory.todayDZD ||
                             0) + rewardDZD;
                         userData.miningData.miningHistory.thisWeek = (userData.miningData.miningHistory.thisWeek ||
@@ -2154,7 +2180,7 @@
 
             const refLink = document.getElementById('referralLink');
             if (u.telegramId) {
-                const url = `https://t.me/Crynova_bot?start=${u.telegramId}`;
+                const url = `https://t.me/Crynova_bot/Crynova?start=${u.telegramId}`;
                 refLink.value = url;
             } else {
                 refLink.value = 'جاري التحميل...';
@@ -3191,8 +3217,9 @@
             }
         });
 
-        console.log('🚀 Crynova Mining V2.0 (مع إصلاحات)');
-        console.log('✅ الإحالات تعمل محلياً عبر Firebase مع معاملات');
+        console.log('🚀 Crynova Mining V2.0 (مع إصلاح الإحالات)');
+        console.log('✅ الإحالات تعمل الآن للمستخدمين الجدد والموجودين');
+        console.log('✅ دعم start_param من Telegram WebApp');
         console.log('💰 مكافأة الإحالة: 5 USDT + ' + (5 * 250) + ' DZD');
         console.log('🔒 جميع العمليات المالية تستخدم معاملات Firestore');
     </script>
