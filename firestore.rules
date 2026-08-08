@@ -1,0 +1,150 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================================
+    // USERS
+    // ============================================================
+
+    match /users/{userId} {
+
+      // المستخدم يستطيع قراءة بيانات حسابه فقط
+      allow read: if request.auth != null
+                  && request.auth.uid == userId;
+
+      // إنشاء الحساب
+      allow create: if request.auth != null
+                    && request.auth.uid == userId;
+
+      // تحديث البيانات الشخصية فقط
+      // الأرصدة والحقول المالية لا يمكن تعديلها من Frontend
+      allow update: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.wallets == resource.data.wallets
+                    && request.resource.data.miningData == resource.data.miningData
+                    && request.resource.data.referrals == resource.data.referrals
+                    && request.resource.data.referredBy == resource.data.referredBy
+                    && request.resource.data.referrerBy == resource.data.referrerBy;
+
+      allow delete: if false;
+    }
+
+
+    // ============================================================
+    // REFERRALS
+    // ============================================================
+
+    match /referrals/{referralId} {
+
+      // المستخدم يستطيع قراءة إحالاته
+      allow read: if request.auth != null
+                  && (
+                    resource.data.referrerUid == request.auth.uid
+                    || resource.data.referredUid == request.auth.uid
+                  );
+
+      // منع إنشاء إحالات مباشرة من Frontend
+      // Backend فقط هو الذي يجب أن ينشئها
+      allow create: if false;
+
+      allow update: if false;
+
+      allow delete: if false;
+    }
+
+
+    // ============================================================
+    // TRANSACTIONS
+    // ============================================================
+
+    match /transactions/{transactionId} {
+
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+
+      // لا يسمح للمستخدم بإنشاء معاملات مالية بنفسه
+      allow create: if false;
+
+      allow update: if false;
+
+      allow delete: if false;
+    }
+
+
+    // ============================================================
+    // DEPOSITS
+    // ============================================================
+
+    match /deposits/{depositId} {
+
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+
+      // الإيداع يجب أن يمر عبر Backend/Admin
+      allow create: if false;
+
+      allow update: if false;
+
+      allow delete: if false;
+    }
+
+
+    // ============================================================
+    // WITHDRAWALS
+    // ============================================================
+
+    match /withdrawals/{withdrawalId} {
+
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
+
+      // طلب السحب يحتاج Backend
+      allow create: if false;
+
+      allow update: if false;
+
+      allow delete: if false;
+    }
+
+
+    // ============================================================
+    // MINING PACKAGES
+    // ============================================================
+
+    match /packages/{packageId} {
+
+      // الباقات عامة للقراءة
+      allow read: if true;
+
+      // الإدارة فقط من Backend
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+
+    // ============================================================
+    // EXCHANGE RATE
+    // ============================================================
+
+    match /settings/{documentId} {
+
+      allow read: if true;
+
+      // لا يسمح بتغيير سعر الصرف من التطبيق
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+
+    // ============================================================
+    // DEFAULT DENY
+    // ============================================================
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
