@@ -1,27 +1,17 @@
 {
-  "name": "crynova-backend",
+  "name": "crynova-bot",
   "version": "1.0.0",
-  "description": "Crynova Telegram Bot and Backend",
+  "description": "Crynova Telegram Bot with Telegram Mini App and referral system",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
-    "dev": "node --watch bot.js"
+    "dev": "node bot.js"
   },
-  "keywords": [
-    "crynova",
-    "telegram",
-    "telegram-bot",
-    "web-app",
-    "mini-app",
-    "firebase"
-  ],
-  "author": "Crynova",
-  "license": "MIT",
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
     "dotenv": "^16.6.1",
-    "node-telegram-bot-api": "^0.66.0"
+    "telegraf": "^4.16.3"
   }
 }
