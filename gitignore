@@ -1,14 +1,17 @@
+# Dependencies
 node_modules/
+
+# NPM logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
-yarn.lock
 
+# Environment variables
 .env
 .env.local
 .env.*.local
 
+# Firebase / Service Account secrets
 service-account-key.json
 serviceAccountKey.json
 *.key.json
@@ -16,19 +19,27 @@ serviceAccountKey.json
 *.crt
 *.key
 
+# Logs
 logs/
 *.log
 
+# OS files
 .DS_Store
 .DS_Store?
 ._*
 Thumbs.db
 
+# IDE
 .idea/
 .vscode/
 *.swp
 *.swo
 
+# Build output
 dist/
 build/
 out/
+
+# Temporary files
+*.tmp
+*.temp
