@@ -8,17 +8,17 @@
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Firebase SDK (Compat Mode) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     
     <style>
         /* ============================================================
@@ -843,28 +843,6 @@
             margin: 16px 0;
         }
         .clickable { cursor: pointer; }
-
-        /* REFERRAL SUCCESS ANIMATION */
-        .referral-toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--success);
-            color: white;
-            padding: 16px 24px;
-            border-radius: var(--radius-sm);
-            box-shadow: var(--shadow-lg);
-            z-index: 9999;
-            font-weight: 700;
-            animation: slideDown 0.5s ease;
-            max-width: 90%;
-            text-align: center;
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
     </style>
 </head>
 <body>
@@ -1417,13 +1395,24 @@
 <!-- ===== JAVASCRIPT ===== -->
 <script>
     // ============================================================
-    // 0. CONFIGURATION
+    // 1. FIREBASE CONFIG
     // ============================================================
-    // ⭐ غيّر هذا الرابط إلى رابط الخادم الخلفي الخاص بك
-    const BASE_URL = 'https://crynova-backend.onrender.com'; // أو http://localhost:3000
-    
+    const firebaseConfig = {
+        apiKey: "AIzaSyDCF0h_UPivX8oGoQL8Dn1s0lr79VAXpMY",
+        authDomain: "crynova-4d6b3.firebaseapp.com",
+        projectId: "crynova-4d6b3",
+        storageBucket: "crynova-4d6b3.firebasestorage.app",
+        messagingSenderId: "858898515024",
+        appId: "1:858898515024:web:03827d57c2737bbc27bd55"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
     // ============================================================
-    // 1. STATE
+    // 2. STATE
     // ============================================================
     let currentUser = null;
     let userData = null;
@@ -1439,7 +1428,7 @@
     const EXCHANGE_RATE = 250;
 
     // ============================================================
-    // 2. TELEGRAM INTEGRATION
+    // 3. TELEGRAM INTEGRATION
     // ============================================================
     function getTelegramUser() {
         if (window.Telegram && window.Telegram.WebApp) {
@@ -1461,15 +1450,8 @@
         return null;
     }
 
-    function getTelegramInitData() {
-        if (window.Telegram && window.Telegram.WebApp) {
-            return window.Telegram.WebApp.initData || null;
-        }
-        return null;
-    }
-
     // ============================================================
-    // 3. AUTHENTICATION (VIA BACKEND)
+    // 4. AUTHENTICATION
     // ============================================================
     async function authUser() {
         const tgUser = getTelegramUser();
@@ -1480,50 +1462,61 @@
         }
 
         try {
-            // ✅ جلب كود الإحالة من الرابط
-            const urlParams = new URLSearchParams(window.location.search);
-            const referralCode = urlParams.get('start') || null;
+            const usersRef = db.collection('users');
+            const snapshot = await usersRef.where('telegramId', '==', tgUser.id.toString()).get();
             
-            // ✅ إرسال طلب التسجيل إلى الخادم
-            const response = await fetch(`${BASE_URL}/api/user/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    telegramId: tgUser.id.toString(),
-                    firstName: tgUser.firstName,
-                    username: tgUser.username || '',
-                    initData: getTelegramInitData(),
-                    referralCode: referralCode
-                })
-            });
-            
-            const result = await response.json();
-            
-            if (!result.success) {
-                console.error('❌ فشل التسجيل:', result.message);
-                return false;
-            }
-            
-            // ✅ تحديث البيانات المحلية
-            currentUser = { 
-                uid: result.data.id, 
-                ...result.data 
-            };
-            userData = currentUser;
-            
-            console.log(`👋 مرحباً ${userData.displayName || 'مستخدم'}`);
-            
-            // ✅ عرض رسالة نجاح الإحالة إن وجدت
-            if (result.referral) {
-                console.log('✅ تم تسجيل الإحالة بنجاح!');
-                console.log(`👤 المُحيل: ${result.referral.referrerName}`);
-                console.log(`💰 المكافأة: ${result.referral.commission} USDT`);
+            if (!snapshot.empty) {
+                const doc = snapshot.docs[0];
+                currentUser = { uid: doc.id, ...doc.data() };
+                userData = currentUser;
                 
-                // عرض رسالة منبثقة
-                showReferralSuccessToast(
-                    result.referral.referrerName,
-                    result.referral.commission
-                );
+                await doc.ref.update({ 
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                console.log('👋 مرحباً ' + (userData.displayName || 'مستخدم'));
+            } else {
+                const displayName = tgUser.firstName + (tgUser.lastName ? ' ' + tgUser.lastName : '');
+                
+                const newUser = {
+                    telegramId: tgUser.id.toString(),
+                    username: tgUser.username,
+                    displayName: displayName || 'مستخدم',
+                    photoURL: tgUser.photoUrl || `https://ui-avatars.com/api/?name=${displayName || 'U'}&background=6c5ce7&color=fff&size=128`,
+                    joinDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                    level: 1,
+                    status: 'active',
+                    referralCode: tgUser.id.toString(),
+                    referredBy: null,
+                    currency: 'USDT',
+                    wallets: {
+                        main: 0, reward: 0, referral: 0, locked: 0,
+                        dzd: 0, dzdReward: 0, dzdReferral: 0, dzdLocked: 0
+                    },
+                    miningData: {
+                        currentPackage: null,
+                        totalMined: 0,
+                        totalMinedDZD: 0,
+                        totalReferrals: 0,
+                        miningHistory: {
+                            today: 0, todayDZD: 0,
+                            thisWeek: 0, thisWeekDZD: 0,
+                            thisMonth: 0, thisMonthDZD: 0
+                        },
+                        lastMiningUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                        activeSince: firebase.firestore.FieldValue.serverTimestamp()
+                    }
+                };
+                
+                const docRef = await db.collection('users').add(newUser);
+                currentUser = { uid: docRef.id, ...newUser };
+                userData = currentUser;
+                
+                console.log('✅ تم إنشاء حسابك بنجاح!');
+                
+                // معالجة الإحالة محلياً
+                await handleReferralLocally();
             }
             
             updateUI();
@@ -1538,38 +1531,97 @@
             return true;
             
         } catch (error) {
-            console.error('❌ خطأ في التسجيل:', error);
+            console.error('Auth error:', error);
             return false;
         }
     }
 
     // ============================================================
-    // 4. REFERRAL SUCCESS TOAST
+    // 5. REFERRAL HANDLING (LOCAL - FIREBASE ONLY)
     // ============================================================
-    function showReferralSuccessToast(referrerName, commission) {
-        // إزالة أي توست سابق
-        const oldToast = document.querySelector('.referral-toast');
-        if (oldToast) oldToast.remove();
+    async function handleReferralLocally() {
+        if (!userData) return;
         
-        const toast = document.createElement('div');
-        toast.className = 'referral-toast';
-        toast.innerHTML = `
-            🎉 تم تسجيل إحالتك بنجاح!<br>
-            👤 المُحيل: ${referrerName}<br>
-            💰 المكافأة: ${commission} USDT
-        `;
-        document.body.appendChild(toast);
+        const urlParams = new URLSearchParams(window.location.search);
+        const referralCode = urlParams.get('start');
         
-        // إزالة التوست بعد 5 ثوانٍ
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transition = 'opacity 0.5s';
-            setTimeout(() => toast.remove(), 500);
-        }, 5000);
+        if (!referralCode || referralCode === userData.telegramId) {
+            console.log('ℹ️ لا يوجد كود إحالة أو الكود خاص بالمستخدم نفسه');
+            return;
+        }
+        
+        console.log(`🔗 معالجة الإحالة: ${referralCode}`);
+        
+        try {
+            // البحث عن المُحيل
+            const referrerSnapshot = await db.collection('users')
+                .where('referralCode', '==', referralCode)
+                .get();
+                
+            if (referrerSnapshot.empty) {
+                console.log('⚠️ لم يتم العثور على المُحيل');
+                return;
+            }
+            
+            const referrerDoc = referrerSnapshot.docs[0];
+            
+            // التحقق من عدم وجود إحالة مسبقة
+            const existingReferral = await db.collection('referrals')
+                .where('referredUid', '==', userData.uid)
+                .get();
+                
+            if (!existingReferral.empty) {
+                console.log('⚠️ هذا المستخدم تمت إحالته مسبقاً');
+                return;
+            }
+            
+            // تحديث بيانات المستخدم الحالي
+            await db.collection('users').doc(userData.uid).update({
+                referredBy: referralCode
+            });
+            
+            // إضافة سجل الإحالة
+            await db.collection('referrals').add({
+                referrerUid: referrerDoc.id,
+                referredUid: userData.uid,
+                displayName: userData.displayName || 'مستخدم',
+                joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                commissionEarned: 5
+            });
+            
+            // تحديث المُحيل
+            await referrerDoc.ref.update({
+                'miningData.totalReferrals': firebase.firestore.FieldValue.increment(1),
+                'wallets.referral': firebase.firestore.FieldValue.increment(5),
+                'wallets.dzdReferral': firebase.firestore.FieldValue.increment(5 * EXCHANGE_RATE)
+            });
+            
+            // إضافة معاملة للمُحيل
+            await db.collection('transactions').add({
+                uid: referrerDoc.id,
+                type: 'referral_bonus',
+                amount: 5,
+                currency: 'USDT',
+                description: `عمولة إحالة - ${userData.displayName || 'مستخدم جديد'}`,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            // تحديث userData محلياً
+            userData.referredBy = referralCode;
+            
+            console.log('✅ تمت معالجة الإحالة بنجاح!');
+            console.log('📊 تقرير الإحالات:');
+            console.log('- عدد المحالين:', (userData.miningData?.totalReferrals || 0) + 1);
+            console.log('- عمولات USDT:', (userData.wallets?.referral || 0) + 5);
+            console.log('- عمولات DZD:', (userData.wallets?.dzdReferral || 0) + (5 * EXCHANGE_RATE));
+            
+        } catch (error) {
+            console.error('❌ خطأ في معالجة الإحالة:', error);
+        }
     }
 
     // ============================================================
-    // 5. HELPERS
+    // 6. HELPERS
     // ============================================================
     function formatDate(timestamp) {
         if (!timestamp) return '--';
@@ -1693,7 +1745,7 @@
     }
 
     // ============================================================
-    // 6. CURRENCY SELECTOR
+    // 7. CURRENCY SELECTOR
     // ============================================================
     function setCurrency(currency) {
         selectedCurrency = currency;
@@ -1716,7 +1768,7 @@
     }
 
     // ============================================================
-    // 7. MINING SIMULATION
+    // 8. MINING SIMULATION
     // ============================================================
     function startMiningSimulation() {
         if (miningInterval) {
@@ -1743,7 +1795,20 @@
             
             if (reward > 0) {
                 try {
-                    // محاكاة التعدين - تحديث محلي فقط (سيتم مزامنته مع الخادم لاحقاً)
+                    const userRef = db.collection('users').doc(userData.uid);
+                    await userRef.update({
+                        'wallets.reward': firebase.firestore.FieldValue.increment(reward),
+                        'wallets.dzdReward': firebase.firestore.FieldValue.increment(rewardDZD),
+                        'miningData.totalMined': firebase.firestore.FieldValue.increment(reward),
+                        'miningData.totalMinedDZD': firebase.firestore.FieldValue.increment(rewardDZD),
+                        'miningData.miningHistory.today': firebase.firestore.FieldValue.increment(reward),
+                        'miningData.miningHistory.todayDZD': firebase.firestore.FieldValue.increment(rewardDZD),
+                        'miningData.miningHistory.thisWeek': firebase.firestore.FieldValue.increment(reward),
+                        'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(rewardDZD),
+                        'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(reward),
+                        'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(rewardDZD)
+                    });
+                    
                     if (!userData.wallets) userData.wallets = { main: 0, reward: 0, referral: 0, locked: 0, dzd: 0, dzdReward: 0, dzdReferral: 0, dzdLocked: 0 };
                     userData.wallets.reward = (userData.wallets.reward || 0) + reward;
                     userData.wallets.dzdReward = (userData.wallets.dzdReward || 0) + rewardDZD;
@@ -1765,7 +1830,7 @@
     }
 
     // ============================================================
-    // 8. NAVIGATION
+    // 9. NAVIGATION
     // ============================================================
     function navigateTo(page) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1792,7 +1857,7 @@
     }
 
     // ============================================================
-    // 9. UI UPDATES
+    // 10. UI UPDATES
     // ============================================================
     function updateUI() {
         if (!userData) return;
@@ -2001,7 +2066,7 @@
     }
 
     // ============================================================
-    // 10. DEPOSIT
+    // 11. DEPOSIT
     // ============================================================
     function updateDepositNetwork() {
         const currency = document.getElementById('depositCurrency').value;
@@ -2154,7 +2219,7 @@
     }
 
     // ============================================================
-    // 11. WITHDRAW
+    // 12. WITHDRAW
     // ============================================================
     function updateWithdrawNetwork() {
         const currency = document.getElementById('withdrawCurrency').value;
@@ -2317,7 +2382,7 @@
     }
 
     // ============================================================
-    // 12. PACKAGES
+    // 13. PACKAGES
     // ============================================================
     async function loadPackages() {
         try {
@@ -2375,7 +2440,7 @@
     }
 
     // ============================================================
-    // 13. PURCHASE
+    // 14. PURCHASE
     // ============================================================
     async function purchasePackage(packageId) {
         if (!userData) {
@@ -2468,7 +2533,7 @@
     }
 
     // ============================================================
-    // 14. TRANSACTIONS
+    // 15. TRANSACTIONS
     // ============================================================
     async function loadTransactions() {
         if (!userData) return;
@@ -2564,36 +2629,19 @@
     }
 
     // ============================================================
-    // 15. REFERRALS (VIA BACKEND API)
+    // 16. REFERRALS
     // ============================================================
     async function loadReferrals() {
         if (!userData) return;
-        
         try {
-            const response = await fetch(`${BASE_URL}/api/referrals/${userData.telegramId}`);
-            const result = await response.json();
-            
-            if (result.success) {
-                const data = result.data;
-                
-                // تحديث الإحصائيات
-                document.getElementById('refCount').textContent = data.totalReferrals || 0;
-                const currency = selectedCurrency;
-                const isDZD = currency === 'DZD';
-                const earnings = isDZD 
-                    ? (userData.wallets?.dzdReferral || 0) 
-                    : (userData.wallets?.referral || 0);
-                document.getElementById('refEarnings').textContent = earnings.toFixed(2);
-                
-                // عرض قائمة المدعوين
-                renderReferrals(data.referrals || []);
-                
-                // تحديث الرابط
-                document.getElementById('referralLink').value = data.referralLink || '';
-            }
-            
+            const snapshot = await db.collection('referrals')
+                .where('referrerUid', '==', userData.uid)
+                .get();
+            const referrals = [];
+            snapshot.forEach(doc => referrals.push({ id: doc.id, ...doc.data() }));
+            renderReferrals(referrals);
         } catch (error) {
-            console.error('❌ خطأ في جلب الإحالات:', error);
+            console.error('Load referrals error:', error);
             renderReferrals([]);
         }
     }
@@ -2609,10 +2657,10 @@
             <div class="list-item">
                 <div class="left">
                     <div class="avatar" style="width:36px;height:36px;font-size:14px;">
-                        ${(r.referredName || 'م').charAt(0)}
+                        ${(r.displayName || 'م').charAt(0)}
                     </div>
                     <div>
-                        <div class="title">${r.referredName || 'مستخدم'}</div>
+                        <div class="title">${r.displayName || 'مستخدم'}</div>
                         <div class="sub">${formatDate(r.joinedAt)}</div>
                     </div>
                 </div>
@@ -2624,7 +2672,7 @@
     }
 
     // ============================================================
-    // 16. WITHDRAW CALCULATION
+    // 17. WITHDRAW CALCULATION
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         const amountInput = document.getElementById('withdrawAmount');
@@ -2642,7 +2690,7 @@
     });
 
     // ============================================================
-    // 17. THEME TOGGLE
+    // 18. THEME TOGGLE
     // ============================================================
     function toggleTheme() {
         isDarkTheme = !isDarkTheme;
@@ -2694,29 +2742,9 @@
     }
 
     // ============================================================
-    // 18. FIREBASE CONFIG (for direct operations)
-    // ============================================================
-    const firebaseConfig = {
-        apiKey: "AIzaSyDCF0h_UPivX8oGoQL8Dn1s0lr79VAXpMY",
-        authDomain: "crynova-4d6b3.firebaseapp.com",
-        projectId: "crynova-4d6b3",
-        storageBucket: "crynova-4d6b3.firebasestorage.app",
-        messagingSenderId: "858898515024",
-        appId: "1:858898515024:web:03827d57c2737bbc27bd55"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const storage = firebase.storage();
-
-    // ============================================================
     // 19. INIT
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 Crynova Mining V2.0 - مع دعم الإحالات عبر Backend');
-        console.log(`📡 الخادم الخلفي: ${BASE_URL}`);
-        
         authUser();
         
         setCurrency('USDT');
@@ -2734,9 +2762,9 @@
         }
     });
 
-    console.log('✅ جميع التعديلات تمت بنجاح!');
-    console.log('💡 الإحالات تعمل عبر الخادم الخلفي (Backend)');
-    console.log('🔒 نظام آمن ومحمي ضد التلاعب');
+    console.log('🚀 Crynova Mining V2.0');
+    console.log('✅ الإحالات تعمل محلياً عبر Firebase');
+    console.log('💰 مكافأة الإحالة: 5 USDT + 1250 DZD');
 </script>
 </body>
 </html>
