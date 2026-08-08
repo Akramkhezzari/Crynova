@@ -1,71 +1,20 @@
-# ====================================
-# ملفات البيئة والسرية (الأهم!)
-# ====================================
-.env
-.env.local
-.env.*.local
-serviceAccountKey.json
-*.pem
-*.key
-
-# ====================================
-# مجلدات التبعيات
-# ====================================
 node_modules/
+.env
+.env.*
+!.env.example
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
-yarn.lock
 
-# ====================================
-# ملفات نظام التشغيل
-# ====================================
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-desktop.ini
+service-account-key.json
+serviceAccountKey.json
+*.key.json
+*.pem
+*.crt
+*.key
 
-# ====================================
-# محررات الكود والبيئات
-# ====================================
-.vscode/
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-*.swo
-*.swn
-*.orig
-
-# ====================================
-# ملفات البناء والتجميع
-# ====================================
-dist/
-build/
-out/
-*.log
 logs/
-*.pid
-*.seed
-*.pid.lock
+*.log
 
-# ====================================
-# ملفات مؤقتة
-# ====================================
-*.tmp
-*.temp
-*.cache
-
-# ====================================
-# Firebase (إضافي للأمان)
-# ====================================
-firebase-debug.log
-.firebase/
-google-credentials.json
+.DS_Store
