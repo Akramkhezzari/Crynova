@@ -1,21 +1,21 @@
 {
   "name": "crynova-backend",
-  "version": "2.0.0",
-  "description": "Crynova Mining Referral Server with Security",
+  "version": "2.1.0",
+  "description": "Crynova Telegram Bot, Web App and Referral Backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "express": "^4.21.2",
     "cors": "^2.8.5",
-    "firebase-admin": "^11.11.0",
-    "express-rate-limit": "^6.10.0",
-    "crypto": "^1.0.1"
+    "firebase-admin": "^13.0.2",
+    "express-rate-limit": "^7.5.0",
+    "node-telegram-bot-api": "^0.66.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.1.7"
   },
   "engines": {
     "node": "18.x"
