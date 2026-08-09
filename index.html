@@ -378,6 +378,15 @@
             box-shadow: 0 8px 32px rgba(225, 112, 85, 0.4);
         }
 
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(9, 132, 227, 0.35);
+        }
+
         .btn-outline {
             background: transparent;
             border: 2px solid var(--border);
@@ -1517,7 +1526,6 @@
                     <span class="left"><i class="fas fa-calendar" style="color:var(--text-muted);width:20px;"></i> تاريخ التسجيل</span>
                     <span id="profileJoinDate" style="font-weight:600;">--</span>
                 </div>
-                <!-- معرف Telegram مع زر نسخ -->
                 <div class="list-item">
                     <span class="left"><i class="fas fa-id-badge" style="color:var(--text-muted);width:20px;"></i> معرف Telegram</span>
                     <div style="display:flex;align-items:center;gap:8px;">
@@ -1535,7 +1543,6 @@
                 </div>
             </div>
 
-            <!-- ===== قسم الإحالات اليدوية ===== -->
             <div class="card">
                 <div style="display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;margin-bottom:12px;">
                     <i class="fas fa-user-plus" style="color:var(--text-muted);width:20px;"></i>
@@ -1553,7 +1560,6 @@
             </div>
 
             <div class="card">
-                <!-- ===== مبدل العملة ===== -->
                 <div style="padding:4px 0 12px 0;border-bottom:1px solid var(--border-light);">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                         <div style="display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;">
@@ -1572,13 +1578,11 @@
                     </div>
                 </div>
 
-                <!-- ===== اللغة ===== -->
                 <div class="list-item clickable" onclick="toggleLanguage()" style="padding-top:14px;">
                     <span class="left"><i class="fas fa-globe" style="color:var(--text-muted);width:20px;"></i> اللغة</span>
                     <span style="font-weight:600;">العربية <i class="fas fa-chevron-left" style="font-size:12px;color:var(--text-muted);"></i></span>
                 </div>
 
-                <!-- ===== الوضع المظلم ===== -->
                 <div class="list-item" style="border-bottom:none;padding-bottom:0;">
                     <span class="left"><i class="fas fa-moon" style="color:var(--text-muted);width:20px;"></i> الوضع المظلم</span>
                     <label style="position:relative;display:inline-block;width:48px;height:26px;">
@@ -1623,6 +1627,69 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ===== شحن رصيد يدوي ===== -->
+            <div class="card" style="border:2px solid var(--success);">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-plus-circle text-success"></i> شحن رصيد يدوي</div>
+                    <span class="status status-success">إدارة</span>
+                </div>
+                <div class="input-group">
+                    <label>معرف المستخدم (Telegram ID) <span class="required">*</span></label>
+                    <input type="text" id="adminUserId" placeholder="مثال: 123456789">
+                </div>
+                <div class="input-group">
+                    <label>العملة <span class="required">*</span></label>
+                    <select id="adminCurrency">
+                        <option value="USDT">USDT</option>
+                        <option value="DZD">DZD</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>المبلغ <span class="required">*</span></label>
+                    <input type="number" id="adminAmount" placeholder="أدخل المبلغ" step="0.01" min="0.01">
+                </div>
+                <div class="input-group">
+                    <label>رقم العملية (اختياري)</label>
+                    <input type="text" id="adminTransactionId" placeholder="رقم العملية (اختياري)">
+                </div>
+                <button class="btn btn-success" onclick="adminManualCredit()">
+                    <i class="fas fa-coins"></i> شحن الرصيد
+                </button>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">
+                    <i class="fas fa-info-circle"></i> سيتم إضافة المبلغ إلى المحفظة الرئيسية مع تسجيل المعاملة.
+                </div>
+            </div>
+
+            <!-- ===== تأكيد إيداع تلقائي ===== -->
+            <div class="card" style="border:2px solid var(--info);">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-bolt text-info"></i> تأكيد إيداع تلقائي</div>
+                    <span class="status status-info">أتمتة</span>
+                </div>
+                <div class="input-group">
+                    <label>رقم العملية <span class="required">*</span></label>
+                    <input type="text" id="autoTxId" placeholder="أدخل رقم العملية كما في الطلب">
+                </div>
+                <div class="input-group">
+                    <label>المبلغ <span class="required">*</span></label>
+                    <input type="number" id="autoAmount" placeholder="أدخل المبلغ المستلم" step="0.01" min="0.01">
+                </div>
+                <div class="input-group">
+                    <label>العملة <span class="required">*</span></label>
+                    <select id="autoCurrency">
+                        <option value="USDT">USDT</option>
+                        <option value="DZD">DZD</option>
+                    </select>
+                </div>
+                <button class="btn btn-info" onclick="autoConfirmDeposit()" style="color:white;">
+                    <i class="fas fa-check-circle"></i> تأكيد تلقائي
+                </button>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">
+                    <i class="fas fa-info-circle"></i> سيتم البحث عن طلب إيداع معلق بنفس رقم العملية والمبلغ والعملة، وتأكيده تلقائياً.
+                </div>
+            </div>
+
         </div>
 
     </div>
@@ -1649,7 +1716,6 @@
             <i class="fas fa-user"></i>
             <span>الحساب</span>
         </button>
-        <!-- زر الأدمن يظهر فقط عند تسجيل الدخول كأدمن -->
         <button class="nav-item" id="adminNavBtn" data-page="admin" onclick="navigateTo('admin')" style="display:none;">
             <i class="fas fa-shield-alt"></i>
             <span>إدارة</span>
@@ -1761,7 +1827,6 @@
                     console.log('✅ تم إنشاء حساب جديد:', userData.displayName);
                 }
 
-                // الاستماع للتحديثات
                 userRef.onSnapshot((doc) => {
                     if (doc.exists) {
                         userData = { telegramId: doc.id, ...doc.data() };
@@ -1774,10 +1839,7 @@
                     }
                 });
 
-                // ✅ التحقق من صلاحية الأدمن
                 await checkAdmin(telegramId);
-
-                // تحميل البيانات
                 await loadPackages();
                 await loadTransactions();
                 await loadReferrals();
@@ -1788,7 +1850,6 @@
                 updateUI();
                 startMining();
 
-                // إذا كان أدمن، حمّل طلبات الإدارة
                 if (isAdmin) {
                     document.getElementById('adminNavBtn').style.display = 'flex';
                     await loadAdminRequests();
@@ -1863,19 +1924,24 @@
             container.innerHTML = list.map(d => `
                 <div class="admin-request-card">
                     <div class="flex-between">
-                        <span class="user-info">👤 ${d.uid}</span>
+                        <span class="user-info">
+                            👤 <strong>${d.uid}</strong>
+                            <button class="copy-btn" onclick="copyText('${d.uid}')" style="padding:2px 8px;font-size:11px;background:var(--bg-input);color:var(--text-secondary);">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </span>
                         <span class="status status-pending status-badge">قيد الانتظار</span>
                     </div>
                     <div class="details">
-                        <strong>${d.amount} ${d.currency}</strong> | ${d.network || 'غير محدد'}
+                        <strong>${d.amount} ${d.currency}</strong> | الشبكة: ${d.network || 'غير محدد'}
                         <br><small>التاريخ: ${formatDateTime(d.createdAt)}</small>
                         ${d.transactionId ? `<br><small>رقم العملية: ${d.transactionId}</small>` : ''}
                     </div>
                     <div class="actions">
-                        <button class="btn btn-success btn-sm" onclick="approveDeposit('${d.id}','${d.uid}',${d.amount},'${d.currency}','${d.transactionId||''}')">
+                        <button class="btn btn-success btn-sm" onclick="approveDeposit('${d.id}','${d.uid}',${d.amount},'${d.currency}','${d.depositId||''}')">
                             <i class="fas fa-check"></i> تأكيد
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="rejectDeposit('${d.id}','${d.uid}','${d.transactionId||''}')">
+                        <button class="btn btn-danger btn-sm" onclick="rejectDeposit('${d.id}','${d.uid}','${d.depositId||''}')">
                             <i class="fas fa-times"></i> رفض
                         </button>
                     </div>
@@ -1883,18 +1949,18 @@
             `).join('');
         }
 
-        // ✅ تأكيد الإيداع (تم الإصلاح)
-        async function approveDeposit(id, uid, amount, currency, transactionId) {
+        // ============================================================
+        // 8. APPROVE / REJECT DEPOSIT (معرف فريد)
+        // ============================================================
+        async function approveDeposit(id, uid, amount, currency, depositId) {
             if (!confirm(`تأكيد إيداع ${amount} ${currency} للمستخدم ${uid}؟`)) return;
 
             try {
-                // 1. تحديث حالة الطلب في المجموعة العامة
                 await db.collection('deposits').doc(id).update({
                     status: 'confirmed',
                     confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // 2. تحديث رصيد المستخدم
                 const userRef = db.collection('users').doc(uid);
                 const userDoc = await userRef.get();
                 if (!userDoc.exists) throw new Error('المستخدم غير موجود');
@@ -1904,10 +1970,9 @@
                     [field]: firebase.firestore.FieldValue.increment(amount)
                 });
 
-                // 3. تحديث حالة الطلب في مصفوفة المستخدم
                 const userDeposits = userDoc.data().deposits || [];
                 const updatedDeposits = userDeposits.map(d => {
-                    if (d.transactionId === transactionId) {
+                    if (d.depositId === depositId) {
                         return { ...d, status: 'confirmed' };
                     }
                     return d;
@@ -1924,8 +1989,7 @@
             }
         }
 
-        // ✅ رفض الإيداع (تم الإصلاح)
-        async function rejectDeposit(id, uid, transactionId) {
+        async function rejectDeposit(id, uid, depositId) {
             if (!confirm(`رفض طلب الإيداع للمستخدم ${uid}؟`)) return;
 
             try {
@@ -1934,13 +1998,12 @@
                     rejectedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // تحديث حالة الطلب في مصفوفة المستخدم
                 const userRef = db.collection('users').doc(uid);
                 const userDoc = await userRef.get();
                 if (userDoc.exists) {
                     const userDeposits = userDoc.data().deposits || [];
                     const updatedDeposits = userDeposits.map(d => {
-                        if (d.transactionId === transactionId) {
+                        if (d.depositId === depositId) {
                             return { ...d, status: 'rejected' };
                         }
                         return d;
@@ -1950,15 +2013,14 @@
 
                 showToast('❌ تم رفض الإيداع');
                 await loadAdminDeposits();
-
             } catch (e) {
                 console.error(e);
-                showToast('❌ حدث خطأ');
+                showToast('❌ حدث خطأ: ' + e.message);
             }
         }
 
         // ============================================================
-        // 8. ADMIN - WITHDRAWALS
+        // 9. ADMIN - WITHDRAWALS
         // ============================================================
         async function loadAdminWithdrawals() {
             try {
@@ -1994,7 +2056,12 @@
             container.innerHTML = list.map(w => `
                 <div class="admin-request-card">
                     <div class="flex-between">
-                        <span class="user-info">👤 ${w.uid}</span>
+                        <span class="user-info">
+                            👤 <strong>${w.uid}</strong>
+                            <button class="copy-btn" onclick="copyText('${w.uid}')" style="padding:2px 8px;font-size:11px;background:var(--bg-input);color:var(--text-secondary);">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </span>
                         <span class="status status-pending status-badge">قيد الانتظار</span>
                     </div>
                     <div class="details">
@@ -2004,10 +2071,10 @@
                         ${w.eccpId ? `<br><small>ECCP: ${w.eccpId}</small>` : ''}
                     </div>
                     <div class="actions">
-                        <button class="btn btn-success btn-sm" onclick="approveWithdrawal('${w.id}','${w.uid}','${w.createdAt}')">
+                        <button class="btn btn-success btn-sm" onclick="approveWithdrawal('${w.id}','${w.uid}','${w.withdrawalId||''}')">
                             <i class="fas fa-check"></i> تأكيد
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="rejectWithdrawal('${w.id}','${w.uid}',${w.amount},'${w.currency}','${w.createdAt}')">
+                        <button class="btn btn-danger btn-sm" onclick="rejectWithdrawal('${w.id}','${w.uid}',${w.amount},'${w.currency}','${w.withdrawalId||''}')">
                             <i class="fas fa-times"></i> رفض
                         </button>
                     </div>
@@ -2015,8 +2082,10 @@
             `).join('');
         }
 
-        // ✅ تأكيد السحب (تم الإصلاح)
-        async function approveWithdrawal(id, uid, createdAt) {
+        // ============================================================
+        // 10. APPROVE / REJECT WITHDRAWAL (معرف فريد)
+        // ============================================================
+        async function approveWithdrawal(id, uid, withdrawalId) {
             if (!confirm(`تأكيد سحب للمستخدم ${uid}؟`)) return;
 
             try {
@@ -2025,15 +2094,12 @@
                     completedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // تحديث حالة السحب في مصفوفة المستخدم
                 const userRef = db.collection('users').doc(uid);
                 const userDoc = await userRef.get();
                 if (userDoc.exists) {
                     const userWithdrawals = userDoc.data().withdrawals || [];
                     const updatedWithdrawals = userWithdrawals.map(w => {
-                        // مقارنة التاريخ كـ string
-                        if (w.createdAt && w.createdAt.toDate && w.createdAt.toDate().getTime() === new Date(createdAt)
-                            .getTime()) {
+                        if (w.withdrawalId === withdrawalId) {
                             return { ...w, status: 'completed' };
                         }
                         return w;
@@ -2043,15 +2109,13 @@
 
                 showToast('✅ تم تأكيد السحب');
                 await loadAdminWithdrawals();
-
             } catch (e) {
                 console.error(e);
-                showToast('❌ حدث خطأ');
+                showToast('❌ حدث خطأ: ' + e.message);
             }
         }
 
-        // ✅ رفض السحب وإعادة الرصيد (تم الإصلاح)
-        async function rejectWithdrawal(id, uid, amount, currency, createdAt) {
+        async function rejectWithdrawal(id, uid, amount, currency, withdrawalId) {
             if (!confirm(`رفض طلب السحب وإعادة ${amount} ${currency} للمستخدم ${uid}؟`)) return;
 
             try {
@@ -2060,7 +2124,6 @@
                     rejectedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // إعادة الرصيد للمستخدم
                 const userRef = db.collection('users').doc(uid);
                 const userDoc = await userRef.get();
                 if (userDoc.exists) {
@@ -2069,11 +2132,9 @@
                         [field]: firebase.firestore.FieldValue.increment(amount)
                     });
 
-                    // تحديث حالة السحب في مصفوفة المستخدم
                     const userWithdrawals = userDoc.data().withdrawals || [];
                     const updatedWithdrawals = userWithdrawals.map(w => {
-                        if (w.createdAt && w.createdAt.toDate && w.createdAt.toDate().getTime() === new Date(createdAt)
-                            .getTime()) {
+                        if (w.withdrawalId === withdrawalId) {
                             return { ...w, status: 'rejected' };
                         }
                         return w;
@@ -2084,15 +2145,14 @@
                 showToast(`❌ تم رفض السحب وإعادة ${amount} ${currency}`);
                 await loadAdminWithdrawals();
                 updateUI();
-
             } catch (e) {
                 console.error(e);
-                showToast('❌ حدث خطأ');
+                showToast('❌ حدث خطأ: ' + e.message);
             }
         }
 
         // ============================================================
-        // 9. MANUAL REFERRAL
+        // 11. MANUAL REFERRAL
         // ============================================================
         async function manualReferral() {
             if (!userData) {
@@ -2157,7 +2217,6 @@
                     });
                 });
 
-                // تحديث محلي
                 userData.referrerBy = referralCode;
                 userData.wallets.referral = (userData.wallets.referral || 0) + 5;
                 userData.wallets.dzdReferral = (userData.wallets.dzdReferral || 0) + (5 * exchangeRate);
@@ -2191,7 +2250,7 @@
         }
 
         // ============================================================
-        // 10. HELPERS
+        // 12. HELPERS
         // ============================================================
         function formatDate(timestamp) {
             if (!timestamp) return '--';
@@ -2317,7 +2376,7 @@
         }
 
         // ============================================================
-        // 11. CURRENCY & EXCHANGE RATE
+        // 13. CURRENCY & EXCHANGE RATE
         // ============================================================
         function setCurrency(currency) {
             selectedCurrency = currency;
@@ -2336,7 +2395,7 @@
         }
 
         // ============================================================
-        // 12. MINING SIMULATION
+        // 14. MINING SIMULATION
         // ============================================================
         function startMining() {
             if (miningInterval) clearInterval(miningInterval);
@@ -2410,7 +2469,7 @@
         window.addEventListener('beforeunload', () => { if (miningInterval) clearInterval(miningInterval); });
 
         // ============================================================
-        // 13. NAVIGATION
+        // 15. NAVIGATION
         // ============================================================
         function navigateTo(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2431,7 +2490,7 @@
         }
 
         // ============================================================
-        // 14. UI UPDATES
+        // 16. UI UPDATES
         // ============================================================
         function updateUI() {
             if (!userData) return;
@@ -2569,7 +2628,7 @@
         }
 
         // ============================================================
-        // 15. DEPOSIT
+        // 17. DEPOSIT
         // ============================================================
         function updateDepositNetwork() {
             const currency = document.getElementById('depositCurrency').value;
@@ -2615,7 +2674,21 @@
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
             try {
                 const now = new Date();
+                // 1. إنشاء مستند في المجموعة العامة أولاً
+                const docRef = await db.collection('deposits').add({
+                    uid: userData.telegramId,
+                    amount: depositData.amount,
+                    currency: depositData.currency,
+                    network: depositData.currency === 'DZD' ? 'CCP' : document.getElementById('depositNetwork').value,
+                    walletAddress: depositData.address,
+                    transactionId: txId,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 2. حفظ depositId في كائن الإيداع
                 const depositObj = {
+                    depositId: docRef.id,
                     amount: depositData.amount,
                     currency: depositData.currency,
                     network: depositData.currency === 'DZD' ? 'CCP' : document.getElementById('depositNetwork').value,
@@ -2625,7 +2698,7 @@
                     createdAt: now
                 };
 
-                // 1. إضافة إلى مصفوفة المستخدم
+                // 3. تحديث مصفوفة المستخدم
                 await db.collection('users').doc(userData.telegramId).update({
                     'deposits': firebase.firestore.FieldValue.arrayUnion(depositObj),
                     'transactions': firebase.firestore.FieldValue.arrayUnion({
@@ -2638,13 +2711,6 @@
                     })
                 });
 
-                // 2. إضافة إلى المجموعة العامة للأدمن
-                await db.collection('deposits').add({
-                    uid: userData.telegramId,
-                    ...depositObj,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
                 showToast('تم إرسال طلب الإيداع، في انتظار المراجعة');
                 document.getElementById('depositTransactionId').value = '';
                 document.getElementById('depositDetails').classList.add('hidden');
@@ -2652,9 +2718,10 @@
                 await loadDeposits();
                 await loadTransactions();
                 if (isAdmin) await loadAdminDeposits();
+                updateUI();
             } catch (e) {
                 console.error(e);
-                showToast('حدث خطأ');
+                showToast('حدث خطأ: ' + e.message);
             }
         }
 
@@ -2686,7 +2753,7 @@
         }
 
         // ============================================================
-        // 16. WITHDRAW
+        // 18. WITHDRAW
         // ============================================================
         function updateWithdrawNetwork() {
             const cur = document.getElementById('withdrawCurrency').value;
@@ -2718,6 +2785,21 @@
             if (!confirm(`تأكيد سحب ${amount} ${currency}? الرسوم: ${fee.toFixed(2)}`)) return;
 
             try {
+                const now = new Date();
+                const docRef = db.collection('withdrawals').doc();
+                const withdrawalId = docRef.id;
+
+                const withdrawObj = {
+                    withdrawalId: withdrawalId,
+                    amount: amount,
+                    currency: currency,
+                    recipientAddress: recipient,
+                    eccpId: eccpId || null,
+                    fee: fee,
+                    status: 'pending',
+                    createdAt: now
+                };
+
                 await db.runTransaction(async (t) => {
                     const ref = db.collection('users').doc(userData.telegramId);
                     const doc = await t.get(ref);
@@ -2747,16 +2829,6 @@
                         upd['wallets.dzdReward'] = r - fr;
                         upd['wallets.dzdReferral'] = refr - fref;
                     }
-                    const now = new Date();
-                    const withdrawObj = {
-                        amount: amount,
-                        currency: currency,
-                        recipientAddress: recipient,
-                        eccpId: eccpId || null,
-                        fee: fee,
-                        status: 'pending',
-                        createdAt: now
-                    };
                     upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                         type: 'withdraw',
                         amount: total,
@@ -2768,60 +2840,20 @@
                     upd['withdrawals'] = firebase.firestore.FieldValue.arrayUnion(withdrawObj);
                     t.update(ref, upd);
 
-                    // إضافة إلى المجموعة العامة للأدمن
-                    const wdRef = db.collection('withdrawals').doc();
-                    t.set(wdRef, {
+                    t.set(docRef, {
                         uid: userData.telegramId,
-                        ...withdrawObj,
+                        withdrawalId: withdrawalId,
+                        amount: amount,
+                        currency: currency,
+                        recipientAddress: recipient,
+                        eccpId: eccpId || null,
+                        fee: fee,
+                        status: 'pending',
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 });
 
                 showToast('تم طلب السحب بنجاح');
-                // تحديث محلي
-                if (currency === 'USDT') {
-                    let rem = total;
-                    const m = userData.wallets?.main || 0, r = userData.wallets?.reward || 0, refr = userData.wallets?.referral || 0;
-                    const fm = Math.min(rem, m); rem -= fm;
-                    const fr = Math.min(rem, r); rem -= fr;
-                    const fref = Math.min(rem, refr); rem -= fref;
-                    if (userData.wallets) {
-                        userData.wallets.main -= fm;
-                        userData.wallets.reward -= fr;
-                        userData.wallets.referral -= fref;
-                    }
-                } else {
-                    let rem = total;
-                    const m = userData.wallets?.dzd || 0, r = userData.wallets?.dzdReward || 0, refr = userData.wallets?.dzdReferral || 0;
-                    const fm = Math.min(rem, m); rem -= fm;
-                    const fr = Math.min(rem, r); rem -= fr;
-                    const fref = Math.min(rem, refr); rem -= fref;
-                    if (userData.wallets) {
-                        userData.wallets.dzd -= fm;
-                        userData.wallets.dzdReward -= fr;
-                        userData.wallets.dzdReferral -= fref;
-                    }
-                }
-                if (!userData.transactions) userData.transactions = [];
-                userData.transactions.push({
-                    type: 'withdraw',
-                    amount: total,
-                    currency: currency,
-                    description: `سحب ${amount} ${currency}`,
-                    balanceAfter: (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0) -
-                        total,
-                    timestamp: new Date()
-                });
-                if (!userData.withdrawals) userData.withdrawals = [];
-                userData.withdrawals.push({
-                    amount: amount,
-                    currency: currency,
-                    recipientAddress: recipient,
-                    eccpId: eccpId || null,
-                    fee: fee,
-                    status: 'pending',
-                    createdAt: new Date()
-                });
                 updateUI();
                 await loadWithdrawals();
                 await loadTransactions();
@@ -2862,7 +2894,7 @@
         }
 
         // ============================================================
-        // 17. PACKAGES
+        // 19. PACKAGES
         // ============================================================
         async function loadPackages() {
             try {
@@ -2973,49 +3005,7 @@
                 });
 
                 showToast(`تم شراء "${pkg.name}" بنجاح!`);
-                // تحديث محلي
-                if (isDZD) {
-                    let rem = price;
-                    const m = userData.wallets?.dzd || 0, r = userData.wallets?.dzdReward || 0, refr = userData.wallets?.dzdReferral || 0;
-                    const fm = Math.min(rem, m); rem -= fm;
-                    const fr = Math.min(rem, r); rem -= fr;
-                    const fref = Math.min(rem, refr); rem -= fref;
-                    if (userData.wallets) {
-                        userData.wallets.dzd -= fm;
-                        userData.wallets.dzdReward -= fr;
-                        userData.wallets.dzdReferral -= fref;
-                    }
-                } else {
-                    let rem = price;
-                    const m = userData.wallets?.main || 0, r = userData.wallets?.reward || 0, refr = userData.wallets?.referral || 0;
-                    const fm = Math.min(rem, m); rem -= fm;
-                    const fr = Math.min(rem, r); rem -= fr;
-                    const fref = Math.min(rem, refr); rem -= fref;
-                    if (userData.wallets) {
-                        userData.wallets.main -= fm;
-                        userData.wallets.reward -= fr;
-                        userData.wallets.referral -= fref;
-                    }
-                }
-                userData.miningData.currentPackage = {
-                    name: pkg.name,
-                    hashRate: pkg.hashRate,
-                    duration: pkg.duration,
-                    endDate: new Date(Date.now() + pkg.duration * 24 * 60 * 60 * 1000),
-                    packageId: pkg.id,
-                    price: price,
-                    currency: cur
-                };
-                if (!userData.transactions) userData.transactions = [];
-                userData.transactions.push({
-                    type: 'purchase',
-                    amount: price,
-                    currency: cur,
-                    description: `شراء ${pkg.name}`,
-                    balanceAfter: (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0),
-                    timestamp: new Date(),
-                    packageId: pkg.id
-                });
+                // تحديث محلي (سيتم تحديثه تلقائياً عبر onSnapshot)
                 updateUI();
                 await loadTransactions();
             } catch (e) {
@@ -3024,7 +3014,7 @@
         }
 
         // ============================================================
-        // 18. TRANSACTIONS
+        // 20. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -3084,7 +3074,7 @@
         }
 
         // ============================================================
-        // 19. REFERRALS
+        // 21. REFERRALS
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -3111,7 +3101,7 @@
         }
 
         // ============================================================
-        // 20. WITHDRAW CALCULATION
+        // 22. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -3128,7 +3118,7 @@
         });
 
         // ============================================================
-        // 21. THEME TOGGLE
+        // 23. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -3175,7 +3165,104 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 22. INIT
+        // 24. ADMIN MANUAL CREDIT (شحن يدوي)
+        // ============================================================
+        async function adminManualCredit() {
+            const uid = document.getElementById('adminUserId').value.trim();
+            const currency = document.getElementById('adminCurrency').value;
+            const amount = parseFloat(document.getElementById('adminAmount').value);
+            const transactionId = document.getElementById('adminTransactionId').value.trim();
+
+            if (!uid) { showToast('⚠️ أدخل معرف المستخدم'); return; }
+            if (!amount || amount <= 0) { showToast('⚠️ أدخل مبلغاً صحيحاً (أكبر من 0)'); return; }
+
+            if (!confirm(`تأكيد شحن ${amount} ${currency} للمستخدم ${uid}؟`)) return;
+
+            try {
+                const userRef = db.collection('users').doc(uid);
+                const userDoc = await userRef.get();
+                if (!userDoc.exists) {
+                    showToast('❌ المستخدم غير موجود');
+                    return;
+                }
+
+                const field = currency === 'USDT' ? 'wallets.main' : 'wallets.dzd';
+                const now = new Date();
+
+                await userRef.update({
+                    [field]: firebase.firestore.FieldValue.increment(amount),
+                    'transactions': firebase.firestore.FieldValue.arrayUnion({
+                        type: 'manual_deposit',
+                        amount: amount,
+                        currency: currency,
+                        description: `شحن يدوي من الإدارة ${transactionId ? '(رقم العملية: '+transactionId+')' : ''}`,
+                        timestamp: now,
+                        status: 'completed',
+                        admin: userData?.telegramId || 'admin'
+                    })
+                });
+
+                showToast(`✅ تم شحن ${amount} ${currency} للمستخدم ${uid}`);
+                document.getElementById('adminUserId').value = '';
+                document.getElementById('adminAmount').value = '';
+                document.getElementById('adminTransactionId').value = '';
+
+                // تحديث الواجهة إذا كانت تعرض بيانات المستخدم (اختياري)
+                // updateUI();
+
+            } catch (e) {
+                console.error(e);
+                showToast('❌ حدث خطأ: ' + e.message);
+            }
+        }
+
+        // ============================================================
+        // 25. AUTO CONFIRM DEPOSIT (تأكيد تلقائي)
+        // ============================================================
+        async function autoConfirmDeposit() {
+            const txId = document.getElementById('autoTxId').value.trim();
+            const amount = parseFloat(document.getElementById('autoAmount').value);
+            const currency = document.getElementById('autoCurrency').value;
+
+            if (!txId) { showToast('⚠️ أدخل رقم العملية'); return; }
+            if (!amount || amount <= 0) { showToast('⚠️ أدخل مبلغاً صحيحاً (أكبر من 0)'); return; }
+
+            if (!confirm(`تأكيد تلقائي لإيداع ${amount} ${currency} برقم العملية ${txId}؟`)) return;
+
+            try {
+                const snapshot = await db.collection('deposits')
+                    .where('transactionId', '==', txId)
+                    .where('amount', '==', amount)
+                    .where('currency', '==', currency)
+                    .where('status', '==', 'pending')
+                    .limit(1)
+                    .get();
+
+                if (snapshot.empty) {
+                    showToast('❌ لم يتم العثور على طلب إيداع معلق بهذه البيانات');
+                    return;
+                }
+
+                const doc = snapshot.docs[0];
+                const data = doc.data();
+                const depositId = data.depositId || '';
+
+                await approveDeposit(doc.id, data.uid, data.amount, data.currency, depositId);
+
+                document.getElementById('autoTxId').value = '';
+                document.getElementById('autoAmount').value = '';
+
+                showToast(`✅ تم تأكيد الإيداع تلقائياً (رقم العملية: ${txId})`);
+                await loadAdminDeposits();
+
+            } catch (e) {
+                console.error(e);
+                showToast('❌ حدث خطأ: ' + e.message);
+            }
+        }
+
+        // ============================================================
+        // 26. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
