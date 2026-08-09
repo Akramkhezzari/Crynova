@@ -998,13 +998,6 @@
         .clickable {
             cursor: pointer;
         }
-        /* DARK MODE SWITCH - حالة التفعيل المرئية */
-        #darkModeToggle:checked + span {
-            background: var(--accent) !important;
-        }
-        #darkModeToggle:checked + span + #darkModeSlider {
-            transform: translateX(22px);
-        }
     </style>
 </head>
 <body>
@@ -1532,16 +1525,6 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: ADMIN (لوحة التحكم) ========== -->
-        <div class="page" id="page-admin">
-            <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
-                <i class="fas fa-shield-alt text-danger"></i> لوحة التحكم
-            </h2>
-            <div id="adminContent">
-                <div class="text-center text-muted" style="padding:20px 0;">جاري التحميل...</div>
-            </div>
-        </div>
-
     </div>
 
     <!-- ===== BOTTOM NAVIGATION ===== -->
@@ -1597,8 +1580,6 @@
         let miningInterval = null;
         let selectedCurrency = 'USDT';
         let exchangeRate = 250;
-        let isAdmin = false;
-        const ADMIN_IDS = ['5922049376']; // ضع هنا معرفات المشرفين
 
         const POSTAL_ACCOUNT = '0799999002385412178';
 
@@ -1616,7 +1597,7 @@
         }
 
         // ============================================================
-        // 4. AUTHENTICATION
+        // 4. AUTHENTICATION - KEY = telegramId
         // ============================================================
         async function authUser() {
             const tgUser = getTelegramUser();
@@ -1625,26 +1606,22 @@
                 return false;
             }
 
-            // التحقق من الأدمن
-            isAdmin = ADMIN_IDS.includes(tgUser.id.toString());
-            if (isAdmin) {
-                console.log('👑 مرحباً أيها المشرف!');
-                // إضافة زر الإدارة في التذييل أو مكان مناسب (سيظهر في صفحة الإدارة)
-            }
+            const telegramId = tgUser.id.toString(); // المفتاح الأساسي
 
             try {
-                const usersRef = db.collection('users');
-                const snapshot = await usersRef.where('telegramId', '==', tgUser.id.toString()).get();
+                const userRef = db.collection('users').doc(telegramId);
+                const docSnap = await userRef.get();
 
-                if (!snapshot.empty) {
-                    const doc = snapshot.docs[0];
-                    userData = { uid: doc.id, ...doc.data() };
-                    await doc.ref.update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() });
+                if (docSnap.exists) {
+                    // مستخدم موجود
+                    userData = { telegramId: telegramId, ...docSnap.data() };
+                    await userRef.update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() });
                     console.log('✅ مرحباً بعودتك,', userData.displayName);
                 } else {
+                    // إنشاء مستخدم جديد
                     const displayName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
                     const newUser = {
-                        telegramId: tgUser.id.toString(),
+                        telegramId: telegramId,
                         username: tgUser.username || '',
                         displayName: displayName || 'مستخدم',
                         photoURL: tgUser.photo_url || `https://ui-avatars.com/api/?name=${displayName || 'U'}&background=6c5ce7&color=fff&size=128`,
@@ -1652,8 +1629,8 @@
                         lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
                         level: 1,
                         status: 'active',
-                        referralCode: tgUser.id.toString(),
-                        referrerBy: null, // ✅ الحقل الصحيح
+                        referralCode: telegramId, // نفس المعرف
+                        referrerBy: null,
                         currency: 'USDT',
                         wallets: {
                             main: 0,
@@ -1680,20 +1657,19 @@
                             }
                         }
                     };
-                    const docRef = await db.collection('users').add(newUser);
-                    userData = { uid: docRef.id, ...newUser };
+                    await userRef.set(newUser);
+                    userData = { telegramId: telegramId, ...newUser };
                     console.log('✅ تم إنشاء حساب جديد:', userData.displayName);
                 }
 
-                // ✅ معالجة الإحالة بعد تحميل المستخدم
+                // ✅ معالجة الإحالة
                 await handleReferral();
 
                 // الاستماع للتحديثات
-                db.collection('users').doc(userData.uid).onSnapshot((doc) => {
+                userRef.onSnapshot((doc) => {
                     if (doc.exists) {
-                        userData = { uid: doc.id, ...doc.data() };
+                        userData = { telegramId: doc.id, ...doc.data() };
                         updateUI();
-                        if (isAdmin) loadAdminData();
                     }
                 });
 
@@ -1707,7 +1683,6 @@
 
                 updateUI();
                 startMining();
-                if (isAdmin) loadAdminData();
                 return true;
 
             } catch (e) {
@@ -1717,10 +1692,9 @@
         }
 
         // ============================================================
-        // 5. معالجة الإحالة (المحسّنة)
+        // 5. REFERRAL HANDLING - باستخدام telegramId كمفتاح
         // ============================================================
         async function handleReferral() {
-            console.log('🔍 بدء معالجة الإحالة...');
             if (!userData) {
                 console.warn('❌ userData غير موجود');
                 return;
@@ -1731,38 +1705,19 @@
                 return;
             }
 
-            // محاولة قراءة الكود من 3 مصادر
             let referralCode = null;
-
-            // 1. من start_param الخاص بـ Telegram WebApp (الأكثر موثوقية)
-            if (window.Telegram?.WebApp) {
-                const tg = window.Telegram.WebApp;
-                referralCode = tg.initDataUnsafe?.start_param;
-                if (referralCode) {
-                    console.log('✅ قرأت start_param من WebApp:', referralCode);
-                    // خزنه في localStorage للاستخدام المستقبلي
-                    localStorage.setItem('referralCode', referralCode);
-                }
+            if (window.Telegram && window.Telegram.WebApp) {
+                referralCode = window.Telegram.WebApp.initDataUnsafe?.start_param;
+                if (referralCode) console.log('✅ قرأت start_param من WebApp:', referralCode);
             }
-
-            // 2. من localStorage (إذا تم تخزينه سابقاً)
-            if (!referralCode) {
-                referralCode = localStorage.getItem('referralCode');
-                if (referralCode) console.log('✅ قرأت من localStorage:', referralCode);
-            }
-
-            // 3. من URL (كحل أخير)
             if (!referralCode) {
                 const params = new URLSearchParams(window.location.search);
                 referralCode = params.get('start');
-                if (referralCode) {
-                    console.log('✅ قرأت من URL:', referralCode);
-                    localStorage.setItem('referralCode', referralCode);
-                }
+                if (referralCode) console.log('✅ قرأت start من URL:', referralCode);
             }
 
             if (!referralCode) {
-                console.warn('❌ لم يتم العثور على كود إحالة (start) في أي مكان');
+                console.warn('❌ لم يتم العثور على كود إحالة');
                 return;
             }
 
@@ -1774,43 +1729,33 @@
             console.log(`🔗 معالجة الإحالة: ${referralCode}`);
 
             try {
-                // البحث عن المُحيل
-                const referrerSnap = await db.collection('users')
-                    .where('referralCode', '==', referralCode)
-                    .get();
+                // البحث عن المُحيل باستخدام المعرف مباشرة (doc)
+                const referrerRef = db.collection('users').doc(referralCode);
+                const referrerDoc = await referrerRef.get();
 
-                if (referrerSnap.empty) {
+                if (!referrerDoc.exists) {
                     console.warn(`⚠️ لم يُعثر على مُحيل بهذا الكود: ${referralCode}`);
                     showToast('⚠️ لم يتم العثور على المستخدم الذي دعاك.');
                     return;
                 }
 
-                const referrerDoc = referrerSnap.docs[0];
                 const referrerData = referrerDoc.data();
-                console.log('👤 تم العثور على المُحيل:', referrerData.displayName, '(UID:', referrerDoc.id, ')');
+                console.log('👤 تم العثور على المُحيل:', referrerData.displayName);
 
-                // التأكد من عدم وجود إحالة مسبقة
+                // التأكد من عدم وجود إحالة مسبقة لهذا المستخدم
                 const existing = await db.collection('referrals')
-                    .where('referredUid', '==', userData.uid)
+                    .where('referredUid', '==', userData.telegramId)
                     .get();
 
                 if (!existing.empty) {
                     console.warn('⚠️ هذه الإحالة مسجلة مسبقاً');
-                    localStorage.removeItem('referralCode');
                     return;
                 }
 
                 // تنفيذ المعاملة
-                console.log('🔄 بدء المعاملة...');
                 await db.runTransaction(async (transaction) => {
-                    const userRef = db.collection('users').doc(userData.uid);
-                    const refRef = referrerDoc.ref;
-
-                    const userDoc = await transaction.get(userRef);
-                    const refDoc = await transaction.get(refRef);
-                    if (!userDoc.exists || !refDoc.exists) {
-                        throw new Error('أحد المستخدمين غير موجود');
-                    }
+                    const userRef = db.collection('users').doc(userData.telegramId);
+                    const refRef = db.collection('users').doc(referralCode);
 
                     // تحديث المستخدم المُحال
                     transaction.update(userRef, { referrerBy: referralCode });
@@ -1825,8 +1770,8 @@
                     // إضافة سجل الإحالة
                     const refsRef = db.collection('referrals');
                     transaction.set(refsRef.doc(), {
-                        referrerUid: referrerDoc.id,
-                        referredUid: userData.uid,
+                        referrerUid: referralCode,
+                        referredUid: userData.telegramId,
                         displayName: userData.displayName || 'مستخدم',
                         joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
                         commissionEarned: 5
@@ -1835,7 +1780,7 @@
                     // إضافة معاملة للمُحيل
                     const transRef = db.collection('transactions');
                     transaction.set(transRef.doc(), {
-                        uid: referrerDoc.id,
+                        uid: referralCode,
                         type: 'referral_bonus',
                         amount: 5,
                         currency: 'USDT',
@@ -1846,28 +1791,10 @@
 
                 console.log('✅ تمت معالجة الإحالة بنجاح!');
                 userData.referrerBy = referralCode;
-                localStorage.removeItem('referralCode');
                 showToast('🎉 تم تفعيل الإحالة! شكراً لدعوتك.');
                 await loadReferrals();
                 await loadTransactions();
                 updateUI();
-
-                // إرسال إشعار إلى خادم البوت (اختياري)
-                try {
-                    await fetch('/api/referral', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            referrerId: referralCode,
-                            referredId: userData.telegramId,
-                            referredName: userData.displayName,
-                            amount: 5
-                        })
-                    });
-                    console.log('📨 تم إرسال الإشعار إلى الخادم');
-                } catch (e) {
-                    console.warn('⚠️ فشل إرسال الإشعار للخادم:', e);
-                }
 
             } catch (error) {
                 console.error('❌ فشل معالجة الإحالة:', error);
@@ -1876,23 +1803,17 @@
         }
 
         // ============================================================
-        // 6. اختبار الإحالة يدوياً
+        // 6. TEST REFERRAL MANUALLY
         // ============================================================
         async function testReferralManually() {
             const code = prompt('🔑 أدخل كود الإحالة (مثل 5922049376):');
             if (!code) return;
-
-            // محاكاة تمرير الكود عبر WebApp
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.initDataUnsafe = { start_param: code };
             }
-            // محاكاة الكود في URL
             const url = new URL(window.location.href);
             url.searchParams.set('start', code);
             window.history.replaceState({}, '', url);
-            // تخزين في localStorage
-            localStorage.setItem('referralCode', code);
-
             showToast('🔄 جاري معالجة الإحالة...');
             await handleReferral();
         }
@@ -2051,7 +1972,7 @@
         function startMining() {
             if (miningInterval) clearInterval(miningInterval);
             miningInterval = setInterval(async () => {
-                if (!userData || !userData.uid) return;
+                if (!userData || !userData.telegramId) return;
                 const pkg = userData.miningData?.currentPackage;
                 if (!pkg) return;
                 const now = new Date();
@@ -2066,7 +1987,7 @@
                 const rewardDZD = reward * exchangeRate;
                 if (reward <= 0) return;
                 try {
-                    const ref = db.collection('users').doc(userData.uid);
+                    const ref = db.collection('users').doc(userData.telegramId);
                     await db.runTransaction(async (t) => {
                         const doc = await t.get(ref);
                         if (!doc.exists) return;
@@ -2076,14 +1997,11 @@
                             'miningData.totalMined': firebase.firestore.FieldValue.increment(reward),
                             'miningData.totalMinedDZD': firebase.firestore.FieldValue.increment(rewardDZD),
                             'miningData.miningHistory.today': firebase.firestore.FieldValue.increment(reward),
-                            'miningData.miningHistory.todayDZD': firebase.firestore.FieldValue.increment(
-                            rewardDZD),
+                            'miningData.miningHistory.todayDZD': firebase.firestore.FieldValue.increment(rewardDZD),
                             'miningData.miningHistory.thisWeek': firebase.firestore.FieldValue.increment(reward),
-                            'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(
-                                rewardDZD),
+                            'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(rewardDZD),
                             'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(reward),
-                            'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(
-                                rewardDZD)
+                            'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(rewardDZD)
                         });
                     });
                     // تحديث محلي سريع
@@ -2093,20 +2011,13 @@
                     if (!userData.miningData) userData.miningData = {};
                     userData.miningData.totalMined = (userData.miningData.totalMined || 0) + reward;
                     userData.miningData.totalMinedDZD = (userData.miningData.totalMinedDZD || 0) + rewardDZD;
-                    if (!userData.miningData.miningHistory) userData.miningData.miningHistory = { today: 0,
-                        todayDZD: 0, thisWeek: 0, thisWeekDZD: 0, thisMonth: 0, thisMonthDZD: 0 };
-                    userData.miningData.miningHistory.today = (userData.miningData.miningHistory.today || 0) +
-                    reward;
-                    userData.miningData.miningHistory.todayDZD = (userData.miningData.miningHistory.todayDZD ||
-                        0) + rewardDZD;
-                    userData.miningData.miningHistory.thisWeek = (userData.miningData.miningHistory.thisWeek ||
-                        0) + reward;
-                    userData.miningData.miningHistory.thisWeekDZD = (userData.miningData.miningHistory
-                        .thisWeekDZD || 0) + rewardDZD;
-                    userData.miningData.miningHistory.thisMonth = (userData.miningData.miningHistory
-                        .thisMonth || 0) + reward;
-                    userData.miningData.miningHistory.thisMonthDZD = (userData.miningData.miningHistory
-                        .thisMonthDZD || 0) + rewardDZD;
+                    if (!userData.miningData.miningHistory) userData.miningData.miningHistory = { today: 0, todayDZD: 0, thisWeek: 0, thisWeekDZD: 0, thisMonth: 0, thisMonthDZD: 0 };
+                    userData.miningData.miningHistory.today = (userData.miningData.miningHistory.today || 0) + reward;
+                    userData.miningData.miningHistory.todayDZD = (userData.miningData.miningHistory.todayDZD || 0) + rewardDZD;
+                    userData.miningData.miningHistory.thisWeek = (userData.miningData.miningHistory.thisWeek || 0) + reward;
+                    userData.miningData.miningHistory.thisWeekDZD = (userData.miningData.miningHistory.thisWeekDZD || 0) + rewardDZD;
+                    userData.miningData.miningHistory.thisMonth = (userData.miningData.miningHistory.thisMonth || 0) + reward;
+                    userData.miningData.miningHistory.thisMonthDZD = (userData.miningData.miningHistory.thisMonthDZD || 0) + rewardDZD;
                     updateUI();
                 } catch (e) { /* ignore */ }
             }, 30000);
@@ -2129,7 +2040,6 @@
             if (page === 'mining') updateMiningUI();
             if (page === 'referrals') updateReferralUI();
             if (page === 'profile') updateProfileUI();
-            if (page === 'admin' && isAdmin) loadAdminData();
         }
 
         // ============================================================
@@ -2255,14 +2165,10 @@
             const dailyDZD = daily * exchangeRate;
             document.getElementById('miningDailyEarnings').textContent = isDZD ? dailyDZD.toFixed(2) : daily.toFixed(2);
             document.getElementById('miningDailyCurrency').textContent = selectedCurrency;
-            document.getElementById('miningTotalMined').textContent = isDZD ? (md.totalMinedDZD || 0).toFixed(2) : (md
-                .totalMined || 0).toFixed(2);
-            document.getElementById('miningToday').textContent = isDZD ? (md.miningHistory?.todayDZD || 0).toFixed(2) : (md
-                .miningHistory?.today || 0).toFixed(2);
-            document.getElementById('miningThisWeek').textContent = isDZD ? (md.miningHistory?.thisWeekDZD || 0).toFixed(
-                2) : (md.miningHistory?.thisWeek || 0).toFixed(2);
-            document.getElementById('miningThisMonth').textContent = isDZD ? (md.miningHistory?.thisMonthDZD || 0)
-                .toFixed(2) : (md.miningHistory?.thisMonth || 0).toFixed(2);
+            document.getElementById('miningTotalMined').textContent = isDZD ? (md.totalMinedDZD || 0).toFixed(2) : (md.totalMined || 0).toFixed(2);
+            document.getElementById('miningToday').textContent = isDZD ? (md.miningHistory?.todayDZD || 0).toFixed(2) : (md.miningHistory?.today || 0).toFixed(2);
+            document.getElementById('miningThisWeek').textContent = isDZD ? (md.miningHistory?.thisWeekDZD || 0).toFixed(2) : (md.miningHistory?.thisWeek || 0).toFixed(2);
+            document.getElementById('miningThisMonth').textContent = isDZD ? (md.miningHistory?.thisMonthDZD || 0).toFixed(2) : (md.miningHistory?.thisMonth || 0).toFixed(2);
             document.getElementById('miningCard').className = isDZD ? 'card dzd-gradient' : 'card gradient';
         }
 
@@ -2275,119 +2181,7 @@
         }
 
         // ============================================================
-        // 13. ADMIN PANEL
-        // ============================================================
-        async function loadAdminData() {
-            if (!isAdmin) {
-                document.getElementById('adminContent').innerHTML = `
-                    <div class="card text-center" style="padding:32px 0;">
-                        <div style="font-size:48px;">🔒</div>
-                        <div style="font-size:18px;font-weight:700;">غير مصرح</div>
-                        <div style="color:var(--text-secondary);">هذه الصفحة للمشرفين فقط</div>
-                    </div>
-                `;
-                return;
-            }
-            try {
-                // إحصائيات سريعة
-                const usersSnap = await db.collection('users').get();
-                const depositsSnap = await db.collection('deposits').where('status', '==', 'pending').get();
-                const referralsSnap = await db.collection('referrals').get();
-
-                const adminHtml = `
-                    <div class="grid-3">
-                        <div class="stat-box">
-                            <span class="icon">👥</span>
-                            <div class="number">${usersSnap.size}</div>
-                            <div class="label">إجمالي المستخدمين</div>
-                        </div>
-                        <div class="stat-box">
-                            <span class="icon">⏳</span>
-                            <div class="number" style="color:var(--warning);">${depositsSnap.size}</div>
-                            <div class="label">إيداعات معلقة</div>
-                        </div>
-                        <div class="stat-box">
-                            <span class="icon">🔗</span>
-                            <div class="number" style="color:var(--success);">${referralsSnap.size}</div>
-                            <div class="label">إجمالي الإحالات</div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-title"><i class="fas fa-list"></i> آخر المستخدمين</div>
-                        <div id="adminUsersList">جاري التحميل...</div>
-                    </div>
-                    <button class="btn btn-outline" onclick="adminApproveAllDeposits()">
-                        <i class="fas fa-check-double"></i> تأكيد جميع الإيداعات المعلقة
-                    </button>
-                `;
-                document.getElementById('adminContent').innerHTML = adminHtml;
-
-                // عرض آخر 5 مستخدمين
-                const usersSnap2 = await db.collection('users').orderBy('joinDate', 'desc').limit(5).get();
-                let usersHtml = '';
-                usersSnap2.forEach(doc => {
-                    const u = doc.data();
-                    usersHtml += `
-                        <div class="list-item">
-                            <div class="left">
-                                <div class="avatar" style="width:36px;height:36px;font-size:14px;">${(u.displayName||'م').charAt(0)}</div>
-                                <div><div class="title">${u.displayName||'مستخدم'}</div><div class="sub">${u.telegramId}</div></div>
-                            </div>
-                            <div class="right"><span class="status ${getStatusBadge(u.status)}">${getStatusText(u.status)}</span></div>
-                        </div>
-                    `;
-                });
-                document.getElementById('adminUsersList').innerHTML = usersHtml || 'لا يوجد مستخدمين';
-
-            } catch (e) {
-                document.getElementById('adminContent').innerHTML = `<div class="text-danger">حدث خطأ: ${e.message}</div>`;
-            }
-        }
-
-        async function adminApproveAllDeposits() {
-            if (!isAdmin) return;
-            if (!confirm('تأكيد جميع الإيداعات المعلقة؟')) return;
-            try {
-                const snap = await db.collection('deposits').where('status', '==', 'pending').get();
-                let count = 0;
-                for (const doc of snap.docs) {
-                    const data = doc.data();
-                    // تحديث الحالة
-                    await doc.ref.update({ status: 'confirmed' });
-                    // إضافة المبلغ إلى رصيد المستخدم
-                    const userRef = db.collection('users').doc(data.uid);
-                    await db.runTransaction(async (t) => {
-                        const udoc = await t.get(userRef);
-                        if (!udoc.exists) return;
-                        const updateData = {};
-                        if (data.currency === 'USDT') {
-                            updateData['wallets.main'] = firebase.firestore.FieldValue.increment(data.amount);
-                        } else {
-                            updateData['wallets.dzd'] = firebase.firestore.FieldValue.increment(data.amount);
-                        }
-                        t.update(userRef, updateData);
-                        // إضافة معاملة
-                        const transRef = db.collection('transactions');
-                        t.set(transRef.doc(), {
-                            uid: data.uid,
-                            type: 'deposit',
-                            amount: data.amount,
-                            currency: data.currency,
-                            description: 'إيداع (تأكيد تلقائي)',
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    });
-                    count++;
-                }
-                showToast(`✅ تم تأكيد ${count} إيداع`);
-                loadAdminData();
-            } catch (e) {
-                showToast('خطأ: ' + e.message);
-            }
-        }
-
-        // ============================================================
-        // 14. DEPOSIT
+        // 13. DEPOSIT
         // ============================================================
         function updateDepositNetwork() {
             const currency = document.getElementById('depositCurrency').value;
@@ -2406,8 +2200,7 @@
                 address = `CCP: ${POSTAL_ACCOUNT}`;
             } else {
                 const network = document.getElementById('depositNetwork').value;
-                address = '0x' + Array.from({ length: 40 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)])
-                    .join('');
+                address = '0x' + Array.from({ length: 40 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
             }
             depositData = { currency, amount, address };
             document.getElementById('depositAddress').textContent = address;
@@ -2434,7 +2227,7 @@
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
             try {
                 await db.collection('deposits').add({
-                    uid: userData.uid,
+                    uid: userData.telegramId,
                     amount: depositData.amount,
                     currency: depositData.currency,
                     network: depositData.currency === 'DZD' ? 'CCP' : document.getElementById('depositNetwork').value,
@@ -2454,8 +2247,7 @@
         async function loadDeposits() {
             if (!userData) return;
             try {
-                const snap = await db.collection('deposits').where('uid', '==', userData.uid).orderBy('createdAt', 'desc')
-                    .get();
+                const snap = await db.collection('deposits').where('uid', '==', userData.telegramId).orderBy('createdAt', 'desc').get();
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
                 renderDeposits(list);
@@ -2464,8 +2256,7 @@
 
         function renderDeposits(list) {
             const c = document.getElementById('depositRequests');
-            if (!list || !list.length) { c.innerHTML =
-                '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لا توجد طلبات إيداع</div>'; return; }
+            if (!list || !list.length) { c.innerHTML = '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لا توجد طلبات إيداع</div>'; return; }
             c.innerHTML = list.map(d => `
                 <div class="list-item">
                     <div class="left"><div><div class="title">${d.amount} ${d.currency}</div><div class="sub">${formatDateTime(d.createdAt)}</div></div></div>
@@ -2475,7 +2266,7 @@
         }
 
         // ============================================================
-        // 15. WITHDRAW
+        // 14. WITHDRAW
         // ============================================================
         function updateWithdrawNetwork() {
             const cur = document.getElementById('withdrawCurrency').value;
@@ -2490,15 +2281,10 @@
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             if (!amount || amount < 10) { showToast('الحد الأدنى 10'); return; }
             let totalBal = 0;
-            if (currency === 'USDT') totalBal = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData
-                .wallets?.referral || 0);
-            else totalBal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
-            const fee = amount * 0.02;
-            const total = amount + fee;
-            if (total > totalBal) { showToast('الرصيد غير كافٍ (شامل الرسوم)'); return; }
-            let recipient = '',
-                eccpId = '';
+            if (currency === 'USDT') totalBal = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
+            else totalBal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            if (amount > totalBal) { showToast('الرصيد غير كافٍ'); return; }
+            let recipient = '', eccpId = '';
             if (currency === 'DZD') {
                 eccpId = document.getElementById('withdrawEccpId').value.trim();
                 if (!eccpId) { showToast('أدخل معرف ECCP'); return; }
@@ -2507,70 +2293,51 @@
                 recipient = document.getElementById('withdrawAddress').value.trim();
                 if (!recipient) { showToast('أدخل عنوان المستلم'); return; }
             }
+            const fee = amount * 0.02;
+            const total = amount + fee;
             if (!confirm(`تأكيد سحب ${amount} ${currency}? الرسوم: ${fee.toFixed(2)}`)) return;
             try {
                 await db.runTransaction(async (t) => {
-                    const ref = db.collection('users').doc(userData.uid);
+                    const ref = db.collection('users').doc(userData.telegramId);
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
                     let bal = 0;
-                    if (currency === 'USDT') bal = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward ||
-                        0) + (doc.data().wallets?.referral || 0);
-                    else bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
-                        .wallets?.dzdReferral || 0);
+                    if (currency === 'USDT') bal = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward || 0) + (doc.data().wallets?.referral || 0);
+                    else bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
                     if (bal < total) throw new Error('رصيد غير كاف');
                     let rem = total;
                     const upd = {};
                     if (currency === 'USDT') {
-                        const m = doc.data().wallets?.main || 0,
-                            r = doc.data().wallets?.reward || 0,
-                            refr = doc.data().wallets?.referral || 0;
-                        const fm = Math.min(rem, m);
-                        rem -= fm;
-                        const fr = Math.min(rem, r);
-                        rem -= fr;
-                        const fref = Math.min(rem, refr);
-                        rem -= fref;
+                        const m = doc.data().wallets?.main || 0, r = doc.data().wallets?.reward || 0, refr = doc.data().wallets?.referral || 0;
+                        const fm = Math.min(rem, m); rem -= fm;
+                        const fr = Math.min(rem, r); rem -= fr;
+                        const fref = Math.min(rem, refr); rem -= fref;
                         upd['wallets.main'] = m - fm;
                         upd['wallets.reward'] = r - fr;
                         upd['wallets.referral'] = refr - fref;
                     } else {
-                        const m = doc.data().wallets?.dzd || 0,
-                            r = doc.data().wallets?.dzdReward || 0,
-                            refr = doc.data().wallets?.dzdReferral || 0;
-                        const fm = Math.min(rem, m);
-                        rem -= fm;
-                        const fr = Math.min(rem, r);
-                        rem -= fr;
-                        const fref = Math.min(rem, refr);
-                        rem -= fref;
+                        const m = doc.data().wallets?.dzd || 0, r = doc.data().wallets?.dzdReward || 0, refr = doc.data().wallets?.dzdReferral || 0;
+                        const fm = Math.min(rem, m); rem -= fm;
+                        const fr = Math.min(rem, r); rem -= fr;
+                        const fref = Math.min(rem, refr); rem -= fref;
                         upd['wallets.dzd'] = m - fm;
                         upd['wallets.dzdReward'] = r - fr;
                         upd['wallets.dzdReferral'] = refr - fref;
                     }
                     t.update(ref, upd);
                     const wdRef = db.collection('withdrawals').doc();
-                    t.set(wdRef, { uid: userData.uid, amount, currency, recipientAddress: recipient, eccpId: eccpId ||
-                            null, fee, status: 'pending', createdAt: firebase.firestore.FieldValue
-                            .serverTimestamp() });
+                    t.set(wdRef, { uid: userData.telegramId, amount, currency, recipientAddress: recipient, eccpId: eccpId || null, fee, status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
                     const trRef = db.collection('transactions').doc();
-                    t.set(trRef, { uid: userData.uid, type: 'withdraw', amount: total, currency,
-                        description: `سحب`, balanceAfter: bal - total, timestamp: firebase.firestore
-                            .FieldValue.serverTimestamp() });
+                    t.set(trRef, { uid: userData.telegramId, type: 'withdraw', amount: total, currency, description: `سحب`, balanceAfter: bal - total, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 });
                 showToast('تم طلب السحب بنجاح');
                 // تحديث محلي سريع
                 if (currency === 'USDT') {
                     let rem = total;
-                    const m = userData.wallets?.main || 0,
-                        r = userData.wallets?.reward || 0,
-                        refr = userData.wallets?.referral || 0;
-                    const fm = Math.min(rem, m);
-                    rem -= fm;
-                    const fr = Math.min(rem, r);
-                    rem -= fr;
-                    const fref = Math.min(rem, refr);
-                    rem -= fref;
+                    const m = userData.wallets?.main || 0, r = userData.wallets?.reward || 0, refr = userData.wallets?.referral || 0;
+                    const fm = Math.min(rem, m); rem -= fm;
+                    const fr = Math.min(rem, r); rem -= fr;
+                    const fref = Math.min(rem, refr); rem -= fref;
                     if (userData.wallets) {
                         userData.wallets.main -= fm;
                         userData.wallets.reward -= fr;
@@ -2578,15 +2345,10 @@
                     }
                 } else {
                     let rem = total;
-                    const m = userData.wallets?.dzd || 0,
-                        r = userData.wallets?.dzdReward || 0,
-                        refr = userData.wallets?.dzdReferral || 0;
-                    const fm = Math.min(rem, m);
-                    rem -= fm;
-                    const fr = Math.min(rem, r);
-                    rem -= fr;
-                    const fref = Math.min(rem, refr);
-                    rem -= fref;
+                    const m = userData.wallets?.dzd || 0, r = userData.wallets?.dzdReward || 0, refr = userData.wallets?.dzdReferral || 0;
+                    const fm = Math.min(rem, m); rem -= fm;
+                    const fr = Math.min(rem, r); rem -= fr;
+                    const fref = Math.min(rem, refr); rem -= fref;
                     if (userData.wallets) {
                         userData.wallets.dzd -= fm;
                         userData.wallets.dzdReward -= fr;
@@ -2605,8 +2367,7 @@
         async function loadWithdrawals() {
             if (!userData) return;
             try {
-                const snap = await db.collection('withdrawals').where('uid', '==', userData.uid).orderBy('createdAt',
-                    'desc').get();
+                const snap = await db.collection('withdrawals').where('uid', '==', userData.telegramId).orderBy('createdAt', 'desc').get();
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
                 renderWithdrawals(list);
@@ -2615,8 +2376,7 @@
 
         function renderWithdrawals(list) {
             const c = document.getElementById('withdrawRequests');
-            if (!list || !list.length) { c.innerHTML =
-                '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لا توجد طلبات سحب</div>'; return; }
+            if (!list || !list.length) { c.innerHTML = '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لا توجد طلبات سحب</div>'; return; }
             c.innerHTML = list.map(w => `
                 <div class="list-item">
                     <div class="left"><div><div class="title">${w.amount} ${w.currency}</div><div class="sub">${formatDateTime(w.createdAt)}</div></div></div>
@@ -2626,7 +2386,7 @@
         }
 
         // ============================================================
-        // 16. PACKAGES
+        // 15. PACKAGES
         // ============================================================
         async function loadPackages() {
             try {
@@ -2640,8 +2400,7 @@
         function renderPackages() {
             const c = document.getElementById('packagesList');
             if (!allPackages.length) {
-                c.innerHTML =
-                    `<div class="card text-center" style="padding:32px 0;"><div style="font-size:48px;">📦</div><div style="font-size:18px;font-weight:700;">لا توجد باقات</div></div>`;
+                c.innerHTML = `<div class="card text-center" style="padding:32px 0;"><div style="font-size:48px;">📦</div><div style="font-size:18px;font-weight:700;">لا توجد باقات</div></div>`;
                 return;
             }
             const isDZD = selectedCurrency === 'DZD';
@@ -2676,48 +2435,34 @@
             const price = isDZD ? pkg.price * exchangeRate : pkg.price;
             const cur = isDZD ? 'DZD' : pkg.currency;
             let bal = 0;
-            if (isDZD) bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
-            else bal = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral ||
-                0);
+            if (isDZD) bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            else bal = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
             if (bal < price) { showToast(`الرصيد غير كافٍ (${price.toFixed(2)} ${cur})`); return; }
             if (!confirm(`شراء باقة "${pkg.name}" بسعر ${price.toFixed(2)} ${cur}؟`)) return;
             try {
                 await db.runTransaction(async (t) => {
-                    const ref = db.collection('users').doc(userData.uid);
+                    const ref = db.collection('users').doc(userData.telegramId);
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
                     let b = 0;
-                    if (isDZD) b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
-                        .wallets?.dzdReferral || 0);
-                    else b = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward || 0) + (doc.data()
-                        .wallets?.referral || 0);
+                    if (isDZD) b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
+                    else b = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward || 0) + (doc.data().wallets?.referral || 0);
                     if (b < price) throw new Error('رصيد غير كاف');
                     let rem = price;
                     const upd = {};
                     if (isDZD) {
-                        const m = doc.data().wallets?.dzd || 0,
-                            r = doc.data().wallets?.dzdReward || 0,
-                            refr = doc.data().wallets?.dzdReferral || 0;
-                        const fm = Math.min(rem, m);
-                        rem -= fm;
-                        const fr = Math.min(rem, r);
-                        rem -= fr;
-                        const fref = Math.min(rem, refr);
-                        rem -= fref;
+                        const m = doc.data().wallets?.dzd || 0, r = doc.data().wallets?.dzdReward || 0, refr = doc.data().wallets?.dzdReferral || 0;
+                        const fm = Math.min(rem, m); rem -= fm;
+                        const fr = Math.min(rem, r); rem -= fr;
+                        const fref = Math.min(rem, refr); rem -= fref;
                         upd['wallets.dzd'] = m - fm;
                         upd['wallets.dzdReward'] = r - fr;
                         upd['wallets.dzdReferral'] = refr - fref;
                     } else {
-                        const m = doc.data().wallets?.main || 0,
-                            r = doc.data().wallets?.reward || 0,
-                            refr = doc.data().wallets?.referral || 0;
-                        const fm = Math.min(rem, m);
-                        rem -= fm;
-                        const fr = Math.min(rem, r);
-                        rem -= fr;
-                        const fref = Math.min(rem, refr);
-                        rem -= fref;
+                        const m = doc.data().wallets?.main || 0, r = doc.data().wallets?.reward || 0, refr = doc.data().wallets?.referral || 0;
+                        const fm = Math.min(rem, m); rem -= fm;
+                        const fr = Math.min(rem, r); rem -= fr;
+                        const fref = Math.min(rem, refr); rem -= fref;
                         upd['wallets.main'] = m - fm;
                         upd['wallets.reward'] = r - fr;
                         upd['wallets.referral'] = refr - fref;
@@ -2733,23 +2478,16 @@
                     };
                     t.update(ref, upd);
                     const trRef = db.collection('transactions').doc();
-                    t.set(trRef, { uid: userData.uid, type: 'purchase', amount: price, currency: cur,
-                        description: `شراء ${pkg.name}`, balanceAfter: b - price, timestamp: firebase
-                            .firestore.FieldValue.serverTimestamp(), packageId: pkg.id });
+                    t.set(trRef, { uid: userData.telegramId, type: 'purchase', amount: price, currency: cur, description: `شراء ${pkg.name}`, balanceAfter: b - price, timestamp: firebase.firestore.FieldValue.serverTimestamp(), packageId: pkg.id });
                 });
                 showToast(`تم شراء "${pkg.name}" بنجاح!`);
                 // تحديث محلي
                 if (isDZD) {
                     let rem = price;
-                    const m = userData.wallets?.dzd || 0,
-                        r = userData.wallets?.dzdReward || 0,
-                        refr = userData.wallets?.dzdReferral || 0;
-                    const fm = Math.min(rem, m);
-                    rem -= fm;
-                    const fr = Math.min(rem, r);
-                    rem -= fr;
-                    const fref = Math.min(rem, refr);
-                    rem -= fref;
+                    const m = userData.wallets?.dzd || 0, r = userData.wallets?.dzdReward || 0, refr = userData.wallets?.dzdReferral || 0;
+                    const fm = Math.min(rem, m); rem -= fm;
+                    const fr = Math.min(rem, r); rem -= fr;
+                    const fref = Math.min(rem, refr); rem -= fref;
                     if (userData.wallets) {
                         userData.wallets.dzd -= fm;
                         userData.wallets.dzdReward -= fr;
@@ -2757,22 +2495,16 @@
                     }
                 } else {
                     let rem = price;
-                    const m = userData.wallets?.main || 0,
-                        r = userData.wallets?.reward || 0,
-                        refr = userData.wallets?.referral || 0;
-                    const fm = Math.min(rem, m);
-                    rem -= fm;
-                    const fr = Math.min(rem, r);
-                    rem -= fr;
-                    const fref = Math.min(rem, refr);
-                    rem -= fref;
+                    const m = userData.wallets?.main || 0, r = userData.wallets?.reward || 0, refr = userData.wallets?.referral || 0;
+                    const fm = Math.min(rem, m); rem -= fm;
+                    const fr = Math.min(rem, r); rem -= fr;
+                    const fref = Math.min(rem, refr); rem -= fref;
                     if (userData.wallets) {
                         userData.wallets.main -= fm;
                         userData.wallets.reward -= fr;
                         userData.wallets.referral -= fref;
                     }
                 }
-                if (!userData.miningData) userData.miningData = {};
                 userData.miningData.currentPackage = {
                     name: pkg.name,
                     hashRate: pkg.hashRate,
@@ -2788,28 +2520,24 @@
         }
 
         // ============================================================
-        // 17. TRANSACTIONS
+        // 16. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
             try {
-                const snap = await db.collection('transactions').where('uid', '==', userData.uid).orderBy('timestamp',
-                    'desc').limit(50).get();
+                const snap = await db.collection('transactions').where('uid', '==', userData.telegramId).orderBy('timestamp', 'desc').limit(50).get();
                 allTransactions = [];
                 snap.forEach(d => allTransactions.push({ id: d.id, ...d.data() }));
                 renderTransactions(allTransactions);
                 renderRecentTransactions(allTransactions.slice(0, 5));
-            } catch (e) { allTransactions = [];
-                renderTransactions([]);
-                renderRecentTransactions([]); }
+            } catch (e) { allTransactions = []; renderTransactions([]); renderRecentTransactions([]); }
         }
 
         function renderTransactions(list) {
             const c = document.getElementById('transactionsList');
             const filtered = currentFilter === 'all' ? list : list.filter(t => t.type === currentFilter);
             if (!filtered.length) {
-                c.innerHTML =
-                    `<div class="text-muted text-center" style="padding:32px 0;"><div style="font-size:48px;">📭</div><div style="font-size:16px;">لا توجد عمليات</div></div>`;
+                c.innerHTML = `<div class="text-muted text-center" style="padding:32px 0;"><div style="font-size:48px;">📭</div><div style="font-size:16px;">لا توجد عمليات</div></div>`;
                 return;
             }
             c.innerHTML = filtered.map(t => `
@@ -2824,8 +2552,7 @@
 
         function renderRecentTransactions(list) {
             const c = document.getElementById('recentTransactions');
-            if (!list || !list.length) { c.innerHTML =
-                '<div class="text-muted text-center" style="padding:20px 0;font-size:14px;">لا توجد عمليات حديثة</div>'; return; }
+            if (!list || !list.length) { c.innerHTML = '<div class="text-muted text-center" style="padding:20px 0;font-size:14px;">لا توجد عمليات حديثة</div>'; return; }
             c.innerHTML = list.map(t => `
                 <div class="list-item">
                     <div class="left"><div style="width:28px;text-align:center;"><i class="fas ${getTransactionIcon(t.type)}" style="font-size:14px;"></i></div>
@@ -2845,12 +2572,12 @@
         }
 
         // ============================================================
-        // 18. REFERRALS
+        // 17. REFERRALS
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
             try {
-                const snap = await db.collection('referrals').where('referrerUid', '==', userData.uid).get();
+                const snap = await db.collection('referrals').where('referrerUid', '==', userData.telegramId).get();
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
                 renderReferrals(list);
@@ -2859,8 +2586,7 @@
 
         function renderReferrals(list) {
             const c = document.getElementById('referralsList');
-            if (!list || !list.length) { c.innerHTML =
-                '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>'; return; }
+            if (!list || !list.length) { c.innerHTML = '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>'; return; }
             c.innerHTML = list.map(r => `
                 <div class="list-item">
                     <div class="left"><div class="avatar" style="width:36px;height:36px;font-size:14px;">${(r.displayName||'م').charAt(0)}</div>
@@ -2872,7 +2598,7 @@
         }
 
         // ============================================================
-        // 19. WITHDRAW CALCULATION
+        // 18. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -2889,14 +2615,12 @@
         });
 
         // ============================================================
-        // 20. THEME TOGGLE
+        // 19. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
             const root = document.documentElement;
             const btn = document.getElementById('themeToggle');
-            const darkModeToggle = document.getElementById('darkModeToggle');
-            if (darkModeToggle) darkModeToggle.checked = isDarkTheme;
             if (isDarkTheme) {
                 root.style.setProperty('--bg-primary', '#0a0a1a');
                 root.style.setProperty('--bg-secondary', '#12122a');
@@ -2938,7 +2662,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 21. INIT
+        // 20. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -2951,25 +2675,11 @@
                     else tg.close();
                 });
             }
-
-            // إضافة زر الإدارة في التذييل للمشرفين (سيكون مخفياً لغيرهم)
-            const nav = document.getElementById('bottomNav');
-            if (isAdmin) {
-                const adminBtn = document.createElement('button');
-                adminBtn.className = 'nav-item';
-                adminBtn.dataset.page = 'admin';
-                adminBtn.innerHTML = '<i class="fas fa-shield-alt"></i><span>إدارة</span>';
-                adminBtn.onclick = () => navigateTo('admin');
-                nav.appendChild(adminBtn);
-            }
         });
 
-        console.log('🚀 Crynova V2 - الإصدار النهائي مع إصلاح الإحالات');
-        console.log('✅ استخدام حقل referrerBy بشكل موحد');
-        console.log('✅ ثلاث طبقات لقراءة start (start_param, localStorage, URL)');
-        console.log('✅ معاملة ذرية + زر اختبار يدوي');
-        console.log('👑 لوحة تحكم للمشرفين');
-        console.log('🔍 تابع الكونسول لمعرفة تفاصيل الإحالة');
+        console.log('🚀 Crynova V2 - المفتاح الأساسي هو telegramId');
+        console.log('✅ جميع الاستعلامات تستخدم doc(telegramId)');
+        console.log('✅ نظام الإحالات يعمل بالكامل');
     </script>
 </body>
 </html>
