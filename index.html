@@ -1712,7 +1712,7 @@
         }
 
         // ============================================================
-        // 5. MANUAL REFERRAL - إضافة إلى المصفوفة
+        // 5. MANUAL REFERRAL - إضافة إلى المصفوفة (تم إصلاح timestamp)
         // ============================================================
         async function manualReferral() {
             if (!userData) {
@@ -1757,6 +1757,8 @@
                     transaction.update(userRef, { referrerBy: referralCode });
 
                     // ✅ تحديث المُحيل: زيادة الرصيد والإحالات وإضافة إلى المصفوفات
+                    // استخدمنا new Date() بدلاً من serverTimestamp()
+                    const now = new Date();
                     transaction.update(refRef, {
                         'miningData.totalReferrals': firebase.firestore.FieldValue.increment(1),
                         'wallets.referral': firebase.firestore.FieldValue.increment(5),
@@ -1764,7 +1766,7 @@
                         'referrals': firebase.firestore.FieldValue.arrayUnion({
                             referredUid: userData.telegramId,
                             displayName: userData.displayName || 'مستخدم',
-                            joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            joinedAt: now,
                             commissionEarned: 5
                         }),
                         'transactions': firebase.firestore.FieldValue.arrayUnion({
@@ -1772,7 +1774,7 @@
                             amount: 5,
                             currency: 'USDT',
                             description: `عمولة إحالة (يدوية) - ${userData.displayName}`,
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                            timestamp: now
                         })
                     });
                 });
@@ -1984,6 +1986,7 @@
                     await db.runTransaction(async (t) => {
                         const doc = await t.get(ref);
                         if (!doc.exists) return;
+                        const nowTimestamp = new Date();
                         t.update(ref, {
                             'wallets.reward': firebase.firestore.FieldValue.increment(reward),
                             'wallets.dzdReward': firebase.firestore.FieldValue.increment(rewardDZD),
@@ -1995,13 +1998,13 @@
                             'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(rewardDZD),
                             'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(reward),
                             'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(rewardDZD),
-                            // ✅ إضافة معاملة التعدين إلى المصفوفة
+                            // ✅ إضافة معاملة التعدين إلى المصفوفة (باستخدام new Date)
                             'transactions': firebase.firestore.FieldValue.arrayUnion({
                                 type: 'mining_reward',
                                 amount: reward,
                                 currency: 'USDT',
                                 description: 'أرباح تعدين',
-                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                timestamp: nowTimestamp
                             })
                         });
                     });
@@ -2235,14 +2238,14 @@
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
             try {
-                // ✅ إضافة معاملة الإيداع إلى المصفوفة
+                // ✅ إضافة معاملة الإيداع إلى المصفوفة (باستخدام new Date)
                 await db.collection('users').doc(userData.telegramId).update({
                     'transactions': firebase.firestore.FieldValue.arrayUnion({
                         type: 'deposit',
                         amount: depositData.amount,
                         currency: depositData.currency,
                         description: `إيداع ${depositData.amount} ${depositData.currency}`,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        timestamp: new Date(),
                         status: 'pending'
                     })
                 });
@@ -2357,14 +2360,14 @@
                         upd['wallets.dzdReward'] = r - fr;
                         upd['wallets.dzdReferral'] = refr - fref;
                     }
-                    // ✅ إضافة معاملة السحب إلى المصفوفة
+                    // ✅ إضافة معاملة السحب إلى المصفوفة (باستخدام new Date)
                     upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                         type: 'withdraw',
                         amount: total,
                         currency: currency,
                         description: `سحب ${amount} ${currency}`,
                         balanceAfter: bal - total,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        timestamp: new Date()
                     });
                     t.update(ref, upd);
 
@@ -2550,14 +2553,14 @@
                         price: price,
                         currency: cur
                     };
-                    // ✅ إضافة معاملة الشراء إلى المصفوفة
+                    // ✅ إضافة معاملة الشراء إلى المصفوفة (باستخدام new Date)
                     upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                         type: 'purchase',
                         amount: price,
                         currency: cur,
                         description: `شراء ${pkg.name}`,
                         balanceAfter: b - price,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        timestamp: new Date(),
                         packageId: pkg.id
                     });
                     t.update(ref, upd);
@@ -2783,8 +2786,7 @@
             }
         });
 
-        console.log('🚀 Crynova V2 - transactions و referrals كمصفوفات داخل المستند');
-        console.log('✅ مثل miningData و wallets');
+        console.log('🚀 Crynova V2 - transactions و referrals كمصفوفات داخل المستند (تم إصلاح timestamp)');
     </script>
 </body>
 </html>
