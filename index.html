@@ -1625,19 +1625,17 @@
                 return false;
             }
 
-            const telegramId = tgUser.id.toString(); // المفتاح الأساسي
+            const telegramId = tgUser.id.toString();
 
             try {
                 const userRef = db.collection('users').doc(telegramId);
                 const docSnap = await userRef.get();
 
                 if (docSnap.exists) {
-                    // مستخدم موجود
                     userData = { telegramId: telegramId, ...docSnap.data() };
                     await userRef.update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() });
                     console.log('✅ مرحباً بعودتك,', userData.displayName);
                 } else {
-                    // إنشاء مستخدم جديد
                     const displayName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
                     const newUser = {
                         telegramId: telegramId,
@@ -1648,7 +1646,7 @@
                         lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
                         level: 1,
                         status: 'active',
-                        referralCode: telegramId, // نفس المعرف
+                        referralCode: telegramId,
                         referrerBy: null,
                         currency: 'USDT',
                         wallets: {
@@ -1680,9 +1678,6 @@
                     userData = { telegramId: telegramId, ...newUser };
                     console.log('✅ تم إنشاء حساب جديد:', userData.displayName);
                 }
-
-                // ❌ إزالة التحقق التلقائي من الإحالات
-                // تم حذف استدعاء handleReferral() نهائياً
 
                 // الاستماع للتحديثات
                 userRef.onSnapshot((doc) => {
@@ -1725,23 +1720,14 @@
                 showToast('⚠️ أدخل معرف المُحيل');
                 return;
             }
-
             if (referralCode === userData.telegramId) {
                 showToast('⚠️ لا يمكنك إحالة نفسك');
                 return;
             }
 
             // التحقق من وجود إحالة مسبقة لهذا المستخدم
-            try {
-                const existing = await db.collection('referrals')
-                    .where('referredUid', '==', userData.telegramId)
-                    .get();
-                if (!existing.empty) {
-                    showToast('⚠️ لديك إحالة مسجلة مسبقاً');
-                    return;
-                }
-            } catch (e) {
-                showToast('❌ حدث خطأ أثناء التحقق');
+            if (userData.referrerBy) {
+                showToast('⚠️ لديك إحالة مسجلة مسبقاً');
                 return;
             }
 
@@ -1777,20 +1763,24 @@
                         'wallets.dzdReferral': firebase.firestore.FieldValue.increment(5 * exchangeRate)
                     });
 
-                    // إضافة سجل الإحالة
-                    const refsRef = db.collection('referrals');
-                    transaction.set(refsRef.doc(), {
-                        referrerUid: referralCode,
+                    // كتابة سجل الإحالة في subcollection الخاص بالمُحيل
+                    const refSubRef = db.collection('users')
+                        .doc(referralCode)
+                        .collection('referrals')
+                        .doc();
+                    transaction.set(refSubRef, {
                         referredUid: userData.telegramId,
                         displayName: userData.displayName || 'مستخدم',
                         joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
                         commissionEarned: 5
                     });
 
-                    // إضافة معاملة للمُحيل
-                    const transRef = db.collection('transactions');
-                    transaction.set(transRef.doc(), {
-                        uid: referralCode,
+                    // كتابة معاملة العمولة في subcollection الخاص بالمُحيل
+                    const transSubRef = db.collection('users')
+                        .doc(referralCode)
+                        .collection('transactions')
+                        .doc();
+                    transaction.set(transSubRef, {
                         type: 'referral_bonus',
                         amount: 5,
                         currency: 'USDT',
@@ -1801,13 +1791,9 @@
 
                 // تحديث محلي
                 userData.referrerBy = referralCode;
-                if (userData.wallets) {
-                    userData.wallets.referral = (userData.wallets.referral || 0) + 5;
-                    userData.wallets.dzdReferral = (userData.wallets.dzdReferral || 0) + (5 * exchangeRate);
-                }
-                if (userData.miningData) {
-                    userData.miningData.totalReferrals = (userData.miningData.totalReferrals || 0) + 1;
-                }
+                userData.wallets.referral = (userData.wallets.referral || 0) + 5;
+                userData.wallets.dzdReferral = (userData.wallets.dzdReferral || 0) + (5 * exchangeRate);
+                userData.miningData.totalReferrals = (userData.miningData.totalReferrals || 0) + 1;
 
                 showToast('✅ تم تسجيل الإحالة بنجاح!');
                 codeInput.value = '';
@@ -2007,7 +1993,7 @@
                             'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(rewardDZD)
                         });
                     });
-                    // تحديث محلي سريع
+                    // تحديث محلي
                     if (!userData.wallets) userData.wallets = {};
                     userData.wallets.reward = (userData.wallets.reward || 0) + reward;
                     userData.wallets.dzdReward = (userData.wallets.dzdReward || 0) + rewardDZD;
@@ -2229,32 +2215,45 @@
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
             try {
-                await db.collection('deposits').add({
-                    uid: userData.telegramId,
-                    amount: depositData.amount,
-                    currency: depositData.currency,
-                    network: depositData.currency === 'DZD' ? 'CCP' : document.getElementById('depositNetwork').value,
-                    walletAddress: depositData.address,
-                    transactionId: txId,
-                    status: 'pending',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                // استخدام subcollection داخل المستخدم
+                await db.collection('users')
+                    .doc(userData.telegramId)
+                    .collection('deposits')
+                    .add({
+                        amount: depositData.amount,
+                        currency: depositData.currency,
+                        network: depositData.currency === 'DZD' ? 'CCP' : document.getElementById('depositNetwork').value,
+                        walletAddress: depositData.address,
+                        transactionId: txId,
+                        status: 'pending',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
                 showToast('تم إرسال طلب الإيداع، في انتظار المراجعة');
                 document.getElementById('depositTransactionId').value = '';
                 document.getElementById('depositDetails').classList.add('hidden');
                 depositData = null;
                 await loadDeposits();
-            } catch (e) { showToast('حدث خطأ'); }
+            } catch (e) {
+                console.error(e);
+                showToast('حدث خطأ');
+            }
         }
 
         async function loadDeposits() {
             if (!userData) return;
             try {
-                const snap = await db.collection('deposits').where('uid', '==', userData.telegramId).orderBy('createdAt', 'desc').get();
+                const snap = await db.collection('users')
+                    .doc(userData.telegramId)
+                    .collection('deposits')
+                    .orderBy('createdAt', 'desc')
+                    .get();
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
                 renderDeposits(list);
-            } catch (e) { renderDeposits([]); }
+            } catch (e) {
+                console.error(e);
+                renderDeposits([]);
+            }
         }
 
         function renderDeposits(list) {
@@ -2299,15 +2298,18 @@
             const fee = amount * 0.02;
             const total = amount + fee;
             if (!confirm(`تأكيد سحب ${amount} ${currency}? الرسوم: ${fee.toFixed(2)}`)) return;
+
             try {
                 await db.runTransaction(async (t) => {
                     const ref = db.collection('users').doc(userData.telegramId);
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
+
                     let bal = 0;
                     if (currency === 'USDT') bal = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward || 0) + (doc.data().wallets?.referral || 0);
                     else bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
                     if (bal < total) throw new Error('رصيد غير كاف');
+
                     let rem = total;
                     const upd = {};
                     if (currency === 'USDT') {
@@ -2328,13 +2330,39 @@
                         upd['wallets.dzdReferral'] = refr - fref;
                     }
                     t.update(ref, upd);
-                    const wdRef = db.collection('withdrawals').doc();
-                    t.set(wdRef, { uid: userData.telegramId, amount, currency, recipientAddress: recipient, eccpId: eccpId || null, fee, status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-                    const trRef = db.collection('transactions').doc();
-                    t.set(trRef, { uid: userData.telegramId, type: 'withdraw', amount: total, currency, description: `سحب`, balanceAfter: bal - total, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+
+                    // كتابة طلب السحب في subcollection
+                    const wdRef = db.collection('users')
+                        .doc(userData.telegramId)
+                        .collection('withdrawals')
+                        .doc();
+                    t.set(wdRef, {
+                        amount: amount,
+                        currency: currency,
+                        recipientAddress: recipient,
+                        eccpId: eccpId || null,
+                        fee: fee,
+                        status: 'pending',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    // كتابة معاملة السحب في subcollection
+                    const transRef = db.collection('users')
+                        .doc(userData.telegramId)
+                        .collection('transactions')
+                        .doc();
+                    t.set(transRef, {
+                        type: 'withdraw',
+                        amount: total,
+                        currency: currency,
+                        description: `سحب ${amount} ${currency}`,
+                        balanceAfter: bal - total,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
                 });
+
                 showToast('تم طلب السحب بنجاح');
-                // تحديث محلي سريع
+                // تحديث محلي
                 if (currency === 'USDT') {
                     let rem = total;
                     const m = userData.wallets?.main || 0, r = userData.wallets?.reward || 0, refr = userData.wallets?.referral || 0;
@@ -2364,17 +2392,26 @@
                 document.getElementById('withdrawAddress').value = '';
                 document.getElementById('withdrawEccpId').value = '';
                 document.getElementById('withdrawAmount').value = '';
-            } catch (e) { showToast(e.message || 'حدث خطأ'); }
+            } catch (e) {
+                showToast(e.message || 'حدث خطأ');
+            }
         }
 
         async function loadWithdrawals() {
             if (!userData) return;
             try {
-                const snap = await db.collection('withdrawals').where('uid', '==', userData.telegramId).orderBy('createdAt', 'desc').get();
+                const snap = await db.collection('users')
+                    .doc(userData.telegramId)
+                    .collection('withdrawals')
+                    .orderBy('createdAt', 'desc')
+                    .get();
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
                 renderWithdrawals(list);
-            } catch (e) { renderWithdrawals([]); }
+            } catch (e) {
+                console.error(e);
+                renderWithdrawals([]);
+            }
         }
 
         function renderWithdrawals(list) {
@@ -2397,7 +2434,10 @@
                 allPackages = [];
                 snap.forEach(d => allPackages.push({ id: d.id, ...d.data() }));
                 renderPackages();
-            } catch (e) { renderPackages(); }
+            } catch (e) {
+                console.error(e);
+                renderPackages();
+            }
         }
 
         function renderPackages() {
@@ -2437,20 +2477,24 @@
             const isDZD = selectedCurrency === 'DZD';
             const price = isDZD ? pkg.price * exchangeRate : pkg.price;
             const cur = isDZD ? 'DZD' : pkg.currency;
+
             let bal = 0;
             if (isDZD) bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
             else bal = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
             if (bal < price) { showToast(`الرصيد غير كافٍ (${price.toFixed(2)} ${cur})`); return; }
             if (!confirm(`شراء باقة "${pkg.name}" بسعر ${price.toFixed(2)} ${cur}؟`)) return;
+
             try {
                 await db.runTransaction(async (t) => {
                     const ref = db.collection('users').doc(userData.telegramId);
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
+
                     let b = 0;
                     if (isDZD) b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
                     else b = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward || 0) + (doc.data().wallets?.referral || 0);
                     if (b < price) throw new Error('رصيد غير كاف');
+
                     let rem = price;
                     const upd = {};
                     if (isDZD) {
@@ -2476,13 +2520,27 @@
                         duration: pkg.duration,
                         endDate: new Date(Date.now() + pkg.duration * 24 * 60 * 60 * 1000),
                         packageId: pkg.id,
-                        price,
+                        price: price,
                         currency: cur
                     };
                     t.update(ref, upd);
-                    const trRef = db.collection('transactions').doc();
-                    t.set(trRef, { uid: userData.telegramId, type: 'purchase', amount: price, currency: cur, description: `شراء ${pkg.name}`, balanceAfter: b - price, timestamp: firebase.firestore.FieldValue.serverTimestamp(), packageId: pkg.id });
+
+                    // كتابة معاملة الشراء في subcollection
+                    const transRef = db.collection('users')
+                        .doc(userData.telegramId)
+                        .collection('transactions')
+                        .doc();
+                    t.set(transRef, {
+                        type: 'purchase',
+                        amount: price,
+                        currency: cur,
+                        description: `شراء ${pkg.name}`,
+                        balanceAfter: b - price,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        packageId: pkg.id
+                    });
                 });
+
                 showToast(`تم شراء "${pkg.name}" بنجاح!`);
                 // تحديث محلي
                 if (isDZD) {
@@ -2514,12 +2572,14 @@
                     duration: pkg.duration,
                     endDate: new Date(Date.now() + pkg.duration * 24 * 60 * 60 * 1000),
                     packageId: pkg.id,
-                    price,
+                    price: price,
                     currency: cur
                 };
                 updateUI();
                 await loadTransactions();
-            } catch (e) { showToast(e.message || 'حدث خطأ'); }
+            } catch (e) {
+                showToast(e.message || 'حدث خطأ');
+            }
         }
 
         // ============================================================
@@ -2528,12 +2588,23 @@
         async function loadTransactions() {
             if (!userData) return;
             try {
-                const snap = await db.collection('transactions').where('uid', '==', userData.telegramId).orderBy('timestamp', 'desc').limit(50).get();
+                const snap = await db.collection('users')
+                    .doc(userData.telegramId)
+                    .collection('transactions')
+                    .orderBy('timestamp', 'desc')
+                    .limit(50)
+                    .get();
+
                 allTransactions = [];
                 snap.forEach(d => allTransactions.push({ id: d.id, ...d.data() }));
                 renderTransactions(allTransactions);
                 renderRecentTransactions(allTransactions.slice(0, 5));
-            } catch (e) { allTransactions = []; renderTransactions([]); renderRecentTransactions([]); }
+            } catch (e) {
+                console.error(e);
+                allTransactions = [];
+                renderTransactions([]);
+                renderRecentTransactions([]);
+            }
         }
 
         function renderTransactions(list) {
@@ -2580,11 +2651,17 @@
         async function loadReferrals() {
             if (!userData) return;
             try {
-                const snap = await db.collection('referrals').where('referrerUid', '==', userData.telegramId).get();
+                const snap = await db.collection('users')
+                    .doc(userData.telegramId)
+                    .collection('referrals')
+                    .get();
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
                 renderReferrals(list);
-            } catch (e) { renderReferrals([]); }
+            } catch (e) {
+                console.error(e);
+                renderReferrals([]);
+            }
         }
 
         function renderReferrals(list) {
@@ -2680,7 +2757,7 @@
             }
         });
 
-        console.log('🚀 Crynova V2 - الإحالات تعمل فقط يدوياً');
+        console.log('🚀 Crynova V2 - جميع المجموعات ضمن users (subcollections)');
         console.log('✅ تم إزالة التحقق التلقائي من start_param');
     </script>
 </body>
