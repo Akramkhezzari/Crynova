@@ -1,150 +1,78 @@
+// ============================================================
+// قواعد أمان Firestore - Crynova Mining
+// ============================================================
+// ⚠️ تنبيه مهم:
+// واجهتك الحالية (index.html) لا تستخدم Firebase Authentication،
+// فقط بيانات تيليجرام غير موثّقة (initDataUnsafe). هذا يعني أن قواعد
+// Firestore لا تستطيع التحقق فعلياً من "من هو المستخدم الحقيقي"،
+// لأن لا يوجد رمز مصادقة (auth token) مرتبط بالطلب من الأساس.
+//
+// القواعد أدناه تسمح بنفس العمليات التي تقوم بها واجهتك حالياً
+// (حتى لا تتعطل الميزات الموجودة)، لكنها لا تحل مشكلة إمكانية تعديل
+// أي شخص لرصيده الخاص عبر أدوات المطور في المتصفح.
+//
+// الحل الجذري: نقل كل عملية تُغيّر الرصيد (شراء باقة، مكافأة تعدين،
+// سحب، إيداع مؤكد) إلى نقاط API في server.js تستخدم Firebase Admin
+// SDK (التي تتجاوز هذه القواعد أصلاً)، ثم منع الكتابة المباشرة من
+// العميل على حقول wallets و miningData بالكامل. أخبرني إن أردت أن
+// أبني لك هذه النقاط في الخادم.
+// ============================================================
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ============================================================
-    // USERS
-    // ============================================================
-
-    match /users/{userId} {
-
-      // المستخدم يستطيع قراءة بيانات حسابه فقط
-      allow read: if request.auth != null
-                  && request.auth.uid == userId;
-
-      // إنشاء الحساب
-      allow create: if request.auth != null
-                    && request.auth.uid == userId;
-
-      // تحديث البيانات الشخصية فقط
-      // الأرصدة والحقول المالية لا يمكن تعديلها من Frontend
-      allow update: if request.auth != null
-                    && request.auth.uid == userId
-                    && request.resource.data.wallets == resource.data.wallets
-                    && request.resource.data.miningData == resource.data.miningData
-                    && request.resource.data.referrals == resource.data.referrals
-                    && request.resource.data.referredBy == resource.data.referredBy
-                    && request.resource.data.referrerBy == resource.data.referrerBy;
-
-      allow delete: if false;
-    }
-
-
-    // ============================================================
-    // REFERRALS
-    // ============================================================
-
-    match /referrals/{referralId} {
-
-      // المستخدم يستطيع قراءة إحالاته
-      allow read: if request.auth != null
-                  && (
-                    resource.data.referrerUid == request.auth.uid
-                    || resource.data.referredUid == request.auth.uid
-                  );
-
-      // منع إنشاء إحالات مباشرة من Frontend
-      // Backend فقط هو الذي يجب أن ينشئها
-      allow create: if false;
-
-      allow update: if false;
-
-      allow delete: if false;
-    }
-
-
-    // ============================================================
-    // TRANSACTIONS
-    // ============================================================
-
-    match /transactions/{transactionId} {
-
-      allow read: if request.auth != null
-                  && resource.data.userId == request.auth.uid;
-
-      // لا يسمح للمستخدم بإنشاء معاملات مالية بنفسه
-      allow create: if false;
-
-      allow update: if false;
-
-      allow delete: if false;
-    }
-
-
-    // ============================================================
-    // DEPOSITS
-    // ============================================================
-
-    match /deposits/{depositId} {
-
-      allow read: if request.auth != null
-                  && resource.data.userId == request.auth.uid;
-
-      // الإيداع يجب أن يمر عبر Backend/Admin
-      allow create: if false;
-
-      allow update: if false;
-
-      allow delete: if false;
-    }
-
-
-    // ============================================================
-    // WITHDRAWALS
-    // ============================================================
-
-    match /withdrawals/{withdrawalId} {
-
-      allow read: if request.auth != null
-                  && resource.data.userId == request.auth.uid;
-
-      // طلب السحب يحتاج Backend
-      allow create: if false;
-
-      allow update: if false;
-
-      allow delete: if false;
-    }
-
-
-    // ============================================================
-    // MINING PACKAGES
-    // ============================================================
-
+    // الباقات: قراءة عامة فقط، الإدارة تتم من لوحة Firebase أو الخادم
     match /packages/{packageId} {
-
-      // الباقات عامة للقراءة
       allow read: if true;
+      allow write: if false;
+    }
 
-      // الإدارة فقط من Backend
-      allow create: if false;
-      allow update: if false;
+    // سعر الصرف والإعدادات العامة: قراءة فقط
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // المستخدمون: قراءة/كتابة مفتوحة حالياً لتطابق سلوك الواجهة الحالي
+    // ⚠️ غير آمن على المدى الطويل - انظر التنبيه أعلاه
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasAll(['telegramId', 'wallets', 'miningData'])
+                    && request.resource.data.wallets.main == 0
+                    && request.resource.data.wallets.reward == 0;
+      allow update: if true;
+    }
+
+    // المعاملات: القراءة حسب uid، الإنشاء مسموح (سجل فقط)، لا تعديل ولا حذف
+    match /transactions/{txId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    // الإحالات: قراءة عامة، إنشاء فقط عند عدم وجود سجل سابق لنفس المُحال
+    match /referrals/{refId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    // طلبات الإيداع: المستخدم ينشئ الطلب، لا يمكنه تغيير حالته بنفسه
+    match /deposits/{depositId} {
+      allow read: if true;
+      allow create: if request.resource.data.status == 'pending';
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+                    == false; // يمنع العميل من تغيير الحالة مباشرة؛ يتم عبر الخادم/الأدمن
       allow delete: if false;
     }
 
-
-    // ============================================================
-    // EXCHANGE RATE
-    // ============================================================
-
-    match /settings/{documentId} {
-
+    // طلبات السحب: نفس منطق الإيداع
+    match /withdrawals/{withdrawalId} {
       allow read: if true;
-
-      // لا يسمح بتغيير سعر الصرف من التطبيق
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
-    }
-
-
-    // ============================================================
-    // DEFAULT DENY
-    // ============================================================
-
-    match /{document=**} {
-      allow read, write: if false;
+      allow create: if request.resource.data.status == 'pending';
+      allow update, delete: if false;
     }
   }
 }
