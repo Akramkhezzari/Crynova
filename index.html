@@ -27,7 +27,7 @@
 
     <style>
         /* ============================================================
-           RESET & VARIABLES - LIGHT THEME (نفس الكود السابق)
+           RESET & VARIABLES - LIGHT THEME
            ============================================================ */
         * {
             margin: 0;
@@ -1872,10 +1872,10 @@
                         ${d.transactionId ? `<br><small>رقم العملية: ${d.transactionId}</small>` : ''}
                     </div>
                     <div class="actions">
-                        <button class="btn btn-success btn-sm" onclick="approveDeposit('${d.id}','${d.uid}',${d.amount},'${d.currency}')">
+                        <button class="btn btn-success btn-sm" onclick="approveDeposit('${d.id}','${d.uid}',${d.amount},'${d.currency}','${d.transactionId||''}')">
                             <i class="fas fa-check"></i> تأكيد
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="rejectDeposit('${d.id}','${d.uid}')">
+                        <button class="btn btn-danger btn-sm" onclick="rejectDeposit('${d.id}','${d.uid}','${d.transactionId||''}')">
                             <i class="fas fa-times"></i> رفض
                         </button>
                     </div>
@@ -1883,8 +1883,8 @@
             `).join('');
         }
 
-        // تأكيد الإيداع
-        async function approveDeposit(id, uid, amount, currency) {
+        // ✅ تأكيد الإيداع (تم الإصلاح)
+        async function approveDeposit(id, uid, amount, currency, transactionId) {
             if (!confirm(`تأكيد إيداع ${amount} ${currency} للمستخدم ${uid}؟`)) return;
 
             try {
@@ -1907,7 +1907,7 @@
                 // 3. تحديث حالة الطلب في مصفوفة المستخدم
                 const userDeposits = userDoc.data().deposits || [];
                 const updatedDeposits = userDeposits.map(d => {
-                    if (d.transactionId === (await db.collection('deposits').doc(id).get()).data().transactionId) {
+                    if (d.transactionId === transactionId) {
                         return { ...d, status: 'confirmed' };
                     }
                     return d;
@@ -1924,8 +1924,8 @@
             }
         }
 
-        // رفض الإيداع
-        async function rejectDeposit(id, uid) {
+        // ✅ رفض الإيداع (تم الإصلاح)
+        async function rejectDeposit(id, uid, transactionId) {
             if (!confirm(`رفض طلب الإيداع للمستخدم ${uid}؟`)) return;
 
             try {
@@ -1940,7 +1940,7 @@
                 if (userDoc.exists) {
                     const userDeposits = userDoc.data().deposits || [];
                     const updatedDeposits = userDeposits.map(d => {
-                        if (d.transactionId === (await db.collection('deposits').doc(id).get()).data().transactionId) {
+                        if (d.transactionId === transactionId) {
                             return { ...d, status: 'rejected' };
                         }
                         return d;
@@ -2004,10 +2004,10 @@
                         ${w.eccpId ? `<br><small>ECCP: ${w.eccpId}</small>` : ''}
                     </div>
                     <div class="actions">
-                        <button class="btn btn-success btn-sm" onclick="approveWithdrawal('${w.id}','${w.uid}')">
+                        <button class="btn btn-success btn-sm" onclick="approveWithdrawal('${w.id}','${w.uid}','${w.createdAt}')">
                             <i class="fas fa-check"></i> تأكيد
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="rejectWithdrawal('${w.id}','${w.uid}',${w.amount},'${w.currency}')">
+                        <button class="btn btn-danger btn-sm" onclick="rejectWithdrawal('${w.id}','${w.uid}',${w.amount},'${w.currency}','${w.createdAt}')">
                             <i class="fas fa-times"></i> رفض
                         </button>
                     </div>
@@ -2015,8 +2015,8 @@
             `).join('');
         }
 
-        // تأكيد السحب
-        async function approveWithdrawal(id, uid) {
+        // ✅ تأكيد السحب (تم الإصلاح)
+        async function approveWithdrawal(id, uid, createdAt) {
             if (!confirm(`تأكيد سحب للمستخدم ${uid}؟`)) return;
 
             try {
@@ -2031,7 +2031,9 @@
                 if (userDoc.exists) {
                     const userWithdrawals = userDoc.data().withdrawals || [];
                     const updatedWithdrawals = userWithdrawals.map(w => {
-                        if (w.createdAt === (await db.collection('withdrawals').doc(id).get()).data().createdAt) {
+                        // مقارنة التاريخ كـ string
+                        if (w.createdAt && w.createdAt.toDate && w.createdAt.toDate().getTime() === new Date(createdAt)
+                            .getTime()) {
                             return { ...w, status: 'completed' };
                         }
                         return w;
@@ -2048,8 +2050,8 @@
             }
         }
 
-        // رفض السحب (إعادة الرصيد)
-        async function rejectWithdrawal(id, uid, amount, currency) {
+        // ✅ رفض السحب وإعادة الرصيد (تم الإصلاح)
+        async function rejectWithdrawal(id, uid, amount, currency, createdAt) {
             if (!confirm(`رفض طلب السحب وإعادة ${amount} ${currency} للمستخدم ${uid}؟`)) return;
 
             try {
@@ -2070,7 +2072,8 @@
                     // تحديث حالة السحب في مصفوفة المستخدم
                     const userWithdrawals = userDoc.data().withdrawals || [];
                     const updatedWithdrawals = userWithdrawals.map(w => {
-                        if (w.createdAt === (await db.collection('withdrawals').doc(id).get()).data().createdAt) {
+                        if (w.createdAt && w.createdAt.toDate && w.createdAt.toDate().getTime() === new Date(createdAt)
+                            .getTime()) {
                             return { ...w, status: 'rejected' };
                         }
                         return w;
@@ -2089,7 +2092,7 @@
         }
 
         // ============================================================
-        // 9. MANUAL REFERRAL (نفس الكود السابق مع إصلاح timestamp)
+        // 9. MANUAL REFERRAL
         // ============================================================
         async function manualReferral() {
             if (!userData) {
@@ -2188,7 +2191,7 @@
         }
 
         // ============================================================
-        // 10. HELPERS (نفس الكود السابق)
+        // 10. HELPERS
         // ============================================================
         function formatDate(timestamp) {
             if (!timestamp) return '--';
@@ -2566,7 +2569,7 @@
         }
 
         // ============================================================
-        // 15. DEPOSIT (مع إضافة المجموعة العامة)
+        // 15. DEPOSIT
         // ============================================================
         function updateDepositNetwork() {
             const currency = document.getElementById('depositCurrency').value;
@@ -2683,7 +2686,7 @@
         }
 
         // ============================================================
-        // 16. WITHDRAW (مع إضافة المجموعة العامة)
+        // 16. WITHDRAW
         // ============================================================
         function updateWithdrawNetwork() {
             const cur = document.getElementById('withdrawCurrency').value;
@@ -3187,7 +3190,7 @@
             }
         });
 
-        console.log('🚀 Crynova V2 - مع لوحة إدارة متكاملة');
+        console.log('🚀 Crynova V2 - مع لوحة إدارة متكاملة (تم إصلاح الأخطاء)');
         console.log('✅ لإضافة أدمن: أنشئ مستنداً في مجموعة admins باسم الـ telegramId');
     </script>
 </body>
