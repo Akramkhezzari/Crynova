@@ -1414,10 +1414,6 @@
                 <button class="btn btn-sm btn-ghost mt-8" onclick="shareReferral()" style="width:auto;">
                     <i class="fas fa-share-alt"></i> مشاركة الرابط
                 </button>
-                <!-- زر اختبار الإحالة يدوياً -->
-                <button class="btn btn-sm btn-outline mt-8" onclick="testReferralManually()" style="width:auto;">
-                    <i class="fas fa-vial"></i> اختبار الإحالة يدوياً
-                </button>
             </div>
 
             <div class="card">
@@ -1475,15 +1471,38 @@
                     <span class="left"><i class="fas fa-calendar" style="color:var(--text-muted);width:20px;"></i> تاريخ التسجيل</span>
                     <span id="profileJoinDate" style="font-weight:600;">--</span>
                 </div>
+                <!-- معرف Telegram مع زر نسخ -->
                 <div class="list-item">
                     <span class="left"><i class="fas fa-id-badge" style="color:var(--text-muted);width:20px;"></i> معرف Telegram</span>
-                    <span id="profileTelegramId" style="font-weight:600;">--</span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span id="profileTelegramId" style="font-weight:600;">--</span>
+                        <button class="btn btn-sm btn-outline" style="width:auto;padding:6px 12px;" onclick="copyText(document.getElementById('profileTelegramId').textContent)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="list-item" style="border-bottom:none;">
                     <span class="left"><i class="fas fa-link" style="color:var(--text-muted);width:20px;"></i> رابط الإحالة</span>
                     <button class="btn btn-sm btn-outline" style="width:auto;" onclick="copyText(document.getElementById('referralLink').value)">
                         <i class="fas fa-copy"></i> نسخ
                     </button>
+                </div>
+            </div>
+
+            <!-- ===== قسم الإحالات اليدوية ===== -->
+            <div class="card">
+                <div style="display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;margin-bottom:12px;">
+                    <i class="fas fa-user-plus" style="color:var(--text-muted);width:20px;"></i>
+                    تسجيل إحالة يدوية
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <input type="text" id="manualReferralCode" placeholder="أدخل معرف المُحيل (Telegram ID)" style="flex:1;padding:12px 14px;background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-weight:600;font-size:14px;font-family:inherit;min-width:150px;">
+                    <button class="btn btn-primary btn-sm" style="width:auto;padding:12px 20px;" onclick="manualReferral()">
+                        <i class="fas fa-check"></i> تسجيل
+                    </button>
+                </div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">
+                    <i class="fas fa-info-circle"></i> أدخل معرف Telegram الخاص بالشخص الذي دعاك (سيتم إضافة 5 USDT لحسابك أنت وله)
                 </div>
             </div>
 
@@ -1803,19 +1822,114 @@
         }
 
         // ============================================================
-        // 6. TEST REFERRAL MANUALLY
+        // 6. MANUAL REFERRAL (من صفحة الحساب)
         // ============================================================
-        async function testReferralManually() {
-            const code = prompt('🔑 أدخل كود الإحالة (مثل 5922049376):');
-            if (!code) return;
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.initDataUnsafe = { start_param: code };
+        async function manualReferral() {
+            if (!userData) {
+                showToast('❌ يرجى تسجيل الدخول أولاً');
+                return;
             }
-            const url = new URL(window.location.href);
-            url.searchParams.set('start', code);
-            window.history.replaceState({}, '', url);
-            showToast('🔄 جاري معالجة الإحالة...');
-            await handleReferral();
+
+            const codeInput = document.getElementById('manualReferralCode');
+            const referralCode = codeInput.value.trim();
+            if (!referralCode) {
+                showToast('⚠️ أدخل معرف المُحيل');
+                return;
+            }
+
+            if (referralCode === userData.telegramId) {
+                showToast('⚠️ لا يمكنك إحالة نفسك');
+                return;
+            }
+
+            // التحقق من وجود إحالة مسبقة لهذا المستخدم
+            try {
+                const existing = await db.collection('referrals')
+                    .where('referredUid', '==', userData.telegramId)
+                    .get();
+                if (!existing.empty) {
+                    showToast('⚠️ لديك إحالة مسجلة مسبقاً');
+                    return;
+                }
+            } catch (e) {
+                showToast('❌ حدث خطأ أثناء التحقق');
+                return;
+            }
+
+            // البحث عن المُحيل
+            let referrerDoc;
+            try {
+                const ref = db.collection('users').doc(referralCode);
+                referrerDoc = await ref.get();
+                if (!referrerDoc.exists) {
+                    showToast('⚠️ لم يتم العثور على مستخدم بهذا المعرف');
+                    return;
+                }
+            } catch (e) {
+                showToast('❌ حدث خطأ أثناء البحث عن المُحيل');
+                return;
+            }
+
+            const referrerData = referrerDoc.data();
+
+            // تنفيذ المعاملة
+            try {
+                await db.runTransaction(async (transaction) => {
+                    const userRef = db.collection('users').doc(userData.telegramId);
+                    const refRef = db.collection('users').doc(referralCode);
+
+                    // تحديث المستخدم المُحال
+                    transaction.update(userRef, { referrerBy: referralCode });
+
+                    // تحديث المُحيل
+                    transaction.update(refRef, {
+                        'miningData.totalReferrals': firebase.firestore.FieldValue.increment(1),
+                        'wallets.referral': firebase.firestore.FieldValue.increment(5),
+                        'wallets.dzdReferral': firebase.firestore.FieldValue.increment(5 * exchangeRate)
+                    });
+
+                    // إضافة سجل الإحالة
+                    const refsRef = db.collection('referrals');
+                    transaction.set(refsRef.doc(), {
+                        referrerUid: referralCode,
+                        referredUid: userData.telegramId,
+                        displayName: userData.displayName || 'مستخدم',
+                        joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        commissionEarned: 5
+                    });
+
+                    // إضافة معاملة للمُحيل
+                    const transRef = db.collection('transactions');
+                    transaction.set(transRef.doc(), {
+                        uid: referralCode,
+                        type: 'referral_bonus',
+                        amount: 5,
+                        currency: 'USDT',
+                        description: `عمولة إحالة (يدوية) - ${userData.displayName}`,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+
+                // تحديث محلي
+                userData.referrerBy = referralCode;
+                if (userData.wallets) {
+                    userData.wallets.referral = (userData.wallets.referral || 0) + 5;
+                    userData.wallets.dzdReferral = (userData.wallets.dzdReferral || 0) + (5 * exchangeRate);
+                }
+                if (userData.miningData) {
+                    userData.miningData.totalReferrals = (userData.miningData.totalReferrals || 0) + 1;
+                }
+
+                showToast('✅ تم تسجيل الإحالة بنجاح!');
+                codeInput.value = '';
+                await loadReferrals();
+                await loadTransactions();
+                updateUI();
+
+            } catch (error) {
+                console.error('❌ فشل تسجيل الإحالة اليدوية:', error);
+                showToast('❌ حدث خطأ: ' + error.message);
+            }
         }
 
         // ============================================================
