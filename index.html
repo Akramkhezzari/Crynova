@@ -1672,7 +1672,10 @@
                                 thisMonth: 0,
                                 thisMonthDZD: 0
                             }
-                        }
+                        },
+                        // ✅ المصفوفات الجديدة
+                        transactions: [],
+                        referrals: []
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -1684,6 +1687,9 @@
                     if (doc.exists) {
                         userData = { telegramId: doc.id, ...doc.data() };
                         updateUI();
+                        // تحديث المعاملات والإحالات تلقائياً
+                        loadTransactions();
+                        loadReferrals();
                     }
                 });
 
@@ -1706,7 +1712,7 @@
         }
 
         // ============================================================
-        // 5. MANUAL REFERRAL (الطريقة الوحيدة الآن)
+        // 5. MANUAL REFERRAL - إضافة إلى المصفوفة
         // ============================================================
         async function manualReferral() {
             if (!userData) {
@@ -1725,13 +1731,11 @@
                 return;
             }
 
-            // التحقق من وجود إحالة مسبقة لهذا المستخدم
             if (userData.referrerBy) {
                 showToast('⚠️ لديك إحالة مسجلة مسبقاً');
                 return;
             }
 
-            // البحث عن المُحيل
             let referrerDoc;
             try {
                 const ref = db.collection('users').doc(referralCode);
@@ -1745,47 +1749,31 @@
                 return;
             }
 
-            const referrerData = referrerDoc.data();
-
-            // تنفيذ المعاملة
             try {
                 await db.runTransaction(async (transaction) => {
                     const userRef = db.collection('users').doc(userData.telegramId);
                     const refRef = db.collection('users').doc(referralCode);
 
-                    // تحديث المستخدم المُحال
                     transaction.update(userRef, { referrerBy: referralCode });
 
-                    // تحديث المُحيل
+                    // ✅ تحديث المُحيل: زيادة الرصيد والإحالات وإضافة إلى المصفوفات
                     transaction.update(refRef, {
                         'miningData.totalReferrals': firebase.firestore.FieldValue.increment(1),
                         'wallets.referral': firebase.firestore.FieldValue.increment(5),
-                        'wallets.dzdReferral': firebase.firestore.FieldValue.increment(5 * exchangeRate)
-                    });
-
-                    // ✅ كتابة سجل الإحالة في subcollection الخاص بالمُحيل (users/{uid}/referrals)
-                    const refSubRef = db.collection('users')
-                        .doc(referralCode)
-                        .collection('referrals')
-                        .doc();
-                    transaction.set(refSubRef, {
-                        referredUid: userData.telegramId,
-                        displayName: userData.displayName || 'مستخدم',
-                        joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        commissionEarned: 5
-                    });
-
-                    // ✅ كتابة معاملة العمولة في subcollection الخاص بالمُحيل (users/{uid}/transactions)
-                    const transSubRef = db.collection('users')
-                        .doc(referralCode)
-                        .collection('transactions')
-                        .doc();
-                    transaction.set(transSubRef, {
-                        type: 'referral_bonus',
-                        amount: 5,
-                        currency: 'USDT',
-                        description: `عمولة إحالة (يدوية) - ${userData.displayName}`,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        'wallets.dzdReferral': firebase.firestore.FieldValue.increment(5 * exchangeRate),
+                        'referrals': firebase.firestore.FieldValue.arrayUnion({
+                            referredUid: userData.telegramId,
+                            displayName: userData.displayName || 'مستخدم',
+                            joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            commissionEarned: 5
+                        }),
+                        'transactions': firebase.firestore.FieldValue.arrayUnion({
+                            type: 'referral_bonus',
+                            amount: 5,
+                            currency: 'USDT',
+                            description: `عمولة إحالة (يدوية) - ${userData.displayName}`,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        })
                     });
                 });
 
@@ -1794,6 +1782,22 @@
                 userData.wallets.referral = (userData.wallets.referral || 0) + 5;
                 userData.wallets.dzdReferral = (userData.wallets.dzdReferral || 0) + (5 * exchangeRate);
                 userData.miningData.totalReferrals = (userData.miningData.totalReferrals || 0) + 1;
+                // إضافة إلى المصفوفات المحلية
+                if (!userData.referrals) userData.referrals = [];
+                userData.referrals.push({
+                    referredUid: userData.telegramId,
+                    displayName: userData.displayName || 'مستخدم',
+                    joinedAt: new Date(),
+                    commissionEarned: 5
+                });
+                if (!userData.transactions) userData.transactions = [];
+                userData.transactions.push({
+                    type: 'referral_bonus',
+                    amount: 5,
+                    currency: 'USDT',
+                    description: `عمولة إحالة (يدوية) - ${userData.displayName}`,
+                    timestamp: new Date()
+                });
 
                 showToast('✅ تم تسجيل الإحالة بنجاح!');
                 codeInput.value = '';
@@ -1956,7 +1960,7 @@
         }
 
         // ============================================================
-        // 9. MINING SIMULATION
+        // 9. MINING SIMULATION - إضافة معاملة تعدين إلى المصفوفة
         // ============================================================
         function startMining() {
             if (miningInterval) clearInterval(miningInterval);
@@ -1990,7 +1994,15 @@
                             'miningData.miningHistory.thisWeek': firebase.firestore.FieldValue.increment(reward),
                             'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(rewardDZD),
                             'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(reward),
-                            'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(rewardDZD)
+                            'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(rewardDZD),
+                            // ✅ إضافة معاملة التعدين إلى المصفوفة
+                            'transactions': firebase.firestore.FieldValue.arrayUnion({
+                                type: 'mining_reward',
+                                amount: reward,
+                                currency: 'USDT',
+                                description: 'أرباح تعدين',
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                            })
                         });
                     });
                     // تحديث محلي
@@ -2007,6 +2019,14 @@
                     userData.miningData.miningHistory.thisWeekDZD = (userData.miningData.miningHistory.thisWeekDZD || 0) + rewardDZD;
                     userData.miningData.miningHistory.thisMonth = (userData.miningData.miningHistory.thisMonth || 0) + reward;
                     userData.miningData.miningHistory.thisMonthDZD = (userData.miningData.miningHistory.thisMonthDZD || 0) + rewardDZD;
+                    if (!userData.transactions) userData.transactions = [];
+                    userData.transactions.push({
+                        type: 'mining_reward',
+                        amount: reward,
+                        currency: 'USDT',
+                        description: 'أرباح تعدين',
+                        timestamp: new Date()
+                    });
                     updateUI();
                 } catch (e) { /* ignore */ }
             }, 30000);
@@ -2215,7 +2235,19 @@
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
             try {
-                // ✅ الإيداع يبقى مجموعة عامة (للأدمن)
+                // ✅ إضافة معاملة الإيداع إلى المصفوفة
+                await db.collection('users').doc(userData.telegramId).update({
+                    'transactions': firebase.firestore.FieldValue.arrayUnion({
+                        type: 'deposit',
+                        amount: depositData.amount,
+                        currency: depositData.currency,
+                        description: `إيداع ${depositData.amount} ${depositData.currency}`,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'pending'
+                    })
+                });
+
+                // ✅ كتابة طلب الإيداع في المجموعة العامة (للأدمن)
                 await db.collection('deposits').add({
                     uid: userData.telegramId,
                     amount: depositData.amount,
@@ -2226,11 +2258,13 @@
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
+
                 showToast('تم إرسال طلب الإيداع، في انتظار المراجعة');
                 document.getElementById('depositTransactionId').value = '';
                 document.getElementById('depositDetails').classList.add('hidden');
                 depositData = null;
                 await loadDeposits();
+                await loadTransactions();
             } catch (e) {
                 console.error(e);
                 showToast('حدث خطأ');
@@ -2240,7 +2274,6 @@
         async function loadDeposits() {
             if (!userData) return;
             try {
-                // ✅ باقي مجموعة عامة
                 const snap = await db.collection('deposits').where('uid', '==', userData.telegramId).orderBy('createdAt', 'desc').get();
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
@@ -2324,9 +2357,18 @@
                         upd['wallets.dzdReward'] = r - fr;
                         upd['wallets.dzdReferral'] = refr - fref;
                     }
+                    // ✅ إضافة معاملة السحب إلى المصفوفة
+                    upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
+                        type: 'withdraw',
+                        amount: total,
+                        currency: currency,
+                        description: `سحب ${amount} ${currency}`,
+                        balanceAfter: bal - total,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
                     t.update(ref, upd);
 
-                    // ✅ طلب السحب يبقى مجموعة عامة (للأدمن)
+                    // ✅ طلب السحب في المجموعة العامة (للأدمن)
                     const wdRef = db.collection('withdrawals').doc();
                     t.set(wdRef, {
                         uid: userData.telegramId,
@@ -2337,20 +2379,6 @@
                         fee: fee,
                         status: 'pending',
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
-                    // ✅ معاملة السحب في subcollection الخاص بالمستخدم
-                    const transRef = db.collection('users')
-                        .doc(userData.telegramId)
-                        .collection('transactions')
-                        .doc();
-                    t.set(transRef, {
-                        type: 'withdraw',
-                        amount: total,
-                        currency: currency,
-                        description: `سحب ${amount} ${currency}`,
-                        balanceAfter: bal - total,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 });
 
@@ -2379,6 +2407,16 @@
                         userData.wallets.dzdReferral -= fref;
                     }
                 }
+                if (!userData.transactions) userData.transactions = [];
+                userData.transactions.push({
+                    type: 'withdraw',
+                    amount: total,
+                    currency: currency,
+                    description: `سحب ${amount} ${currency}`,
+                    balanceAfter: (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0) -
+                        total,
+                    timestamp: new Date()
+                });
                 updateUI();
                 await loadWithdrawals();
                 await loadTransactions();
@@ -2393,7 +2431,6 @@
         async function loadWithdrawals() {
             if (!userData) return;
             try {
-                // ✅ باقي مجموعة عامة
                 const snap = await db.collection('withdrawals').where('uid', '==', userData.telegramId).orderBy('createdAt', 'desc').get();
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
@@ -2513,14 +2550,8 @@
                         price: price,
                         currency: cur
                     };
-                    t.update(ref, upd);
-
-                    // ✅ معاملة الشراء في subcollection الخاص بالمستخدم
-                    const transRef = db.collection('users')
-                        .doc(userData.telegramId)
-                        .collection('transactions')
-                        .doc();
-                    t.set(transRef, {
+                    // ✅ إضافة معاملة الشراء إلى المصفوفة
+                    upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                         type: 'purchase',
                         amount: price,
                         currency: cur,
@@ -2529,6 +2560,7 @@
                         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                         packageId: pkg.id
                     });
+                    t.update(ref, upd);
                 });
 
                 showToast(`تم شراء "${pkg.name}" بنجاح!`);
@@ -2565,6 +2597,16 @@
                     price: price,
                     currency: cur
                 };
+                if (!userData.transactions) userData.transactions = [];
+                userData.transactions.push({
+                    type: 'purchase',
+                    amount: price,
+                    currency: cur,
+                    description: `شراء ${pkg.name}`,
+                    balanceAfter: (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0),
+                    timestamp: new Date(),
+                    packageId: pkg.id
+                });
                 updateUI();
                 await loadTransactions();
             } catch (e) {
@@ -2573,20 +2615,19 @@
         }
 
         // ============================================================
-        // 15. TRANSACTIONS (Subcollection)
+        // 15. TRANSACTIONS - قراءة من المصفوفة
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
             try {
-                const snap = await db.collection('users')
-                    .doc(userData.telegramId)
-                    .collection('transactions')
-                    .orderBy('timestamp', 'desc')
-                    .limit(50)
-                    .get();
-
-                allTransactions = [];
-                snap.forEach(d => allTransactions.push({ id: d.id, ...d.data() }));
+                // ✅ القراءة من المصفوفة داخل المستند
+                allTransactions = userData.transactions || [];
+                // ترتيب تنازلي حسب الوقت
+                allTransactions.sort((a, b) => {
+                    const timeA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+                    const timeB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+                    return timeB - timeA;
+                });
                 renderTransactions(allTransactions);
                 renderRecentTransactions(allTransactions.slice(0, 5));
             } catch (e) {
@@ -2636,17 +2677,12 @@
         }
 
         // ============================================================
-        // 16. REFERRALS (Subcollection)
+        // 16. REFERRALS - قراءة من المصفوفة
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
             try {
-                const snap = await db.collection('users')
-                    .doc(userData.telegramId)
-                    .collection('referrals')
-                    .get();
-                const list = [];
-                snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                const list = userData.referrals || [];
                 renderReferrals(list);
             } catch (e) {
                 console.error(e);
@@ -2747,9 +2783,8 @@
             }
         });
 
-        console.log('🚀 Crynova V2 - transactions و referrals فقط Subcollections');
-        console.log('✅ deposits و withdrawals بقيت مجموعات عامة');
-        console.log('✅ تم إزالة التحقق التلقائي من start_param');
+        console.log('🚀 Crynova V2 - transactions و referrals كمصفوفات داخل المستند');
+        console.log('✅ مثل miningData و wallets');
     </script>
 </body>
 </html>
