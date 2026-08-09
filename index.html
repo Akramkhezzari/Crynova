@@ -998,6 +998,13 @@
         .clickable {
             cursor: pointer;
         }
+        /* DARK MODE SWITCH - حالة التفعيل المرئية */
+        #darkModeToggle:checked + span {
+            background: var(--accent) !important;
+        }
+        #darkModeToggle:checked + span + #darkModeSlider {
+            transform: translateX(22px);
+        }
     </style>
 </head>
 <body>
@@ -1414,6 +1421,10 @@
                 <button class="btn btn-sm btn-ghost mt-8" onclick="shareReferral()" style="width:auto;">
                     <i class="fas fa-share-alt"></i> مشاركة الرابط
                 </button>
+                <!-- زر اختبار الإحالة يدوياً -->
+                <button class="btn btn-sm btn-outline mt-8" onclick="testReferralManually()" style="width:auto;">
+                    <i class="fas fa-vial"></i> اختبار الإحالة يدوياً
+                </button>
             </div>
 
             <div class="card">
@@ -1521,6 +1532,16 @@
             </div>
         </div>
 
+        <!-- ========== PAGE: ADMIN (لوحة التحكم) ========== -->
+        <div class="page" id="page-admin">
+            <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+                <i class="fas fa-shield-alt text-danger"></i> لوحة التحكم
+            </h2>
+            <div id="adminContent">
+                <div class="text-center text-muted" style="padding:20px 0;">جاري التحميل...</div>
+            </div>
+        </div>
+
     </div>
 
     <!-- ===== BOTTOM NAVIGATION ===== -->
@@ -1562,14 +1583,11 @@
         };
 
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
         const db = firebase.firestore();
-        const storage = firebase.storage();
 
         // ============================================================
         // 2. STATE
         // ============================================================
-        let currentUser = null;
         let userData = null;
         let allPackages = [];
         let allTransactions = [];
@@ -1578,7 +1596,9 @@
         let isDarkTheme = false;
         let miningInterval = null;
         let selectedCurrency = 'USDT';
-        let exchangeRate = 250; // سيتم تحديثه من Firebase
+        let exchangeRate = 250;
+        let isAdmin = false;
+        const ADMIN_IDS = ['5922049376']; // ضع هنا معرفات المشرفين
 
         const POSTAL_ACCOUNT = '0799999002385412178';
 
@@ -1590,17 +1610,7 @@
                 const tg = window.Telegram.WebApp;
                 tg.expand();
                 tg.enableClosingConfirmation();
-
-                const user = tg.initDataUnsafe?.user;
-                if (user) {
-                    return {
-                        id: user.id,
-                        username: user.username || '',
-                        firstName: user.first_name || '',
-                        lastName: user.last_name || '',
-                        photoUrl: user.photo_url || ''
-                    };
-                }
+                return tg.initDataUnsafe?.user || null;
             }
             return null;
         }
@@ -1610,10 +1620,16 @@
         // ============================================================
         async function authUser() {
             const tgUser = getTelegramUser();
-
             if (!tgUser) {
-                console.error('يرجى فتح التطبيق من خلال Telegram');
+                console.error('❌ لا يمكن العثور على مستخدم Telegram');
                 return false;
+            }
+
+            // التحقق من الأدمن
+            isAdmin = ADMIN_IDS.includes(tgUser.id.toString());
+            if (isAdmin) {
+                console.log('👑 مرحباً أيها المشرف!');
+                // إضافة زر الإدارة في التذييل أو مكان مناسب (سيظهر في صفحة الإدارة)
             }
 
             try {
@@ -1622,28 +1638,22 @@
 
                 if (!snapshot.empty) {
                     const doc = snapshot.docs[0];
-                    currentUser = { uid: doc.id, ...doc.data() };
-                    userData = currentUser;
-
-                    await doc.ref.update({
-                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
-                    console.log('👋 مرحباً ' + (userData.displayName || 'مستخدم'));
+                    userData = { uid: doc.id, ...doc.data() };
+                    await doc.ref.update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() });
+                    console.log('✅ مرحباً بعودتك,', userData.displayName);
                 } else {
-                    const displayName = tgUser.firstName + (tgUser.lastName ? ' ' + tgUser.lastName : '');
-
+                    const displayName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
                     const newUser = {
                         telegramId: tgUser.id.toString(),
-                        username: tgUser.username,
+                        username: tgUser.username || '',
                         displayName: displayName || 'مستخدم',
-                        photoURL: tgUser.photoUrl || `https://ui-avatars.com/api/?name=${displayName || 'U'}&background=6c5ce7&color=fff&size=128`,
+                        photoURL: tgUser.photo_url || `https://ui-avatars.com/api/?name=${displayName || 'U'}&background=6c5ce7&color=fff&size=128`,
                         joinDate: firebase.firestore.FieldValue.serverTimestamp(),
                         lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
                         level: 1,
                         status: 'active',
                         referralCode: tgUser.id.toString(),
-                        referredBy: null,
+                        referrerBy: null, // ✅ الحقل الصحيح
                         currency: 'USDT',
                         wallets: {
                             main: 0,
@@ -1667,91 +1677,97 @@
                                 thisWeekDZD: 0,
                                 thisMonth: 0,
                                 thisMonthDZD: 0
-                            },
-                            lastMiningUpdate: firebase.firestore.FieldValue.serverTimestamp(),
-                            activeSince: firebase.firestore.FieldValue.serverTimestamp()
+                            }
                         }
                     };
-
                     const docRef = await db.collection('users').add(newUser);
-                    currentUser = { uid: docRef.id, ...newUser };
-                    userData = currentUser;
-
-                    console.log('✅ تم إنشاء حسابك بنجاح!');
+                    userData = { uid: docRef.id, ...newUser };
+                    console.log('✅ تم إنشاء حساب جديد:', userData.displayName);
                 }
 
-                // ✅ معالجة الإحالة في كل مرة (سواء كان المستخدم جديداً أو موجوداً)
-                await handleReferralLocally();
+                // ✅ معالجة الإحالة بعد تحميل المستخدم
+                await handleReferral();
 
-                // الاستماع لتحديثات المستخدم في الوقت الفعلي
-                listenToUserUpdates();
+                // الاستماع للتحديثات
+                db.collection('users').doc(userData.uid).onSnapshot((doc) => {
+                    if (doc.exists) {
+                        userData = { uid: doc.id, ...doc.data() };
+                        updateUI();
+                        if (isAdmin) loadAdminData();
+                    }
+                });
+
+                // تحميل البيانات
+                await loadPackages();
+                await loadTransactions();
+                await loadReferrals();
+                await loadDeposits();
+                await loadWithdrawals();
+                await loadExchangeRate();
 
                 updateUI();
-                loadPackages();
-                loadTransactions();
-                loadReferrals();
-                loadDeposits();
-                loadWithdrawals();
-                loadExchangeRate();
-
-                startMiningSimulation();
-
+                startMining();
+                if (isAdmin) loadAdminData();
                 return true;
 
-            } catch (error) {
-                console.error('Auth error:', error);
+            } catch (e) {
+                console.error('❌ خطأ في المصادقة:', e);
                 return false;
             }
         }
 
         // ============================================================
-        // 4.1 الاستماع لتحديثات المستخدم
+        // 5. معالجة الإحالة (المحسّنة)
         // ============================================================
-        function listenToUserUpdates() {
-            if (!userData || !userData.uid) return;
-            db.collection('users').doc(userData.uid)
-                .onSnapshot((doc) => {
-                    if (doc.exists) {
-                        userData = { uid: doc.id, ...doc.data() };
-                        updateUI();
-                    }
-                }, (error) => {
-                    console.error('Error listening to user updates:', error);
-                });
-        }
-
-        // ============================================================
-        // 5. REFERRAL HANDLING (معاملة + دعم start_param)
-        // ============================================================
-        async function handleReferralLocally() {
-            // تأكد من وجود بيانات المستخدم
-            if (!userData || !userData.uid) {
-                console.log('⏳ انتظار اكتمال بيانات المستخدم...');
+        async function handleReferral() {
+            console.log('🔍 بدء معالجة الإحالة...');
+            if (!userData) {
+                console.warn('❌ userData غير موجود');
                 return;
             }
 
-            // منع معالجة الإحالة إذا كان المستخدم قد تمت إحالته مسبقاً
-            if (userData.referredBy) {
-                console.log('ℹ️ هذا المستخدم تمت إحالته مسبقاً، تجاهل.');
+            if (userData.referrerBy) {
+                console.log('ℹ️ المستخدم مُحال بالفعل بواسطة:', userData.referrerBy);
                 return;
             }
 
-            // محاولة قراءة كود الإحالة من URL أو من Telegram WebApp
-            const urlParams = new URLSearchParams(window.location.search);
-            let referralCode = urlParams.get('start');
+            // محاولة قراءة الكود من 3 مصادر
+            let referralCode = null;
 
-            if (!referralCode && window.Telegram?.WebApp) {
+            // 1. من start_param الخاص بـ Telegram WebApp (الأكثر موثوقية)
+            if (window.Telegram?.WebApp) {
                 const tg = window.Telegram.WebApp;
                 referralCode = tg.initDataUnsafe?.start_param;
+                if (referralCode) {
+                    console.log('✅ قرأت start_param من WebApp:', referralCode);
+                    // خزنه في localStorage للاستخدام المستقبلي
+                    localStorage.setItem('referralCode', referralCode);
+                }
+            }
+
+            // 2. من localStorage (إذا تم تخزينه سابقاً)
+            if (!referralCode) {
+                referralCode = localStorage.getItem('referralCode');
+                if (referralCode) console.log('✅ قرأت من localStorage:', referralCode);
+            }
+
+            // 3. من URL (كحل أخير)
+            if (!referralCode) {
+                const params = new URLSearchParams(window.location.search);
+                referralCode = params.get('start');
+                if (referralCode) {
+                    console.log('✅ قرأت من URL:', referralCode);
+                    localStorage.setItem('referralCode', referralCode);
+                }
             }
 
             if (!referralCode) {
-                console.log('ℹ️ لا يوجد كود إحالة');
+                console.warn('❌ لم يتم العثور على كود إحالة (start) في أي مكان');
                 return;
             }
 
             if (referralCode === userData.telegramId) {
-                console.log('ℹ️ كود الإحالة خاص بالمستخدم نفسه، تجاهل.');
+                console.warn('⚠️ كود الإحالة خاص بالمستخدم نفسه، تجاهل');
                 return;
             }
 
@@ -1759,44 +1775,48 @@
 
             try {
                 // البحث عن المُحيل
-                const referrerSnapshot = await db.collection('users')
+                const referrerSnap = await db.collection('users')
                     .where('referralCode', '==', referralCode)
                     .get();
 
-                if (referrerSnapshot.empty) {
-                    console.log('⚠️ لم يتم العثور على المُحيل');
+                if (referrerSnap.empty) {
+                    console.warn(`⚠️ لم يُعثر على مُحيل بهذا الكود: ${referralCode}`);
+                    showToast('⚠️ لم يتم العثور على المستخدم الذي دعاك.');
                     return;
                 }
 
-                const referrerDoc = referrerSnapshot.docs[0];
+                const referrerDoc = referrerSnap.docs[0];
+                const referrerData = referrerDoc.data();
+                console.log('👤 تم العثور على المُحيل:', referrerData.displayName, '(UID:', referrerDoc.id, ')');
 
-                // التحقق من عدم وجود إحالة مسبقة (للتأكيد)
-                const existingReferral = await db.collection('referrals')
+                // التأكد من عدم وجود إحالة مسبقة
+                const existing = await db.collection('referrals')
                     .where('referredUid', '==', userData.uid)
                     .get();
 
-                if (!existingReferral.empty) {
-                    console.log('⚠️ هذا المستخدم تمت إحالته مسبقاً (تم العثور على سجل)');
+                if (!existing.empty) {
+                    console.warn('⚠️ هذه الإحالة مسجلة مسبقاً');
+                    localStorage.removeItem('referralCode');
                     return;
                 }
 
-                // استخدام معاملة لضمان الذرية
+                // تنفيذ المعاملة
+                console.log('🔄 بدء المعاملة...');
                 await db.runTransaction(async (transaction) => {
                     const userRef = db.collection('users').doc(userData.uid);
-                    const referrerRef = referrerDoc.ref;
+                    const refRef = referrerDoc.ref;
 
                     const userDoc = await transaction.get(userRef);
-                    const referrerDocData = await transaction.get(referrerRef);
+                    const refDoc = await transaction.get(refRef);
+                    if (!userDoc.exists || !refDoc.exists) {
+                        throw new Error('أحد المستخدمين غير موجود');
+                    }
 
-                    if (!userDoc.exists || !referrerDocData.exists) return;
+                    // تحديث المستخدم المُحال
+                    transaction.update(userRef, { referrerBy: referralCode });
 
-                    // تحديث المستخدم الحالي (تعيين المُحيل)
-                    transaction.update(userRef, {
-                        referredBy: referralCode
-                    });
-
-                    // تحديث المُحيل (زيادة عدد الإحالات والمكافآت)
-                    transaction.update(referrerRef, {
+                    // تحديث المُحيل
+                    transaction.update(refRef, {
                         'miningData.totalReferrals': firebase.firestore.FieldValue.increment(1),
                         'wallets.referral': firebase.firestore.FieldValue.increment(5),
                         'wallets.dzdReferral': firebase.firestore.FieldValue.increment(5 * exchangeRate)
@@ -1819,40 +1839,71 @@
                         type: 'referral_bonus',
                         amount: 5,
                         currency: 'USDT',
-                        description: `عمولة إحالة - ${userData.displayName || 'مستخدم جديد'}`,
+                        description: `عمولة إحالة - ${userData.displayName}`,
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 });
 
                 console.log('✅ تمت معالجة الإحالة بنجاح!');
+                userData.referrerBy = referralCode;
+                localStorage.removeItem('referralCode');
                 showToast('🎉 تم تفعيل الإحالة! شكراً لدعوتك.');
-
-                // تحديث بيانات المستخدم محلياً
-                userData.referredBy = referralCode;
+                await loadReferrals();
+                await loadTransactions();
                 updateUI();
-                loadReferrals();
-                loadTransactions();
-                updateWalletUI();
+
+                // إرسال إشعار إلى خادم البوت (اختياري)
+                try {
+                    await fetch('/api/referral', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            referrerId: referralCode,
+                            referredId: userData.telegramId,
+                            referredName: userData.displayName,
+                            amount: 5
+                        })
+                    });
+                    console.log('📨 تم إرسال الإشعار إلى الخادم');
+                } catch (e) {
+                    console.warn('⚠️ فشل إرسال الإشعار للخادم:', e);
+                }
 
             } catch (error) {
-                console.error('❌ خطأ في معالجة الإحالة:', error);
-                showToast('حدث خطأ أثناء معالجة الإحالة، حاول مرة أخرى.');
+                console.error('❌ فشل معالجة الإحالة:', error);
+                showToast('حدث خطأ أثناء معالجة الإحالة: ' + error.message);
             }
         }
 
         // ============================================================
-        // 6. HELPERS
+        // 6. اختبار الإحالة يدوياً
+        // ============================================================
+        async function testReferralManually() {
+            const code = prompt('🔑 أدخل كود الإحالة (مثل 5922049376):');
+            if (!code) return;
+
+            // محاكاة تمرير الكود عبر WebApp
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.initDataUnsafe = { start_param: code };
+            }
+            // محاكاة الكود في URL
+            const url = new URL(window.location.href);
+            url.searchParams.set('start', code);
+            window.history.replaceState({}, '', url);
+            // تخزين في localStorage
+            localStorage.setItem('referralCode', code);
+
+            showToast('🔄 جاري معالجة الإحالة...');
+            await handleReferral();
+        }
+
+        // ============================================================
+        // 7. HELPERS
         // ============================================================
         function formatDate(timestamp) {
             if (!timestamp) return '--';
             const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
             return date.toLocaleDateString('ar-EG', { day: '2-digit', month: 'short', year: 'numeric' });
-        }
-
-        function formatTime(timestamp) {
-            if (!timestamp) return '--';
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-            return date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
         }
 
         function formatDateTime(timestamp) {
@@ -1915,37 +1966,28 @@
 
         function copyText(text) {
             if (!text || text === 'جاري التحميل...') {
-                console.warn('لا يوجد نص للنسخ');
+                showToast('لا يوجد نص للنسخ');
                 return;
             }
             if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => {
-                    showToast('تم نسخ النص');
-                }).catch(() => fallbackCopy(text));
+                navigator.clipboard.writeText(text).then(() => showToast('تم النسخ'));
             } else {
-                fallbackCopy(text);
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+                showToast('تم النسخ');
             }
-        }
-
-        function fallbackCopy(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            showToast('تم نسخ النص');
         }
 
         function shareReferral() {
             const link = document.getElementById('referralLink').value;
             if (link && link !== 'جاري التحميل...') {
                 if (navigator.share) {
-                    navigator.share({
-                        title: 'انضم إلى Crynova Mining',
-                        text: 'اربح مع Crynova Mining! استخدم رابط الدعوة الخاص بي:',
-                        url: link
-                    }).catch(() => copyText(link));
+                    navigator.share({ title: 'انضم إلى Crynova Mining', text: 'اربح مع Crynova Mining!', url: link })
+                        .catch(() => copyText(link));
                 } else {
                     copyText(link);
                 }
@@ -1963,78 +2005,55 @@
             }, 2000);
         }
 
-        // Toast بسيط
         function showToast(msg) {
-            const toast = document.createElement('div');
-            toast.style.cssText = `
-                    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-                    background: var(--accent); color: white; padding: 12px 24px;
-                    border-radius: 30px; font-weight: 700; z-index: 9999;
-                    box-shadow: var(--shadow-lg); font-family: 'Cairo', sans-serif;
-                    animation: fadeSlideIn 0.3s ease;
-                `;
-            toast.textContent = msg;
-            document.body.appendChild(toast);
+            const t = document.createElement('div');
+            t.style.cssText = `
+                position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+                background: var(--accent); color: #fff; padding: 12px 24px;
+                border-radius: 30px; font-weight: 700; z-index: 9999;
+                box-shadow: var(--shadow-lg); font-family: 'Cairo', sans-serif;
+                max-width: 90%; text-align: center;
+            `;
+            t.textContent = msg;
+            document.body.appendChild(t);
             setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transition = 'opacity 0.3s';
-                setTimeout(() => toast.remove(), 300);
-            }, 2500);
+                t.style.opacity = '0';
+                t.style.transition = 'opacity 0.3s';
+                setTimeout(() => t.remove(), 300);
+            }, 3000);
         }
 
         // ============================================================
-        // 7. CURRENCY SELECTOR
+        // 8. CURRENCY
         // ============================================================
         function setCurrency(currency) {
             selectedCurrency = currency;
-
-            const usdtBtn = document.getElementById('currencyUsdtBtn');
-            const dzdBtn = document.getElementById('currencyDzdBtn');
-
-            usdtBtn.className = currency === 'USDT' ? 'active-usdt' : '';
-            dzdBtn.className = currency === 'DZD' ? 'active-dzd' : '';
-
+            document.getElementById('currencyUsdtBtn').className = currency === 'USDT' ? 'active-usdt' : '';
+            document.getElementById('currencyDzdBtn').className = currency === 'DZD' ? 'active-dzd' : '';
             document.getElementById('currentCurrencyDisplay').textContent = currency;
-
-            updateHomeUI();
-            updateWalletUI();
-            updateMiningUI();
-            updateReferralUI();
+            updateUI();
             renderPackages();
-
-            console.log(`💱 تم تغيير العملة إلى ${currency}`);
         }
 
         // ============================================================
-        // 8. سعر الصرف من Firestore
+        // 9. EXCHANGE RATE
         // ============================================================
         async function loadExchangeRate() {
             try {
                 const doc = await db.collection('settings').doc('exchangeRate').get();
-                if (doc.exists) {
-                    exchangeRate = doc.data().rate || 250;
-                }
-                console.log(`💱 سعر الصرف: 1 USDT = ${exchangeRate} DZD`);
-            } catch (e) {
-                console.warn('استخدام سعر الصرف الافتراضي 250');
-            }
+                if (doc.exists) exchangeRate = doc.data().rate || 250;
+            } catch (e) { /* use default */ }
         }
 
         // ============================================================
-        // 9. MINING SIMULATION
+        // 10. MINING SIMULATION
         // ============================================================
-        function startMiningSimulation() {
-            if (miningInterval) {
-                clearInterval(miningInterval);
-                miningInterval = null;
-            }
-
+        function startMining() {
+            if (miningInterval) clearInterval(miningInterval);
             miningInterval = setInterval(async () => {
-                if (!userData || !userData.miningData || !userData.uid) return;
-
-                const pkg = userData.miningData.currentPackage;
+                if (!userData || !userData.uid) return;
+                const pkg = userData.miningData?.currentPackage;
                 if (!pkg) return;
-
                 const now = new Date();
                 const end = pkg.endDate?.toDate ? pkg.endDate.toDate() : new Date(pkg.endDate);
                 if (now > end) {
@@ -2042,111 +2061,85 @@
                     document.getElementById('miningStatus').className = 'status status-danger';
                     return;
                 }
-
                 const hashRate = pkg.hashRate || 0;
                 const reward = hashRate * 0.001;
                 const rewardDZD = reward * exchangeRate;
-
-                if (reward > 0) {
-                    try {
-                        const userRef = db.collection('users').doc(userData.uid);
-                        await db.runTransaction(async (transaction) => {
-                            const doc = await transaction.get(userRef);
-                            if (!doc.exists) return;
-
-                            transaction.update(userRef, {
-                                'wallets.reward': firebase.firestore.FieldValue.increment(reward),
-                                'wallets.dzdReward': firebase.firestore.FieldValue.increment(rewardDZD),
-                                'miningData.totalMined': firebase.firestore.FieldValue.increment(reward),
-                                'miningData.totalMinedDZD': firebase.firestore.FieldValue.increment(rewardDZD),
-                                'miningData.miningHistory.today': firebase.firestore.FieldValue.increment(reward),
-                                'miningData.miningHistory.todayDZD': firebase.firestore.FieldValue.increment(
-                                    rewardDZD),
-                                'miningData.miningHistory.thisWeek': firebase.firestore.FieldValue.increment(reward),
-                                'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(
-                                    rewardDZD),
-                                'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(reward),
-                                'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(
-                                    rewardDZD)
-                            });
+                if (reward <= 0) return;
+                try {
+                    const ref = db.collection('users').doc(userData.uid);
+                    await db.runTransaction(async (t) => {
+                        const doc = await t.get(ref);
+                        if (!doc.exists) return;
+                        t.update(ref, {
+                            'wallets.reward': firebase.firestore.FieldValue.increment(reward),
+                            'wallets.dzdReward': firebase.firestore.FieldValue.increment(rewardDZD),
+                            'miningData.totalMined': firebase.firestore.FieldValue.increment(reward),
+                            'miningData.totalMinedDZD': firebase.firestore.FieldValue.increment(rewardDZD),
+                            'miningData.miningHistory.today': firebase.firestore.FieldValue.increment(reward),
+                            'miningData.miningHistory.todayDZD': firebase.firestore.FieldValue.increment(
+                            rewardDZD),
+                            'miningData.miningHistory.thisWeek': firebase.firestore.FieldValue.increment(reward),
+                            'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(
+                                rewardDZD),
+                            'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(reward),
+                            'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(
+                                rewardDZD)
                         });
-
-                        // تحديث محلي سريع
-                        if (!userData.wallets) userData.wallets = { main: 0, reward: 0, referral: 0, locked: 0, dzd: 0,
-                            dzdReward: 0, dzdReferral: 0, dzdLocked: 0 };
-                        userData.wallets.reward = (userData.wallets.reward || 0) + reward;
-                        userData.wallets.dzdReward = (userData.wallets.dzdReward || 0) + rewardDZD;
-                        if (!userData.miningData) userData.miningData = {};
-                        userData.miningData.totalMined = (userData.miningData.totalMined || 0) + reward;
-                        userData.miningData.totalMinedDZD = (userData.miningData.totalMinedDZD || 0) + rewardDZD;
-                        if (!userData.miningData.miningHistory) userData.miningData.miningHistory = { today: 0,
-                            todayDZD: 0, thisWeek: 0, thisWeekDZD: 0, thisMonth: 0, thisMonthDZD: 0 };
-                        userData.miningData.miningHistory.today = (userData.miningData.miningHistory.today || 0) +
-                            reward;
-                        userData.miningData.miningHistory.todayDZD = (userData.miningData.miningHistory.todayDZD ||
-                            0) + rewardDZD;
-                        userData.miningData.miningHistory.thisWeek = (userData.miningData.miningHistory.thisWeek ||
-                            0) + reward;
-                        userData.miningData.miningHistory.thisWeekDZD = (userData.miningData.miningHistory
-                            .thisWeekDZD || 0) + rewardDZD;
-                        userData.miningData.miningHistory.thisMonth = (userData.miningData.miningHistory
-                            .thisMonth || 0) + reward;
-                        userData.miningData.miningHistory.thisMonthDZD = (userData.miningData.miningHistory
-                            .thisMonthDZD || 0) + rewardDZD;
-
-                        updateUI();
-                    } catch (error) {
-                        console.error('Mining error:', error);
-                    }
-                }
+                    });
+                    // تحديث محلي سريع
+                    if (!userData.wallets) userData.wallets = {};
+                    userData.wallets.reward = (userData.wallets.reward || 0) + reward;
+                    userData.wallets.dzdReward = (userData.wallets.dzdReward || 0) + rewardDZD;
+                    if (!userData.miningData) userData.miningData = {};
+                    userData.miningData.totalMined = (userData.miningData.totalMined || 0) + reward;
+                    userData.miningData.totalMinedDZD = (userData.miningData.totalMinedDZD || 0) + rewardDZD;
+                    if (!userData.miningData.miningHistory) userData.miningData.miningHistory = { today: 0,
+                        todayDZD: 0, thisWeek: 0, thisWeekDZD: 0, thisMonth: 0, thisMonthDZD: 0 };
+                    userData.miningData.miningHistory.today = (userData.miningData.miningHistory.today || 0) +
+                    reward;
+                    userData.miningData.miningHistory.todayDZD = (userData.miningData.miningHistory.todayDZD ||
+                        0) + rewardDZD;
+                    userData.miningData.miningHistory.thisWeek = (userData.miningData.miningHistory.thisWeek ||
+                        0) + reward;
+                    userData.miningData.miningHistory.thisWeekDZD = (userData.miningData.miningHistory
+                        .thisWeekDZD || 0) + rewardDZD;
+                    userData.miningData.miningHistory.thisMonth = (userData.miningData.miningHistory
+                        .thisMonth || 0) + reward;
+                    userData.miningData.miningHistory.thisMonthDZD = (userData.miningData.miningHistory
+                        .thisMonthDZD || 0) + rewardDZD;
+                    updateUI();
+                } catch (e) { /* ignore */ }
             }, 30000);
         }
-
-        // تنظيف المؤقت عند إغلاق الصفحة
-        window.addEventListener('beforeunload', function() {
-            if (miningInterval) {
-                clearInterval(miningInterval);
-                miningInterval = null;
-            }
-        });
+        window.addEventListener('beforeunload', () => { if (miningInterval) clearInterval(miningInterval); });
 
         // ============================================================
-        // 10. NAVIGATION
+        // 11. NAVIGATION
         // ============================================================
         function navigateTo(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const targetPage = document.getElementById(`page-${page}`);
-            if (targetPage) targetPage.classList.add('active');
-
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.toggle('active', item.dataset.page === page);
-            });
-
+            const el = document.getElementById('page-' + page);
+            if (el) el.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+            if (window.Telegram?.WebApp) {
+                const tg = window.Telegram.WebApp;
+                page === 'home' ? tg.BackButton.hide() : tg.BackButton.show();
+            }
             if (page === 'wallet') updateWalletUI();
             if (page === 'mining') updateMiningUI();
             if (page === 'referrals') updateReferralUI();
             if (page === 'profile') updateProfileUI();
-
-            if (window.Telegram?.WebApp) {
-                const tg = window.Telegram.WebApp;
-                if (page === 'home') {
-                    tg.BackButton.hide();
-                } else {
-                    tg.BackButton.show();
-                }
-            }
+            if (page === 'admin' && isAdmin) loadAdminData();
         }
 
         // ============================================================
-        // 11. UI UPDATES
+        // 12. UI UPDATES
         // ============================================================
         function updateUI() {
             if (!userData) return;
-
             const u = userData;
             const name = u.displayName || u.username || 'مستخدم';
             const initial = name.charAt(0).toUpperCase() || '?';
-
             document.querySelectorAll('#profileAvatar, #headerAvatar').forEach(el => {
                 if (u.photoURL && u.photoURL.startsWith('http')) {
                     el.style.backgroundImage = `url(${u.photoURL})`;
@@ -2157,13 +2150,11 @@
                     el.style.backgroundImage = '';
                 }
             });
-
             document.getElementById('profileName').textContent = name;
             document.getElementById('headerUserName').textContent = name;
             document.getElementById('userLevelBadge').textContent = u.level || 1;
             document.getElementById('profileLevel').textContent = u.level || 1;
             document.getElementById('headerUserLevel').textContent = `المستوى ${u.level || 1}`;
-
             updateProfileUI();
             updateHomeUI();
             updateWalletUI();
@@ -2177,54 +2168,31 @@
             document.getElementById('profileTelegram').textContent = u.username ? `@${u.username}` : 'غير متاح';
             document.getElementById('profileTelegramId').textContent = u.telegramId || '--';
             document.getElementById('profileJoinDate').textContent = formatDate(u.joinDate);
-
             const refLink = document.getElementById('referralLink');
             if (u.telegramId) {
-                const url = `https://t.me/Crynova_bot/Crynova?start=${u.telegramId}`;
-                refLink.value = url;
+                refLink.value = `https://t.me/Crynova_bot/Crynova?start=${u.telegramId}`;
             } else {
                 refLink.value = 'جاري التحميل...';
             }
-
             document.getElementById('currentCurrencyDisplay').textContent = selectedCurrency;
         }
 
         function updateHomeUI() {
             if (!userData) return;
             const u = userData;
-            const currency = selectedCurrency;
-            const isDZD = currency === 'DZD';
-
-            let balance = 0;
-            let mined = 0;
-
-            if (isDZD) {
-                balance = (u.wallets?.dzd || 0) + (u.wallets?.dzdReward || 0) + (u.wallets?.dzdReferral || 0);
-                mined = u.miningData?.totalMinedDZD || 0;
-            } else {
-                balance = (u.wallets?.main || 0) + (u.wallets?.reward || 0) + (u.wallets?.referral || 0);
-                mined = u.miningData?.totalMined || 0;
-            }
-
+            const isDZD = selectedCurrency === 'DZD';
+            const balance = isDZD ?
+                (u.wallets?.dzd || 0) + (u.wallets?.dzdReward || 0) + (u.wallets?.dzdReferral || 0) :
+                (u.wallets?.main || 0) + (u.wallets?.reward || 0) + (u.wallets?.referral || 0);
+            const mined = isDZD ? (u.miningData?.totalMinedDZD || 0) : (u.miningData?.totalMined || 0);
             document.getElementById('homeBalance').textContent = balance.toFixed(2);
-            document.getElementById('homeCurrency').textContent = currency;
+            document.getElementById('homeCurrency').textContent = selectedCurrency;
             document.getElementById('homeMined').textContent = mined.toFixed(2);
             document.getElementById('homeReferrals').textContent = u.miningData?.totalReferrals || 0;
-
             const pkg = u.miningData?.currentPackage;
-            if (pkg && pkg.name) {
-                document.getElementById('homePackage').textContent = pkg.name;
-            } else {
-                document.getElementById('homePackage').textContent = 'لا توجد';
-            }
-
+            document.getElementById('homePackage').textContent = pkg && pkg.name ? pkg.name : 'لا توجد';
             const card = document.getElementById('homeBalanceCard');
-            if (isDZD) {
-                card.className = 'card dzd-gradient';
-            } else {
-                card.className = 'card gradient';
-            }
-
+            card.className = isDZD ? 'card dzd-gradient' : 'card gradient';
             updateMiningStatus();
         }
 
@@ -2234,7 +2202,6 @@
             const hashRateEl = document.getElementById('miningHashRate');
             const endsEl = document.getElementById('miningEnds');
             const progressEl = document.getElementById('miningProgress');
-
             if (!pkg || !pkg.endDate) {
                 statusEl.textContent = 'غير نشط';
                 statusEl.className = 'status status-danger';
@@ -2243,14 +2210,12 @@
                 progressEl.style.width = '0%';
                 return;
             }
-
             const now = new Date();
             const end = pkg.endDate.toDate ? pkg.endDate.toDate() : new Date(pkg.endDate);
             const total = pkg.duration || 30;
             const start = new Date(end.getTime() - total * 24 * 60 * 60 * 1000);
             const elapsed = (now - start) / (1000 * 60 * 60 * 24);
             const progress = Math.min(100, (elapsed / total) * 100);
-
             const isActive = now < end;
             statusEl.textContent = isActive ? 'نشط' : 'منتهي';
             statusEl.className = `status ${isActive ? 'status-success' : 'status-danger'}`;
@@ -2262,47 +2227,21 @@
         function updateWalletUI() {
             if (!userData) return;
             const w = userData.wallets || {};
-            const currency = selectedCurrency;
-            const isDZD = currency === 'DZD';
-
-            let total = 0,
-                main = 0,
-                reward = 0,
-                referral = 0,
-                locked = 0,
-                withdrawable = 0;
-
-            if (isDZD) {
-                main = w.dzd || 0;
-                reward = w.dzdReward || 0;
-                referral = w.dzdReferral || 0;
-                locked = w.dzdLocked || 0;
-                total = main + reward + referral;
-                withdrawable = total;
-            } else {
-                main = w.main || 0;
-                reward = w.reward || 0;
-                referral = w.referral || 0;
-                locked = w.locked || 0;
-                total = main + reward + referral;
-                withdrawable = total;
-            }
-
+            const isDZD = selectedCurrency === 'DZD';
+            const main = isDZD ? (w.dzd || 0) : (w.main || 0);
+            const reward = isDZD ? (w.dzdReward || 0) : (w.reward || 0);
+            const referral = isDZD ? (w.dzdReferral || 0) : (w.referral || 0);
+            const locked = isDZD ? (w.dzdLocked || 0) : (w.locked || 0);
+            const total = main + reward + referral;
             document.getElementById('walletTotal').textContent = total.toFixed(2);
-            document.getElementById('walletTotalCurrency').textContent = currency;
+            document.getElementById('walletTotalCurrency').textContent = selectedCurrency;
             document.getElementById('walletMain').textContent = main.toFixed(2);
             document.getElementById('walletReward').textContent = reward.toFixed(2);
             document.getElementById('walletReferral').textContent = referral.toFixed(2);
             document.getElementById('walletLocked').textContent = locked.toFixed(2);
-            document.getElementById('walletWithdrawable').textContent = withdrawable.toFixed(2);
-            document.getElementById('withdrawableBalance').textContent = withdrawable.toFixed(2);
-
-            const card = document.getElementById('walletBalanceCard');
-            if (isDZD) {
-                card.className = 'card dzd-gradient';
-            } else {
-                card.className = 'card gradient';
-            }
+            document.getElementById('walletWithdrawable').textContent = total.toFixed(2);
+            document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
+            document.getElementById('walletBalanceCard').className = isDZD ? 'card dzd-gradient' : 'card gradient';
         }
 
         function updateMiningUI() {
@@ -2310,138 +2249,189 @@
             const md = userData.miningData || {};
             const pkg = md.currentPackage;
             const hashRate = pkg?.hashRate || 0;
-            const currency = selectedCurrency;
-            const isDZD = currency === 'DZD';
-
+            const isDZD = selectedCurrency === 'DZD';
             document.getElementById('miningDetailHashRate').textContent = hashRate.toFixed(2);
-            const dailyEarnings = hashRate * 1.44;
-            const dailyEarningsDZD = dailyEarnings * exchangeRate;
-            document.getElementById('miningDailyEarnings').textContent = isDZD ? dailyEarningsDZD.toFixed(2) : dailyEarnings
-                .toFixed(2);
-            document.getElementById('miningDailyCurrency').textContent = currency;
-
-            document.getElementById('miningTotalMined').textContent = isDZD ?
-                (md.totalMinedDZD || 0).toFixed(2) :
-                (md.totalMined || 0).toFixed(2);
-            document.getElementById('miningToday').textContent = isDZD ?
-                (md.miningHistory?.todayDZD || 0).toFixed(2) :
-                (md.miningHistory?.today || 0).toFixed(2);
-            document.getElementById('miningThisWeek').textContent = isDZD ?
-                (md.miningHistory?.thisWeekDZD || 0).toFixed(2) :
-                (md.miningHistory?.thisWeek || 0).toFixed(2);
-            document.getElementById('miningThisMonth').textContent = isDZD ?
-                (md.miningHistory?.thisMonthDZD || 0).toFixed(2) :
-                (md.miningHistory?.thisMonth || 0).toFixed(2);
-
-            const card = document.getElementById('miningCard');
-            if (isDZD) {
-                card.className = 'card dzd-gradient';
-            } else {
-                card.className = 'card gradient';
-            }
+            const daily = hashRate * 1.44;
+            const dailyDZD = daily * exchangeRate;
+            document.getElementById('miningDailyEarnings').textContent = isDZD ? dailyDZD.toFixed(2) : daily.toFixed(2);
+            document.getElementById('miningDailyCurrency').textContent = selectedCurrency;
+            document.getElementById('miningTotalMined').textContent = isDZD ? (md.totalMinedDZD || 0).toFixed(2) : (md
+                .totalMined || 0).toFixed(2);
+            document.getElementById('miningToday').textContent = isDZD ? (md.miningHistory?.todayDZD || 0).toFixed(2) : (md
+                .miningHistory?.today || 0).toFixed(2);
+            document.getElementById('miningThisWeek').textContent = isDZD ? (md.miningHistory?.thisWeekDZD || 0).toFixed(
+                2) : (md.miningHistory?.thisWeek || 0).toFixed(2);
+            document.getElementById('miningThisMonth').textContent = isDZD ? (md.miningHistory?.thisMonthDZD || 0)
+                .toFixed(2) : (md.miningHistory?.thisMonth || 0).toFixed(2);
+            document.getElementById('miningCard').className = isDZD ? 'card dzd-gradient' : 'card gradient';
         }
 
         function updateReferralUI() {
             if (!userData) return;
-            const currency = selectedCurrency;
-            const isDZD = currency === 'DZD';
-            const earnings = isDZD ?
-                (userData.wallets?.dzdReferral || 0) :
-                (userData.wallets?.referral || 0);
+            const isDZD = selectedCurrency === 'DZD';
+            const earnings = isDZD ? (userData.wallets?.dzdReferral || 0) : (userData.wallets?.referral || 0);
             document.getElementById('refCount').textContent = userData.miningData?.totalReferrals || 0;
             document.getElementById('refEarnings').textContent = earnings.toFixed(2);
         }
 
         // ============================================================
-        // 12. DEPOSIT
+        // 13. ADMIN PANEL
+        // ============================================================
+        async function loadAdminData() {
+            if (!isAdmin) {
+                document.getElementById('adminContent').innerHTML = `
+                    <div class="card text-center" style="padding:32px 0;">
+                        <div style="font-size:48px;">🔒</div>
+                        <div style="font-size:18px;font-weight:700;">غير مصرح</div>
+                        <div style="color:var(--text-secondary);">هذه الصفحة للمشرفين فقط</div>
+                    </div>
+                `;
+                return;
+            }
+            try {
+                // إحصائيات سريعة
+                const usersSnap = await db.collection('users').get();
+                const depositsSnap = await db.collection('deposits').where('status', '==', 'pending').get();
+                const referralsSnap = await db.collection('referrals').get();
+
+                const adminHtml = `
+                    <div class="grid-3">
+                        <div class="stat-box">
+                            <span class="icon">👥</span>
+                            <div class="number">${usersSnap.size}</div>
+                            <div class="label">إجمالي المستخدمين</div>
+                        </div>
+                        <div class="stat-box">
+                            <span class="icon">⏳</span>
+                            <div class="number" style="color:var(--warning);">${depositsSnap.size}</div>
+                            <div class="label">إيداعات معلقة</div>
+                        </div>
+                        <div class="stat-box">
+                            <span class="icon">🔗</span>
+                            <div class="number" style="color:var(--success);">${referralsSnap.size}</div>
+                            <div class="label">إجمالي الإحالات</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title"><i class="fas fa-list"></i> آخر المستخدمين</div>
+                        <div id="adminUsersList">جاري التحميل...</div>
+                    </div>
+                    <button class="btn btn-outline" onclick="adminApproveAllDeposits()">
+                        <i class="fas fa-check-double"></i> تأكيد جميع الإيداعات المعلقة
+                    </button>
+                `;
+                document.getElementById('adminContent').innerHTML = adminHtml;
+
+                // عرض آخر 5 مستخدمين
+                const usersSnap2 = await db.collection('users').orderBy('joinDate', 'desc').limit(5).get();
+                let usersHtml = '';
+                usersSnap2.forEach(doc => {
+                    const u = doc.data();
+                    usersHtml += `
+                        <div class="list-item">
+                            <div class="left">
+                                <div class="avatar" style="width:36px;height:36px;font-size:14px;">${(u.displayName||'م').charAt(0)}</div>
+                                <div><div class="title">${u.displayName||'مستخدم'}</div><div class="sub">${u.telegramId}</div></div>
+                            </div>
+                            <div class="right"><span class="status ${getStatusBadge(u.status)}">${getStatusText(u.status)}</span></div>
+                        </div>
+                    `;
+                });
+                document.getElementById('adminUsersList').innerHTML = usersHtml || 'لا يوجد مستخدمين';
+
+            } catch (e) {
+                document.getElementById('adminContent').innerHTML = `<div class="text-danger">حدث خطأ: ${e.message}</div>`;
+            }
+        }
+
+        async function adminApproveAllDeposits() {
+            if (!isAdmin) return;
+            if (!confirm('تأكيد جميع الإيداعات المعلقة؟')) return;
+            try {
+                const snap = await db.collection('deposits').where('status', '==', 'pending').get();
+                let count = 0;
+                for (const doc of snap.docs) {
+                    const data = doc.data();
+                    // تحديث الحالة
+                    await doc.ref.update({ status: 'confirmed' });
+                    // إضافة المبلغ إلى رصيد المستخدم
+                    const userRef = db.collection('users').doc(data.uid);
+                    await db.runTransaction(async (t) => {
+                        const udoc = await t.get(userRef);
+                        if (!udoc.exists) return;
+                        const updateData = {};
+                        if (data.currency === 'USDT') {
+                            updateData['wallets.main'] = firebase.firestore.FieldValue.increment(data.amount);
+                        } else {
+                            updateData['wallets.dzd'] = firebase.firestore.FieldValue.increment(data.amount);
+                        }
+                        t.update(userRef, updateData);
+                        // إضافة معاملة
+                        const transRef = db.collection('transactions');
+                        t.set(transRef.doc(), {
+                            uid: data.uid,
+                            type: 'deposit',
+                            amount: data.amount,
+                            currency: data.currency,
+                            description: 'إيداع (تأكيد تلقائي)',
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    });
+                    count++;
+                }
+                showToast(`✅ تم تأكيد ${count} إيداع`);
+                loadAdminData();
+            } catch (e) {
+                showToast('خطأ: ' + e.message);
+            }
+        }
+
+        // ============================================================
+        // 14. DEPOSIT
         // ============================================================
         function updateDepositNetwork() {
             const currency = document.getElementById('depositCurrency').value;
-            const networkGroup = document.getElementById('depositNetworkGroup');
-            const eccpGroup = document.getElementById('depositEccpGroup');
-
-            if (currency === 'DZD') {
-                networkGroup.style.display = 'none';
-                eccpGroup.style.display = 'block';
-                document.getElementById('depositEccpId').value = POSTAL_ACCOUNT;
-            } else {
-                networkGroup.style.display = 'block';
-                eccpGroup.style.display = 'none';
-            }
+            document.getElementById('depositNetworkGroup').style.display = currency === 'DZD' ? 'none' : 'block';
+            document.getElementById('depositEccpGroup').style.display = currency === 'DZD' ? 'block' : 'none';
+            if (currency === 'DZD') document.getElementById('depositEccpId').value = POSTAL_ACCOUNT;
         }
 
         function generateDeposit() {
-            if (!userData) {
-                console.error('يرجى تسجيل الدخول أولاً');
-                return;
-            }
-
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
             const currency = document.getElementById('depositCurrency').value;
             const amount = parseFloat(document.getElementById('depositAmount').value);
-
-            if (!amount || amount < 1) {
-                alert('يرجى إدخال مبلغ صحيح (أقل مبلغ 1)');
-                return;
-            }
-
+            if (!amount || amount < 1) { showToast('أدخل مبلغاً صحيحاً (≥1)'); return; }
             let address = '';
-            let eccpId = '';
-
             if (currency === 'DZD') {
-                eccpId = POSTAL_ACCOUNT;
                 address = `CCP: ${POSTAL_ACCOUNT}`;
             } else {
                 const network = document.getElementById('depositNetwork').value;
-                address = '0x' + Array.from({ length: 40 }, () =>
-                    '0123456789abcdef'[Math.floor(Math.random() * 16)]
-                ).join('');
+                address = '0x' + Array.from({ length: 40 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)])
+                    .join('');
             }
-
-            depositData = { currency, amount, address, eccpId };
-
+            depositData = { currency, amount, address };
             document.getElementById('depositAddress').textContent = address;
             document.getElementById('depositAmountDisplay').textContent = `${amount} ${currency}`;
             document.getElementById('depositDetails').classList.remove('hidden');
-
-            const qrContainer = document.getElementById('depositQR');
+            const qr = document.getElementById('depositQR');
             if (currency === 'DZD') {
-                qrContainer.innerHTML = `
-                            <div style="background:var(--accent-glow);padding:20px;border-radius:var(--radius-sm);text-align:center;border:2px dashed var(--accent);width:100%;">
-                                <i class="fas fa-building-columns" style="font-size:48px;color:var(--accent);"></i>
-                                <div style="font-weight:700;margin-top:8px;font-size:16px;">تحويل بريدي</div>
-                                <div style="font-size:13px;color:var(--text-secondary);">CCP: ${POSTAL_ACCOUNT}</div>
-                                <div style="font-size:20px;font-weight:900;color:var(--accent);margin-top:4px;">${amount} DZD</div>
-                            </div>
-                        `;
+                qr.innerHTML = `
+                    <div style="background:var(--accent-glow);padding:20px;border-radius:var(--radius-sm);text-align:center;border:2px dashed var(--accent);width:100%;">
+                        <i class="fas fa-building-columns" style="font-size:48px;color:var(--accent);"></i>
+                        <div style="font-weight:700;margin-top:8px;font-size:16px;">تحويل بريدي</div>
+                        <div style="font-size:13px;color:var(--text-secondary);">CCP: ${POSTAL_ACCOUNT}</div>
+                        <div style="font-size:20px;font-weight:900;color:var(--accent);margin-top:4px;">${amount} DZD</div>
+                    </div>
+                `;
             } else {
-                qrContainer.innerHTML = `
-                            <div class="qr-placeholder" style="width:180px;height:180px;">
-                                <i class="fas fa-qrcode" style="font-size:64px;color:var(--accent);"></i>
-                            </div>
-                        `;
+                qr.innerHTML = `<div class="qr-placeholder"><i class="fas fa-qrcode" style="font-size:64px;color:var(--accent);"></i></div>`;
             }
-
-            console.log(`تم إنشاء طلب إيداع ${amount} ${currency}`);
         }
 
         async function submitDepositProof() {
-            if (!userData) {
-                console.error('يرجى تسجيل الدخول أولاً');
-                return;
-            }
-
-            const transactionId = document.getElementById('depositTransactionId').value.trim();
-
-            if (!transactionId) {
-                alert('يرجى إدخال رقم عملية التحويل');
-                return;
-            }
-
-            if (!depositData) {
-                alert('يرجى إنشاء طلب إيداع أولاً');
-                return;
-            }
-
+            if (!userData || !depositData) { showToast('أنشئ طلب إيداع أولاً'); return; }
+            const txId = document.getElementById('depositTransactionId').value.trim();
+            if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
             try {
                 await db.collection('deposits').add({
                     uid: userData.uid,
@@ -2449,708 +2439,464 @@
                     currency: depositData.currency,
                     network: depositData.currency === 'DZD' ? 'CCP' : document.getElementById('depositNetwork').value,
                     walletAddress: depositData.address,
-                    eccpId: depositData.eccpId || null,
-                    transactionId: transactionId,
+                    transactionId: txId,
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-
                 showToast('تم إرسال طلب الإيداع، في انتظار المراجعة');
-
                 document.getElementById('depositTransactionId').value = '';
                 document.getElementById('depositDetails').classList.add('hidden');
                 depositData = null;
-                loadDeposits();
-
-            } catch (error) {
-                console.error('Deposit error:', error);
-                alert('حدث خطأ، حاول مرة أخرى');
-            }
+                await loadDeposits();
+            } catch (e) { showToast('حدث خطأ'); }
         }
 
         async function loadDeposits() {
             if (!userData) return;
             try {
-                const snapshot = await db.collection('deposits')
-                    .where('uid', '==', userData.uid)
-                    .orderBy('createdAt', 'desc')
+                const snap = await db.collection('deposits').where('uid', '==', userData.uid).orderBy('createdAt', 'desc')
                     .get();
-                const deposits = [];
-                snapshot.forEach(doc => deposits.push({ id: doc.id, ...doc.data() }));
-                renderDeposits(deposits);
-            } catch (error) {
-                console.error('Load deposits error:', error);
-                renderDeposits([]);
-            }
+                const list = [];
+                snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                renderDeposits(list);
+            } catch (e) { renderDeposits([]); }
         }
 
-        function renderDeposits(deposits) {
-            const container = document.getElementById('depositRequests');
-            if (!deposits || deposits.length === 0) {
-                container.innerHTML =
-                    `<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لا توجد طلبات إيداع</div>`;
-                return;
-            }
-
-            container.innerHTML = deposits.map(d => `
-                        <div class="list-item">
-                            <div class="left">
-                                <div>
-                                    <div class="title">${d.amount} ${d.currency} ${d.eccpId ? '🏦 بريدي' : ''}</div>
-                                    <div class="sub">${formatDateTime(d.createdAt)} ${d.transactionId ? '• رقم العملية: ' + d.transactionId : ''}</div>
-                                </div>
-                            </div>
-                            <div class="right">
-                                <span class="status ${getStatusBadge(d.status)}">${getStatusText(d.status)}</span>
-                            </div>
-                        </div>
-                    `).join('');
+        function renderDeposits(list) {
+            const c = document.getElementById('depositRequests');
+            if (!list || !list.length) { c.innerHTML =
+                '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لا توجد طلبات إيداع</div>'; return; }
+            c.innerHTML = list.map(d => `
+                <div class="list-item">
+                    <div class="left"><div><div class="title">${d.amount} ${d.currency}</div><div class="sub">${formatDateTime(d.createdAt)}</div></div></div>
+                    <div class="right"><span class="status ${getStatusBadge(d.status)}">${getStatusText(d.status)}</span></div>
+                </div>
+            `).join('');
         }
 
         // ============================================================
-        // 13. WITHDRAW
+        // 15. WITHDRAW
         // ============================================================
         function updateWithdrawNetwork() {
-            const currency = document.getElementById('withdrawCurrency').value;
-            const networkGroup = document.getElementById('withdrawNetworkGroup');
-            const addressGroup = document.getElementById('withdrawAddressGroup');
-            const eccpGroup = document.getElementById('withdrawEccpGroup');
-
-            if (currency === 'DZD') {
-                networkGroup.style.display = 'none';
-                addressGroup.style.display = 'none';
-                eccpGroup.style.display = 'block';
-            } else {
-                networkGroup.style.display = 'block';
-                addressGroup.style.display = 'block';
-                eccpGroup.style.display = 'none';
-            }
+            const cur = document.getElementById('withdrawCurrency').value;
+            document.getElementById('withdrawNetworkGroup').style.display = cur === 'DZD' ? 'none' : 'block';
+            document.getElementById('withdrawAddressGroup').style.display = cur === 'DZD' ? 'none' : 'block';
+            document.getElementById('withdrawEccpGroup').style.display = cur === 'DZD' ? 'block' : 'none';
         }
 
         async function requestWithdraw() {
-            if (!userData || !userData.uid) {
-                alert('يرجى تسجيل الدخول أولاً');
-                return;
-            }
-
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
             const currency = document.getElementById('withdrawCurrency').value;
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
-
-            if (!amount || amount < 10) {
-                alert('الحد الأدنى للسحب هو 10');
-                return;
-            }
-
-            let withdrawable = 0;
-            if (currency === 'USDT') {
-                withdrawable = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets
-                    ?.referral || 0);
-            } else {
-                withdrawable = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                    ?.dzdReferral || 0);
-            }
-
-            if (amount > withdrawable) {
-                alert('الرصيد غير كافٍ');
-                return;
-            }
-
-            let recipient = '';
-            let network = '';
-            let eccpId = '';
-
-            if (currency === 'DZD') {
-                eccpId = document.getElementById('withdrawEccpId').value.trim();
-                if (!eccpId) {
-                    alert('يرجى إدخال معرف ECCP للمستلم');
-                    return;
-                }
-                recipient = `ECCP:${eccpId}`;
-                network = 'ECCP';
-            } else {
-                recipient = document.getElementById('withdrawAddress').value.trim();
-                if (!recipient) {
-                    alert('يرجى إدخال عنوان المستلم');
-                    return;
-                }
-                network = document.getElementById('withdrawNetwork').value;
-            }
-
+            if (!amount || amount < 10) { showToast('الحد الأدنى 10'); return; }
+            let totalBal = 0;
+            if (currency === 'USDT') totalBal = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData
+                .wallets?.referral || 0);
+            else totalBal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                ?.dzdReferral || 0);
             const fee = amount * 0.02;
             const total = amount + fee;
-
-            if (!confirm(`تأكيد سحب ${amount} ${currency} إلى ${recipient.substring(0, 20)}...\nالرسوم: ${fee.toFixed(2)} ${currency}`))
-                return;
-
+            if (total > totalBal) { showToast('الرصيد غير كافٍ (شامل الرسوم)'); return; }
+            let recipient = '',
+                eccpId = '';
+            if (currency === 'DZD') {
+                eccpId = document.getElementById('withdrawEccpId').value.trim();
+                if (!eccpId) { showToast('أدخل معرف ECCP'); return; }
+                recipient = `ECCP:${eccpId}`;
+            } else {
+                recipient = document.getElementById('withdrawAddress').value.trim();
+                if (!recipient) { showToast('أدخل عنوان المستلم'); return; }
+            }
+            if (!confirm(`تأكيد سحب ${amount} ${currency}? الرسوم: ${fee.toFixed(2)}`)) return;
             try {
-                const userRef = db.collection('users').doc(userData.uid);
-
-                await db.runTransaction(async (transaction) => {
-                    const doc = await transaction.get(userRef);
-                    if (!doc.exists) throw new Error('المستخدم غير موجود');
-
-                    let currentBalance = 0;
+                await db.runTransaction(async (t) => {
+                    const ref = db.collection('users').doc(userData.uid);
+                    const doc = await t.get(ref);
+                    if (!doc.exists) throw new Error('غير موجود');
+                    let bal = 0;
+                    if (currency === 'USDT') bal = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward ||
+                        0) + (doc.data().wallets?.referral || 0);
+                    else bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                        .wallets?.dzdReferral || 0);
+                    if (bal < total) throw new Error('رصيد غير كاف');
+                    let rem = total;
+                    const upd = {};
                     if (currency === 'USDT') {
-                        currentBalance = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward || 0) + (doc
-                            .data().wallets?.referral || 0);
+                        const m = doc.data().wallets?.main || 0,
+                            r = doc.data().wallets?.reward || 0,
+                            refr = doc.data().wallets?.referral || 0;
+                        const fm = Math.min(rem, m);
+                        rem -= fm;
+                        const fr = Math.min(rem, r);
+                        rem -= fr;
+                        const fref = Math.min(rem, refr);
+                        rem -= fref;
+                        upd['wallets.main'] = m - fm;
+                        upd['wallets.reward'] = r - fr;
+                        upd['wallets.referral'] = refr - fref;
                     } else {
-                        currentBalance = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc
-                            .data().wallets?.dzdReferral || 0);
+                        const m = doc.data().wallets?.dzd || 0,
+                            r = doc.data().wallets?.dzdReward || 0,
+                            refr = doc.data().wallets?.dzdReferral || 0;
+                        const fm = Math.min(rem, m);
+                        rem -= fm;
+                        const fr = Math.min(rem, r);
+                        rem -= fr;
+                        const fref = Math.min(rem, refr);
+                        rem -= fref;
+                        upd['wallets.dzd'] = m - fm;
+                        upd['wallets.dzdReward'] = r - fr;
+                        upd['wallets.dzdReferral'] = refr - fref;
                     }
-
-                    if (currentBalance < total) throw new Error('الرصيد غير كافٍ');
-
-                    // خصم من المحفظة الرئيسية أولاً، ثم المكافآت، ثم الإحالات
-                    let remaining = total;
-                    const updateData = {};
-                    if (currency === 'USDT') {
-                        const main = doc.data().wallets?.main || 0;
-                        const reward = doc.data().wallets?.reward || 0;
-                        const referral = doc.data().wallets?.referral || 0;
-
-                        const fromMain = Math.min(remaining, main);
-                        remaining -= fromMain;
-                        const fromReward = Math.min(remaining, reward);
-                        remaining -= fromReward;
-                        const fromReferral = Math.min(remaining, referral);
-                        remaining -= fromReferral;
-
-                        updateData['wallets.main'] = main - fromMain;
-                        updateData['wallets.reward'] = reward - fromReward;
-                        updateData['wallets.referral'] = referral - fromReferral;
-                    } else {
-                        const main = doc.data().wallets?.dzd || 0;
-                        const reward = doc.data().wallets?.dzdReward || 0;
-                        const referral = doc.data().wallets?.dzdReferral || 0;
-
-                        const fromMain = Math.min(remaining, main);
-                        remaining -= fromMain;
-                        const fromReward = Math.min(remaining, reward);
-                        remaining -= fromReward;
-                        const fromReferral = Math.min(remaining, referral);
-                        remaining -= fromReferral;
-
-                        updateData['wallets.dzd'] = main - fromMain;
-                        updateData['wallets.dzdReward'] = reward - fromReward;
-                        updateData['wallets.dzdReferral'] = referral - fromReferral;
-                    }
-
-                    transaction.update(userRef, updateData);
-
-                    // إضافة طلب السحب
-                    const withdrawRef = db.collection('withdrawals').doc();
-                    transaction.set(withdrawRef, {
-                        uid: userData.uid,
-                        amount: amount,
-                        currency: currency,
-                        network: network,
-                        recipientAddress: recipient,
-                        eccpId: eccpId || null,
-                        fee: fee,
-                        status: 'pending',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
-                    // إضافة معاملة
-                    const transRef = db.collection('transactions').doc();
-                    transaction.set(transRef, {
-                        uid: userData.uid,
-                        type: 'withdraw',
-                        amount: total,
-                        currency: currency,
-                        description: `سحب إلى ${recipient.substring(0, 10)}...`,
-                        balanceAfter: currentBalance - total,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                    t.update(ref, upd);
+                    const wdRef = db.collection('withdrawals').doc();
+                    t.set(wdRef, { uid: userData.uid, amount, currency, recipientAddress: recipient, eccpId: eccpId ||
+                            null, fee, status: 'pending', createdAt: firebase.firestore.FieldValue
+                            .serverTimestamp() });
+                    const trRef = db.collection('transactions').doc();
+                    t.set(trRef, { uid: userData.uid, type: 'withdraw', amount: total, currency,
+                        description: `سحب`, balanceAfter: bal - total, timestamp: firebase.firestore
+                            .FieldValue.serverTimestamp() });
                 });
-
-                showToast('تم طلب السحب بنجاح، في انتظار المراجعة');
-
-                // تحديث محلي
+                showToast('تم طلب السحب بنجاح');
+                // تحديث محلي سريع
                 if (currency === 'USDT') {
-                    let remaining = total;
-                    const main = userData.wallets?.main || 0;
-                    const reward = userData.wallets?.reward || 0;
-                    const referral = userData.wallets?.referral || 0;
-                    const fromMain = Math.min(remaining, main);
-                    remaining -= fromMain;
-                    const fromReward = Math.min(remaining, reward);
-                    remaining -= fromReward;
-                    const fromReferral = Math.min(remaining, referral);
-                    remaining -= fromReferral;
+                    let rem = total;
+                    const m = userData.wallets?.main || 0,
+                        r = userData.wallets?.reward || 0,
+                        refr = userData.wallets?.referral || 0;
+                    const fm = Math.min(rem, m);
+                    rem -= fm;
+                    const fr = Math.min(rem, r);
+                    rem -= fr;
+                    const fref = Math.min(rem, refr);
+                    rem -= fref;
                     if (userData.wallets) {
-                        userData.wallets.main -= fromMain;
-                        userData.wallets.reward -= fromReward;
-                        userData.wallets.referral -= fromReferral;
+                        userData.wallets.main -= fm;
+                        userData.wallets.reward -= fr;
+                        userData.wallets.referral -= fref;
                     }
                 } else {
-                    let remaining = total;
-                    const main = userData.wallets?.dzd || 0;
-                    const reward = userData.wallets?.dzdReward || 0;
-                    const referral = userData.wallets?.dzdReferral || 0;
-                    const fromMain = Math.min(remaining, main);
-                    remaining -= fromMain;
-                    const fromReward = Math.min(remaining, reward);
-                    remaining -= fromReward;
-                    const fromReferral = Math.min(remaining, referral);
-                    remaining -= fromReferral;
+                    let rem = total;
+                    const m = userData.wallets?.dzd || 0,
+                        r = userData.wallets?.dzdReward || 0,
+                        refr = userData.wallets?.dzdReferral || 0;
+                    const fm = Math.min(rem, m);
+                    rem -= fm;
+                    const fr = Math.min(rem, r);
+                    rem -= fr;
+                    const fref = Math.min(rem, refr);
+                    rem -= fref;
                     if (userData.wallets) {
-                        userData.wallets.dzd -= fromMain;
-                        userData.wallets.dzdReward -= fromReward;
-                        userData.wallets.dzdReferral -= fromReferral;
+                        userData.wallets.dzd -= fm;
+                        userData.wallets.dzdReward -= fr;
+                        userData.wallets.dzdReferral -= fref;
                     }
                 }
-
-                updateWalletUI();
-                loadWithdrawals();
-                loadTransactions();
-
+                updateUI();
+                await loadWithdrawals();
+                await loadTransactions();
                 document.getElementById('withdrawAddress').value = '';
                 document.getElementById('withdrawEccpId').value = '';
                 document.getElementById('withdrawAmount').value = '';
-
-            } catch (error) {
-                console.error('Withdraw error:', error);
-                alert(error.message || 'حدث خطأ أثناء السحب');
-            }
+            } catch (e) { showToast(e.message || 'حدث خطأ'); }
         }
 
         async function loadWithdrawals() {
             if (!userData) return;
             try {
-                const snapshot = await db.collection('withdrawals')
-                    .where('uid', '==', userData.uid)
-                    .orderBy('createdAt', 'desc')
-                    .get();
-                const withdrawals = [];
-                snapshot.forEach(doc => withdrawals.push({ id: doc.id, ...doc.data() }));
-                renderWithdrawals(withdrawals);
-            } catch (error) {
-                console.error('Load withdrawals error:', error);
-                renderWithdrawals([]);
-            }
+                const snap = await db.collection('withdrawals').where('uid', '==', userData.uid).orderBy('createdAt',
+                    'desc').get();
+                const list = [];
+                snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                renderWithdrawals(list);
+            } catch (e) { renderWithdrawals([]); }
         }
 
-        function renderWithdrawals(withdrawals) {
-            const container = document.getElementById('withdrawRequests');
-            if (!withdrawals || withdrawals.length === 0) {
-                container.innerHTML =
-                    `<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لا توجد طلبات سحب</div>`;
-                return;
-            }
-
-            container.innerHTML = withdrawals.map(w => `
-                        <div class="list-item">
-                            <div class="left">
-                                <div>
-                                    <div class="title">${w.amount} ${w.currency} ${w.eccpId ? '🔗 ECCP' : ''}</div>
-                                    <div class="sub">${formatDateTime(w.createdAt)}</div>
-                                </div>
-                            </div>
-                            <div class="right">
-                                <span class="status ${getStatusBadge(w.status)}">${getStatusText(w.status)}</span>
-                            </div>
-                        </div>
-                    `).join('');
+        function renderWithdrawals(list) {
+            const c = document.getElementById('withdrawRequests');
+            if (!list || !list.length) { c.innerHTML =
+                '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لا توجد طلبات سحب</div>'; return; }
+            c.innerHTML = list.map(w => `
+                <div class="list-item">
+                    <div class="left"><div><div class="title">${w.amount} ${w.currency}</div><div class="sub">${formatDateTime(w.createdAt)}</div></div></div>
+                    <div class="right"><span class="status ${getStatusBadge(w.status)}">${getStatusText(w.status)}</span></div>
+                </div>
+            `).join('');
         }
 
         // ============================================================
-        // 14. PACKAGES
+        // 16. PACKAGES
         // ============================================================
         async function loadPackages() {
             try {
-                const snapshot = await db.collection('packages')
-                    .where('isActive', '==', true)
-                    .orderBy('displayOrder')
-                    .get();
-
+                const snap = await db.collection('packages').where('isActive', '==', true).orderBy('displayOrder').get();
                 allPackages = [];
-                snapshot.forEach(doc => allPackages.push({ id: doc.id, ...doc.data() }));
+                snap.forEach(d => allPackages.push({ id: d.id, ...d.data() }));
                 renderPackages();
-            } catch (error) {
-                console.error('Load packages error:', error);
-                renderPackages();
-            }
+            } catch (e) { renderPackages(); }
         }
 
         function renderPackages() {
-            const container = document.getElementById('packagesList');
-            if (allPackages.length === 0) {
-                container.innerHTML = `
-                            <div class="card text-center" style="padding:32px 0;">
-                                <div style="font-size:48px;margin-bottom:12px;">📦</div>
-                                <div style="font-size:18px;font-weight:700;">لا توجد باقات</div>
-                                <div style="color:var(--text-secondary);font-size:14px;">سيتم إضافة الباقات قريباً</div>
-                            </div>
-                        `;
+            const c = document.getElementById('packagesList');
+            if (!allPackages.length) {
+                c.innerHTML =
+                    `<div class="card text-center" style="padding:32px 0;"><div style="font-size:48px;">📦</div><div style="font-size:18px;font-weight:700;">لا توجد باقات</div></div>`;
                 return;
             }
-
-            const currency = selectedCurrency;
-            const isDZD = currency === 'DZD';
-
-            container.innerHTML = allPackages.map((pkg, index) => {
-                const price = isDZD ? (pkg.price * exchangeRate) : pkg.price;
-                const priceCurrency = isDZD ? 'DZD' : pkg.currency;
-
+            const isDZD = selectedCurrency === 'DZD';
+            c.innerHTML = allPackages.map((p, i) => {
+                const price = isDZD ? p.price * exchangeRate : p.price;
+                const cur = isDZD ? 'DZD' : p.currency;
                 return `
-                            <div class="package-card ${index === 1 ? 'popular' : ''}">
-                                ${index === 1 ? `<div class="badge-popular">⭐ الأفضل</div>` : ''}
-                                <div class="icon">${pkg.icon || '📦'}</div>
-                                <div class="name">${pkg.name}</div>
-                                <div class="price ${isDZD ? 'dzd-price' : ''}">${price.toFixed(2)} <small>${priceCurrency}</small></div>
-                                <div style="text-align:center;color:var(--text-secondary);font-size:14px;font-weight:500;">${pkg.description || ''}</div>
-                                <ul class="features">
-                                    ${pkg.features?.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('') || ''}
-                                    <li><i class="fas fa-clock"></i> مدة ${pkg.duration} يوم</li>
-                                    <li><i class="fas fa-microchip"></i> ${pkg.hashRate} H/s</li>
-                                </ul>
-                                <button class="btn ${index === 1 ? (isDZD ? 'btn-dzd' : 'btn-primary') : 'btn-outline'}" onclick="purchasePackage('${pkg.id}')">
-                                    <i class="fas fa-cart-plus"></i> شراء الآن
-                                </button>
-                            </div>
-                        `
+                    <div class="package-card ${i===1?'popular':''}">
+                        ${i===1?'<div class="badge-popular">⭐ الأفضل</div>':''}
+                        <div class="icon">${p.icon||'📦'}</div>
+                        <div class="name">${p.name}</div>
+                        <div class="price ${isDZD?'dzd-price':''}">${price.toFixed(2)} <small>${cur}</small></div>
+                        <div style="text-align:center;color:var(--text-secondary);font-size:14px;">${p.description||''}</div>
+                        <ul class="features">
+                            ${p.features?.map(f=>`<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('')||''}
+                            <li><i class="fas fa-clock"></i> مدة ${p.duration} يوم</li>
+                            <li><i class="fas fa-microchip"></i> ${p.hashRate} H/s</li>
+                        </ul>
+                        <button class="btn ${i===1?(isDZD?'btn-dzd':'btn-primary'):'btn-outline'}" onclick="purchasePackage('${p.id}')">
+                            <i class="fas fa-cart-plus"></i> شراء الآن
+                        </button>
+                    </div>
+                `;
             }).join('');
         }
 
-        // ============================================================
-        // 15. PURCHASE (معاملة)
-        // ============================================================
-        async function purchasePackage(packageId) {
-            if (!userData || !userData.uid) {
-                alert('يرجى تسجيل الدخول أولاً');
-                return;
-            }
-
-            const pkg = allPackages.find(p => p.id === packageId);
-            if (!pkg) {
-                alert('الباقة غير موجودة');
-                return;
-            }
-
-            const currency = selectedCurrency;
-            const isDZD = currency === 'DZD';
-            const price = isDZD ? (pkg.price * exchangeRate) : pkg.price;
-            const priceCurrency = isDZD ? 'DZD' : pkg.currency;
-
-            let balance = 0;
-            if (isDZD) {
-                balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                    ?.dzdReferral || 0);
-            } else {
-                balance = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets
-                    ?.referral || 0);
-            }
-
-            if (balance < price) {
-                alert(`الرصيد غير كافٍ. تحتاج ${price.toFixed(2)} ${priceCurrency}`);
-                return;
-            }
-
-            if (!confirm(`هل أنت متأكد من شراء باقة "${pkg.name}" بسعر ${price.toFixed(2)} ${priceCurrency}؟`)) return;
-
+        async function purchasePackage(id) {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+            const pkg = allPackages.find(p => p.id === id);
+            if (!pkg) { showToast('الباقة غير موجودة'); return; }
+            const isDZD = selectedCurrency === 'DZD';
+            const price = isDZD ? pkg.price * exchangeRate : pkg.price;
+            const cur = isDZD ? 'DZD' : pkg.currency;
+            let bal = 0;
+            if (isDZD) bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                ?.dzdReferral || 0);
+            else bal = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral ||
+                0);
+            if (bal < price) { showToast(`الرصيد غير كافٍ (${price.toFixed(2)} ${cur})`); return; }
+            if (!confirm(`شراء باقة "${pkg.name}" بسعر ${price.toFixed(2)} ${cur}؟`)) return;
             try {
-                const userRef = db.collection('users').doc(userData.uid);
-
-                await db.runTransaction(async (transaction) => {
-                    const doc = await transaction.get(userRef);
-                    if (!doc.exists) throw new Error('المستخدم غير موجود');
-
-                    let currentBalance = 0;
+                await db.runTransaction(async (t) => {
+                    const ref = db.collection('users').doc(userData.uid);
+                    const doc = await t.get(ref);
+                    if (!doc.exists) throw new Error('غير موجود');
+                    let b = 0;
+                    if (isDZD) b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                        .wallets?.dzdReferral || 0);
+                    else b = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward || 0) + (doc.data()
+                        .wallets?.referral || 0);
+                    if (b < price) throw new Error('رصيد غير كاف');
+                    let rem = price;
+                    const upd = {};
                     if (isDZD) {
-                        currentBalance = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc
-                            .data().wallets?.dzdReferral || 0);
+                        const m = doc.data().wallets?.dzd || 0,
+                            r = doc.data().wallets?.dzdReward || 0,
+                            refr = doc.data().wallets?.dzdReferral || 0;
+                        const fm = Math.min(rem, m);
+                        rem -= fm;
+                        const fr = Math.min(rem, r);
+                        rem -= fr;
+                        const fref = Math.min(rem, refr);
+                        rem -= fref;
+                        upd['wallets.dzd'] = m - fm;
+                        upd['wallets.dzdReward'] = r - fr;
+                        upd['wallets.dzdReferral'] = refr - fref;
                     } else {
-                        currentBalance = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward || 0) + (doc
-                            .data().wallets?.referral || 0);
+                        const m = doc.data().wallets?.main || 0,
+                            r = doc.data().wallets?.reward || 0,
+                            refr = doc.data().wallets?.referral || 0;
+                        const fm = Math.min(rem, m);
+                        rem -= fm;
+                        const fr = Math.min(rem, r);
+                        rem -= fr;
+                        const fref = Math.min(rem, refr);
+                        rem -= fref;
+                        upd['wallets.main'] = m - fm;
+                        upd['wallets.reward'] = r - fr;
+                        upd['wallets.referral'] = refr - fref;
                     }
-
-                    if (currentBalance < price) throw new Error('الرصيد غير كافٍ');
-
-                    // خصم من المحفظة الرئيسية أولاً، ثم المكافآت، ثم الإحالات
-                    let remaining = price;
-                    const updateData = {};
-                    if (isDZD) {
-                        const main = doc.data().wallets?.dzd || 0;
-                        const reward = doc.data().wallets?.dzdReward || 0;
-                        const referral = doc.data().wallets?.dzdReferral || 0;
-
-                        const fromMain = Math.min(remaining, main);
-                        remaining -= fromMain;
-                        const fromReward = Math.min(remaining, reward);
-                        remaining -= fromReward;
-                        const fromReferral = Math.min(remaining, referral);
-                        remaining -= fromReferral;
-
-                        updateData['wallets.dzd'] = main - fromMain;
-                        updateData['wallets.dzdReward'] = reward - fromReward;
-                        updateData['wallets.dzdReferral'] = referral - fromReferral;
-                    } else {
-                        const main = doc.data().wallets?.main || 0;
-                        const reward = doc.data().wallets?.reward || 0;
-                        const referral = doc.data().wallets?.referral || 0;
-
-                        const fromMain = Math.min(remaining, main);
-                        remaining -= fromMain;
-                        const fromReward = Math.min(remaining, reward);
-                        remaining -= fromReward;
-                        const fromReferral = Math.min(remaining, referral);
-                        remaining -= fromReferral;
-
-                        updateData['wallets.main'] = main - fromMain;
-                        updateData['wallets.reward'] = reward - fromReward;
-                        updateData['wallets.referral'] = referral - fromReferral;
-                    }
-
-                    updateData['miningData.currentPackage'] = {
+                    upd['miningData.currentPackage'] = {
                         name: pkg.name,
                         hashRate: pkg.hashRate,
                         duration: pkg.duration,
                         endDate: new Date(Date.now() + pkg.duration * 24 * 60 * 60 * 1000),
                         packageId: pkg.id,
-                        price: price,
-                        currency: priceCurrency
+                        price,
+                        currency: cur
                     };
-
-                    transaction.update(userRef, updateData);
-
-                    // إضافة معاملة
-                    const transRef = db.collection('transactions').doc();
-                    transaction.set(transRef, {
-                        uid: userData.uid,
-                        type: 'purchase',
-                        amount: price,
-                        currency: priceCurrency,
-                        description: `شراء باقة ${pkg.name}`,
-                        balanceAfter: currentBalance - price,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                        packageId: pkg.id
-                    });
+                    t.update(ref, upd);
+                    const trRef = db.collection('transactions').doc();
+                    t.set(trRef, { uid: userData.uid, type: 'purchase', amount: price, currency: cur,
+                        description: `شراء ${pkg.name}`, balanceAfter: b - price, timestamp: firebase
+                            .firestore.FieldValue.serverTimestamp(), packageId: pkg.id });
                 });
-
-                showToast(`تم شراء باقة ${pkg.name} بنجاح!`);
-
+                showToast(`تم شراء "${pkg.name}" بنجاح!`);
                 // تحديث محلي
                 if (isDZD) {
-                    let remaining = price;
-                    const main = userData.wallets?.dzd || 0;
-                    const reward = userData.wallets?.dzdReward || 0;
-                    const referral = userData.wallets?.dzdReferral || 0;
-                    const fromMain = Math.min(remaining, main);
-                    remaining -= fromMain;
-                    const fromReward = Math.min(remaining, reward);
-                    remaining -= fromReward;
-                    const fromReferral = Math.min(remaining, referral);
-                    remaining -= fromReferral;
+                    let rem = price;
+                    const m = userData.wallets?.dzd || 0,
+                        r = userData.wallets?.dzdReward || 0,
+                        refr = userData.wallets?.dzdReferral || 0;
+                    const fm = Math.min(rem, m);
+                    rem -= fm;
+                    const fr = Math.min(rem, r);
+                    rem -= fr;
+                    const fref = Math.min(rem, refr);
+                    rem -= fref;
                     if (userData.wallets) {
-                        userData.wallets.dzd -= fromMain;
-                        userData.wallets.dzdReward -= fromReward;
-                        userData.wallets.dzdReferral -= fromReferral;
+                        userData.wallets.dzd -= fm;
+                        userData.wallets.dzdReward -= fr;
+                        userData.wallets.dzdReferral -= fref;
                     }
                 } else {
-                    let remaining = price;
-                    const main = userData.wallets?.main || 0;
-                    const reward = userData.wallets?.reward || 0;
-                    const referral = userData.wallets?.referral || 0;
-                    const fromMain = Math.min(remaining, main);
-                    remaining -= fromMain;
-                    const fromReward = Math.min(remaining, reward);
-                    remaining -= fromReward;
-                    const fromReferral = Math.min(remaining, referral);
-                    remaining -= fromReferral;
+                    let rem = price;
+                    const m = userData.wallets?.main || 0,
+                        r = userData.wallets?.reward || 0,
+                        refr = userData.wallets?.referral || 0;
+                    const fm = Math.min(rem, m);
+                    rem -= fm;
+                    const fr = Math.min(rem, r);
+                    rem -= fr;
+                    const fref = Math.min(rem, refr);
+                    rem -= fref;
                     if (userData.wallets) {
-                        userData.wallets.main -= fromMain;
-                        userData.wallets.reward -= fromReward;
-                        userData.wallets.referral -= fromReferral;
+                        userData.wallets.main -= fm;
+                        userData.wallets.reward -= fr;
+                        userData.wallets.referral -= fref;
                     }
                 }
-
+                if (!userData.miningData) userData.miningData = {};
                 userData.miningData.currentPackage = {
                     name: pkg.name,
                     hashRate: pkg.hashRate,
                     duration: pkg.duration,
                     endDate: new Date(Date.now() + pkg.duration * 24 * 60 * 60 * 1000),
                     packageId: pkg.id,
-                    price: price,
-                    currency: priceCurrency
+                    price,
+                    currency: cur
                 };
-
                 updateUI();
-                loadTransactions();
-
-            } catch (error) {
-                console.error('Purchase error:', error);
-                alert(error.message || 'حدث خطأ أثناء الشراء');
-            }
+                await loadTransactions();
+            } catch (e) { showToast(e.message || 'حدث خطأ'); }
         }
 
         // ============================================================
-        // 16. TRANSACTIONS
+        // 17. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
             try {
-                const snapshot = await db.collection('transactions')
-                    .where('uid', '==', userData.uid)
-                    .orderBy('timestamp', 'desc')
-                    .limit(50)
-                    .get();
-
+                const snap = await db.collection('transactions').where('uid', '==', userData.uid).orderBy('timestamp',
+                    'desc').limit(50).get();
                 allTransactions = [];
-                snapshot.forEach(doc => allTransactions.push({ id: doc.id, ...doc.data() }));
+                snap.forEach(d => allTransactions.push({ id: d.id, ...d.data() }));
                 renderTransactions(allTransactions);
                 renderRecentTransactions(allTransactions.slice(0, 5));
-            } catch (error) {
-                console.error('Load transactions error:', error);
-                allTransactions = [];
+            } catch (e) { allTransactions = [];
                 renderTransactions([]);
-                renderRecentTransactions([]);
-            }
+                renderRecentTransactions([]); }
         }
 
-        function renderTransactions(transactions) {
-            const container = document.getElementById('transactionsList');
-            const filtered = currentFilter === 'all' ?
-                transactions :
-                transactions.filter(t => t.type === currentFilter);
-
-            if (filtered.length === 0) {
-                container.innerHTML = `
-                            <div class="text-muted text-center" style="padding:32px 0;">
-                                <div style="font-size:48px;margin-bottom:12px;">📭</div>
-                                <div style="font-size:16px;">لا توجد عمليات</div>
-                            </div>
-                        `;
+        function renderTransactions(list) {
+            const c = document.getElementById('transactionsList');
+            const filtered = currentFilter === 'all' ? list : list.filter(t => t.type === currentFilter);
+            if (!filtered.length) {
+                c.innerHTML =
+                    `<div class="text-muted text-center" style="padding:32px 0;"><div style="font-size:48px;">📭</div><div style="font-size:16px;">لا توجد عمليات</div></div>`;
                 return;
             }
-
-            container.innerHTML = filtered.map(t => `
-                        <div class="list-item">
-                            <div class="left">
-                                <div style="width:36px;text-align:center;">
-                                    <i class="fas ${getTransactionIcon(t.type)}" style="font-size:18px;"></i>
-                                </div>
-                                <div>
-                                    <div class="title">${getTransactionLabel(t.type)}</div>
-                                    <div class="sub">${t.description || ''} • ${formatDateTime(t.timestamp)}</div>
-                                </div>
-                            </div>
-                            <div class="right">
-                                <div class="amount ${t.type === 'withdraw' ? 'text-danger' : 'text-success'}">
-                                    ${t.type === 'withdraw' ? '−' : '+'}${t.amount.toFixed(2)} ${t.currency || 'USDT'}
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
+            c.innerHTML = filtered.map(t => `
+                <div class="list-item">
+                    <div class="left"><div style="width:36px;text-align:center;"><i class="fas ${getTransactionIcon(t.type)}" style="font-size:18px;"></i></div>
+                        <div><div class="title">${getTransactionLabel(t.type)}</div><div class="sub">${t.description||''} • ${formatDateTime(t.timestamp)}</div></div>
+                    </div>
+                    <div class="right"><div class="amount ${t.type==='withdraw'?'text-danger':'text-success'}">${t.type==='withdraw'?'−':'+'}${t.amount.toFixed(2)} ${t.currency||'USDT'}</div></div>
+                </div>
+            `).join('');
         }
 
-        function renderRecentTransactions(transactions) {
-            const container = document.getElementById('recentTransactions');
-            if (!transactions || transactions.length === 0) {
-                container.innerHTML =
-                    `<div class="text-muted text-center" style="padding:20px 0;font-size:14px;">لا توجد عمليات حديثة</div>`;
-                return;
-            }
-
-            container.innerHTML = transactions.map(t => `
-                        <div class="list-item">
-                            <div class="left">
-                                <div style="width:28px;text-align:center;">
-                                    <i class="fas ${getTransactionIcon(t.type)}" style="font-size:14px;"></i>
-                                </div>
-                                <div>
-                                    <div class="title" style="font-size:14px;">${getTransactionLabel(t.type)}</div>
-                                    <div class="sub" style="font-size:12px;">${formatTime(t.timestamp)}</div>
-                                </div>
-                            </div>
-                            <div class="right">
-                                <div style="font-size:14px;font-weight:700;color:${t.type === 'withdraw' ? 'var(--danger)' : 'var(--success)'}">
-                                    ${t.type === 'withdraw' ? '−' : '+'}${t.amount.toFixed(2)} ${t.currency || 'USDT'}
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
+        function renderRecentTransactions(list) {
+            const c = document.getElementById('recentTransactions');
+            if (!list || !list.length) { c.innerHTML =
+                '<div class="text-muted text-center" style="padding:20px 0;font-size:14px;">لا توجد عمليات حديثة</div>'; return; }
+            c.innerHTML = list.map(t => `
+                <div class="list-item">
+                    <div class="left"><div style="width:28px;text-align:center;"><i class="fas ${getTransactionIcon(t.type)}" style="font-size:14px;"></i></div>
+                        <div><div class="title" style="font-size:14px;">${getTransactionLabel(t.type)}</div><div class="sub" style="font-size:12px;">${formatDateTime(t.timestamp)}</div></div>
+                    </div>
+                    <div class="right"><div style="font-size:14px;font-weight:700;color:${t.type==='withdraw'?'var(--danger)':'var(--success)'}">${t.type==='withdraw'?'−':'+'}${t.amount.toFixed(2)} ${t.currency||'USDT'}</div></div>
+                </div>
+            `).join('');
         }
 
         function filterTransactions(type) {
             currentFilter = type;
-            document.querySelectorAll('#transactionFilters .btn').forEach(btn => {
-                const isActive = btn.dataset.filter === type;
-                btn.className = `btn btn-sm ${isActive ? 'btn-primary' : 'btn-ghost'}`;
+            document.querySelectorAll('#transactionFilters .btn').forEach(b => {
+                b.className = `btn btn-sm ${b.dataset.filter===type?'btn-primary':'btn-ghost'}`;
             });
             renderTransactions(allTransactions);
         }
 
         // ============================================================
-        // 17. REFERRALS
+        // 18. REFERRALS
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
             try {
-                const snapshot = await db.collection('referrals')
-                    .where('referrerUid', '==', userData.uid)
-                    .get();
-                const referrals = [];
-                snapshot.forEach(doc => referrals.push({ id: doc.id, ...doc.data() }));
-                renderReferrals(referrals);
-            } catch (error) {
-                console.error('Load referrals error:', error);
-                renderReferrals([]);
-            }
+                const snap = await db.collection('referrals').where('referrerUid', '==', userData.uid).get();
+                const list = [];
+                snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                renderReferrals(list);
+            } catch (e) { renderReferrals([]); }
         }
 
-        function renderReferrals(referrals) {
-            const container = document.getElementById('referralsList');
-            if (!referrals || referrals.length === 0) {
-                container.innerHTML =
-                    `<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>`;
-                return;
-            }
-
-            container.innerHTML = referrals.map(r => `
-                        <div class="list-item">
-                            <div class="left">
-                                <div class="avatar" style="width:36px;height:36px;font-size:14px;">
-                                    ${(r.displayName || 'م').charAt(0)}
-                                </div>
-                                <div>
-                                    <div class="title">${r.displayName || 'مستخدم'}</div>
-                                    <div class="sub">${formatDate(r.joinedAt)}</div>
-                                </div>
-                            </div>
-                            <div class="right">
-                                <div style="color:var(--success);font-weight:700;">+${r.commissionEarned || 0} USDT</div>
-                            </div>
-                        </div>
-                    `).join('');
+        function renderReferrals(list) {
+            const c = document.getElementById('referralsList');
+            if (!list || !list.length) { c.innerHTML =
+                '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>'; return; }
+            c.innerHTML = list.map(r => `
+                <div class="list-item">
+                    <div class="left"><div class="avatar" style="width:36px;height:36px;font-size:14px;">${(r.displayName||'م').charAt(0)}</div>
+                        <div><div class="title">${r.displayName||'مستخدم'}</div><div class="sub">${formatDate(r.joinedAt)}</div></div>
+                    </div>
+                    <div class="right"><div style="color:var(--success);font-weight:700;">+${r.commissionEarned||0} USDT</div></div>
+                </div>
+            `).join('');
         }
 
         // ============================================================
-        // 18. WITHDRAW CALCULATION
+        // 19. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
-            const amountInput = document.getElementById('withdrawAmount');
-            if (amountInput) {
-                amountInput.addEventListener('input', function() {
-                    const amount = parseFloat(this.value) || 0;
-                    const fee = amount * 0.02;
+            const amt = document.getElementById('withdrawAmount');
+            if (amt) {
+                amt.addEventListener('input', function() {
+                    const a = parseFloat(this.value) || 0;
+                    const fee = a * 0.02;
                     document.getElementById('withdrawFee').textContent = fee.toFixed(2);
-                    document.getElementById('withdrawTotal').textContent = (amount + fee).toFixed(2);
+                    document.getElementById('withdrawTotal').textContent = (a + fee).toFixed(2);
                 });
             }
-
             document.getElementById('withdrawCurrency')?.addEventListener('change', updateWithdrawNetwork);
             document.getElementById('depositCurrency')?.addEventListener('change', updateDepositNetwork);
         });
 
         // ============================================================
-        // 19. THEME TOGGLE
+        // 20. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
             const root = document.documentElement;
             const btn = document.getElementById('themeToggle');
-
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            if (darkModeToggle) darkModeToggle.checked = isDarkTheme;
             if (isDarkTheme) {
                 root.style.setProperty('--bg-primary', '#0a0a1a');
                 root.style.setProperty('--bg-secondary', '#12122a');
@@ -3186,42 +2932,44 @@
 
         function toggleDarkMode() {
             const toggle = document.getElementById('darkModeToggle');
-            if (toggle.checked !== isDarkTheme) {
-                toggleTheme();
-            }
+            if (toggle.checked !== isDarkTheme) toggleTheme();
         }
 
-        function toggleLanguage() {
-            console.log('سيتم إضافة اللغة الإنجليزية قريباً 🌐');
-            showToast('سيتم دعم الإنجليزية قريباً');
-        }
+        function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 20. INIT
+        // 21. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
-
             setCurrency('USDT');
-
             if (window.Telegram?.WebApp) {
                 const tg = window.Telegram.WebApp;
                 tg.BackButton.onClick(() => {
-                    const activePage = document.querySelector('.page.active');
-                    if (activePage && activePage.id !== 'page-home') {
-                        navigateTo('home');
-                    } else {
-                        tg.close();
-                    }
+                    const active = document.querySelector('.page.active');
+                    if (active && active.id !== 'page-home') navigateTo('home');
+                    else tg.close();
                 });
+            }
+
+            // إضافة زر الإدارة في التذييل للمشرفين (سيكون مخفياً لغيرهم)
+            const nav = document.getElementById('bottomNav');
+            if (isAdmin) {
+                const adminBtn = document.createElement('button');
+                adminBtn.className = 'nav-item';
+                adminBtn.dataset.page = 'admin';
+                adminBtn.innerHTML = '<i class="fas fa-shield-alt"></i><span>إدارة</span>';
+                adminBtn.onclick = () => navigateTo('admin');
+                nav.appendChild(adminBtn);
             }
         });
 
-        console.log('🚀 Crynova Mining V2.0 (مع إصلاح الإحالات)');
-        console.log('✅ الإحالات تعمل الآن للمستخدمين الجدد والموجودين');
-        console.log('✅ دعم start_param من Telegram WebApp');
-        console.log('💰 مكافأة الإحالة: 5 USDT + ' + (5 * 250) + ' DZD');
-        console.log('🔒 جميع العمليات المالية تستخدم معاملات Firestore');
+        console.log('🚀 Crynova V2 - الإصدار النهائي مع إصلاح الإحالات');
+        console.log('✅ استخدام حقل referrerBy بشكل موحد');
+        console.log('✅ ثلاث طبقات لقراءة start (start_param, localStorage, URL)');
+        console.log('✅ معاملة ذرية + زر اختبار يدوي');
+        console.log('👑 لوحة تحكم للمشرفين');
+        console.log('🔍 تابع الكونسول لمعرفة تفاصيل الإحالة');
     </script>
 </body>
 </html>
