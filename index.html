@@ -1681,8 +1681,8 @@
                     console.log('✅ تم إنشاء حساب جديد:', userData.displayName);
                 }
 
-                // ✅ معالجة الإحالة
-                await handleReferral();
+                // ❌ إزالة التحقق التلقائي من الإحالات
+                // تم حذف استدعاء handleReferral() نهائياً
 
                 // الاستماع للتحديثات
                 userRef.onSnapshot((doc) => {
@@ -1711,118 +1711,7 @@
         }
 
         // ============================================================
-        // 5. REFERRAL HANDLING - باستخدام telegramId كمفتاح
-        // ============================================================
-        async function handleReferral() {
-            if (!userData) {
-                console.warn('❌ userData غير موجود');
-                return;
-            }
-
-            if (userData.referrerBy) {
-                console.log('ℹ️ المستخدم مُحال بالفعل بواسطة:', userData.referrerBy);
-                return;
-            }
-
-            let referralCode = null;
-            if (window.Telegram && window.Telegram.WebApp) {
-                referralCode = window.Telegram.WebApp.initDataUnsafe?.start_param;
-                if (referralCode) console.log('✅ قرأت start_param من WebApp:', referralCode);
-            }
-            if (!referralCode) {
-                const params = new URLSearchParams(window.location.search);
-                referralCode = params.get('start');
-                if (referralCode) console.log('✅ قرأت start من URL:', referralCode);
-            }
-
-            if (!referralCode) {
-                console.warn('❌ لم يتم العثور على كود إحالة');
-                return;
-            }
-
-            if (referralCode === userData.telegramId) {
-                console.warn('⚠️ كود الإحالة خاص بالمستخدم نفسه، تجاهل');
-                return;
-            }
-
-            console.log(`🔗 معالجة الإحالة: ${referralCode}`);
-
-            try {
-                // البحث عن المُحيل باستخدام المعرف مباشرة (doc)
-                const referrerRef = db.collection('users').doc(referralCode);
-                const referrerDoc = await referrerRef.get();
-
-                if (!referrerDoc.exists) {
-                    console.warn(`⚠️ لم يُعثر على مُحيل بهذا الكود: ${referralCode}`);
-                    showToast('⚠️ لم يتم العثور على المستخدم الذي دعاك.');
-                    return;
-                }
-
-                const referrerData = referrerDoc.data();
-                console.log('👤 تم العثور على المُحيل:', referrerData.displayName);
-
-                // التأكد من عدم وجود إحالة مسبقة لهذا المستخدم
-                const existing = await db.collection('referrals')
-                    .where('referredUid', '==', userData.telegramId)
-                    .get();
-
-                if (!existing.empty) {
-                    console.warn('⚠️ هذه الإحالة مسجلة مسبقاً');
-                    return;
-                }
-
-                // تنفيذ المعاملة
-                await db.runTransaction(async (transaction) => {
-                    const userRef = db.collection('users').doc(userData.telegramId);
-                    const refRef = db.collection('users').doc(referralCode);
-
-                    // تحديث المستخدم المُحال
-                    transaction.update(userRef, { referrerBy: referralCode });
-
-                    // تحديث المُحيل
-                    transaction.update(refRef, {
-                        'miningData.totalReferrals': firebase.firestore.FieldValue.increment(1),
-                        'wallets.referral': firebase.firestore.FieldValue.increment(5),
-                        'wallets.dzdReferral': firebase.firestore.FieldValue.increment(5 * exchangeRate)
-                    });
-
-                    // إضافة سجل الإحالة
-                    const refsRef = db.collection('referrals');
-                    transaction.set(refsRef.doc(), {
-                        referrerUid: referralCode,
-                        referredUid: userData.telegramId,
-                        displayName: userData.displayName || 'مستخدم',
-                        joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        commissionEarned: 5
-                    });
-
-                    // إضافة معاملة للمُحيل
-                    const transRef = db.collection('transactions');
-                    transaction.set(transRef.doc(), {
-                        uid: referralCode,
-                        type: 'referral_bonus',
-                        amount: 5,
-                        currency: 'USDT',
-                        description: `عمولة إحالة - ${userData.displayName}`,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                });
-
-                console.log('✅ تمت معالجة الإحالة بنجاح!');
-                userData.referrerBy = referralCode;
-                showToast('🎉 تم تفعيل الإحالة! شكراً لدعوتك.');
-                await loadReferrals();
-                await loadTransactions();
-                updateUI();
-
-            } catch (error) {
-                console.error('❌ فشل معالجة الإحالة:', error);
-                showToast('حدث خطأ أثناء معالجة الإحالة: ' + error.message);
-            }
-        }
-
-        // ============================================================
-        // 6. MANUAL REFERRAL (من صفحة الحساب)
+        // 5. MANUAL REFERRAL (الطريقة الوحيدة الآن)
         // ============================================================
         async function manualReferral() {
             if (!userData) {
@@ -1933,7 +1822,7 @@
         }
 
         // ============================================================
-        // 7. HELPERS
+        // 6. HELPERS
         // ============================================================
         function formatDate(timestamp) {
             if (!timestamp) return '--';
@@ -2059,7 +1948,7 @@
         }
 
         // ============================================================
-        // 8. CURRENCY
+        // 7. CURRENCY
         // ============================================================
         function setCurrency(currency) {
             selectedCurrency = currency;
@@ -2071,7 +1960,7 @@
         }
 
         // ============================================================
-        // 9. EXCHANGE RATE
+        // 8. EXCHANGE RATE
         // ============================================================
         async function loadExchangeRate() {
             try {
@@ -2081,7 +1970,7 @@
         }
 
         // ============================================================
-        // 10. MINING SIMULATION
+        // 9. MINING SIMULATION
         // ============================================================
         function startMining() {
             if (miningInterval) clearInterval(miningInterval);
@@ -2139,7 +2028,7 @@
         window.addEventListener('beforeunload', () => { if (miningInterval) clearInterval(miningInterval); });
 
         // ============================================================
-        // 11. NAVIGATION
+        // 10. NAVIGATION
         // ============================================================
         function navigateTo(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2157,7 +2046,7 @@
         }
 
         // ============================================================
-        // 12. UI UPDATES
+        // 11. UI UPDATES
         // ============================================================
         function updateUI() {
             if (!userData) return;
@@ -2295,7 +2184,7 @@
         }
 
         // ============================================================
-        // 13. DEPOSIT
+        // 12. DEPOSIT
         // ============================================================
         function updateDepositNetwork() {
             const currency = document.getElementById('depositCurrency').value;
@@ -2380,7 +2269,7 @@
         }
 
         // ============================================================
-        // 14. WITHDRAW
+        // 13. WITHDRAW
         // ============================================================
         function updateWithdrawNetwork() {
             const cur = document.getElementById('withdrawCurrency').value;
@@ -2500,7 +2389,7 @@
         }
 
         // ============================================================
-        // 15. PACKAGES
+        // 14. PACKAGES
         // ============================================================
         async function loadPackages() {
             try {
@@ -2634,7 +2523,7 @@
         }
 
         // ============================================================
-        // 16. TRANSACTIONS
+        // 15. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -2686,7 +2575,7 @@
         }
 
         // ============================================================
-        // 17. REFERRALS
+        // 16. REFERRALS (عرض القائمة فقط)
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -2712,7 +2601,7 @@
         }
 
         // ============================================================
-        // 18. WITHDRAW CALCULATION
+        // 17. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -2729,7 +2618,7 @@
         });
 
         // ============================================================
-        // 19. THEME TOGGLE
+        // 18. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -2776,7 +2665,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 20. INIT
+        // 19. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -2791,9 +2680,8 @@
             }
         });
 
-        console.log('🚀 Crynova V2 - المفتاح الأساسي هو telegramId');
-        console.log('✅ جميع الاستعلامات تستخدم doc(telegramId)');
-        console.log('✅ نظام الإحالات يعمل بالكامل');
+        console.log('🚀 Crynova V2 - الإحالات تعمل فقط يدوياً');
+        console.log('✅ تم إزالة التحقق التلقائي من start_param');
     </script>
 </body>
 </html>
