@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crynova Mining V2</title>
+    <title>Crynova Mining V2 - Admin</title>
 
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js">
@@ -27,7 +27,7 @@
 
     <style>
         /* ============================================================
-           RESET & VARIABLES - LIGHT THEME
+           RESET & VARIABLES - LIGHT THEME (نفس الكود السابق)
            ============================================================ */
         * {
             margin: 0;
@@ -998,6 +998,52 @@
         .clickable {
             cursor: pointer;
         }
+
+        /* ADMIN PANEL STYLES */
+        .admin-request-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .admin-request-card:hover {
+            border-color: var(--accent-light);
+        }
+        .admin-request-card .user-info {
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .admin-request-card .details {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 6px 0;
+        }
+        .admin-request-card .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .admin-request-card .actions .btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            width: auto;
+            flex: 1;
+        }
+        .admin-request-card .status-badge {
+            font-size: 12px;
+        }
+        .admin-empty {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-muted);
+        }
+        .admin-empty i {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -1544,6 +1590,41 @@
             </div>
         </div>
 
+        <!-- ========== PAGE: ADMIN PANEL ========== -->
+        <div class="page" id="page-admin">
+            <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+                <i class="fas fa-shield-alt text-danger"></i> لوحة الإدارة
+            </h2>
+
+            <!-- طلبات الإيداع -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-arrow-down text-success"></i> طلبات الإيداع</div>
+                    <span id="pendingDepositsCount" class="status status-pending">0</span>
+                </div>
+                <div id="adminDepositsList">
+                    <div class="admin-empty">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <div>لا توجد طلبات إيداع معلقة</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- طلبات السحب -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-arrow-up text-danger"></i> طلبات السحب</div>
+                    <span id="pendingWithdrawalsCount" class="status status-pending">0</span>
+                </div>
+                <div id="adminWithdrawalsList">
+                    <div class="admin-empty">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <div>لا توجد طلبات سحب معلقة</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- ===== BOTTOM NAVIGATION ===== -->
@@ -1567,6 +1648,11 @@
         <button class="nav-item" data-page="profile" onclick="navigateTo('profile')">
             <i class="fas fa-user"></i>
             <span>الحساب</span>
+        </button>
+        <!-- زر الأدمن يظهر فقط عند تسجيل الدخول كأدمن -->
+        <button class="nav-item" id="adminNavBtn" data-page="admin" onclick="navigateTo('admin')" style="display:none;">
+            <i class="fas fa-shield-alt"></i>
+            <span>إدارة</span>
         </button>
     </nav>
 
@@ -1599,6 +1685,7 @@
         let miningInterval = null;
         let selectedCurrency = 'USDT';
         let exchangeRate = 250;
+        let isAdmin = false;
 
         const POSTAL_ACCOUNT = '0799999002385412178';
 
@@ -1616,7 +1703,7 @@
         }
 
         // ============================================================
-        // 4. AUTHENTICATION - KEY = telegramId
+        // 4. AUTHENTICATION + ADMIN CHECK
         // ============================================================
         async function authUser() {
             const tgUser = getTelegramUser();
@@ -1664,7 +1751,6 @@
                                 thisMonth: 0, thisMonthDZD: 0
                             }
                         },
-                        // ✅ جميع المصفوفات داخل المستخدم فقط
                         transactions: [],
                         referrals: [],
                         deposits: [],
@@ -1684,9 +1770,14 @@
                         loadReferrals();
                         loadDeposits();
                         loadWithdrawals();
+                        if (isAdmin) loadAdminRequests();
                     }
                 });
 
+                // ✅ التحقق من صلاحية الأدمن
+                await checkAdmin(telegramId);
+
+                // تحميل البيانات
                 await loadPackages();
                 await loadTransactions();
                 await loadReferrals();
@@ -1696,6 +1787,13 @@
 
                 updateUI();
                 startMining();
+
+                // إذا كان أدمن، حمّل طلبات الإدارة
+                if (isAdmin) {
+                    document.getElementById('adminNavBtn').style.display = 'flex';
+                    await loadAdminRequests();
+                }
+
                 return true;
 
             } catch (e) {
@@ -1705,7 +1803,293 @@
         }
 
         // ============================================================
-        // 5. MANUAL REFERRAL
+        // 5. ADMIN CHECK
+        // ============================================================
+        async function checkAdmin(uid) {
+            try {
+                const doc = await db.collection('admins').doc(uid).get();
+                isAdmin = doc.exists;
+                if (isAdmin) {
+                    console.log('👑 تم التعرف على الأدمن:', uid);
+                }
+            } catch (e) {
+                console.error('❌ فشل التحقق من صلاحية الأدمن:', e);
+                isAdmin = false;
+            }
+        }
+
+        // ============================================================
+        // 6. LOAD ADMIN REQUESTS
+        // ============================================================
+        async function loadAdminRequests() {
+            await loadAdminDeposits();
+            await loadAdminWithdrawals();
+        }
+
+        // ============================================================
+        // 7. ADMIN - DEPOSITS
+        // ============================================================
+        async function loadAdminDeposits() {
+            try {
+                const snap = await db.collection('deposits')
+                    .where('status', '==', 'pending')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                const list = [];
+                snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                renderAdminDeposits(list);
+            } catch (e) {
+                console.error(e);
+                renderAdminDeposits([]);
+            }
+        }
+
+        function renderAdminDeposits(list) {
+            const container = document.getElementById('adminDepositsList');
+            const count = document.getElementById('pendingDepositsCount');
+            count.textContent = list.length;
+
+            if (!list.length) {
+                container.innerHTML = `
+                    <div class="admin-empty">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <div>لا توجد طلبات إيداع معلقة</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = list.map(d => `
+                <div class="admin-request-card">
+                    <div class="flex-between">
+                        <span class="user-info">👤 ${d.uid}</span>
+                        <span class="status status-pending status-badge">قيد الانتظار</span>
+                    </div>
+                    <div class="details">
+                        <strong>${d.amount} ${d.currency}</strong> | ${d.network || 'غير محدد'}
+                        <br><small>التاريخ: ${formatDateTime(d.createdAt)}</small>
+                        ${d.transactionId ? `<br><small>رقم العملية: ${d.transactionId}</small>` : ''}
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-success btn-sm" onclick="approveDeposit('${d.id}','${d.uid}',${d.amount},'${d.currency}')">
+                            <i class="fas fa-check"></i> تأكيد
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="rejectDeposit('${d.id}','${d.uid}')">
+                            <i class="fas fa-times"></i> رفض
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // تأكيد الإيداع
+        async function approveDeposit(id, uid, amount, currency) {
+            if (!confirm(`تأكيد إيداع ${amount} ${currency} للمستخدم ${uid}؟`)) return;
+
+            try {
+                // 1. تحديث حالة الطلب في المجموعة العامة
+                await db.collection('deposits').doc(id).update({
+                    status: 'confirmed',
+                    confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 2. تحديث رصيد المستخدم
+                const userRef = db.collection('users').doc(uid);
+                const userDoc = await userRef.get();
+                if (!userDoc.exists) throw new Error('المستخدم غير موجود');
+
+                const field = currency === 'USDT' ? 'wallets.main' : 'wallets.dzd';
+                await userRef.update({
+                    [field]: firebase.firestore.FieldValue.increment(amount)
+                });
+
+                // 3. تحديث حالة الطلب في مصفوفة المستخدم
+                const userDeposits = userDoc.data().deposits || [];
+                const updatedDeposits = userDeposits.map(d => {
+                    if (d.transactionId === (await db.collection('deposits').doc(id).get()).data().transactionId) {
+                        return { ...d, status: 'confirmed' };
+                    }
+                    return d;
+                });
+                await userRef.update({ deposits: updatedDeposits });
+
+                showToast(`✅ تم تأكيد إيداع ${amount} ${currency}`);
+                await loadAdminDeposits();
+                updateUI();
+
+            } catch (e) {
+                console.error(e);
+                showToast('❌ حدث خطأ: ' + e.message);
+            }
+        }
+
+        // رفض الإيداع
+        async function rejectDeposit(id, uid) {
+            if (!confirm(`رفض طلب الإيداع للمستخدم ${uid}؟`)) return;
+
+            try {
+                await db.collection('deposits').doc(id).update({
+                    status: 'rejected',
+                    rejectedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // تحديث حالة الطلب في مصفوفة المستخدم
+                const userRef = db.collection('users').doc(uid);
+                const userDoc = await userRef.get();
+                if (userDoc.exists) {
+                    const userDeposits = userDoc.data().deposits || [];
+                    const updatedDeposits = userDeposits.map(d => {
+                        if (d.transactionId === (await db.collection('deposits').doc(id).get()).data().transactionId) {
+                            return { ...d, status: 'rejected' };
+                        }
+                        return d;
+                    });
+                    await userRef.update({ deposits: updatedDeposits });
+                }
+
+                showToast('❌ تم رفض الإيداع');
+                await loadAdminDeposits();
+
+            } catch (e) {
+                console.error(e);
+                showToast('❌ حدث خطأ');
+            }
+        }
+
+        // ============================================================
+        // 8. ADMIN - WITHDRAWALS
+        // ============================================================
+        async function loadAdminWithdrawals() {
+            try {
+                const snap = await db.collection('withdrawals')
+                    .where('status', '==', 'pending')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                const list = [];
+                snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                renderAdminWithdrawals(list);
+            } catch (e) {
+                console.error(e);
+                renderAdminWithdrawals([]);
+            }
+        }
+
+        function renderAdminWithdrawals(list) {
+            const container = document.getElementById('adminWithdrawalsList');
+            const count = document.getElementById('pendingWithdrawalsCount');
+            count.textContent = list.length;
+
+            if (!list.length) {
+                container.innerHTML = `
+                    <div class="admin-empty">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <div>لا توجد طلبات سحب معلقة</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = list.map(w => `
+                <div class="admin-request-card">
+                    <div class="flex-between">
+                        <span class="user-info">👤 ${w.uid}</span>
+                        <span class="status status-pending status-badge">قيد الانتظار</span>
+                    </div>
+                    <div class="details">
+                        <strong>${w.amount} ${w.currency}</strong> | الرسوم: ${w.fee || 0}
+                        <br><small>التاريخ: ${formatDateTime(w.createdAt)}</small>
+                        ${w.recipientAddress ? `<br><small>العنوان: ${w.recipientAddress}</small>` : ''}
+                        ${w.eccpId ? `<br><small>ECCP: ${w.eccpId}</small>` : ''}
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-success btn-sm" onclick="approveWithdrawal('${w.id}','${w.uid}')">
+                            <i class="fas fa-check"></i> تأكيد
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="rejectWithdrawal('${w.id}','${w.uid}',${w.amount},'${w.currency}')">
+                            <i class="fas fa-times"></i> رفض
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // تأكيد السحب
+        async function approveWithdrawal(id, uid) {
+            if (!confirm(`تأكيد سحب للمستخدم ${uid}؟`)) return;
+
+            try {
+                await db.collection('withdrawals').doc(id).update({
+                    status: 'completed',
+                    completedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // تحديث حالة السحب في مصفوفة المستخدم
+                const userRef = db.collection('users').doc(uid);
+                const userDoc = await userRef.get();
+                if (userDoc.exists) {
+                    const userWithdrawals = userDoc.data().withdrawals || [];
+                    const updatedWithdrawals = userWithdrawals.map(w => {
+                        if (w.createdAt === (await db.collection('withdrawals').doc(id).get()).data().createdAt) {
+                            return { ...w, status: 'completed' };
+                        }
+                        return w;
+                    });
+                    await userRef.update({ withdrawals: updatedWithdrawals });
+                }
+
+                showToast('✅ تم تأكيد السحب');
+                await loadAdminWithdrawals();
+
+            } catch (e) {
+                console.error(e);
+                showToast('❌ حدث خطأ');
+            }
+        }
+
+        // رفض السحب (إعادة الرصيد)
+        async function rejectWithdrawal(id, uid, amount, currency) {
+            if (!confirm(`رفض طلب السحب وإعادة ${amount} ${currency} للمستخدم ${uid}؟`)) return;
+
+            try {
+                await db.collection('withdrawals').doc(id).update({
+                    status: 'rejected',
+                    rejectedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // إعادة الرصيد للمستخدم
+                const userRef = db.collection('users').doc(uid);
+                const userDoc = await userRef.get();
+                if (userDoc.exists) {
+                    const field = currency === 'USDT' ? 'wallets.main' : 'wallets.dzd';
+                    await userRef.update({
+                        [field]: firebase.firestore.FieldValue.increment(amount)
+                    });
+
+                    // تحديث حالة السحب في مصفوفة المستخدم
+                    const userWithdrawals = userDoc.data().withdrawals || [];
+                    const updatedWithdrawals = userWithdrawals.map(w => {
+                        if (w.createdAt === (await db.collection('withdrawals').doc(id).get()).data().createdAt) {
+                            return { ...w, status: 'rejected' };
+                        }
+                        return w;
+                    });
+                    await userRef.update({ withdrawals: updatedWithdrawals });
+                }
+
+                showToast(`❌ تم رفض السحب وإعادة ${amount} ${currency}`);
+                await loadAdminWithdrawals();
+                updateUI();
+
+            } catch (e) {
+                console.error(e);
+                showToast('❌ حدث خطأ');
+            }
+        }
+
+        // ============================================================
+        // 9. MANUAL REFERRAL (نفس الكود السابق مع إصلاح timestamp)
         // ============================================================
         async function manualReferral() {
             if (!userData) {
@@ -1804,7 +2188,7 @@
         }
 
         // ============================================================
-        // 6. HELPERS
+        // 10. HELPERS (نفس الكود السابق)
         // ============================================================
         function formatDate(timestamp) {
             if (!timestamp) return '--';
@@ -1930,7 +2314,7 @@
         }
 
         // ============================================================
-        // 7. CURRENCY
+        // 11. CURRENCY & EXCHANGE RATE
         // ============================================================
         function setCurrency(currency) {
             selectedCurrency = currency;
@@ -1941,9 +2325,6 @@
             renderPackages();
         }
 
-        // ============================================================
-        // 8. EXCHANGE RATE
-        // ============================================================
         async function loadExchangeRate() {
             try {
                 const doc = await db.collection('settings').doc('exchangeRate').get();
@@ -1952,7 +2333,7 @@
         }
 
         // ============================================================
-        // 9. MINING SIMULATION
+        // 12. MINING SIMULATION
         // ============================================================
         function startMining() {
             if (miningInterval) clearInterval(miningInterval);
@@ -2026,7 +2407,7 @@
         window.addEventListener('beforeunload', () => { if (miningInterval) clearInterval(miningInterval); });
 
         // ============================================================
-        // 10. NAVIGATION
+        // 13. NAVIGATION
         // ============================================================
         function navigateTo(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2041,10 +2422,13 @@
             if (page === 'mining') updateMiningUI();
             if (page === 'referrals') updateReferralUI();
             if (page === 'profile') updateProfileUI();
+            if (page === 'admin' && isAdmin) {
+                loadAdminRequests();
+            }
         }
 
         // ============================================================
-        // 11. UI UPDATES
+        // 14. UI UPDATES
         // ============================================================
         function updateUI() {
             if (!userData) return;
@@ -2182,7 +2566,7 @@
         }
 
         // ============================================================
-        // 12. DEPOSIT
+        // 15. DEPOSIT (مع إضافة المجموعة العامة)
         // ============================================================
         function updateDepositNetwork() {
             const currency = document.getElementById('depositCurrency').value;
@@ -2222,23 +2606,25 @@
             }
         }
 
-        // ✅ إضافة إيداع فقط إلى مصفوفات المستخدم
         async function submitDepositProof() {
             if (!userData || !depositData) { showToast('أنشئ طلب إيداع أولاً'); return; }
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
             try {
                 const now = new Date();
+                const depositObj = {
+                    amount: depositData.amount,
+                    currency: depositData.currency,
+                    network: depositData.currency === 'DZD' ? 'CCP' : document.getElementById('depositNetwork').value,
+                    walletAddress: depositData.address,
+                    transactionId: txId,
+                    status: 'pending',
+                    createdAt: now
+                };
+
+                // 1. إضافة إلى مصفوفة المستخدم
                 await db.collection('users').doc(userData.telegramId).update({
-                    'deposits': firebase.firestore.FieldValue.arrayUnion({
-                        amount: depositData.amount,
-                        currency: depositData.currency,
-                        network: depositData.currency === 'DZD' ? 'CCP' : document.getElementById('depositNetwork').value,
-                        walletAddress: depositData.address,
-                        transactionId: txId,
-                        status: 'pending',
-                        createdAt: now
-                    }),
+                    'deposits': firebase.firestore.FieldValue.arrayUnion(depositObj),
                     'transactions': firebase.firestore.FieldValue.arrayUnion({
                         type: 'deposit',
                         amount: depositData.amount,
@@ -2249,19 +2635,26 @@
                     })
                 });
 
+                // 2. إضافة إلى المجموعة العامة للأدمن
+                await db.collection('deposits').add({
+                    uid: userData.telegramId,
+                    ...depositObj,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
                 showToast('تم إرسال طلب الإيداع، في انتظار المراجعة');
                 document.getElementById('depositTransactionId').value = '';
                 document.getElementById('depositDetails').classList.add('hidden');
                 depositData = null;
                 await loadDeposits();
                 await loadTransactions();
+                if (isAdmin) await loadAdminDeposits();
             } catch (e) {
                 console.error(e);
                 showToast('حدث خطأ');
             }
         }
 
-        // ✅ قراءة من مصفوفة deposits
         async function loadDeposits() {
             if (!userData) return;
             try {
@@ -2290,7 +2683,7 @@
         }
 
         // ============================================================
-        // 13. WITHDRAW
+        // 16. WITHDRAW (مع إضافة المجموعة العامة)
         // ============================================================
         function updateWithdrawNetwork() {
             const cur = document.getElementById('withdrawCurrency').value;
@@ -2299,7 +2692,6 @@
             document.getElementById('withdrawEccpGroup').style.display = cur === 'DZD' ? 'block' : 'none';
         }
 
-        // ✅ إضافة سحب فقط إلى مصفوفات المستخدم
         async function requestWithdraw() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
             const currency = document.getElementById('withdrawCurrency').value;
@@ -2353,6 +2745,15 @@
                         upd['wallets.dzdReferral'] = refr - fref;
                     }
                     const now = new Date();
+                    const withdrawObj = {
+                        amount: amount,
+                        currency: currency,
+                        recipientAddress: recipient,
+                        eccpId: eccpId || null,
+                        fee: fee,
+                        status: 'pending',
+                        createdAt: now
+                    };
                     upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                         type: 'withdraw',
                         amount: total,
@@ -2361,16 +2762,16 @@
                         balanceAfter: bal - total,
                         timestamp: now
                     });
-                    upd['withdrawals'] = firebase.firestore.FieldValue.arrayUnion({
-                        amount: amount,
-                        currency: currency,
-                        recipientAddress: recipient,
-                        eccpId: eccpId || null,
-                        fee: fee,
-                        status: 'pending',
-                        createdAt: now
-                    });
+                    upd['withdrawals'] = firebase.firestore.FieldValue.arrayUnion(withdrawObj);
                     t.update(ref, upd);
+
+                    // إضافة إلى المجموعة العامة للأدمن
+                    const wdRef = db.collection('withdrawals').doc();
+                    t.set(wdRef, {
+                        uid: userData.telegramId,
+                        ...withdrawObj,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
                 });
 
                 showToast('تم طلب السحب بنجاح');
@@ -2404,7 +2805,8 @@
                     amount: total,
                     currency: currency,
                     description: `سحب ${amount} ${currency}`,
-                    balanceAfter: (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0) - total,
+                    balanceAfter: (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0) -
+                        total,
                     timestamp: new Date()
                 });
                 if (!userData.withdrawals) userData.withdrawals = [];
@@ -2420,6 +2822,7 @@
                 updateUI();
                 await loadWithdrawals();
                 await loadTransactions();
+                if (isAdmin) await loadAdminWithdrawals();
                 document.getElementById('withdrawAddress').value = '';
                 document.getElementById('withdrawEccpId').value = '';
                 document.getElementById('withdrawAmount').value = '';
@@ -2428,7 +2831,6 @@
             }
         }
 
-        // ✅ قراءة من مصفوفة withdrawals
         async function loadWithdrawals() {
             if (!userData) return;
             try {
@@ -2457,7 +2859,7 @@
         }
 
         // ============================================================
-        // 14. PACKAGES
+        // 17. PACKAGES
         // ============================================================
         async function loadPackages() {
             try {
@@ -2619,7 +3021,7 @@
         }
 
         // ============================================================
-        // 15. TRANSACTIONS
+        // 18. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -2679,7 +3081,7 @@
         }
 
         // ============================================================
-        // 16. REFERRALS
+        // 19. REFERRALS
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -2706,7 +3108,7 @@
         }
 
         // ============================================================
-        // 17. WITHDRAW CALCULATION
+        // 20. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -2723,7 +3125,7 @@
         });
 
         // ============================================================
-        // 18. THEME TOGGLE
+        // 21. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -2770,7 +3172,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 19. INIT
+        // 22. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -2785,8 +3187,8 @@
             }
         });
 
-        console.log('🚀 Crynova V2 - جميع البيانات داخل المستخدم فقط (مصفوفات)');
-        console.log('✅ transactions, referrals, deposits, withdrawals كلها في users/{uid}');
+        console.log('🚀 Crynova V2 - مع لوحة إدارة متكاملة');
+        console.log('✅ لإضافة أدمن: أنشئ مستنداً في مجموعة admins باسم الـ telegramId');
     </script>
 </body>
 </html>
