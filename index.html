@@ -1763,7 +1763,7 @@
                         'wallets.dzdReferral': firebase.firestore.FieldValue.increment(5 * exchangeRate)
                     });
 
-                    // كتابة سجل الإحالة في subcollection الخاص بالمُحيل
+                    // ✅ كتابة سجل الإحالة في subcollection الخاص بالمُحيل (users/{uid}/referrals)
                     const refSubRef = db.collection('users')
                         .doc(referralCode)
                         .collection('referrals')
@@ -1775,7 +1775,7 @@
                         commissionEarned: 5
                     });
 
-                    // كتابة معاملة العمولة في subcollection الخاص بالمُحيل
+                    // ✅ كتابة معاملة العمولة في subcollection الخاص بالمُحيل (users/{uid}/transactions)
                     const transSubRef = db.collection('users')
                         .doc(referralCode)
                         .collection('transactions')
@@ -2215,19 +2215,17 @@
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
             try {
-                // استخدام subcollection داخل المستخدم
-                await db.collection('users')
-                    .doc(userData.telegramId)
-                    .collection('deposits')
-                    .add({
-                        amount: depositData.amount,
-                        currency: depositData.currency,
-                        network: depositData.currency === 'DZD' ? 'CCP' : document.getElementById('depositNetwork').value,
-                        walletAddress: depositData.address,
-                        transactionId: txId,
-                        status: 'pending',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                // ✅ الإيداع يبقى مجموعة عامة (للأدمن)
+                await db.collection('deposits').add({
+                    uid: userData.telegramId,
+                    amount: depositData.amount,
+                    currency: depositData.currency,
+                    network: depositData.currency === 'DZD' ? 'CCP' : document.getElementById('depositNetwork').value,
+                    walletAddress: depositData.address,
+                    transactionId: txId,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
                 showToast('تم إرسال طلب الإيداع، في انتظار المراجعة');
                 document.getElementById('depositTransactionId').value = '';
                 document.getElementById('depositDetails').classList.add('hidden');
@@ -2242,11 +2240,8 @@
         async function loadDeposits() {
             if (!userData) return;
             try {
-                const snap = await db.collection('users')
-                    .doc(userData.telegramId)
-                    .collection('deposits')
-                    .orderBy('createdAt', 'desc')
-                    .get();
+                // ✅ باقي مجموعة عامة
+                const snap = await db.collection('deposits').where('uid', '==', userData.telegramId).orderBy('createdAt', 'desc').get();
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
                 renderDeposits(list);
@@ -2331,12 +2326,10 @@
                     }
                     t.update(ref, upd);
 
-                    // كتابة طلب السحب في subcollection
-                    const wdRef = db.collection('users')
-                        .doc(userData.telegramId)
-                        .collection('withdrawals')
-                        .doc();
+                    // ✅ طلب السحب يبقى مجموعة عامة (للأدمن)
+                    const wdRef = db.collection('withdrawals').doc();
                     t.set(wdRef, {
+                        uid: userData.telegramId,
                         amount: amount,
                         currency: currency,
                         recipientAddress: recipient,
@@ -2346,7 +2339,7 @@
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
-                    // كتابة معاملة السحب في subcollection
+                    // ✅ معاملة السحب في subcollection الخاص بالمستخدم
                     const transRef = db.collection('users')
                         .doc(userData.telegramId)
                         .collection('transactions')
@@ -2400,11 +2393,8 @@
         async function loadWithdrawals() {
             if (!userData) return;
             try {
-                const snap = await db.collection('users')
-                    .doc(userData.telegramId)
-                    .collection('withdrawals')
-                    .orderBy('createdAt', 'desc')
-                    .get();
+                // ✅ باقي مجموعة عامة
+                const snap = await db.collection('withdrawals').where('uid', '==', userData.telegramId).orderBy('createdAt', 'desc').get();
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
                 renderWithdrawals(list);
@@ -2525,7 +2515,7 @@
                     };
                     t.update(ref, upd);
 
-                    // كتابة معاملة الشراء في subcollection
+                    // ✅ معاملة الشراء في subcollection الخاص بالمستخدم
                     const transRef = db.collection('users')
                         .doc(userData.telegramId)
                         .collection('transactions')
@@ -2583,7 +2573,7 @@
         }
 
         // ============================================================
-        // 15. TRANSACTIONS
+        // 15. TRANSACTIONS (Subcollection)
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -2646,7 +2636,7 @@
         }
 
         // ============================================================
-        // 16. REFERRALS (عرض القائمة فقط)
+        // 16. REFERRALS (Subcollection)
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -2757,7 +2747,8 @@
             }
         });
 
-        console.log('🚀 Crynova V2 - جميع المجموعات ضمن users (subcollections)');
+        console.log('🚀 Crynova V2 - transactions و referrals فقط Subcollections');
+        console.log('✅ deposits و withdrawals بقيت مجموعات عامة');
         console.log('✅ تم إزالة التحقق التلقائي من start_param');
     </script>
 </body>
