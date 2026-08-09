@@ -1650,14 +1650,8 @@
                         referrerBy: null,
                         currency: 'USDT',
                         wallets: {
-                            main: 0,
-                            reward: 0,
-                            referral: 0,
-                            locked: 0,
-                            dzd: 0,
-                            dzdReward: 0,
-                            dzdReferral: 0,
-                            dzdLocked: 0
+                            main: 0, reward: 0, referral: 0, locked: 0,
+                            dzd: 0, dzdReward: 0, dzdReferral: 0, dzdLocked: 0
                         },
                         miningData: {
                             currentPackage: null,
@@ -1665,15 +1659,12 @@
                             totalMinedDZD: 0,
                             totalReferrals: 0,
                             miningHistory: {
-                                today: 0,
-                                todayDZD: 0,
-                                thisWeek: 0,
-                                thisWeekDZD: 0,
-                                thisMonth: 0,
-                                thisMonthDZD: 0
+                                today: 0, todayDZD: 0,
+                                thisWeek: 0, thisWeekDZD: 0,
+                                thisMonth: 0, thisMonthDZD: 0
                             }
                         },
-                        // ✅ جميع المصفوفات الجديدة
+                        // ✅ جميع المصفوفات داخل المستخدم فقط
                         transactions: [],
                         referrals: [],
                         deposits: [],
@@ -1689,7 +1680,6 @@
                     if (doc.exists) {
                         userData = { telegramId: doc.id, ...doc.data() };
                         updateUI();
-                        // تحديث جميع القوائم تلقائياً
                         loadTransactions();
                         loadReferrals();
                         loadDeposits();
@@ -1697,7 +1687,6 @@
                     }
                 });
 
-                // تحميل البيانات
                 await loadPackages();
                 await loadTransactions();
                 await loadReferrals();
@@ -1716,7 +1705,7 @@
         }
 
         // ============================================================
-        // 5. MANUAL REFERRAL (إضافة إلى مصفوفة referrals و transactions)
+        // 5. MANUAL REFERRAL
         // ============================================================
         async function manualReferral() {
             if (!userData) {
@@ -1963,7 +1952,7 @@
         }
 
         // ============================================================
-        // 9. MINING SIMULATION - إضافة معاملة تعدين إلى transactions
+        // 9. MINING SIMULATION
         // ============================================================
         function startMining() {
             if (miningInterval) clearInterval(miningInterval);
@@ -2233,14 +2222,13 @@
             }
         }
 
-        // ✅ إضافة إيداع إلى مصفوفة deposits الخاصة بالمستخدم + المجموعة العامة
+        // ✅ إضافة إيداع فقط إلى مصفوفات المستخدم
         async function submitDepositProof() {
             if (!userData || !depositData) { showToast('أنشئ طلب إيداع أولاً'); return; }
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
             try {
                 const now = new Date();
-                // 1. إضافة إلى مصفوفة deposits الخاصة بالمستخدم
                 await db.collection('users').doc(userData.telegramId).update({
                     'deposits': firebase.firestore.FieldValue.arrayUnion({
                         amount: depositData.amount,
@@ -2251,7 +2239,6 @@
                         status: 'pending',
                         createdAt: now
                     }),
-                    // 2. إضافة معاملة الإيداع إلى مصفوفة transactions
                     'transactions': firebase.firestore.FieldValue.arrayUnion({
                         type: 'deposit',
                         amount: depositData.amount,
@@ -2260,18 +2247,6 @@
                         timestamp: now,
                         status: 'pending'
                     })
-                });
-
-                // 3. كتابة طلب الإيداع في المجموعة العامة (للأدمن)
-                await db.collection('deposits').add({
-                    uid: userData.telegramId,
-                    amount: depositData.amount,
-                    currency: depositData.currency,
-                    network: depositData.currency === 'DZD' ? 'CCP' : document.getElementById('depositNetwork').value,
-                    walletAddress: depositData.address,
-                    transactionId: txId,
-                    status: 'pending',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 showToast('تم إرسال طلب الإيداع، في انتظار المراجعة');
@@ -2286,7 +2261,7 @@
             }
         }
 
-        // ✅ قراءة طلبات الإيداع من مصفوفة deposits
+        // ✅ قراءة من مصفوفة deposits
         async function loadDeposits() {
             if (!userData) return;
             try {
@@ -2324,7 +2299,7 @@
             document.getElementById('withdrawEccpGroup').style.display = cur === 'DZD' ? 'block' : 'none';
         }
 
-        // ✅ إضافة سحب إلى مصفوفة withdrawals الخاصة بالمستخدم + المجموعة العامة
+        // ✅ إضافة سحب فقط إلى مصفوفات المستخدم
         async function requestWithdraw() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
             const currency = document.getElementById('withdrawCurrency').value;
@@ -2378,7 +2353,6 @@
                         upd['wallets.dzdReferral'] = refr - fref;
                     }
                     const now = new Date();
-                    // إضافة معاملة السحب إلى مصفوفة transactions
                     upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                         type: 'withdraw',
                         amount: total,
@@ -2387,7 +2361,6 @@
                         balanceAfter: bal - total,
                         timestamp: now
                     });
-                    // إضافة طلب السحب إلى مصفوفة withdrawals
                     upd['withdrawals'] = firebase.firestore.FieldValue.arrayUnion({
                         amount: amount,
                         currency: currency,
@@ -2398,19 +2371,6 @@
                         createdAt: now
                     });
                     t.update(ref, upd);
-
-                    // كتابة طلب السحب في المجموعة العامة (للأدمن)
-                    const wdRef = db.collection('withdrawals').doc();
-                    t.set(wdRef, {
-                        uid: userData.telegramId,
-                        amount: amount,
-                        currency: currency,
-                        recipientAddress: recipient,
-                        eccpId: eccpId || null,
-                        fee: fee,
-                        status: 'pending',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
                 });
 
                 showToast('تم طلب السحب بنجاح');
@@ -2444,8 +2404,7 @@
                     amount: total,
                     currency: currency,
                     description: `سحب ${amount} ${currency}`,
-                    balanceAfter: (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0) -
-                        total,
+                    balanceAfter: (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0) - total,
                     timestamp: new Date()
                 });
                 if (!userData.withdrawals) userData.withdrawals = [];
@@ -2469,7 +2428,7 @@
             }
         }
 
-        // ✅ قراءة طلبات السحب من مصفوفة withdrawals
+        // ✅ قراءة من مصفوفة withdrawals
         async function loadWithdrawals() {
             if (!userData) return;
             try {
@@ -2586,6 +2545,7 @@
                         upd['wallets.reward'] = r - fr;
                         upd['wallets.referral'] = refr - fref;
                     }
+                    const now = new Date();
                     upd['miningData.currentPackage'] = {
                         name: pkg.name,
                         hashRate: pkg.hashRate,
@@ -2601,7 +2561,7 @@
                         currency: cur,
                         description: `شراء ${pkg.name}`,
                         balanceAfter: b - price,
-                        timestamp: new Date(),
+                        timestamp: now,
                         packageId: pkg.id
                     });
                     t.update(ref, upd);
@@ -2659,7 +2619,7 @@
         }
 
         // ============================================================
-        // 15. TRANSACTIONS - قراءة من المصفوفة
+        // 15. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -2719,7 +2679,7 @@
         }
 
         // ============================================================
-        // 16. REFERRALS - قراءة من المصفوفة
+        // 16. REFERRALS
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -2825,9 +2785,8 @@
             }
         });
 
-        console.log('🚀 Crynova V2 - جميع السجلات كمصفوفات داخل المستند (transactions, referrals, deposits, withdrawals)');
-        console.log('✅ تم إصلاح مشكلة serverTimestamp() باستخدام new Date()');
-        console.log('✅ الاحتفاظ بالمجموعات العامة deposits و withdrawals للأدمن');
+        console.log('🚀 Crynova V2 - جميع البيانات داخل المستخدم فقط (مصفوفات)');
+        console.log('✅ transactions, referrals, deposits, withdrawals كلها في users/{uid}');
     </script>
 </body>
 </html>
