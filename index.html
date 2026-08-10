@@ -1576,7 +1576,38 @@
         const POSTAL_ACCOUNT = '0799999002385412178';
 
         // ============================================================
-        // 3. TELEGRAM INTEGRATION
+        // 3. LOCAL STORAGE HELPERS
+        // ============================================================
+        function setLocalUserInfo(displayName, username, photoURL) {
+            try {
+                localStorage.setItem('crynova_user_displayName', displayName || 'مستخدم');
+                localStorage.setItem('crynova_user_username', username || '');
+                localStorage.setItem('crynova_user_photoURL', photoURL || '');
+            } catch (e) { /* ignore */ }
+        }
+
+        function getLocalUserInfo() {
+            try {
+                return {
+                    displayName: localStorage.getItem('crynova_user_displayName') || 'مستخدم',
+                    username: localStorage.getItem('crynova_user_username') || '',
+                    photoURL: localStorage.getItem('crynova_user_photoURL') || ''
+                };
+            } catch (e) {
+                return { displayName: 'مستخدم', username: '', photoURL: '' };
+            }
+        }
+
+        function clearLocalUserInfo() {
+            try {
+                localStorage.removeItem('crynova_user_displayName');
+                localStorage.removeItem('crynova_user_username');
+                localStorage.removeItem('crynova_user_photoURL');
+            } catch (e) { /* ignore */ }
+        }
+
+        // ============================================================
+        // 4. TELEGRAM INTEGRATION
         // ============================================================
         function getTelegramUser() {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -1589,7 +1620,7 @@
         }
 
         // ============================================================
-        // 4. AUTHENTICATION
+        // 5. AUTHENTICATION
         // ============================================================
         async function authUser() {
             const tgUser = getTelegramUser();
@@ -1606,22 +1637,24 @@
 
                 if (docSnap.exists) {
                     userData = { telegramId: telegramId, ...docSnap.data() };
-                    await userRef.update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() });
-                    console.log('✅ مرحباً بعودتك,', userData.displayName);
+                    // تخزين معلومات المستخدم في localStorage
+                    const displayName = userData.displayName || tgUser.first_name || 'مستخدم';
+                    const username = userData.username || tgUser.username || '';
+                    const photoURL = userData.photoURL || tgUser.photo_url || '';
+                    setLocalUserInfo(displayName, username, photoURL);
+                    console.log('✅ مرحباً بعودتك,', displayName);
                 } else {
                     const displayName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
+                    const username = tgUser.username || '';
+                    const photoURL = tgUser.photo_url || `https://ui-avatars.com/api/?name=${displayName || 'U'}&background=6c5ce7&color=fff&size=128`;
+                    
                     const newUser = {
                         telegramId: telegramId,
-                        username: tgUser.username || '',
-                        displayName: displayName || 'مستخدم',
-                        photoURL: tgUser.photo_url || `https://ui-avatars.com/api/?name=${displayName || 'U'}&background=6c5ce7&color=fff&size=128`,
+                        // تم إزالة username, displayName, photoURL, lastLogin من Firestore
                         joinDate: firebase.firestore.FieldValue.serverTimestamp(),
-                        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
                         level: 1,
                         status: 'active',
-                        referralCode: telegramId,
                         referrerBy: null,
-                        currency: 'USDT',
                         wallets: {
                             main: 0, reward: 0, referral: 0, locked: 0,
                             dzd: 0, dzdReward: 0, dzdReferral: 0, dzdLocked: 0
@@ -1644,31 +1677,24 @@
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
-                    console.log('✅ تم إنشاء حساب جديد:', userData.displayName);
+                    // تخزين معلومات المستخدم في localStorage
+                    setLocalUserInfo(displayName, username, photoURL);
+                    console.log('✅ تم إنشاء حساب جديد:', displayName);
                 }
 
-                // مستمع للتحديثات الفورية
-                if (unsubscribeUser) unsubscribeUser();
-                unsubscribeUser = userRef.onSnapshot((doc) => {
-                    if (doc.exists) {
-                        userData = { telegramId: doc.id, ...doc.data() };
-                        updateUI();
-                        loadTransactions();
-                        loadReferrals();
-                        loadDeposits();
-                        loadWithdrawals();
-                    }
-                });
+                // ❌ تم إزالة onSnapshot و lastLogin
 
                 await loadPackages();
-                await loadTransactions();
-                await loadReferrals();
-                await loadDeposits();
-                await loadWithdrawals();
                 await loadExchangeRate();
 
                 updateUI();
                 startMining();
+
+                // عرض البيانات من userData
+                renderTransactions(userData.transactions || []);
+                renderReferrals(userData.referrals || []);
+                renderDeposits(userData.deposits || []);
+                renderWithdrawals(userData.withdrawals || []);
 
                 return true;
 
@@ -1679,7 +1705,7 @@
         }
 
         // ============================================================
-        // 5. HELPERS
+        // 6. HELPERS
         // ============================================================
         function formatDate(timestamp) {
             if (!timestamp) return '--';
@@ -1806,7 +1832,7 @@
         }
 
         // ============================================================
-        // 6. CURRENCY & EXCHANGE RATE
+        // 7. CURRENCY & EXCHANGE RATE
         // ============================================================
         function setCurrency(currency) {
             selectedCurrency = currency;
@@ -1825,14 +1851,21 @@
         }
 
         // ============================================================
-        // 7. MINING SIMULATION
+        // 8. MINING SIMULATION
         // ============================================================
+        let pendingMiningReward = 0;
+        let pendingMiningRewardDZD = 0;
+        let miningWriteInterval = null;
+        const MINING_WRITE_INTERVAL = 120000; // دقيقتان
+        const MINING_MIN_REWARD = 0.001;
+
         function startMining() {
             if (miningInterval) clearInterval(miningInterval);
-            miningInterval = setInterval(async () => {
-                if (!userData || !userData.telegramId) return;
-                const pkg = userData.miningData?.currentPackage;
-                if (!pkg) return;
+            if (miningWriteInterval) clearInterval(miningWriteInterval);
+
+            miningInterval = setInterval(() => {
+                if (!userData || !userData.miningData?.currentPackage) return;
+                const pkg = userData.miningData.currentPackage;
                 const now = new Date();
                 const end = pkg.endDate?.toDate ? pkg.endDate.toDate() : new Date(pkg.endDate);
                 if (now > end) {
@@ -1842,41 +1875,66 @@
                 }
                 const hashRate = pkg.hashRate || 0;
                 const reward = hashRate * 0.001;
-                const rewardDZD = reward * exchangeRate;
                 if (reward <= 0) return;
+                
+                pendingMiningReward += reward;
+                pendingMiningRewardDZD += reward * exchangeRate;
+                
+                // تحديث الواجهة (اختياري)
+                updateMiningUI();
+
+            }, 30000);
+
+            miningWriteInterval = setInterval(async () => {
+                if (pendingMiningReward < MINING_MIN_REWARD) return;
                 try {
                     const ref = db.collection('users').doc(userData.telegramId);
+                    const rewardToWrite = pendingMiningReward;
+                    const rewardDZDToWrite = pendingMiningRewardDZD;
+                    
                     await db.runTransaction(async (t) => {
                         const doc = await t.get(ref);
                         if (!doc.exists) return;
+                        
                         const nowTimestamp = new Date();
                         t.update(ref, {
-                            'wallets.reward': firebase.firestore.FieldValue.increment(reward),
-                            'wallets.dzdReward': firebase.firestore.FieldValue.increment(rewardDZD),
-                            'miningData.totalMined': firebase.firestore.FieldValue.increment(reward),
-                            'miningData.totalMinedDZD': firebase.firestore.FieldValue.increment(rewardDZD),
-                            'miningData.miningHistory.today': firebase.firestore.FieldValue.increment(reward),
-                            'miningData.miningHistory.todayDZD': firebase.firestore.FieldValue.increment(rewardDZD),
-                            'miningData.miningHistory.thisWeek': firebase.firestore.FieldValue.increment(reward),
-                            'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(rewardDZD),
-                            'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(reward),
-                            'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(rewardDZD),
+                            'wallets.reward': firebase.firestore.FieldValue.increment(rewardToWrite),
+                            'wallets.dzdReward': firebase.firestore.FieldValue.increment(rewardDZDToWrite),
+                            'miningData.totalMined': firebase.firestore.FieldValue.increment(rewardToWrite),
+                            'miningData.totalMinedDZD': firebase.firestore.FieldValue.increment(rewardDZDToWrite),
+                            'miningData.miningHistory.today': firebase.firestore.FieldValue.increment(rewardToWrite),
+                            'miningData.miningHistory.todayDZD': firebase.firestore.FieldValue.increment(rewardDZDToWrite),
+                            'miningData.miningHistory.thisWeek': firebase.firestore.FieldValue.increment(rewardToWrite),
+                            'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(rewardDZDToWrite),
+                            'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(rewardToWrite),
+                            'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(rewardDZDToWrite),
                             'transactions': firebase.firestore.FieldValue.arrayUnion({
                                 type: 'mining_reward',
-                                amount: reward,
+                                amount: rewardToWrite,
                                 currency: 'USDT',
-                                description: 'أرباح تعدين',
+                                description: `أرباح تعدين (${rewardToWrite.toFixed(4)} USDT)`,
                                 timestamp: nowTimestamp
                             })
                         });
                     });
-                } catch (e) { /* ignore */ }
-            }, 30000);
+
+                    pendingMiningReward = 0;
+                    pendingMiningRewardDZD = 0;
+                    console.log(`✅ تم كتابة ${rewardToWrite.toFixed(4)} USDT أرباح تعدين`);
+
+                } catch (e) {
+                    console.error('❌ فشل كتابة أرباح التعدين:', e);
+                }
+            }, MINING_WRITE_INTERVAL);
         }
-        window.addEventListener('beforeunload', () => { if (miningInterval) clearInterval(miningInterval); });
+
+        window.addEventListener('beforeunload', () => { 
+            if (miningInterval) clearInterval(miningInterval);
+            if (miningWriteInterval) clearInterval(miningWriteInterval);
+        });
 
         // ============================================================
-        // 8. NAVIGATION
+        // 9. NAVIGATION
         // ============================================================
         function navigateTo(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1894,16 +1952,19 @@
         }
 
         // ============================================================
-        // 9. UI UPDATES
+        // 10. UI UPDATES (مع localStorage)
         // ============================================================
         function updateUI() {
             if (!userData) return;
-            const u = userData;
-            const name = u.displayName || u.username || 'مستخدم';
+            const localInfo = getLocalUserInfo();
+            const name = localInfo.displayName || 'مستخدم';
             const initial = name.charAt(0).toUpperCase() || '?';
+            const photoURL = localInfo.photoURL || '';
+
+            // تحديث الصورة الرمزية
             document.querySelectorAll('#profileAvatar, #headerAvatar').forEach(el => {
-                if (u.photoURL && u.photoURL.startsWith('http')) {
-                    el.style.backgroundImage = `url(${u.photoURL})`;
+                if (photoURL && photoURL.startsWith('http')) {
+                    el.style.backgroundImage = `url(${photoURL})`;
                     el.style.backgroundSize = 'cover';
                     el.textContent = '';
                 } else {
@@ -1911,11 +1972,17 @@
                     el.style.backgroundImage = '';
                 }
             });
+
             document.getElementById('profileName').textContent = name;
             document.getElementById('headerUserName').textContent = name;
-            document.getElementById('userLevelBadge').textContent = u.level || 1;
-            document.getElementById('profileLevel').textContent = u.level || 1;
-            document.getElementById('headerUserLevel').textContent = `المستوى ${u.level || 1}`;
+            document.getElementById('userLevelBadge').textContent = userData.level || 1;
+            document.getElementById('profileLevel').textContent = userData.level || 1;
+            document.getElementById('headerUserLevel').textContent = `المستوى ${userData.level || 1}`;
+
+            // عرض معلومات تيليجرام من localStorage أو userData
+            const username = localInfo.username || userData.username || '';
+            document.getElementById('profileTelegram').textContent = username ? `@${username}` : 'غير متاح';
+
             updateProfileUI();
             updateHomeUI();
             updateWalletUI();
@@ -1925,13 +1992,14 @@
 
         function updateProfileUI() {
             if (!userData) return;
-            const u = userData;
-            document.getElementById('profileTelegram').textContent = u.username ? `@${u.username}` : 'غير متاح';
-            document.getElementById('profileTelegramId').textContent = u.telegramId || '--';
-            document.getElementById('profileJoinDate').textContent = formatDate(u.joinDate);
+            const localInfo = getLocalUserInfo();
+            document.getElementById('profileTelegram').textContent = localInfo.username ? `@${localInfo.username}` : 'غير متاح';
+            document.getElementById('profileTelegramId').textContent = userData.telegramId || '--';
+            document.getElementById('profileJoinDate').textContent = formatDate(userData.joinDate);
+            
             const refLink = document.getElementById('referralLink');
-            if (u.telegramId) {
-                refLink.value = `https://t.me/Crynova_bot/Crynova?start=${u.telegramId}`;
+            if (userData.telegramId) {
+                refLink.value = `https://t.me/Crynova_bot/Crynova?start=${userData.telegramId}`;
             } else {
                 refLink.value = 'جاري التحميل...';
             }
@@ -2032,7 +2100,7 @@
         }
 
         // ============================================================
-        // 10. DEPOSIT
+        // 11. DEPOSIT
         // ============================================================
         function updateDepositMethod() {
             const currency = document.getElementById('depositCurrency').value;
@@ -2082,16 +2150,12 @@
             }
         }
 
-        // ============================================================
-        // 11. DEPOSIT PROOF (تم تعديله - بدون إنشاء وثيقة منفصلة)
-        // ============================================================
         async function submitDepositProof() {
             if (!userData || !depositData) { showToast('أنشئ طلب إيداع أولاً'); return; }
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
             try {
                 const now = new Date();
-                // إنشاء معرف فريد للإيداع (استخدم timestamp + random)
                 const depositId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
                 const depositObj = {
@@ -2118,16 +2182,20 @@
                     })
                 });
 
-                showToast('تم إرسال طلب الإيداع، في انتظار المراجعة');
+                showToast('✅ تم إرسال طلب الإيداع، في انتظار المراجعة');
                 document.getElementById('depositTransactionId').value = '';
                 document.getElementById('depositDetails').classList.add('hidden');
                 depositData = null;
+                
+                // تحديث البيانات يدوياً
+                await refreshUserData();
+                
                 await loadDeposits();
                 await loadTransactions();
                 updateUI();
             } catch (e) {
                 console.error(e);
-                showToast('حدث خطأ: ' + e.message);
+                showToast('❌ حدث خطأ: ' + e.message);
             }
         }
 
@@ -2159,7 +2227,7 @@
         }
 
         // ============================================================
-        // 12. WITHDRAW (تم تعديله - بدون إنشاء وثيقة منفصلة)
+        // 12. WITHDRAW
         // ============================================================
         function updateWithdrawMethod() {
             const currency = document.getElementById('withdrawCurrency').value;
@@ -2248,21 +2316,27 @@
                         description: `سحب ${amount} ${currency}`,
                         balanceAfter: bal - total,
                         timestamp: now,
-                        withdrawalId: withdrawalId
+                        withdrawalId: withdrawalId,
+                        status: 'pending'
                     });
                     upd['withdrawals'] = firebase.firestore.FieldValue.arrayUnion(withdrawObj);
                     t.update(ref, upd);
                 });
 
-                showToast('تم طلب السحب بنجاح');
-                updateUI();
-                await loadWithdrawals();
-                await loadTransactions();
+                showToast('✅ تم طلب السحب بنجاح');
+                
+                // تحديث البيانات يدوياً
+                await refreshUserData();
+                
                 document.getElementById('withdrawBinanceId').value = '';
                 document.getElementById('withdrawBaridiId').value = '';
                 document.getElementById('withdrawAmount').value = '';
+                
+                await loadWithdrawals();
+                await loadTransactions();
+                updateUI();
             } catch (e) {
-                showToast(e.message || 'حدث خطأ');
+                showToast('❌ ' + (e.message || 'حدث خطأ'));
             }
         }
 
@@ -2294,16 +2368,47 @@
         }
 
         // ============================================================
-        // 13. PACKAGES
+        // 13. PACKAGES (مع التخزين المؤقت)
         // ============================================================
-        async function loadPackages() {
+        const PACKAGES_CACHE_KEY = 'crynova_packages_cache';
+        const PACKAGES_CACHE_TTL = 3600000; // ساعة واحدة
+
+        async function loadPackages(force = false) {
+            if (!force) {
+                try {
+                    const cached = localStorage.getItem(PACKAGES_CACHE_KEY);
+                    if (cached) {
+                        const data = JSON.parse(cached);
+                        if (data.timestamp && (Date.now() - data.timestamp < PACKAGES_CACHE_TTL)) {
+                            allPackages = data.packages;
+                            renderPackages();
+                            console.log('📦 تم تحميل الباقات من Cache');
+                            return;
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+            }
+
             try {
-                const snap = await db.collection('packages').where('isActive', '==', true).orderBy('displayOrder').get();
+                const snap = await db.collection('packages')
+                    .where('isActive', '==', true)
+                    .orderBy('displayOrder')
+                    .get();
+                
                 allPackages = [];
-                snap.forEach(d => allPackages.push({ id: d.id, ...d.data() }));
+                snap.forEach(doc => allPackages.push({ id: doc.id, ...doc.data() }));
+                
+                try {
+                    localStorage.setItem(PACKAGES_CACHE_KEY, JSON.stringify({
+                        packages: allPackages,
+                        timestamp: Date.now()
+                    }));
+                } catch (e) { /* ignore */ }
+                
                 renderPackages();
+                console.log('📦 تم تحميل الباقات من Firestore');
             } catch (e) {
-                console.error(e);
+                console.error('❌ فشل تحميل الباقات:', e);
                 renderPackages();
             }
         }
@@ -2400,21 +2505,54 @@
                         description: `شراء ${pkg.name}`,
                         balanceAfter: b - price,
                         timestamp: now,
-                        packageId: pkg.id
+                        packageId: pkg.id,
+                        status: 'completed'
                     });
                     t.update(ref, upd);
                 });
 
-                showToast(`تم شراء "${pkg.name}" بنجاح!`);
-                updateUI();
+                showToast(`✅ تم شراء "${pkg.name}" بنجاح!`);
+                
+                // تحديث البيانات يدوياً
+                await refreshUserData();
+                
                 await loadTransactions();
+                updateUI();
             } catch (e) {
-                showToast(e.message || 'حدث خطأ');
+                showToast('❌ ' + (e.message || 'حدث خطأ'));
             }
         }
 
         // ============================================================
-        // 14. TRANSACTIONS
+        // 14. REFRESH USER DATA (بدون onSnapshot)
+        // ============================================================
+        let lastUserFetch = 0;
+        const USER_CACHE_TTL = 30000; // 30 ثانية
+
+        async function refreshUserData(force = false) {
+            if (!force && Date.now() - lastUserFetch < USER_CACHE_TTL) {
+                console.log('⏳ استخدام بيانات مخزنة مؤقتاً');
+                return;
+            }
+            try {
+                const doc = await db.collection('users').doc(userData.telegramId).get();
+                if (doc.exists) {
+                    userData = { telegramId: doc.id, ...doc.data() };
+                    lastUserFetch = Date.now();
+                    updateUI();
+                    renderTransactions(userData.transactions || []);
+                    renderReferrals(userData.referrals || []);
+                    renderDeposits(userData.deposits || []);
+                    renderWithdrawals(userData.withdrawals || []);
+                    console.log('✅ تم تحديث بيانات المستخدم');
+                }
+            } catch (e) {
+                console.error('❌ فشل تحديث البيانات:', e);
+            }
+        }
+
+        // ============================================================
+        // 15. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -2474,7 +2612,7 @@
         }
 
         // ============================================================
-        // 15. REFERRALS
+        // 16. REFERRALS
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -2501,7 +2639,7 @@
         }
 
         // ============================================================
-        // 16. MANUAL REFERRAL
+        // 17. MANUAL REFERRAL
         // ============================================================
         async function manualReferral() {
             if (!userData) {
@@ -2599,7 +2737,7 @@
         }
 
         // ============================================================
-        // 17. WITHDRAW CALCULATION
+        // 18. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -2617,7 +2755,7 @@
         });
 
         // ============================================================
-        // 18. THEME TOGGLE
+        // 19. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -2664,7 +2802,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 19. INIT
+        // 20. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -2679,7 +2817,7 @@
             }
         });
 
-        console.log('🚀 Crynova V2 - تم نقل الودائع والسحب إلى داخل المستخدم');
+        console.log('🚀 Crynova V2 - تم نقل اسم المستخدم، المعرف، الصورة إلى localStorage');
     </script>
 </body>
 </html>
