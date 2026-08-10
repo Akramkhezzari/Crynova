@@ -1291,7 +1291,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: WITHDRAW (تم التعديل) ========== -->
+        <!-- ========== PAGE: WITHDRAW ========== -->
         <div class="page" id="page-withdraw">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-up text-danger"></i> السحب
@@ -2082,26 +2082,20 @@
             }
         }
 
+        // ============================================================
+        // 11. DEPOSIT PROOF (تم تعديله - بدون إنشاء وثيقة منفصلة)
+        // ============================================================
         async function submitDepositProof() {
             if (!userData || !depositData) { showToast('أنشئ طلب إيداع أولاً'); return; }
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
             try {
                 const now = new Date();
-                const docRef = await db.collection('deposits').add({
-                    uid: userData.telegramId,
-                    userDisplayName: userData.displayName || 'مستخدم',
-                    amount: depositData.amount,
-                    currency: depositData.currency,
-                    network: depositData.currency === 'DZD' ? 'Baridi Mob' : 'Binance',
-                    walletAddress: depositData.address,
-                    transactionId: txId,
-                    status: 'pending',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                // إنشاء معرف فريد للإيداع (استخدم timestamp + random)
+                const depositId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
                 const depositObj = {
-                    depositId: docRef.id,
+                    depositId: depositId,
                     amount: depositData.amount,
                     currency: depositData.currency,
                     network: depositData.currency === 'DZD' ? 'Baridi Mob' : 'Binance',
@@ -2120,7 +2114,7 @@
                         description: `إيداع ${depositData.amount} ${depositData.currency}`,
                         timestamp: now,
                         status: 'pending',
-                        depositId: docRef.id
+                        depositId: depositId
                     })
                 });
 
@@ -2165,7 +2159,7 @@
         }
 
         // ============================================================
-        // 11. WITHDRAW (المعدل)
+        // 12. WITHDRAW (تم تعديله - بدون إنشاء وثيقة منفصلة)
         // ============================================================
         function updateWithdrawMethod() {
             const currency = document.getElementById('withdrawCurrency').value;
@@ -2202,8 +2196,7 @@
 
             try {
                 const now = new Date();
-                const docRef = db.collection('withdrawals').doc();
-                const withdrawalId = docRef.id;
+                const withdrawalId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
                 const withdrawObj = {
                     withdrawalId: withdrawalId,
@@ -2259,19 +2252,6 @@
                     });
                     upd['withdrawals'] = firebase.firestore.FieldValue.arrayUnion(withdrawObj);
                     t.update(ref, upd);
-
-                    t.set(docRef, {
-                        uid: userData.telegramId,
-                        userDisplayName: userData.displayName || 'مستخدم',
-                        withdrawalId: withdrawalId,
-                        amount: amount,
-                        currency: currency,
-                        recipientAddress: recipient,
-                        network: currency === 'DZD' ? 'Baridi Mob' : 'Binance',
-                        fee: fee,
-                        status: 'pending',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
                 });
 
                 showToast('تم طلب السحب بنجاح');
@@ -2314,7 +2294,7 @@
         }
 
         // ============================================================
-        // 12. PACKAGES
+        // 13. PACKAGES
         // ============================================================
         async function loadPackages() {
             try {
@@ -2434,7 +2414,7 @@
         }
 
         // ============================================================
-        // 13. TRANSACTIONS
+        // 14. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -2494,7 +2474,7 @@
         }
 
         // ============================================================
-        // 14. REFERRALS
+        // 15. REFERRALS
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -2521,7 +2501,7 @@
         }
 
         // ============================================================
-        // 15. MANUAL REFERRAL
+        // 16. MANUAL REFERRAL
         // ============================================================
         async function manualReferral() {
             if (!userData) {
@@ -2619,7 +2599,7 @@
         }
 
         // ============================================================
-        // 16. WITHDRAW CALCULATION
+        // 17. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -2637,7 +2617,7 @@
         });
 
         // ============================================================
-        // 17. THEME TOGGLE
+        // 18. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -2684,7 +2664,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 18. INIT
+        // 19. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -2699,7 +2679,7 @@
             }
         });
 
-        console.log('🚀 Crynova V2 - تطبيق المستخدم (تم تعديل السحب)');
+        console.log('🚀 Crynova V2 - تم نقل الودائع والسحب إلى داخل المستخدم');
     </script>
 </body>
 </html>
