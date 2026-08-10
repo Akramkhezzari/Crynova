@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Crynova Mining - الإصدار الجديد</title>
+    <title>Crynova - استثمر واربح</title>
 
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js">
@@ -15,8 +15,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js">
     </script>
 
     <!-- Font Awesome -->
@@ -219,10 +217,6 @@
         .card.dzd-gradient .text-muted,
         .card.dzd-gradient .balance-label {
             color: rgba(255, 255, 255, 0.8);
-        }
-        .card.dzd-gradient .balance-large {
-            -webkit-text-fill-color: white;
-            background: none;
         }
         .card.gold-gradient {
             background: linear-gradient(135deg, #f9a825, #f57f17);
@@ -471,7 +465,7 @@
             background: var(--success);
         }
 
-        /* PACKAGE / PLAN CARDS */
+        /* PLAN CARDS */
         .plan-card {
             background: var(--bg-card);
             border-radius: var(--radius-md);
@@ -806,19 +800,6 @@
             }
         }
 
-        /* ECCP BADGE */
-        .eccp-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--accent-glow);
-            color: var(--accent);
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
         /* USER INFO IN HEADER */
         .user-mini {
             display: flex;
@@ -1148,7 +1129,7 @@
                 </div>
                 <div style="margin-top:12px;display:flex;gap:8px;">
                     <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white;width:auto;flex:1;" onclick="navigateTo('investments')">
-                        <i class="fas fa-chart-line"></i> الاستثمارات
+                        <i class="fas fa-chart-line"></i> استثماراتي
                     </button>
                     <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white;width:auto;flex:1;" onclick="navigateTo('packages')">
                         <i class="fas fa-plus-circle"></i> استثمر الآن
@@ -1193,20 +1174,14 @@
                 <i class="fas fa-cubes text-accent"></i> خطط الاستثمار
             </h2>
             <div id="investPlansList">
-                <div class="text-center text-muted" style="padding:40px 0;">
-                    <div class="loader"></div>
-                    <div style="margin-top:12px;font-weight:600;">جاري تحميل الخطط...</div>
-                </div>
+                <!-- سيتم ملؤها بواسطة JS -->
             </div>
 
             <h2 style="font-size:22px;font-weight:900;margin:24px 0 16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-microchip text-accent"></i> باقات التعدين
             </h2>
             <div id="miningPackagesList">
-                <div class="text-center text-muted" style="padding:40px 0;">
-                    <div class="loader"></div>
-                    <div style="margin-top:12px;font-weight:600;">جاري تحميل الباقات...</div>
-                </div>
+                <!-- سيتم ملؤها بواسطة JS -->
             </div>
         </div>
 
@@ -1235,7 +1210,7 @@
             </button>
         </div>
 
-        <!-- ========== PAGE: MINING ========== -->
+        <!-- ========== PAGE: MINING (تم استبدالها بصفحة التعدين) ========== -->
         <div class="page" id="page-mining">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-microchip text-accent"></i> التعدين
@@ -1708,7 +1683,80 @@
         const MIN_DEPOSIT_DZD = 2000;
 
         // ============================================================
-        // 3. LOCAL STORAGE HELPERS
+        // 3. DEFAULT PLANS (إذا لم توجد بيانات في Firestore)
+        // ============================================================
+        const DEFAULT_INVEST_PLANS = [{
+            id: 'plan_a',
+            type: 'investment',
+            name: 'الخطة أ',
+            description: 'استثمار آمن مع عائد يومي 5%',
+            icon: '📊',
+            minAmount: 2000,
+            maxAmount: 4000,
+            dailyReturnPercent: 5,
+            durationDays: 30,
+            capitalReturnable: true,
+            currency: 'DZD',
+            isActive: true,
+            displayOrder: 1
+        }, {
+            id: 'plan_b',
+            type: 'investment',
+            name: 'الخطة ب',
+            description: 'عائد يومي مرتفع 5.5%',
+            icon: '📈',
+            minAmount: 4000,
+            maxAmount: 8000,
+            dailyReturnPercent: 5.5,
+            durationDays: 30,
+            capitalReturnable: true,
+            currency: 'DZD',
+            isActive: true,
+            displayOrder: 2
+        }, {
+            id: 'plan_c',
+            type: 'investment',
+            name: 'الخطة ج',
+            description: 'أعلى عائد يومي 6%',
+            icon: '🚀',
+            minAmount: 8000,
+            maxAmount: 15000,
+            dailyReturnPercent: 6,
+            durationDays: 30,
+            capitalReturnable: true,
+            currency: 'DZD',
+            isActive: true,
+            displayOrder: 3
+        }];
+
+        const DEFAULT_MINING_PACKAGES = [{
+            id: 'mining_basic',
+            type: 'mining',
+            name: 'باقة أساسية',
+            description: 'تعدين بقوة 5 H/s',
+            icon: '⛏️',
+            price: 50,
+            hashRate: 5,
+            duration: 30,
+            currency: 'USDT',
+            isActive: true,
+            displayOrder: 1
+        }, {
+            id: 'mining_advanced',
+            type: 'mining',
+            name: 'باقة متقدمة',
+            description: 'تعدين بقوة 12 H/s',
+            icon: '⚡',
+            price: 120,
+            hashRate: 12,
+            duration: 30,
+            currency: 'USDT',
+            isActive: true,
+            displayOrder: 2
+        }];
+
+        // ============================================================
+        // 4. LOCAL STORAGE HELPERS
         // ============================================================
         function setLocalUserInfo(displayName, username, photoURL) {
             try {
@@ -1739,7 +1787,7 @@
         }
 
         // ============================================================
-        // 4. TELEGRAM INTEGRATION
+        // 5. TELEGRAM INTEGRATION
         // ============================================================
         function getTelegramUser() {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -1752,7 +1800,7 @@
         }
 
         // ============================================================
-        // 5. AUTHENTICATION
+        // 6. AUTHENTICATION
         // ============================================================
         async function authUser() {
             const tgUser = getTelegramUser();
@@ -1778,7 +1826,7 @@
                     const displayName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
                     const username = tgUser.username || '';
                     const photoURL = tgUser.photo_url ||
-                    `https://ui-avatars.com/api/?name=${displayName || 'U'}&background=6c5ce7&color=fff&size=128`;
+                        `https://ui-avatars.com/api/?name=${displayName || 'U'}&background=6c5ce7&color=fff&size=128`;
 
                     const newUser = {
                         telegramId: telegramId,
@@ -1863,7 +1911,7 @@
         }
 
         // ============================================================
-        // 6. HELPERS
+        // 7. HELPERS
         // ============================================================
         function formatDate(timestamp) {
             if (!timestamp) return '--';
@@ -1994,7 +2042,7 @@
         }
 
         // ============================================================
-        // 7. CURRENCY & EXCHANGE RATE
+        // 8. CURRENCY & EXCHANGE RATE
         // ============================================================
         function setCurrency(currency) {
             selectedCurrency = currency;
@@ -2013,7 +2061,7 @@
         }
 
         // ============================================================
-        // 8. MINING SIMULATION
+        // 9. MINING SIMULATION
         // ============================================================
         let pendingMiningReward = 0;
         let pendingMiningRewardDZD = 0;
@@ -2065,13 +2113,13 @@
                             'miningData.totalMinedDZD': firebase.firestore.FieldValue.increment(rewardDZDToWrite),
                             'miningData.miningHistory.today': firebase.firestore.FieldValue.increment(rewardToWrite),
                             'miningData.miningHistory.todayDZD': firebase.firestore.FieldValue.increment(
-                            rewardDZDToWrite),
+                                rewardDZDToWrite),
                             'miningData.miningHistory.thisWeek': firebase.firestore.FieldValue.increment(
-                            rewardToWrite),
+                                rewardToWrite),
                             'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(
                                 rewardDZDToWrite),
                             'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(
-                            rewardToWrite),
+                                rewardToWrite),
                             'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(
                                 rewardDZDToWrite),
                             'transactions': firebase.firestore.FieldValue.arrayUnion({
@@ -2101,7 +2149,7 @@
         });
 
         // ============================================================
-        // 9. INVESTMENT DAILY RETURNS (توزيع الأرباح اليومية)
+        // 10. INVESTMENT DAILY RETURNS (توزيع الأرباح اليومية)
         // ============================================================
         function startInvestmentReturns() {
             if (investmentInterval) clearInterval(investmentInterval);
@@ -2125,23 +2173,19 @@
                     if (inv.status !== 'active') continue;
                     const endDate = inv.endDate?.toDate ? inv.endDate.toDate() : new Date(inv.endDate);
                     if (now > endDate) {
-                        // انتهى الاستثمار: نحوله إلى مكتمل
                         inv.status = 'completed';
                         updated = true;
                         continue;
                     }
-                    // نضيف أرباح اليوم (مرة واحدة يومياً)
                     const lastReturnDate = inv.lastReturnDate?.toDate ? inv.lastReturnDate.toDate() : null;
                     if (!lastReturnDate || lastReturnDate.getDate() !== now.getDate() ||
                         lastReturnDate.getMonth() !== now.getMonth() ||
                         lastReturnDate.getFullYear() !== now.getFullYear()) {
-                        // لم نوزع أرباح اليوم بعد
                         const dailyReturn = (inv.amount * inv.dailyReturnPercent) / 100;
                         inv.totalReturn = (inv.totalReturn || 0) + dailyReturn;
                         inv.lastReturnDate = now;
                         updated = true;
 
-                        // إضافة الأرباح إلى المحفظة
                         const isDZD = inv.currency === 'DZD';
                         if (isDZD) {
                             await ref.update({
@@ -2175,9 +2219,7 @@
                 }
 
                 if (updated) {
-                    // تحديث قائمة الاستثمارات
                     await ref.update({ investments: investments });
-                    // تحديث البيانات محلياً
                     userData.investments = investments;
                     renderInvestments();
                     updateUI();
@@ -2188,7 +2230,7 @@
         }
 
         // ============================================================
-        // 10. NAVIGATION
+        // 11. NAVIGATION
         // ============================================================
         function navigateTo(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2207,7 +2249,7 @@
         }
 
         // ============================================================
-        // 11. UI UPDATES
+        // 12. UI UPDATES
         // ============================================================
         function updateUI() {
             if (!userData) return;
@@ -2248,7 +2290,7 @@
             if (!userData) return;
             const localInfo = getLocalUserInfo();
             document.getElementById('profileTelegram').textContent = localInfo.username ? `@${localInfo.username}` :
-            'غير متاح';
+                'غير متاح';
             document.getElementById('profileTelegramId').textContent = userData.telegramId || '--';
             document.getElementById('profileJoinDate').textContent = formatDate(userData.joinDate);
 
@@ -2278,12 +2320,10 @@
             const card = document.getElementById('homeBalanceCard');
             card.className = isDZD ? 'card dzd-gradient' : 'card gradient';
 
-            // إحصائيات الاستثمار
             const totalInvested = u.totalInvested || 0;
             const totalReturn = u.totalInvestmentReturns || 0;
             document.getElementById('homeTotalInvested').textContent = isDZD ? totalInvested.toFixed(2) : (totalInvested /
                 exchangeRate).toFixed(2);
-            // حساب الأرباح اليومية من الاستثمارات النشطة
             let daily = 0;
             if (u.investments) {
                 u.investments.forEach(inv => {
@@ -2293,7 +2333,7 @@
                 });
             }
             document.getElementById('homeDailyReturn').textContent = isDZD ? daily.toFixed(2) : (daily / exchangeRate)
-            .toFixed(2);
+                .toFixed(2);
             updateMiningStatus();
         }
 
@@ -2344,7 +2384,6 @@
             document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
             document.getElementById('walletBalanceCard').className = isDZD ? 'card dzd-gradient' : 'card gradient';
 
-            // تحديث الحد الأدنى للسحب
             const minWithdraw = isDZD ? MIN_WITHDRAW_DZD : (MIN_WITHDRAW_DZD / exchangeRate);
             document.getElementById('withdrawMinAmount').textContent = `${minWithdraw.toFixed(2)} ${selectedCurrency}`;
         }
@@ -2381,7 +2420,7 @@
         }
 
         // ============================================================
-        // 12. DEPOSIT
+        // 13. DEPOSIT
         // ============================================================
         function updateDepositMethod() {
             const currency = document.getElementById('depositCurrency').value;
@@ -2395,7 +2434,6 @@
             const amount = parseFloat(document.getElementById('depositAmount').value);
             if (!amount || amount < 1) { showToast('أدخل مبلغاً صحيحاً (≥1)'); return; }
 
-            // التحقق من الحد الأدنى
             const minAmount = currency === 'DZD' ? MIN_DEPOSIT_DZD : (MIN_DEPOSIT_DZD / exchangeRate);
             if (amount < minAmount) {
                 showToast(`الحد الأدنى للإيداع ${minAmount.toFixed(2)} ${currency}`);
@@ -2514,7 +2552,7 @@
         }
 
         // ============================================================
-        // 13. WITHDRAW (رسوم 10%، حد أدنى 1000 DZD)
+        // 14. WITHDRAW (رسوم 10%، حد أدنى 1000 DZD)
         // ============================================================
         function updateWithdrawMethod() {
             const currency = document.getElementById('withdrawCurrency').value;
@@ -2671,27 +2709,15 @@
         }
 
         // ============================================================
-        // 14. PLANS & PACKAGES (Investment + Mining)
+        // 15. PLANS & PACKAGES (Investment + Mining) - مع بيانات افتراضية
         // ============================================================
         const PLANS_CACHE_KEY = 'crynova_plans_cache';
         const PLANS_CACHE_TTL = 3600000;
 
         async function loadPlansAndPackages(force = false) {
-            if (!force) {
-                try {
-                    const cached = localStorage.getItem(PLANS_CACHE_KEY);
-                    if (cached) {
-                        const data = JSON.parse(cached);
-                        if (data.timestamp && (Date.now() - data.timestamp < PLANS_CACHE_TTL)) {
-                            allInvestPlans = data.investPlans || [];
-                            allMiningPackages = data.miningPackages || [];
-                            renderPlansAndPackages();
-                            console.log('📦 تم تحميل الخطط من Cache');
-                            return;
-                        }
-                    }
-                } catch (e) { /* ignore */ }
-            }
+            // حاول تحميل من Firestore
+            let investPlans = [];
+            let miningPackages = [];
 
             try {
                 const plansSnap = await db.collection('packages')
@@ -2699,28 +2725,37 @@
                     .orderBy('displayOrder')
                     .get();
 
-                allInvestPlans = [];
-                allMiningPackages = [];
                 plansSnap.forEach(doc => {
                     const data = { id: doc.id, ...doc.data() };
-                    if (data.type === 'investment') allInvestPlans.push(data);
-                    else if (data.type === 'mining') allMiningPackages.push(data);
+                    if (data.type === 'investment') investPlans.push(data);
+                    else if (data.type === 'mining') miningPackages.push(data);
                 });
-
-                try {
-                    localStorage.setItem(PLANS_CACHE_KEY, JSON.stringify({
-                        investPlans: allInvestPlans,
-                        miningPackages: allMiningPackages,
-                        timestamp: Date.now()
-                    }));
-                } catch (e) { /* ignore */ }
-
-                renderPlansAndPackages();
-                console.log('📦 تم تحميل الخطط من Firestore');
             } catch (e) {
-                console.error('❌ فشل تحميل الخطط:', e);
-                renderPlansAndPackages();
+                console.warn('⚠️ فشل تحميل الخطط من Firestore، سيتم استخدام الخطط الافتراضية');
             }
+
+            // إذا لم توجد خطط، استخدم الافتراضية
+            if (investPlans.length === 0) {
+                investPlans = DEFAULT_INVEST_PLANS;
+            }
+            if (miningPackages.length === 0) {
+                miningPackages = DEFAULT_MINING_PACKAGES;
+            }
+
+            allInvestPlans = investPlans;
+            allMiningPackages = miningPackages;
+
+            // تخزين مؤقت
+            try {
+                localStorage.setItem(PLANS_CACHE_KEY, JSON.stringify({
+                    investPlans: allInvestPlans,
+                    miningPackages: allMiningPackages,
+                    timestamp: Date.now()
+                }));
+            } catch (e) { /* ignore */ }
+
+            renderPlansAndPackages();
+            console.log('📦 تم عرض الخطط (من Firestore أو افتراضية)');
         }
 
         function renderPlansAndPackages() {
@@ -2789,7 +2824,7 @@
         }
 
         // ============================================================
-        // 15. PURCHASE INVESTMENT
+        // 16. PURCHASE INVESTMENT
         // ============================================================
         async function purchaseInvestment(planId) {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -2801,7 +2836,6 @@
             const maxAmount = isDZD ? plan.maxAmount : (plan.maxAmount / exchangeRate);
             const cur = isDZD ? 'DZD' : 'USDT';
 
-            // نافذة إدخال المبلغ
             const amountStr = prompt(`أدخل المبلغ للاستثمار في "${plan.name}" (${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}):`);
             if (!amountStr) return;
             const amount = parseFloat(amountStr);
@@ -2810,10 +2844,8 @@
                 return;
             }
 
-            // تحويل المبلغ للعملة الأساسية للتخزين
             const baseAmount = isDZD ? amount : amount * exchangeRate;
 
-            // التحقق من الرصيد
             let bal = 0;
             if (isDZD) bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
                 ?.dzdReferral || 0);
@@ -2831,7 +2863,7 @@
                     investmentId: investmentId,
                     planId: plan.id,
                     planName: plan.name,
-                    amount: baseAmount, // تخزين بالعملة الأساسية (DZD)
+                    amount: baseAmount,
                     currency: isDZD ? 'DZD' : 'USDT',
                     dailyReturnPercent: plan.dailyReturnPercent,
                     durationDays: plan.durationDays || 30,
@@ -2909,14 +2941,13 @@
         }
 
         // ============================================================
-        // 16. PURCHASE MINING PACKAGE
+        // 17. PURCHASE MINING PACKAGE
         // ============================================================
         async function purchaseMiningPackage(id) {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
             const pkg = allMiningPackages.find(p => p.id === id);
             if (!pkg) { showToast('الباقة غير موجودة'); return; }
 
-            // التحقق من وجود باقة نشطة
             if (userData.miningData?.currentPackage) {
                 const current = userData.miningData.currentPackage;
                 const end = current.endDate?.toDate ? current.endDate.toDate() : new Date(current.endDate);
@@ -3012,7 +3043,7 @@
         }
 
         // ============================================================
-        // 17. RENDER INVESTMENTS
+        // 18. RENDER INVESTMENTS
         // ============================================================
         function renderInvestments() {
             const container = document.getElementById('activeInvestments');
@@ -3076,7 +3107,7 @@
         }
 
         // ============================================================
-        // 18. REFERRALS (مستويين مع عمولة على أول إيداع)
+        // 19. REFERRALS (مستويين)
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -3109,7 +3140,7 @@
         }
 
         // ============================================================
-        // 19. MANUAL REFERRAL (تسجيل إحالة يدوية)
+        // 20. MANUAL REFERRAL
         // ============================================================
         async function manualReferral() {
             if (!userData) {
@@ -3151,16 +3182,13 @@
                     const userRef = db.collection('users').doc(userData.telegramId);
                     const refRef = db.collection('users').doc(referralCode);
 
-                    // تسجيل المُحيل المباشر
                     transaction.update(userRef, { referrer: referralCode });
 
-                    // البحث عن مُحيل المُحيل (المستوى الثاني)
                     const referrerData = referrerDoc.data();
                     const referrerLevel2 = referrerData.referrer || null;
 
                     if (referrerLevel2) {
                         transaction.update(userRef, { referrerLevel2: referrerLevel2 });
-                        // تحديث عدد الإحالات غير المباشرة للمُحيل الأعلى
                         const ref2Ref = db.collection('users').doc(referrerLevel2);
                         transaction.update(ref2Ref, {
                             'miningData.totalReferralsLevel2': firebase.firestore.FieldValue.increment(1)
@@ -3168,7 +3196,6 @@
                     }
 
                     const now = new Date();
-                    // تحديث بيانات المُحيل المباشر
                     transaction.update(refRef, {
                         'miningData.totalReferrals': firebase.firestore.FieldValue.increment(1),
                         'referrals': firebase.firestore.FieldValue.arrayUnion({
@@ -3176,11 +3203,10 @@
                             displayName: userData.displayName || 'مستخدم',
                             joinedAt: now,
                             level: 1,
-                            commissionEarned: 0 // سيتم تحديثها عند أول إيداع
+                            commissionEarned: 0
                         })
                     });
 
-                    // إذا كان هناك مُحيل من المستوى الثاني
                     if (referrerLevel2) {
                         const ref2Ref = db.collection('users').doc(referrerLevel2);
                         transaction.update(ref2Ref, {
@@ -3194,7 +3220,6 @@
                         });
                     }
 
-                    // مكافأة التسجيل 500 DZD
                     transaction.update(userRef, {
                         'wallets.dzdReward': firebase.firestore.FieldValue.increment(500),
                         'transactions': firebase.firestore.FieldValue.arrayUnion({
@@ -3221,7 +3246,7 @@
         }
 
         // ============================================================
-        // 20. TRANSACTIONS
+        // 21. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -3284,7 +3309,7 @@
         }
 
         // ============================================================
-        // 21. WITHDRAW CALCULATION
+        // 22. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -3302,7 +3327,7 @@
         });
 
         // ============================================================
-        // 22. THEME TOGGLE
+        // 23. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -3349,7 +3374,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 23. INIT
+        // 24. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -3364,7 +3389,7 @@
             }
         });
 
-        console.log('🚀 Crynova V3 - تم دمج خطط الاستثمار ونظام الإحالة المستويين ورسوم 10%');
+        console.log('🚀 Crynova V4 - تم إضافة خطط استثمار افتراضية تظهر تلقائياً');
     </script>
 </body>
 </html>
