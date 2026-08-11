@@ -451,11 +451,11 @@
             background: var(--success);
         }
 
-        /* PLAN CARDS */
+        /* PLAN CARDS - تم تصغير حجم المستويات */
         .plan-card {
             background: var(--bg-card);
             border-radius: var(--radius-md);
-            padding: 24px 20px;
+            padding: 18px 16px;
             border: 2px solid var(--border);
             transition: var(--transition);
             cursor: pointer;
@@ -498,28 +498,28 @@
             font-weight: 700;
         }
         .plan-card .icon {
-            font-size: 44px;
+            font-size: 36px;
             display: block;
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .plan-card .name {
-            font-size: 20px;
+            font-size: 17px;
             font-weight: 800;
             text-align: center;
         }
         .plan-card .subtitle {
             text-align: center;
             color: var(--text-secondary);
-            font-size: 14px;
-            margin-top: 4px;
+            font-size: 13px;
+            margin-top: 2px;
         }
         .plan-card .return {
             text-align: center;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 900;
             color: var(--accent);
-            margin: 8px 0;
+            margin: 6px 0;
         }
         .plan-card .return.dzd-return {
             color: var(--dzd-color);
@@ -532,12 +532,12 @@
         .plan-card .features {
             list-style: none;
             padding: 0;
-            margin: 12px 0 16px;
+            margin: 8px 0 14px;
         }
         .plan-card .features li {
-            padding: 6px 0;
+            padding: 4px 0;
             color: var(--text-secondary);
-            font-size: 14px;
+            font-size: 13px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -875,7 +875,7 @@
                 padding: 10px 8px;
             }
             .plan-card .return {
-                font-size: 22px;
+                font-size: 20px;
             }
             .bottom-nav {
                 bottom: 12px;
@@ -907,6 +907,12 @@
             .currency-selector button {
                 font-size: 12px;
                 padding: 6px 10px;
+            }
+            .plan-card .icon {
+                font-size: 30px;
+            }
+            .plan-card .name {
+                font-size: 15px;
             }
         }
 
@@ -1131,10 +1137,10 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: PACKAGES (العوائد الثابتة - 5 مستويات) ========== -->
+        <!-- ========== PAGE: PACKAGES (العوائد الثابتة) ========== -->
         <div class="page" id="page-packages">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
-                <i class="fas fa-cubes text-accent"></i> خطط العوائد الثابتة (5 مستويات)
+                <i class="fas fa-cubes text-accent"></i> خطط العوائد الثابتة
             </h2>
             <div id="investPlansList">
                 <!-- سيتم ملؤها بواسطة JS -->
@@ -2518,7 +2524,6 @@
                 const minAmount = isDZD ? p.minAmount : (p.minAmount / exchangeRate);
                 const maxAmount = isDZD ? p.maxAmount : (p.maxAmount / exchangeRate);
                 const cur = isDZD ? 'DZD' : 'USDT';
-                // تمييز الخطة المميزة (المستوى الثالث) أو النخبة حسب الرغبة
                 const isPopular = (p.id === 'plan_premium' || p.id === 'plan_elite');
                 return `
                     <div class="plan-card ${isPopular ? 'popular' : ''}">
