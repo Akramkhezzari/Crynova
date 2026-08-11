@@ -1836,10 +1836,10 @@
                     <div class="number" id="modalTotalReturn">3,000.00</div>
                     <div class="label">إجمالي الأرباح (30 يوم)</div>
                 </div>
-                <!-- 🎁 مكافأة أول استثمار -->
+                <!-- مكافأة أول استثمار (بدون أيقونة) -->
                 <div class="modal-info-item" style="grid-column: span 2; background: var(--accent-glow); border: 1px solid var(--accent-light);">
                     <div class="number" style="color: var(--gold);" id="modalFirstBonus">140.00</div>
-                    <div class="label">🎁 مكافأة أول استثمار (7%)</div>
+                    <div class="label">مكافأة أول استثمار (7%)</div>
                 </div>
             </div>
 
@@ -2169,7 +2169,7 @@
                 'investment_return': 'fa-coins text-gold',
                 'referral_bonus': 'fa-users text-accent',
                 'reward': 'fa-gift text-warning',
-                'first_investment_bonus': 'fa-gift text-gold' // مكافأة أول استثمار
+                'first_investment_bonus': 'fa-gift text-gold'
             };
             return map[type] || 'fa-circle text-muted';
         }
@@ -2182,7 +2182,7 @@
                 'investment_return': 'أرباح استثمار',
                 'referral_bonus': 'عمولة إحالة',
                 'reward': 'مكافأة',
-                'first_investment_bonus': '🎁 مكافأة أول استثمار'
+                'first_investment_bonus': 'مكافأة أول استثمار'
             };
             return map[type] || type;
         }
@@ -2779,7 +2779,7 @@
         }
 
         // ============================================================
-        // 14. PLANS & RENDER (مع إضافة مكافأة أول استثمار)
+        // 14. PLANS & RENDER (مع مكافأة أول استثمار - بدون أيقونة)
         // ============================================================
         const PLANS_CACHE_KEY = 'crynova_plans_cache';
         const PLANS_CACHE_TTL = 3600000;
@@ -2833,7 +2833,7 @@
                 const minDailyProfit = (minAmount * p.dailyReturnPercent) / 100;
                 const maxDailyProfit = (maxAmount * p.dailyReturnPercent) / 100;
 
-                // 🎁 حساب مكافأة أول استثمار (7%)
+                // مكافأة أول استثمار (بدون أيقونة)
                 const minBonus = (minAmount * FIRST_BONUS_PERCENT) / 100;
                 const maxBonus = (maxAmount * FIRST_BONUS_PERCENT) / 100;
 
@@ -2845,7 +2845,7 @@
                         <ul class="features">
                             <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}</li>
                             <li><i class="fas fa-chart-line"></i> الربح اليومي: ${minDailyProfit.toFixed(2)} - ${maxDailyProfit.toFixed(2)} ${cur}</li>
-                            <li><i class="fas fa-gift" style="color:var(--gold);"></i> 🎁 مكافأة أول استثمار: ${minBonus.toFixed(2)} - ${maxBonus.toFixed(2)} ${cur} (${FIRST_BONUS_PERCENT}%)</li>
+                            <li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: ${minBonus.toFixed(2)} - ${maxBonus.toFixed(2)} ${cur}</li>
                         </ul>
                         <button class="btn ${i===1?(isDZD?'btn-dzd':'btn-primary'):'btn-outline'}" onclick="openInvestmentModal('${p.id}')">
                             <i class="fas fa-plus-circle"></i> استثمر الآن
@@ -2856,7 +2856,7 @@
         }
 
         // ============================================================
-        // 15. MODAL FUNCTIONS (مع مكافأة أول استثمار)
+        // 15. MODAL FUNCTIONS (مع مكافأة أول استثمار - بدون أيقونة)
         // ============================================================
         function openInvestmentModal(planId) {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -2959,7 +2959,7 @@
             const dailyProfit = (amount * plan.dailyReturnPercent) / 100;
             const totalProfit = dailyProfit * 30;
 
-            // 🎁 حساب مكافأة أول استثمار
+            // مكافأة أول استثمار
             const firstBonus = (amount * FIRST_BONUS_PERCENT) / 100;
 
             document.getElementById('modalDailyProfit').textContent = dailyProfit.toFixed(2);
@@ -2994,7 +2994,7 @@
         }
 
         // ============================================================
-        // 16. CONFIRM INVESTMENT (مع إضافة مكافأة أول استثمار)
+        // 16. CONFIRM INVESTMENT (مع مكافأة أول استثمار)
         // ============================================================
         async function confirmInvestment() {
             if (!currentSelectedPlanId) { showToast('حدث خطأ، حاول مرة أخرى'); return; }
@@ -3107,27 +3107,24 @@
                         status: 'completed'
                     });
 
-                    // 🎁 مكافأة أول استثمار (تُمنح فقط إذا لم يكن للمستخدم أي استثمارات سابقة)
+                    // مكافأة أول استثمار (تُمنح فقط إذا لم يكن للمستخدم أي استثمارات سابقة)
                     const existingInvestments = doc.data().investments || [];
                     if (existingInvestments.length === 0) {
                         const bonusAmount = (baseAmount * FIRST_BONUS_PERCENT) / 100;
                         const bonusCurrency = isDZD ? 'DZD' : 'USDT';
-                        // إضافة المكافأة إلى محفظة المكافآت
                         if (isDZD) {
                             upd['wallets.dzdReward'] = firebase.firestore.FieldValue.increment(bonusAmount);
                         } else {
                             upd['wallets.reward'] = firebase.firestore.FieldValue.increment(bonusAmount);
                         }
-                        // تسجيل حركة المكافأة
-                        const bonusTx = {
+                        upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                             type: 'first_investment_bonus',
                             amount: bonusAmount,
                             currency: bonusCurrency,
-                            description: `🎁 مكافأة أول استثمار (${bonusAmount.toFixed(2)} ${bonusCurrency})`,
+                            description: `مكافأة أول استثمار (${bonusAmount.toFixed(2)} ${bonusCurrency})`,
                             timestamp: now,
                             investmentId: investmentId
-                        };
-                        upd['transactions'] = firebase.firestore.FieldValue.arrayUnion(bonusTx);
+                        });
                         console.log(`🎁 تم إضافة مكافأة أول استثمار: ${bonusAmount} ${bonusCurrency}`);
                     }
 
@@ -3490,7 +3487,7 @@
             }
         });
 
-        console.log('🚀 Crynova V7.2 - تم إضافة مكافأة أول استثمار بنسبة 7% في خطط العوائد الثابتة');
+        console.log('🚀 Crynova V7.3 - تم إزالة أيقونة الهدية من مكافأة أول استثمار');
     </script>
 </body>
 </html>
