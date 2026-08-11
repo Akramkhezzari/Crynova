@@ -1295,6 +1295,25 @@
             margin-top: 4px;
             font-weight: 600;
         }
+
+        /* زر الرجوع المخصص */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+        .back-btn:hover {
+            background: var(--accent-glow);
+        }
     </style>
 </head>
 <body>
@@ -1474,10 +1493,13 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: DEPOSIT ========== -->
+        <!-- ========== PAGE: DEPOSIT (مع زر إلغاء) ========== -->
         <div class="page" id="page-deposit">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-down text-success"></i> الإيداع
+                <button class="back-btn" onclick="navigateTo('home')" style="margin-right:auto;">
+                    <i class="fas fa-arrow-right"></i> رجوع
+                </button>
             </h2>
             <div class="card">
                 <div class="input-group">
@@ -1550,9 +1572,14 @@
                             <i class="fas fa-info-circle"></i> أدخل رقم العملية الموجود في وصل التحويل
                         </div>
                     </div>
-                    <button class="btn btn-primary" onclick="submitDepositProof()">
-                        <i class="fas fa-check-circle"></i> تأكيد الإيداع
-                    </button>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn btn-primary" onclick="submitDepositProof()">
+                            <i class="fas fa-check-circle"></i> تأكيد الإيداع
+                        </button>
+                        <button class="btn btn-outline" onclick="cancelDepositDetails()" style="flex:0.5;">
+                            <i class="fas fa-times"></i> إلغاء
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1564,10 +1591,13 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: WITHDRAW ========== -->
+        <!-- ========== PAGE: WITHDRAW (مع زر رجوع) ========== -->
         <div class="page" id="page-withdraw">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-up text-danger"></i> السحب
+                <button class="back-btn" onclick="navigateTo('home')" style="margin-right:auto;">
+                    <i class="fas fa-arrow-right"></i> رجوع
+                </button>
             </h2>
             <div class="card" style="border:2px solid var(--warning);">
                 <div class="flex-between">
@@ -2553,6 +2583,13 @@
             }
         }
 
+        // دالة لإلغاء تفاصيل الإيداع والعودة للنموذج
+        function cancelDepositDetails() {
+            document.getElementById('depositDetails').classList.add('hidden');
+            depositData = null;
+            document.getElementById('depositTransactionId').value = '';
+        }
+
         async function submitDepositProof() {
             if (!userData || !depositData) { showToast('أنشئ طلب إيداع أولاً'); return; }
             const txId = document.getElementById('depositTransactionId').value.trim();
@@ -3528,7 +3565,7 @@
             }
         });
 
-        console.log('🚀 Crynova V7.4 - تم إصلاح مشكلة المودال وتنسيق التاريخ');
+        console.log('🚀 Crynova V7.5 - إضافة أزرار رجوع وإلغاء في الإيداع والسحب');
     </script>
 </body>
 </html>
