@@ -284,11 +284,6 @@
             grid-template-columns: 1fr 1fr 1fr;
             gap: 10px;
         }
-        .grid-4 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 8px;
-        }
 
         .stat-box {
             background: var(--bg-input);
@@ -394,15 +389,6 @@
         .btn-gold:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 32px rgba(249, 168, 37, 0.4);
-        }
-
-        .btn-info {
-            background: var(--info);
-            color: white;
-        }
-        .btn-info:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(9, 132, 227, 0.35);
         }
 
         .btn-outline {
@@ -882,9 +868,6 @@
             .grid-3 {
                 gap: 6px;
             }
-            .grid-4 {
-                gap: 4px;
-            }
             .stat-box .number {
                 font-size: 18px;
             }
@@ -1099,19 +1082,19 @@
 
             <div class="grid-3">
                 <div class="stat-box">
-                    <span class="icon">⛏️</span>
-                    <div class="number" id="homeMined">0.00</div>
-                    <div class="label">إجمالي التعدين</div>
-                </div>
-                <div class="stat-box">
                     <span class="icon">👥</span>
                     <div class="number" id="homeReferrals">0</div>
                     <div class="label">الإحالات</div>
                 </div>
                 <div class="stat-box">
-                    <span class="icon">📦</span>
-                    <div class="number" id="homePackage" style="font-size:16px;">-</div>
-                    <div class="label">الباقة الحالية</div>
+                    <span class="icon">📊</span>
+                    <div class="number" id="homeInvestCount">0</div>
+                    <div class="label">الاستثمارات</div>
+                </div>
+                <div class="stat-box">
+                    <span class="icon">💰</span>
+                    <div class="number" id="homeTotalInvested">0.00</div>
+                    <div class="label">إجمالي المستثمر</div>
                 </div>
             </div>
 
@@ -1120,7 +1103,7 @@
                 <div class="flex-between">
                     <div>
                         <div style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;">💰 إجمالي الاستثمارات</div>
-                        <div style="font-size:28px;font-weight:900;color:white;" id="homeTotalInvested">0.00</div>
+                        <div style="font-size:28px;font-weight:900;color:white;" id="homeTotalInvested2">0.00</div>
                     </div>
                     <div style="text-align:left;">
                         <div style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;">الأرباح اليومية</div>
@@ -1139,26 +1122,6 @@
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title"><i class="fas fa-microchip"></i> حالة التعدين</div>
-                    <span id="miningStatus" class="status status-success">نشط</span>
-                </div>
-                <div class="flex-between">
-                    <div>
-                        <div style="color:var(--text-secondary);font-size:13px;font-weight:600;">قوة التعدين</div>
-                        <div style="font-size:22px;font-weight:800;" id="miningHashRate">0.00 H/s</div>
-                    </div>
-                    <div style="text-align:left;">
-                        <div style="color:var(--text-secondary);font-size:13px;font-weight:600;">ينتهي في</div>
-                        <div style="font-size:16px;font-weight:700;" id="miningEnds">--</div>
-                    </div>
-                </div>
-                <div style="margin-top:14px;background:var(--bg-input);border-radius:10px;height:8px;overflow:hidden;">
-                    <div id="miningProgress" style="height:100%;width:0%;background:var(--accent-gradient);border-radius:10px;transition:width 0.5s;"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
                     <div class="card-title"><i class="fas fa-clock-rotate-left"></i> آخر العمليات</div>
                     <button class="btn btn-sm btn-ghost" onclick="navigateTo('transactions')">عرض الكل</button>
                 </div>
@@ -1168,19 +1131,12 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: PACKAGES (خطط الاستثمار + التعدين) ========== -->
+        <!-- ========== PAGE: PACKAGES (خطط الاستثمار فقط) ========== -->
         <div class="page" id="page-packages">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-cubes text-accent"></i> خطط الاستثمار
             </h2>
             <div id="investPlansList">
-                <!-- سيتم ملؤها بواسطة JS -->
-            </div>
-
-            <h2 style="font-size:22px;font-weight:900;margin:24px 0 16px;display:flex;align-items:center;gap:10px;">
-                <i class="fas fa-microchip text-accent"></i> باقات التعدين
-            </h2>
-            <div id="miningPackagesList">
                 <!-- سيتم ملؤها بواسطة JS -->
             </div>
         </div>
@@ -1207,51 +1163,6 @@
             </div>
             <button class="btn btn-gold" onclick="navigateTo('packages')">
                 <i class="fas fa-plus-circle"></i> استثمر الآن
-            </button>
-        </div>
-
-        <!-- ========== PAGE: MINING (تم استبدالها بصفحة التعدين) ========== -->
-        <div class="page" id="page-mining">
-            <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
-                <i class="fas fa-microchip text-accent"></i> التعدين
-            </h2>
-            <div class="card gradient" id="miningCard">
-                <div class="flex-between">
-                    <div>
-                        <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">قوة التعدين</div>
-                        <div style="font-size:36px;font-weight:900;color:white;" id="miningDetailHashRate">0.00</div>
-                        <div style="color:rgba(255,255,255,0.6);font-size:13px;">H/s</div>
-                    </div>
-                    <div style="text-align:left;">
-                        <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">الأرباح اليومية</div>
-                        <div style="font-size:28px;font-weight:900;color:white;" id="miningDailyEarnings">0.00</div>
-                        <div style="color:rgba(255,255,255,0.6);font-size:13px;" id="miningDailyCurrency">USDT</div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-title" style="margin-bottom:14px;"><i class="fas fa-chart-simple"></i> إحصائيات التعدين</div>
-                <div class="grid-2">
-                    <div class="stat-box">
-                        <div class="number" id="miningTotalMined">0.00</div>
-                        <div class="label">الإجمالي</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="number" id="miningToday">0.00</div>
-                        <div class="label">اليوم</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="number" id="miningThisWeek">0.00</div>
-                        <div class="label">هذا الأسبوع</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="number" id="miningThisMonth">0.00</div>
-                        <div class="label">هذا الشهر</div>
-                    </div>
-                </div>
-            </div>
-            <button class="btn btn-primary" onclick="navigateTo('packages')">
-                <i class="fas fa-shopping-cart"></i> شراء باقة تعدين
             </button>
         </div>
 
@@ -1521,9 +1432,8 @@
                     <button class="btn btn-sm btn-primary" data-filter="all" onclick="filterTransactions('all')">الكل</button>
                     <button class="btn btn-sm btn-ghost" data-filter="deposit" onclick="filterTransactions('deposit')">إيداع</button>
                     <button class="btn btn-sm btn-ghost" data-filter="withdraw" onclick="filterTransactions('withdraw')">سحب</button>
-                    <button class="btn btn-sm btn-ghost" data-filter="purchase" onclick="filterTransactions('purchase')">شراء</button>
                     <button class="btn btn-sm btn-ghost" data-filter="investment" onclick="filterTransactions('investment')">استثمار</button>
-                    <button class="btn btn-sm btn-ghost" data-filter="mining_reward" onclick="filterTransactions('mining_reward')">تعدين</button>
+                    <button class="btn btn-sm btn-ghost" data-filter="investment_return" onclick="filterTransactions('investment_return')">أرباح</button>
                     <button class="btn btn-sm btn-ghost" data-filter="referral_bonus" onclick="filterTransactions('referral_bonus')">إحالات</button>
                 </div>
             </div>
@@ -1666,12 +1576,10 @@
         // ============================================================
         let userData = null;
         let allInvestPlans = [];
-        let allMiningPackages = [];
         let allTransactions = [];
         let currentFilter = 'all';
         let depositData = null;
         let isDarkTheme = false;
-        let miningInterval = null;
         let investmentInterval = null;
         let selectedCurrency = 'USDT';
         let exchangeRate = 250;
@@ -1683,7 +1591,7 @@
         const MIN_DEPOSIT_DZD = 2000;
 
         // ============================================================
-        // 3. DEFAULT PLANS (إذا لم توجد بيانات في Firestore)
+        // 3. DEFAULT INVESTMENT PLANS
         // ============================================================
         const DEFAULT_INVEST_PLANS = [{
             id: 'plan_a',
@@ -1727,32 +1635,6 @@
             currency: 'DZD',
             isActive: true,
             displayOrder: 3
-        }];
-
-        const DEFAULT_MINING_PACKAGES = [{
-            id: 'mining_basic',
-            type: 'mining',
-            name: 'باقة أساسية',
-            description: 'تعدين بقوة 5 H/s',
-            icon: '⛏️',
-            price: 50,
-            hashRate: 5,
-            duration: 30,
-            currency: 'USDT',
-            isActive: true,
-            displayOrder: 1
-        }, {
-            id: 'mining_advanced',
-            type: 'mining',
-            name: 'باقة متقدمة',
-            description: 'تعدين بقوة 12 H/s',
-            icon: '⚡',
-            price: 120,
-            hashRate: 12,
-            duration: 30,
-            currency: 'USDT',
-            isActive: true,
-            displayOrder: 2
         }];
 
         // ============================================================
@@ -1845,21 +1727,6 @@
                             dzdReferral: 0,
                             dzdLocked: 0
                         },
-                        miningData: {
-                            currentPackage: null,
-                            totalMined: 0,
-                            totalMinedDZD: 0,
-                            totalReferrals: 0,
-                            totalReferralsLevel2: 0,
-                            miningHistory: {
-                                today: 0,
-                                todayDZD: 0,
-                                thisWeek: 0,
-                                thisWeekDZD: 0,
-                                thisMonth: 0,
-                                thisMonthDZD: 0
-                            }
-                        },
                         investments: [],
                         totalInvested: 0,
                         totalInvestmentReturns: 0,
@@ -1874,7 +1741,6 @@
                     console.log('✅ تم إنشاء حساب جديد:', displayName);
                 }
 
-                // استماع لحظي للتحديثات
                 if (unsubscribeUser) unsubscribeUser();
                 unsubscribeUser = db.collection('users').doc(telegramId).onSnapshot((doc) => {
                     if (doc.exists) {
@@ -1889,11 +1755,10 @@
                     }
                 });
 
-                await loadPlansAndPackages();
+                await loadPlans();
                 await loadExchangeRate();
 
                 updateUI();
-                startMining();
                 startInvestmentReturns();
 
                 renderTransactions(userData.transactions || []);
@@ -1957,10 +1822,8 @@
             const map = {
                 'deposit': 'fa-arrow-down text-success',
                 'withdraw': 'fa-arrow-up text-danger',
-                'purchase': 'fa-cart-shopping text-accent',
                 'investment': 'fa-chart-line text-gold',
                 'investment_return': 'fa-coins text-gold',
-                'mining_reward': 'fa-microchip text-accent',
                 'referral_bonus': 'fa-users text-accent',
                 'reward': 'fa-gift text-warning'
             };
@@ -1971,10 +1834,8 @@
             const map = {
                 'deposit': 'إيداع',
                 'withdraw': 'سحب',
-                'purchase': 'شراء باقة تعدين',
                 'investment': 'استثمار',
                 'investment_return': 'أرباح استثمار',
-                'mining_reward': 'أرباح تعدين',
                 'referral_bonus': 'عمولة إحالة',
                 'reward': 'مكافأة'
             };
@@ -2050,7 +1911,7 @@
             document.getElementById('currencyDzdBtn').className = currency === 'DZD' ? 'active-dzd' : '';
             document.getElementById('currentCurrencyDisplay').textContent = currency;
             updateUI();
-            renderPlansAndPackages();
+            renderPlans();
         }
 
         async function loadExchangeRate() {
@@ -2061,102 +1922,14 @@
         }
 
         // ============================================================
-        // 9. MINING SIMULATION
-        // ============================================================
-        let pendingMiningReward = 0;
-        let pendingMiningRewardDZD = 0;
-        let miningWriteInterval = null;
-        const MINING_WRITE_INTERVAL = 120000; // دقيقتان
-        const MINING_MIN_REWARD = 0.001;
-
-        function startMining() {
-            if (miningInterval) clearInterval(miningInterval);
-            if (miningWriteInterval) clearInterval(miningWriteInterval);
-
-            miningInterval = setInterval(() => {
-                if (!userData || !userData.miningData?.currentPackage) return;
-                const pkg = userData.miningData.currentPackage;
-                const now = new Date();
-                const end = pkg.endDate?.toDate ? pkg.endDate.toDate() : new Date(pkg.endDate);
-                if (now > end) {
-                    document.getElementById('miningStatus').textContent = 'منتهي';
-                    document.getElementById('miningStatus').className = 'status status-danger';
-                    return;
-                }
-                const hashRate = pkg.hashRate || 0;
-                const reward = hashRate * 0.001;
-                if (reward <= 0) return;
-
-                pendingMiningReward += reward;
-                pendingMiningRewardDZD += reward * exchangeRate;
-
-                updateMiningUI();
-
-            }, 30000);
-
-            miningWriteInterval = setInterval(async () => {
-                if (pendingMiningReward < MINING_MIN_REWARD) return;
-                try {
-                    const ref = db.collection('users').doc(userData.telegramId);
-                    const rewardToWrite = pendingMiningReward;
-                    const rewardDZDToWrite = pendingMiningRewardDZD;
-
-                    await db.runTransaction(async (t) => {
-                        const doc = await t.get(ref);
-                        if (!doc.exists) return;
-
-                        const nowTimestamp = new Date();
-                        t.update(ref, {
-                            'wallets.reward': firebase.firestore.FieldValue.increment(rewardToWrite),
-                            'wallets.dzdReward': firebase.firestore.FieldValue.increment(rewardDZDToWrite),
-                            'miningData.totalMined': firebase.firestore.FieldValue.increment(rewardToWrite),
-                            'miningData.totalMinedDZD': firebase.firestore.FieldValue.increment(rewardDZDToWrite),
-                            'miningData.miningHistory.today': firebase.firestore.FieldValue.increment(rewardToWrite),
-                            'miningData.miningHistory.todayDZD': firebase.firestore.FieldValue.increment(
-                                rewardDZDToWrite),
-                            'miningData.miningHistory.thisWeek': firebase.firestore.FieldValue.increment(
-                                rewardToWrite),
-                            'miningData.miningHistory.thisWeekDZD': firebase.firestore.FieldValue.increment(
-                                rewardDZDToWrite),
-                            'miningData.miningHistory.thisMonth': firebase.firestore.FieldValue.increment(
-                                rewardToWrite),
-                            'miningData.miningHistory.thisMonthDZD': firebase.firestore.FieldValue.increment(
-                                rewardDZDToWrite),
-                            'transactions': firebase.firestore.FieldValue.arrayUnion({
-                                type: 'mining_reward',
-                                amount: rewardToWrite,
-                                currency: 'USDT',
-                                description: `أرباح تعدين (${rewardToWrite.toFixed(4)} USDT)`,
-                                timestamp: nowTimestamp
-                            })
-                        });
-                    });
-
-                    pendingMiningReward = 0;
-                    pendingMiningRewardDZD = 0;
-                    console.log(`✅ تم كتابة ${rewardToWrite.toFixed(4)} USDT أرباح تعدين`);
-
-                } catch (e) {
-                    console.error('❌ فشل كتابة أرباح التعدين:', e);
-                }
-            }, MINING_WRITE_INTERVAL);
-        }
-
-        window.addEventListener('beforeunload', () => {
-            if (miningInterval) clearInterval(miningInterval);
-            if (miningWriteInterval) clearInterval(miningWriteInterval);
-            if (investmentInterval) clearInterval(investmentInterval);
-        });
-
-        // ============================================================
-        // 10. INVESTMENT DAILY RETURNS (توزيع الأرباح اليومية)
+        // 9. INVESTMENT DAILY RETURNS
         // ============================================================
         function startInvestmentReturns() {
             if (investmentInterval) clearInterval(investmentInterval);
             investmentInterval = setInterval(() => {
                 if (!userData || !userData.investments || userData.investments.length === 0) return;
                 processInvestmentReturns();
-            }, 60000); // كل دقيقة للاختبار، يمكن تعديله إلى 24 ساعة
+            }, 60000);
         }
 
         async function processInvestmentReturns() {
@@ -2229,8 +2002,12 @@
             }
         }
 
+        window.addEventListener('beforeunload', () => {
+            if (investmentInterval) clearInterval(investmentInterval);
+        });
+
         // ============================================================
-        // 11. NAVIGATION
+        // 10. NAVIGATION
         // ============================================================
         function navigateTo(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2242,14 +2019,13 @@
                 page === 'home' ? tg.BackButton.hide() : tg.BackButton.show();
             }
             if (page === 'wallet') updateWalletUI();
-            if (page === 'mining') updateMiningUI();
             if (page === 'referrals') updateReferralUI();
             if (page === 'profile') updateProfileUI();
             if (page === 'investments') renderInvestments();
         }
 
         // ============================================================
-        // 12. UI UPDATES
+        // 11. UI UPDATES
         // ============================================================
         function updateUI() {
             if (!userData) return;
@@ -2281,7 +2057,6 @@
             updateProfileUI();
             updateHomeUI();
             updateWalletUI();
-            updateMiningUI();
             updateReferralUI();
             renderInvestments();
         }
@@ -2310,20 +2085,19 @@
             const balance = isDZD ?
                 (u.wallets?.dzd || 0) + (u.wallets?.dzdReward || 0) + (u.wallets?.dzdReferral || 0) :
                 (u.wallets?.main || 0) + (u.wallets?.reward || 0) + (u.wallets?.referral || 0);
-            const mined = isDZD ? (u.miningData?.totalMinedDZD || 0) : (u.miningData?.totalMined || 0);
             document.getElementById('homeBalance').textContent = balance.toFixed(2);
             document.getElementById('homeCurrency').textContent = selectedCurrency;
-            document.getElementById('homeMined').textContent = mined.toFixed(2);
             document.getElementById('homeReferrals').textContent = u.miningData?.totalReferrals || 0;
-            const pkg = u.miningData?.currentPackage;
-            document.getElementById('homePackage').textContent = pkg && pkg.name ? pkg.name : 'لا توجد';
-            const card = document.getElementById('homeBalanceCard');
-            card.className = isDZD ? 'card dzd-gradient' : 'card gradient';
+            document.getElementById('homeInvestCount').textContent = (u.investments || []).filter(i => i.status === 'active')
+                .length;
 
             const totalInvested = u.totalInvested || 0;
             const totalReturn = u.totalInvestmentReturns || 0;
             document.getElementById('homeTotalInvested').textContent = isDZD ? totalInvested.toFixed(2) : (totalInvested /
                 exchangeRate).toFixed(2);
+            document.getElementById('homeTotalInvested2').textContent = isDZD ? totalInvested.toFixed(2) : (totalInvested /
+                exchangeRate).toFixed(2);
+
             let daily = 0;
             if (u.investments) {
                 u.investments.forEach(inv => {
@@ -2334,35 +2108,8 @@
             }
             document.getElementById('homeDailyReturn').textContent = isDZD ? daily.toFixed(2) : (daily / exchangeRate)
                 .toFixed(2);
-            updateMiningStatus();
-        }
-
-        function updateMiningStatus() {
-            const pkg = userData?.miningData?.currentPackage;
-            const statusEl = document.getElementById('miningStatus');
-            const hashRateEl = document.getElementById('miningHashRate');
-            const endsEl = document.getElementById('miningEnds');
-            const progressEl = document.getElementById('miningProgress');
-            if (!pkg || !pkg.endDate) {
-                statusEl.textContent = 'غير نشط';
-                statusEl.className = 'status status-danger';
-                hashRateEl.textContent = '0.00 H/s';
-                endsEl.textContent = '--';
-                progressEl.style.width = '0%';
-                return;
-            }
-            const now = new Date();
-            const end = pkg.endDate.toDate ? pkg.endDate.toDate() : new Date(pkg.endDate);
-            const total = pkg.duration || 30;
-            const start = new Date(end.getTime() - total * 24 * 60 * 60 * 1000);
-            const elapsed = (now - start) / (1000 * 60 * 60 * 24);
-            const progress = Math.min(100, (elapsed / total) * 100);
-            const isActive = now < end;
-            statusEl.textContent = isActive ? 'نشط' : 'منتهي';
-            statusEl.className = `status ${isActive ? 'status-success' : 'status-danger'}`;
-            hashRateEl.textContent = `${pkg.hashRate || 0} H/s`;
-            endsEl.textContent = formatDateTime(end);
-            progressEl.style.width = `${Math.min(100, progress)}%`;
+            const card = document.getElementById('homeBalanceCard');
+            card.className = isDZD ? 'card dzd-gradient' : 'card gradient';
         }
 
         function updateWalletUI() {
@@ -2388,28 +2135,6 @@
             document.getElementById('withdrawMinAmount').textContent = `${minWithdraw.toFixed(2)} ${selectedCurrency}`;
         }
 
-        function updateMiningUI() {
-            if (!userData) return;
-            const md = userData.miningData || {};
-            const pkg = md.currentPackage;
-            const hashRate = pkg?.hashRate || 0;
-            const isDZD = selectedCurrency === 'DZD';
-            document.getElementById('miningDetailHashRate').textContent = hashRate.toFixed(2);
-            const daily = hashRate * 1.44;
-            const dailyDZD = daily * exchangeRate;
-            document.getElementById('miningDailyEarnings').textContent = isDZD ? dailyDZD.toFixed(2) : daily.toFixed(2);
-            document.getElementById('miningDailyCurrency').textContent = selectedCurrency;
-            document.getElementById('miningTotalMined').textContent = isDZD ? (md.totalMinedDZD || 0).toFixed(2) : (md
-                .totalMined || 0).toFixed(2);
-            document.getElementById('miningToday').textContent = isDZD ? (md.miningHistory?.todayDZD || 0).toFixed(2) : (md
-                .miningHistory?.today || 0).toFixed(2);
-            document.getElementById('miningThisWeek').textContent = isDZD ? (md.miningHistory?.thisWeekDZD || 0).toFixed(
-                2) : (md.miningHistory?.thisWeek || 0).toFixed(2);
-            document.getElementById('miningThisMonth').textContent = isDZD ? (md.miningHistory?.thisMonthDZD || 0)
-                .toFixed(2) : (md.miningHistory?.thisMonth || 0).toFixed(2);
-            document.getElementById('miningCard').className = isDZD ? 'card dzd-gradient' : 'card gradient';
-        }
-
         function updateReferralUI() {
             if (!userData) return;
             const isDZD = selectedCurrency === 'DZD';
@@ -2420,7 +2145,7 @@
         }
 
         // ============================================================
-        // 13. DEPOSIT
+        // 12. DEPOSIT
         // ============================================================
         function updateDepositMethod() {
             const currency = document.getElementById('depositCurrency').value;
@@ -2552,7 +2277,7 @@
         }
 
         // ============================================================
-        // 14. WITHDRAW (رسوم 10%، حد أدنى 1000 DZD)
+        // 13. WITHDRAW
         // ============================================================
         function updateWithdrawMethod() {
             const currency = document.getElementById('withdrawCurrency').value;
@@ -2589,7 +2314,7 @@
                 if (!recipient) { showToast('أدخل معرف Binance Pay الخاص بك'); return; }
             }
 
-            const fee = amount * 0.10; // 10% رسوم
+            const fee = amount * 0.10;
             const total = amount + fee;
             if (!confirm(`تأكيد سحب ${amount} ${currency}? الرسوم: ${fee.toFixed(2)}`)) return;
 
@@ -2709,122 +2434,80 @@
         }
 
         // ============================================================
-        // 15. PLANS & PACKAGES (Investment + Mining) - مع بيانات افتراضية
+        // 14. PLANS (Investment only)
         // ============================================================
         const PLANS_CACHE_KEY = 'crynova_plans_cache';
         const PLANS_CACHE_TTL = 3600000;
 
-        async function loadPlansAndPackages(force = false) {
-            // حاول تحميل من Firestore
+        async function loadPlans(force = false) {
             let investPlans = [];
-            let miningPackages = [];
-
             try {
                 const plansSnap = await db.collection('packages')
+                    .where('type', '==', 'investment')
                     .where('isActive', '==', true)
                     .orderBy('displayOrder')
                     .get();
 
                 plansSnap.forEach(doc => {
-                    const data = { id: doc.id, ...doc.data() };
-                    if (data.type === 'investment') investPlans.push(data);
-                    else if (data.type === 'mining') miningPackages.push(data);
+                    investPlans.push({ id: doc.id, ...doc.data() });
                 });
             } catch (e) {
                 console.warn('⚠️ فشل تحميل الخطط من Firestore، سيتم استخدام الخطط الافتراضية');
             }
 
-            // إذا لم توجد خطط، استخدم الافتراضية
             if (investPlans.length === 0) {
                 investPlans = DEFAULT_INVEST_PLANS;
             }
-            if (miningPackages.length === 0) {
-                miningPackages = DEFAULT_MINING_PACKAGES;
-            }
 
             allInvestPlans = investPlans;
-            allMiningPackages = miningPackages;
 
-            // تخزين مؤقت
             try {
                 localStorage.setItem(PLANS_CACHE_KEY, JSON.stringify({
                     investPlans: allInvestPlans,
-                    miningPackages: allMiningPackages,
                     timestamp: Date.now()
                 }));
             } catch (e) { /* ignore */ }
 
-            renderPlansAndPackages();
-            console.log('📦 تم عرض الخطط (من Firestore أو افتراضية)');
+            renderPlans();
+            console.log('📦 تم عرض خطط الاستثمار');
         }
 
-        function renderPlansAndPackages() {
-            // خطط الاستثمار
-            const investContainer = document.getElementById('investPlansList');
+        function renderPlans() {
+            const container = document.getElementById('investPlansList');
             if (!allInvestPlans.length) {
-                investContainer.innerHTML =
+                container.innerHTML =
                     `<div class="card text-center" style="padding:32px 0;"><div style="font-size:48px;">📊</div><div style="font-size:18px;font-weight:700;">لا توجد خطط استثمار</div></div>`;
-            } else {
-                const isDZD = selectedCurrency === 'DZD';
-                investContainer.innerHTML = allInvestPlans.map((p, i) => {
-                    const minAmount = isDZD ? p.minAmount : (p.minAmount / exchangeRate);
-                    const maxAmount = isDZD ? p.maxAmount : (p.maxAmount / exchangeRate);
-                    const cur = isDZD ? 'DZD' : 'USDT';
-                    return `
-                        <div class="plan-card ${i===1?'popular':''}">
-                            ${i===1?'<div class="badge-popular">⭐ الأفضل</div>':''}
-                            <div class="icon">${p.icon||'📈'}</div>
-                            <div class="name">${p.name}</div>
-                            <div class="subtitle">${p.description||'استثمر واربح يومياً'}</div>
-                            <div class="return ${isDZD?'dzd-return':''}">${p.dailyReturnPercent}% <small>يومياً</small></div>
-                            <ul class="features">
-                                <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}</li>
-                                <li><i class="fas fa-clock"></i> المدة: ${p.durationDays||30} يوم</li>
-                                <li><i class="fas fa-percent"></i> العائد: ${p.dailyReturnPercent}% يومياً</li>
-                                ${p.capitalReturnable?'<li><i class="fas fa-undo"></i> استرداد رأس المال</li>':''}
-                            </ul>
-                            <button class="btn ${i===1?(isDZD?'btn-dzd':'btn-primary'):'btn-outline'}" onclick="purchaseInvestment('${p.id}')">
-                                <i class="fas fa-plus-circle"></i> استثمر الآن
-                            </button>
-                        </div>
-                    `;
-                }).join('');
+                return;
             }
 
-            // باقات التعدين
-            const miningContainer = document.getElementById('miningPackagesList');
-            if (!allMiningPackages.length) {
-                miningContainer.innerHTML =
-                    `<div class="card text-center" style="padding:32px 0;"><div style="font-size:48px;">⛏️</div><div style="font-size:18px;font-weight:700;">لا توجد باقات تعدين</div></div>`;
-            } else {
-                const isDZD = selectedCurrency === 'DZD';
-                miningContainer.innerHTML = allMiningPackages.map((p, i) => {
-                    const price = isDZD ? p.price * exchangeRate : p.price;
-                    const cur = isDZD ? 'DZD' : p.currency || 'USDT';
-                    return `
-                        <div class="plan-card ${i===1?'popular':''}">
-                            ${i===1?'<div class="badge-popular">⭐ الأفضل</div>':''}
-                            <div class="icon">${p.icon||'⛏️'}</div>
-                            <div class="name">${p.name}</div>
-                            <div class="subtitle">${p.description||'قوة تعدين عالية'}</div>
-                            <div class="return ${isDZD?'dzd-return':''}">${p.hashRate} <small>H/s</small></div>
-                            <ul class="features">
-                                <li><i class="fas fa-tag"></i> السعر: ${price.toFixed(2)} ${cur}</li>
-                                <li><i class="fas fa-clock"></i> المدة: ${p.duration} يوم</li>
-                                <li><i class="fas fa-microchip"></i> القوة: ${p.hashRate} H/s</li>
-                                ${p.features?.map(f=>`<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('')||''}
-                            </ul>
-                            <button class="btn ${i===1?(isDZD?'btn-dzd':'btn-primary'):'btn-outline'}" onclick="purchaseMiningPackage('${p.id}')">
-                                <i class="fas fa-cart-plus"></i> شراء
-                            </button>
-                        </div>
-                    `;
-                }).join('');
-            }
+            const isDZD = selectedCurrency === 'DZD';
+            container.innerHTML = allInvestPlans.map((p, i) => {
+                const minAmount = isDZD ? p.minAmount : (p.minAmount / exchangeRate);
+                const maxAmount = isDZD ? p.maxAmount : (p.maxAmount / exchangeRate);
+                const cur = isDZD ? 'DZD' : 'USDT';
+                return `
+                    <div class="plan-card ${i===1?'popular':''}">
+                        ${i===1?'<div class="badge-popular">⭐ الأفضل</div>':''}
+                        <div class="icon">${p.icon||'📈'}</div>
+                        <div class="name">${p.name}</div>
+                        <div class="subtitle">${p.description||'استثمر واربح يومياً'}</div>
+                        <div class="return ${isDZD?'dzd-return':''}">${p.dailyReturnPercent}% <small>يومياً</small></div>
+                        <ul class="features">
+                            <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}</li>
+                            <li><i class="fas fa-clock"></i> المدة: ${p.durationDays||30} يوم</li>
+                            <li><i class="fas fa-percent"></i> العائد: ${p.dailyReturnPercent}% يومياً</li>
+                            ${p.capitalReturnable?'<li><i class="fas fa-undo"></i> استرداد رأس المال</li>':''}
+                        </ul>
+                        <button class="btn ${i===1?(isDZD?'btn-dzd':'btn-primary'):'btn-outline'}" onclick="purchaseInvestment('${p.id}')">
+                            <i class="fas fa-plus-circle"></i> استثمر الآن
+                        </button>
+                    </div>
+                `;
+            }).join('');
         }
 
         // ============================================================
-        // 16. PURCHASE INVESTMENT
+        // 15. PURCHASE INVESTMENT
         // ============================================================
         async function purchaseInvestment(planId) {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -2941,109 +2624,7 @@
         }
 
         // ============================================================
-        // 17. PURCHASE MINING PACKAGE
-        // ============================================================
-        async function purchaseMiningPackage(id) {
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-            const pkg = allMiningPackages.find(p => p.id === id);
-            if (!pkg) { showToast('الباقة غير موجودة'); return; }
-
-            if (userData.miningData?.currentPackage) {
-                const current = userData.miningData.currentPackage;
-                const end = current.endDate?.toDate ? current.endDate.toDate() : new Date(current.endDate);
-                if (new Date() < end) {
-                    showToast('لديك باقة تعدين نشطة حالياً');
-                    return;
-                }
-            }
-
-            const isDZD = selectedCurrency === 'DZD';
-            const price = isDZD ? pkg.price * exchangeRate : pkg.price;
-            const cur = isDZD ? 'DZD' : pkg.currency || 'USDT';
-
-            let bal = 0;
-            if (isDZD) bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
-            else bal = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
-            if (bal < price) { showToast(`الرصيد غير كافٍ (${price.toFixed(2)} ${cur})`); return; }
-            if (!confirm(`شراء باقة "${pkg.name}" بسعر ${price.toFixed(2)} ${cur}؟`)) return;
-
-            try {
-                await db.runTransaction(async (t) => {
-                    const ref = db.collection('users').doc(userData.telegramId);
-                    const doc = await t.get(ref);
-                    if (!doc.exists) throw new Error('غير موجود');
-
-                    let b = 0;
-                    if (isDZD) b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
-                        .wallets?.dzdReferral || 0);
-                    else b = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward || 0) + (doc.data()
-                        .wallets?.referral || 0);
-                    if (b < price) throw new Error('رصيد غير كاف');
-
-                    let rem = price;
-                    const upd = {};
-                    if (isDZD) {
-                        const m = doc.data().wallets?.dzd || 0,
-                            r = doc.data().wallets?.dzdReward || 0,
-                            refr = doc.data().wallets?.dzdReferral || 0;
-                        const fm = Math.min(rem, m);
-                        rem -= fm;
-                        const fr = Math.min(rem, r);
-                        rem -= fr;
-                        const fref = Math.min(rem, refr);
-                        rem -= fref;
-                        upd['wallets.dzd'] = m - fm;
-                        upd['wallets.dzdReward'] = r - fr;
-                        upd['wallets.dzdReferral'] = refr - fref;
-                    } else {
-                        const m = doc.data().wallets?.main || 0,
-                            r = doc.data().wallets?.reward || 0,
-                            refr = doc.data().wallets?.referral || 0;
-                        const fm = Math.min(rem, m);
-                        rem -= fm;
-                        const fr = Math.min(rem, r);
-                        rem -= fr;
-                        const fref = Math.min(rem, refr);
-                        rem -= fref;
-                        upd['wallets.main'] = m - fm;
-                        upd['wallets.reward'] = r - fr;
-                        upd['wallets.referral'] = refr - fref;
-                    }
-                    const now = new Date();
-                    const endDate = new Date(Date.now() + pkg.duration * 24 * 60 * 60 * 1000);
-                    upd['miningData.currentPackage'] = {
-                        name: pkg.name,
-                        hashRate: pkg.hashRate,
-                        duration: pkg.duration,
-                        endDate: endDate,
-                        packageId: pkg.id,
-                        price: price,
-                        currency: cur
-                    };
-                    upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
-                        type: 'purchase',
-                        amount: price,
-                        currency: cur,
-                        description: `شراء ${pkg.name}`,
-                        balanceAfter: b - price,
-                        timestamp: now,
-                        packageId: pkg.id,
-                        status: 'completed'
-                    });
-                    t.update(ref, upd);
-                });
-
-                showToast(`✅ تم شراء "${pkg.name}" بنجاح!`);
-                await loadTransactions();
-                updateUI();
-            } catch (e) {
-                showToast('❌ ' + (e.message || 'حدث خطأ'));
-            }
-        }
-
-        // ============================================================
-        // 18. RENDER INVESTMENTS
+        // 16. RENDER INVESTMENTS
         // ============================================================
         function renderInvestments() {
             const container = document.getElementById('activeInvestments');
@@ -3107,7 +2688,7 @@
         }
 
         // ============================================================
-        // 19. REFERRALS (مستويين)
+        // 17. REFERRALS (مستويين)
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -3140,7 +2721,7 @@
         }
 
         // ============================================================
-        // 20. MANUAL REFERRAL
+        // 18. MANUAL REFERRAL
         // ============================================================
         async function manualReferral() {
             if (!userData) {
@@ -3246,7 +2827,7 @@
         }
 
         // ============================================================
-        // 21. TRANSACTIONS
+        // 19. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -3309,7 +2890,7 @@
         }
 
         // ============================================================
-        // 22. WITHDRAW CALCULATION
+        // 20. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -3327,7 +2908,7 @@
         });
 
         // ============================================================
-        // 23. THEME TOGGLE
+        // 21. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -3374,7 +2955,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 24. INIT
+        // 22. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -3389,7 +2970,7 @@
             }
         });
 
-        console.log('🚀 Crynova V4 - تم إضافة خطط استثمار افتراضية تظهر تلقائياً');
+        console.log('🚀 Crynova V5 - تم إزالة كل شيء متعلق بالتعدين، فقط استثمار وإحالات ومحفظة');
     </script>
 </body>
 </html>
