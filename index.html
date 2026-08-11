@@ -1911,6 +1911,7 @@
         let exchangeRate = 250;
         let unsubscribeUser = null;
         let currentSelectedPlanId = null;
+        let isModalOpen = false;
 
         const BINANCE_ID = '1143951718';
         const POSTAL_ACCOUNT = '0799999002385412178';
@@ -2076,7 +2077,11 @@
                         transactions: [],
                         referrals: [],
                         deposits: [],
-                        withdrawals: []
+                        withdrawals: [],
+                        miningData: {
+                            totalReferrals: 0,
+                            totalReferralsLevel2: 0
+                        }
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -2121,14 +2126,12 @@
         // ============================================================
         // 7. HELPERS - تم تعديل تنسيق التاريخ هنا
         // ============================================================
-        // دالة تنسيق التاريخ (YYYY/MM/DD)
         function formatDate(timestamp) {
             if (!timestamp) return '--';
             const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
             return date.toISOString().split('T')[0].replace(/-/g, '/');
         }
 
-        // دالة تنسيق التاريخ والوقت (YYYY/MM/DD HH:MM)
         function formatDateTime(timestamp) {
             if (!timestamp) return '--';
             const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -2416,7 +2419,6 @@
             document.getElementById('profileTelegram').textContent = localInfo.username ? `@${localInfo.username}` :
                 'غير متاح';
             document.getElementById('profileTelegramId').textContent = userData.telegramId || '--';
-            // تاريخ التسجيل سيظهر الآن بصيغة 2026/08/11
             document.getElementById('profileJoinDate').textContent = formatDate(userData.joinDate);
 
             const refLink = document.getElementById('referralLink');
@@ -2860,15 +2862,17 @@
         }
 
         // ============================================================
-        // 15. MODAL FUNCTIONS
+        // 15. MODAL FUNCTIONS (محسنة)
         // ============================================================
         function openInvestmentModal(planId) {
+            if (isModalOpen) return; // منع الفتح المزدوج
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
             const plan = allInvestPlans.find(p => p.id === planId);
             if (!plan) { showToast('الخطة غير موجودة'); return; }
 
             currentSelectedPlanId = planId;
+            isModalOpen = true;
 
             const isDZD = selectedCurrency === 'DZD';
             const cur = isDZD ? 'DZD' : 'USDT';
@@ -2886,6 +2890,7 @@
             const input = document.getElementById('modalAmountInput');
             const slider = document.getElementById('modalRangeSlider');
 
+            // إعادة تعيين القيم
             input.min = minAmount;
             input.max = maxAmount;
             input.step = isDZD ? 100 : 1;
@@ -2896,6 +2901,7 @@
             slider.step = isDZD ? 100 : 1;
             slider.value = minAmount;
 
+            // تحديث الرصيد
             let balance = 0;
             if (isDZD) {
                 balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
@@ -2905,20 +2911,44 @@
             document.getElementById('modalUserBalance').textContent = balance.toFixed(2);
 
             updateModalCalculations();
-            document.getElementById('investmentModal').classList.add('active');
+
+            // عرض المودال
+            const modal = document.getElementById('investmentModal');
+            modal.classList.add('active');
             document.body.style.overflow = 'hidden';
+
+            // التأكد من إزالة المستمع القديم وإضافة مستمع واحد للإغلاق عند النقر على الخلفية
+            modal.onclick = null;
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeInvestmentModal();
+                }
+            });
         }
 
         function closeInvestmentModal() {
-            document.getElementById('investmentModal').classList.remove('active');
+            const modal = document.getElementById('investmentModal');
+            modal.classList.remove('active');
             document.body.style.overflow = '';
+            isModalOpen = false;
             currentSelectedPlanId = null;
+            depositData = null;
+
+            // إعادة تعيين الحقول (اختياري)
+            document.getElementById('modalAmountInput').value = 0;
+            document.getElementById('modalRangeSlider').value = 0;
         }
 
         function adjustAmount(change) {
+            // منع انتشار الحدث
+            event?.preventDefault?.();
+            event?.stopPropagation?.();
+
             const input = document.getElementById('modalAmountInput');
             let val = parseFloat(input.value) || 0;
-            val = Math.max(parseFloat(input.min), Math.min(parseFloat(input.max), val + change));
+            const min = parseFloat(input.min) || 0;
+            const max = parseFloat(input.max) || 0;
+            val = Math.max(min, Math.min(max, val + change));
             const step = parseFloat(input.step) || 1;
             val = Math.round(val / step) * step;
             input.value = val;
@@ -2926,30 +2956,33 @@
             updateModalCalculations();
         }
 
+        // إعادة تعيين المستمعين عند التحميل
         document.addEventListener('DOMContentLoaded', function() {
             const input = document.getElementById('modalAmountInput');
             const slider = document.getElementById('modalRangeSlider');
 
-            input.addEventListener('input', function() {
+            // استبدال العناصر لإزالة أي مستمعين قديمين
+            input.replaceWith(input.cloneNode(true));
+            slider.replaceWith(slider.cloneNode(true));
+
+            // إعادة ربط المستمعين بالعناصر الجديدة
+            const newInput = document.getElementById('modalAmountInput');
+            const newSlider = document.getElementById('modalRangeSlider');
+
+            newInput.addEventListener('input', function() {
                 let val = parseFloat(this.value) || 0;
                 const min = parseFloat(this.min);
                 const max = parseFloat(this.max);
                 if (val < min) val = min;
                 if (val > max) val = max;
-                slider.value = val;
+                newSlider.value = val;
                 updateModalCalculations();
             });
 
-            slider.addEventListener('input', function() {
+            newSlider.addEventListener('input', function() {
                 const val = parseFloat(this.value);
-                input.value = val;
+                newInput.value = val;
                 updateModalCalculations();
-            });
-
-            document.getElementById('investmentModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeInvestmentModal();
-                }
             });
         });
 
@@ -2999,10 +3032,16 @@
         // 16. CONFIRM INVESTMENT
         // ============================================================
         async function confirmInvestment() {
-            if (!currentSelectedPlanId) { showToast('حدث خطأ، حاول مرة أخرى'); return; }
+            if (!currentSelectedPlanId) {
+                showToast('حدث خطأ، حاول مرة أخرى');
+                return;
+            }
 
             const plan = allInvestPlans.find(p => p.id === currentSelectedPlanId);
-            if (!plan) { showToast('الخطة غير موجودة'); return; }
+            if (!plan) {
+                showToast('الخطة غير موجودة');
+                return;
+            }
 
             const input = document.getElementById('modalAmountInput');
             const amount = parseFloat(input.value) || 0;
@@ -3031,6 +3070,7 @@
 
             if (!confirm(`تأكيد استثمار ${amount.toFixed(2)} ${cur} في "${plan.name}"؟`)) return;
 
+            // إغلاق المودال فوراً
             closeInvestmentModal();
 
             try {
@@ -3488,7 +3528,7 @@
             }
         });
 
-        console.log('🚀 Crynova V7.4 - تم تعديل تنسيق التاريخ إلى YYYY/MM/DD في صفحة الحساب وجميع التواريخ');
+        console.log('🚀 Crynova V7.4 - تم إصلاح مشكلة المودال وتنسيق التاريخ');
     </script>
 </body>
 </html>
