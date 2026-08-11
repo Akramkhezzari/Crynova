@@ -451,17 +451,17 @@
             background: var(--success);
         }
 
-        /* PLAN CARDS - تم تصغير حجم المستويات */
+        /* PLAN CARDS - تم تصغير الحجم */
         .plan-card {
             background: var(--bg-card);
             border-radius: var(--radius-md);
-            padding: 18px 16px;
+            padding: 14px 12px;
             border: 2px solid var(--border);
             transition: var(--transition);
             cursor: pointer;
             position: relative;
             overflow: hidden;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
         .plan-card::before {
             content: '';
@@ -476,8 +476,8 @@
         }
         .plan-card:hover {
             border-color: var(--accent);
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
         }
         .plan-card:hover::before {
             opacity: 1;
@@ -488,64 +488,58 @@
         }
         .plan-card.popular .badge-popular {
             position: absolute;
-            top: 12px;
-            right: 12px;
+            top: 10px;
+            right: 10px;
             background: var(--gold);
             color: white;
-            padding: 4px 14px;
+            padding: 3px 12px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
         }
         .plan-card .icon {
-            font-size: 36px;
+            font-size: 28px;
             display: block;
             text-align: center;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .plan-card .name {
-            font-size: 17px;
+            font-size: 15px;
             font-weight: 800;
             text-align: center;
         }
-        .plan-card .subtitle {
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 13px;
-            margin-top: 2px;
-        }
         .plan-card .return {
             text-align: center;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 900;
             color: var(--accent);
-            margin: 6px 0;
+            margin: 4px 0;
         }
         .plan-card .return.dzd-return {
             color: var(--dzd-color);
         }
         .plan-card .return small {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--text-secondary);
         }
         .plan-card .features {
             list-style: none;
             padding: 0;
-            margin: 8px 0 14px;
+            margin: 6px 0 12px;
         }
         .plan-card .features li {
-            padding: 4px 0;
+            padding: 3px 0;
             color: var(--text-secondary);
-            font-size: 13px;
+            font-size: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         .plan-card .features li i {
             color: var(--success);
-            font-size: 14px;
-            width: 20px;
+            font-size: 12px;
+            width: 18px;
             text-align: center;
         }
 
@@ -875,7 +869,7 @@
                 padding: 10px 8px;
             }
             .plan-card .return {
-                font-size: 20px;
+                font-size: 18px;
             }
             .bottom-nav {
                 bottom: 12px;
@@ -909,10 +903,13 @@
                 padding: 6px 10px;
             }
             .plan-card .icon {
-                font-size: 30px;
+                font-size: 24px;
             }
             .plan-card .name {
-                font-size: 15px;
+                font-size: 13px;
+            }
+            .plan-card .features li {
+                font-size: 11px;
             }
         }
 
@@ -1597,19 +1594,16 @@
         const MIN_DEPOSIT_DZD = 2000;
 
         // ============================================================
-        // 3. DEFAULT INVESTMENT PLANS - 5 مستويات مع مكافآت
+        // 3. DEFAULT INVESTMENT PLANS - 5 مستويات مع مكافآت (بدون وصف، مدة، استرداد)
         // ============================================================
         const DEFAULT_INVEST_PLANS = [{
             id: 'plan_basic',
             type: 'investment',
             name: '⭐ المستوى الأساسي',
-            description: 'بداية ممتازة للاستثمار',
             icon: '🥉',
             minAmount: 2000,
             maxAmount: 4999,
             dailyReturnPercent: 5,
-            durationDays: 30,
-            capitalReturnable: true,
             currency: 'DZD',
             isActive: true,
             displayOrder: 1,
@@ -1618,13 +1612,10 @@
             id: 'plan_advanced',
             type: 'investment',
             name: '🚀 المستوى المتقدم',
-            description: 'عوائد متزايدة مع مبلغ أعلى',
             icon: '🥈',
             minAmount: 5000,
             maxAmount: 9999,
             dailyReturnPercent: 5.5,
-            durationDays: 30,
-            capitalReturnable: true,
             currency: 'DZD',
             isActive: true,
             displayOrder: 2,
@@ -1633,13 +1624,10 @@
             id: 'plan_premium',
             type: 'investment',
             name: '💎 المستوى المميز',
-            description: 'أفضل توازن بين المخاطرة والعائد',
             icon: '🥇',
             minAmount: 10000,
             maxAmount: 19999,
             dailyReturnPercent: 6,
-            durationDays: 30,
-            capitalReturnable: true,
             currency: 'DZD',
             isActive: true,
             displayOrder: 3,
@@ -1648,13 +1636,10 @@
             id: 'plan_pro',
             type: 'investment',
             name: '👑 المستوى الاحترافي',
-            description: 'للمستثمرين الجادين',
             icon: '💼',
             minAmount: 20000,
             maxAmount: 34999,
             dailyReturnPercent: 6.5,
-            durationDays: 30,
-            capitalReturnable: true,
             currency: 'DZD',
             isActive: true,
             displayOrder: 4,
@@ -1663,13 +1648,10 @@
             id: 'plan_elite',
             type: 'investment',
             name: '🏆 المستوى النخبة',
-            description: 'أعلى عائد وأعلى استثمار',
             icon: '👑',
             minAmount: 35000,
             maxAmount: 50000,
             dailyReturnPercent: 7,
-            durationDays: 30,
-            capitalReturnable: true,
             currency: 'DZD',
             isActive: true,
             displayOrder: 5,
@@ -2530,13 +2512,9 @@
                         ${isPopular ? '<div class="badge-popular">⭐ الأفضل</div>' : ''}
                         <div class="icon">${p.icon || '📈'}</div>
                         <div class="name">${p.name}</div>
-                        <div class="subtitle">${p.description || 'استثمر واربح يومياً'}</div>
                         <div class="return ${isDZD ? 'dzd-return' : ''}">${p.dailyReturnPercent}% <small>يومياً</small></div>
                         <ul class="features">
                             <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}</li>
-                            <li><i class="fas fa-clock"></i> المدة: ${p.durationDays || 30} يوم</li>
-                            <li><i class="fas fa-percent"></i> العائد: ${p.dailyReturnPercent}% يومياً</li>
-                            ${p.capitalReturnable ? '<li><i class="fas fa-undo"></i> استرداد رأس المال</li>' : ''}
                             ${p.bonusAmount ? `<li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: <strong>${p.bonusAmount} DZD</strong></li>` : ''}
                         </ul>
                         <button class="btn ${isPopular ? (isDZD ? 'btn-dzd' : 'btn-primary') : 'btn-outline'}" onclick="purchaseInvestment('${p.id}')">
@@ -2583,7 +2561,7 @@
 
             try {
                 const now = new Date();
-                const endDate = new Date(Date.now() + (plan.durationDays || 30) * 24 * 60 * 60 * 1000);
+                const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // مدة ثابتة 30 يوم
                 const investmentId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
                 const investmentObj = {
@@ -2593,13 +2571,13 @@
                     amount: baseAmount,
                     currency: isDZD ? 'DZD' : 'USDT',
                     dailyReturnPercent: plan.dailyReturnPercent,
-                    durationDays: plan.durationDays || 30,
+                    durationDays: 30,
                     startDate: now,
                     endDate: endDate,
                     status: 'active',
                     totalReturn: 0,
                     lastReturnDate: null,
-                    capitalReturnable: plan.capitalReturnable || false
+                    capitalReturnable: true // لا يظهر لكن يحتفظ به
                 };
 
                 await db.runTransaction(async (t) => {
@@ -3024,7 +3002,7 @@
             }
         });
 
-        console.log('🚀 Crynova V6 - 5 مستويات استثمار مع مكافآت أول استثمار');
+        console.log('🚀 Crynova V6 - 5 مستويات مع مكافآت (بدون وصف، مدة، استرداد)');
     </script>
 </body>
 </html>
