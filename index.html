@@ -2447,7 +2447,7 @@
         }
 
         // ============================================================
-        // 14. PLANS (Investment only)
+        // 14. PLANS (Investment only) - مع التعديلات المطلوبة
         // ============================================================
         const PLANS_CACHE_KEY = 'crynova_plans_cache';
         const PLANS_CACHE_TTL = 3600000;
@@ -2485,6 +2485,7 @@
             console.log('📦 تم عرض خطط العوائد الثابتة');
         }
 
+        // ========== دالة renderPlans المُعدَّلة ==========
         function renderPlans() {
             const container = document.getElementById('investPlansList');
             if (!allInvestPlans.length) {
@@ -2498,14 +2499,20 @@
                 const minAmount = isDZD ? p.minAmount : (p.minAmount / exchangeRate);
                 const maxAmount = isDZD ? p.maxAmount : (p.maxAmount / exchangeRate);
                 const cur = isDZD ? 'DZD' : 'USDT';
+
+                // حساب الربح اليومي الأدنى والأعلى
+                const minDailyProfit = (minAmount * p.dailyReturnPercent) / 100;
+                const maxDailyProfit = (maxAmount * p.dailyReturnPercent) / 100;
+
                 return `
                     <div class="plan-card ${i===1?'popular':''}">
                         ${i===1?'<div class="badge-popular">⭐ الأفضل</div>':''}
                         <div class="name">${p.name}</div>
-                        <div class="subtitle">${p.description||''}</div>
+                        <!-- تم إزالة سطر subtitle -->
                         <div class="return ${isDZD?'dzd-return':''}">${p.dailyReturnPercent}% <small>يومياً</small></div>
                         <ul class="features">
                             <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}</li>
+                            <li><i class="fas fa-chart-line"></i> الربح اليومي: ${minDailyProfit.toFixed(2)} - ${maxDailyProfit.toFixed(2)} ${cur}</li>
                         </ul>
                         <button class="btn ${i===1?(isDZD?'btn-dzd':'btn-primary'):'btn-outline'}" onclick="purchaseInvestment('${p.id}')">
                             <i class="fas fa-plus-circle"></i> استثمر الآن
