@@ -1658,7 +1658,7 @@
                     <span id="modalExpectedDaily" style="font-weight:700;color:var(--gold);">0.00</span>
                 </div>
                 <div id="modalBonusInfo" style="font-size:13px;color:var(--gold);margin-top:8px;display:none;">
-                    🎁 مكافأة أول استثمار: <span id="modalBonusAmount">0</span> DZD
+                    🎁 مكافأة أول استثمار: <span id="modalBonusAmount">0</span> <span id="modalBonusCurrency">DZD</span>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1707,7 +1707,7 @@
         const MIN_DEPOSIT_DZD = 2000;
 
         // ============================================================
-        // 3. DEFAULT INVESTMENT PLANS - 5 مستويات مع مكافآت (بدون وصف، مدة، استرداد)
+        // 3. DEFAULT INVESTMENT PLANS - 5 مستويات مع مكافآت
         // ============================================================
         const DEFAULT_INVEST_PLANS = [{
             id: 'plan_basic',
@@ -2568,7 +2568,7 @@
         }
 
         // ============================================================
-        // 14. PLANS (Investment only) - مع إضافة الربح اليومي المتوقع ومودال الاستثمار
+        // 14. PLANS (Investment only) - مع عرض المكافأة بالعملة المختارة
         // ============================================================
         const PLANS_CACHE_KEY = 'crynova_plans_cache';
         const PLANS_CACHE_TTL = 3600000;
@@ -2625,6 +2625,19 @@
                 const dailyMin = (minAmount * p.dailyReturnPercent) / 100;
                 const dailyMax = (maxAmount * p.dailyReturnPercent) / 100;
 
+                // عرض المكافأة بالعملة المختارة
+                let bonusDisplay = '';
+                if (p.bonusAmount) {
+                    let bonusValue = p.bonusAmount;
+                    let bonusCurrency = 'DZD';
+                    if (!isDZD) {
+                        bonusValue = bonusValue / exchangeRate;
+                        bonusCurrency = 'USDT';
+                    }
+                    bonusDisplay =
+                        `<li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: <strong>${bonusValue.toFixed(2)} ${bonusCurrency}</strong></li>`;
+                }
+
                 return `
                     <div class="plan-card ${isPopular ? 'popular' : ''}">
                         ${isPopular ? '<div class="badge-popular">⭐ الأفضل</div>' : ''}
@@ -2634,7 +2647,7 @@
                         <ul class="features">
                             <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}</li>
                             <li><i class="fas fa-chart-line" style="color:var(--gold);"></i> الربح اليومي: ${dailyMin.toFixed(0)} - ${dailyMax.toFixed(0)} ${cur}</li>
-                            ${p.bonusAmount ? `<li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: <strong>${p.bonusAmount} DZD</strong></li>` : ''}
+                            ${bonusDisplay}
                         </ul>
                         <button class="btn ${isPopular ? (isDZD ? 'btn-dzd' : 'btn-primary') : 'btn-outline'}" onclick="showInvestmentModal('${p.id}')">
                             <i class="fas fa-plus-circle"></i> استثمر الآن
@@ -2675,11 +2688,18 @@
                 updateExpectedDaily(plan);
             };
 
-            // عرض المكافأة إن وجدت
+            // عرض المكافأة بالعملة المختارة
             const bonusInfo = document.getElementById('modalBonusInfo');
             if (plan.bonusAmount && plan.bonusAmount > 0) {
+                let bonusValue = plan.bonusAmount;
+                let bonusCurrency = 'DZD';
+                if (!isDZD) {
+                    bonusValue = bonusValue / exchangeRate;
+                    bonusCurrency = 'USDT';
+                }
+                document.getElementById('modalBonusAmount').textContent = bonusValue.toFixed(2);
+                document.getElementById('modalBonusCurrency').textContent = bonusCurrency;
                 bonusInfo.style.display = 'block';
-                document.getElementById('modalBonusAmount').textContent = plan.bonusAmount;
             } else {
                 bonusInfo.style.display = 'none';
             }
@@ -2689,7 +2709,6 @@
 
             // إظهار المودال
             document.getElementById('investmentModal').style.display = 'flex';
-            // التركيز على حقل الإدخال
             setTimeout(() => amountInput.focus(), 100);
         }
 
@@ -2706,7 +2725,6 @@
             if (amount && !isNaN(amount) && amount > 0) {
                 const baseAmount = isDZD ? amount : amount * exchangeRate;
                 expected = (baseAmount * plan.dailyReturnPercent) / 100;
-                // عرض المبلغ بالعملة المختارة
                 if (!isDZD) expected = expected / exchangeRate;
             }
             document.getElementById('modalExpectedDaily').textContent = expected.toFixed(2) + ' ' + cur;
@@ -3201,7 +3219,7 @@
             }
         });
 
-        console.log('🚀 Crynova V7 - مودال استثمار متطور بدلاً من prompt/confirm');
+        console.log('🚀 Crynova V7 - مودال استثمار متطور وعرض المكافأة بالعملة المختارة');
     </script>
 </body>
 </html>
