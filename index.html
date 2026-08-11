@@ -114,7 +114,6 @@
             padding: 16px 16px 24px;
         }
 
-        /* HEADER */
         .app-header {
             display: flex;
             justify-content: space-between;
@@ -160,7 +159,6 @@
             box-shadow: var(--shadow-md);
         }
 
-        /* PAGES */
         .page {
             display: none;
             animation: fadeSlideIn 0.4s ease;
@@ -180,7 +178,6 @@
             }
         }
 
-        /* CARDS */
         .card {
             background: var(--bg-card);
             border-radius: var(--radius-md);
@@ -247,7 +244,6 @@
             font-size: 18px;
         }
 
-        /* BALANCE */
         .balance-large {
             font-size: 40px;
             font-weight: 900;
@@ -273,7 +269,6 @@
             margin-right: 4px;
         }
 
-        /* STAT BOXES */
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -320,7 +315,6 @@
             display: block;
         }
 
-        /* BUTTONS */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -352,7 +346,6 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 32px rgba(108, 92, 231, 0.35);
         }
-
         .btn-success {
             background: var(--success);
             color: white;
@@ -361,7 +354,6 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(0, 184, 148, 0.35);
         }
-
         .btn-danger {
             background: var(--danger);
             color: white;
@@ -370,7 +362,6 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(225, 112, 85, 0.35);
         }
-
         .btn-dzd {
             background: linear-gradient(135deg, #e17055, #d63031);
             color: white;
@@ -380,7 +371,6 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 32px rgba(225, 112, 85, 0.4);
         }
-
         .btn-gold {
             background: linear-gradient(135deg, #f9a825, #f57f17);
             color: white;
@@ -390,7 +380,6 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 32px rgba(249, 168, 37, 0.4);
         }
-
         .btn-outline {
             background: transparent;
             border: 2px solid var(--border);
@@ -401,7 +390,6 @@
             color: var(--accent);
             background: var(--accent-glow);
         }
-
         .btn-ghost {
             background: var(--bg-input);
             color: var(--text-secondary);
@@ -419,11 +407,7 @@
             font-size: 12px;
             border-radius: 6px;
         }
-        .btn-block {
-            width: 100%;
-        }
 
-        /* COPY BUTTON */
         .copy-btn {
             background: var(--accent);
             color: white;
@@ -451,7 +435,6 @@
             background: var(--success);
         }
 
-        /* PLAN CARDS - تم تصغير الحجم */
         .plan-card {
             background: var(--bg-card);
             border-radius: var(--radius-md);
@@ -543,7 +526,6 @@
             text-align: center;
         }
 
-        /* MODAL */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -613,7 +595,6 @@
             flex: 1;
         }
 
-        /* BOTTOM NAVIGATION */
         .bottom-nav {
             position: fixed;
             bottom: 16px;
@@ -676,7 +657,6 @@
             color: var(--text-primary);
         }
 
-        /* INPUTS */
         .input-group {
             margin-bottom: 16px;
         }
@@ -731,7 +711,6 @@
             padding-right: 44px;
         }
 
-        /* LIST ITEMS */
         .list-item {
             display: flex;
             justify-content: space-between;
@@ -783,7 +762,6 @@
             color: var(--text-secondary);
         }
 
-        /* STATUS BADGES */
         .status {
             display: inline-block;
             padding: 4px 14px;
@@ -813,44 +791,12 @@
             color: var(--gold);
         }
 
-        /* QR CODE */
         .qr-container {
             display: flex;
             justify-content: center;
             padding: 16px 0;
         }
-        .qr-container .qr-placeholder {
-            background: white;
-            padding: 16px;
-            border-radius: var(--radius-sm);
-            box-shadow: var(--shadow-sm);
-            width: 180px;
-            height: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 64px;
-            color: var(--accent);
-            background: var(--bg-input);
-        }
 
-        /* LOADING */
-        .loader {
-            display: inline-block;
-            width: 28px;
-            height: 28px;
-            border: 3px solid var(--border);
-            border-top: 3px solid var(--accent);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* USER INFO IN HEADER */
         .user-mini {
             display: flex;
             align-items: center;
@@ -882,7 +828,6 @@
             border-radius: 10px;
         }
 
-        /* CURRENCY SELECTOR IN PROFILE */
         .currency-selector {
             display: flex;
             gap: 8px;
@@ -918,88 +863,25 @@
             margin-left: 6px;
         }
 
-        /* RESPONSIVE */
-        @media (max-width: 420px) {
-            .app-container {
-                padding: 12px;
-            }
-            .balance-large {
-                font-size: 32px;
-            }
-            .grid-2 {
-                gap: 8px;
-            }
-            .grid-3 {
-                gap: 6px;
-            }
-            .stat-box .number {
-                font-size: 18px;
-            }
-            .stat-box {
-                padding: 10px 8px;
-            }
-            .plan-card .return {
-                font-size: 18px;
-            }
-            .bottom-nav {
-                bottom: 12px;
-                width: calc(100% - 24px);
-                padding: 4px 2px;
-            }
-            .nav-item {
-                padding: 4px 6px;
-                font-size: 10px;
-            }
-            .nav-item i {
-                font-size: 18px;
-            }
-            .card {
-                padding: 16px;
-            }
-            .btn {
-                padding: 12px 18px;
-                font-size: 14px;
-            }
-            .user-mini .user-name {
-                font-size: 11px;
-            }
-            .user-mini .avatar-small {
-                width: 28px;
-                height: 28px;
-                font-size: 12px;
-            }
-            .currency-selector button {
-                font-size: 12px;
-                padding: 6px 10px;
-            }
-            .plan-card .icon {
-                font-size: 24px;
-            }
-            .plan-card .name {
-                font-size: 13px;
-            }
-            .plan-card .features li {
-                font-size: 11px;
-            }
-            .modal-box {
-                padding: 18px 16px;
-            }
-            .modal-header h3 {
-                font-size: 18px;
-            }
+        .invest-stat {
+            background: rgba(249, 168, 37, 0.08);
+            border: 1px solid rgba(249, 168, 37, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            text-align: center;
+        }
+        .invest-stat .number {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        .invest-stat .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-weight: 600;
         }
 
-        @media (min-width: 768px) {
-            .app-container {
-                padding: 24px;
-            }
-            .bottom-nav {
-                bottom: 24px;
-                padding: 8px 6px;
-            }
-        }
-
-        /* UTILITY */
         .text-center {
             text-align: center;
         }
@@ -1088,24 +970,84 @@
             cursor: pointer;
         }
 
-        /* Investment specific */
-        .invest-stat {
-            background: rgba(249, 168, 37, 0.08);
-            border: 1px solid rgba(249, 168, 37, 0.2);
-            border-radius: var(--radius-sm);
-            padding: 12px;
-            text-align: center;
+        @media (max-width: 420px) {
+            .app-container {
+                padding: 12px;
+            }
+            .balance-large {
+                font-size: 32px;
+            }
+            .grid-2 {
+                gap: 8px;
+            }
+            .grid-3 {
+                gap: 6px;
+            }
+            .stat-box .number {
+                font-size: 18px;
+            }
+            .stat-box {
+                padding: 10px 8px;
+            }
+            .plan-card .return {
+                font-size: 18px;
+            }
+            .bottom-nav {
+                bottom: 12px;
+                width: calc(100% - 24px);
+                padding: 4px 2px;
+            }
+            .nav-item {
+                padding: 4px 6px;
+                font-size: 10px;
+            }
+            .nav-item i {
+                font-size: 18px;
+            }
+            .card {
+                padding: 16px;
+            }
+            .btn {
+                padding: 12px 18px;
+                font-size: 14px;
+            }
+            .user-mini .user-name {
+                font-size: 11px;
+            }
+            .user-mini .avatar-small {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            .currency-selector button {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+            .plan-card .icon {
+                font-size: 24px;
+            }
+            .plan-card .name {
+                font-size: 13px;
+            }
+            .plan-card .features li {
+                font-size: 11px;
+            }
+            .modal-box {
+                padding: 18px 16px;
+            }
+            .modal-header h3 {
+                font-size: 18px;
+            }
         }
-        .invest-stat .number {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--gold);
-        }
-        .invest-stat .label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            font-weight: 600;
+
+        @media (min-width: 768px) {
+            .app-container {
+                padding: 24px;
+            }
+            .bottom-nav {
+                bottom: 24px;
+                padding: 8px 6px;
+            }
         }
     </style>
 </head>
@@ -1177,7 +1119,6 @@
                 </div>
             </div>
 
-            <!-- إحصائيات الاستثمار -->
             <div class="card gold-gradient">
                 <div class="flex-between">
                     <div>
@@ -1210,14 +1151,12 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: PACKAGES (العوائد الثابتة) ========== -->
+        <!-- ========== PAGE: PACKAGES ========== -->
         <div class="page" id="page-packages">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-cubes text-accent"></i> خطط العوائد الثابتة
             </h2>
-            <div id="investPlansList">
-                <!-- سيتم ملؤها بواسطة JS -->
-            </div>
+            <div id="investPlansList"></div>
         </div>
 
         <!-- ========== PAGE: INVESTMENTS ========== -->
@@ -1299,7 +1238,6 @@
                         <option value="DZD">DZD (Baridi Mob)</option>
                     </select>
                 </div>
-                <!-- حقل معرف Binance (يظهر عند اختيار USDT) -->
                 <div class="input-group" id="depositBinanceGroup">
                     <label>معرف Binance Pay <span class="required">*</span></label>
                     <div style="display:flex;gap:8px;align-items:center;">
@@ -1312,7 +1250,6 @@
                         <i class="fas fa-info-circle"></i> قم بالتحويل عبر Binance Pay إلى هذا المعرف
                     </div>
                 </div>
-                <!-- حقل Baridi Mob (يظهر عند اختيار DZD) -->
                 <div class="input-group" id="depositEccpGroup" style="display:none;">
                     <label>رقم حساب Baridi Mob <span class="required">*</span></label>
                     <div style="display:flex;gap:8px;align-items:center;">
@@ -1342,16 +1279,12 @@
                 <div class="card" style="border:2px solid var(--success);">
                     <div class="text-center">
                         <div style="font-size:14px;color:var(--text-secondary);font-weight:600;">أرسل المبلغ إلى الحساب التالي</div>
-                        <div style="font-size:16px;font-weight:700;word-break:break-all;padding:14px;background:var(--bg-input);border-radius:var(--radius-sm);margin:12px 0;border:1px dashed var(--border);" id="depositAddress">
-                            1143951718
-                        </div>
+                        <div style="font-size:16px;font-weight:700;word-break:break-all;padding:14px;background:var(--bg-input);border-radius:var(--radius-sm);margin:12px 0;border:1px dashed var(--border);" id="depositAddress">1143951718</div>
                         <button class="btn btn-sm btn-outline" style="width:auto;" onclick="copyText(document.getElementById('depositAddress').textContent)">
                             <i class="fas fa-copy"></i> نسخ الحساب
                         </button>
                     </div>
-                    <div class="qr-container" id="depositQR">
-                        <!-- سيتم تعبئتها ديناميكياً -->
-                    </div>
+                    <div class="qr-container" id="depositQR"></div>
                     <div class="input-group mt-16">
                         <label>رقم عملية التحويل <span class="required">*</span></label>
                         <div class="input-icon">
@@ -1402,7 +1335,6 @@
                         <option value="DZD">DZD (Baridi Mob)</option>
                     </select>
                 </div>
-                <!-- حقل معرف Binance للمستلم (يظهر عند اختيار USDT) -->
                 <div class="input-group" id="withdrawBinanceGroup">
                     <label>معرف Binance Pay الخاص بك <span class="required">*</span></label>
                     <div class="input-icon">
@@ -1413,7 +1345,6 @@
                         <i class="fas fa-info-circle"></i> سيتم تحويل المبلغ إلى هذا المعرف عبر Binance Pay
                     </div>
                 </div>
-                <!-- حقل Baridi Mob للمستلم (يظهر عند اختيار DZD) -->
                 <div class="input-group" id="withdrawBaridiGroup" style="display:none;">
                     <label>معرف Baridi Mob الخاص بك <span class="required">*</span></label>
                     <div class="input-icon">
@@ -1460,20 +1391,22 @@
             <div class="card" style="background:var(--accent-glow);border:2px solid var(--accent-light);">
                 <div class="text-center">
                     <div style="font-size:52px;margin-bottom:8px;">🎁</div>
-                    <div style="font-size:20px;font-weight:900;">اربح 15% من إيداع المدعو</div>
-                    <div style="color:var(--text-secondary);font-size:15px;">و 5% من إيداع مدعو مدعوك</div>
+                    <div style="font-size:20px;font-weight:900;">اربح <span id="refBonusPercent">10</span>% من إيداع المدعو</div>
+                    <div style="color:var(--text-secondary);font-size:15px;">نسبتك تعتمد على مستواك الحالي</div>
+                    <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">
+                        مستواك الحالي: <strong id="refUserLevel">1</strong>
+                    </div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:6px;background:rgba(0,0,0,0.05);padding:8px;border-radius:8px;">
+                        🎁 عند التسجيل عبر رابط الدعوة: تحصل على <strong>300 دج</strong> مجمدة، تتحرر بعد أول إيداع
+                    </div>
                 </div>
             </div>
-            <div class="grid-3">
+
+            <div class="grid-2">
                 <div class="stat-box">
                     <span class="icon">👤</span>
                     <div class="number" id="refCount">0</div>
                     <div class="label">المدعوين المباشرين</div>
-                </div>
-                <div class="stat-box">
-                    <span class="icon">👥</span>
-                    <div class="number" id="refLevel2Count">0</div>
-                    <div class="label">المدعوين غير المباشرين</div>
                 </div>
                 <div class="stat-box">
                     <span class="icon">💰</span>
@@ -1481,6 +1414,7 @@
                     <div class="label">العمولات</div>
                 </div>
             </div>
+
             <div class="card">
                 <div style="font-size:14px;color:var(--text-secondary);font-weight:600;margin-bottom:8px;">رابط الدعوة الخاص بك</div>
                 <div style="display:flex;gap:8px;">
@@ -1493,6 +1427,23 @@
                     <i class="fas fa-share-alt"></i> مشاركة الرابط
                 </button>
             </div>
+
+            <div class="card">
+                <div style="display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;margin-bottom:12px;">
+                    <i class="fas fa-user-plus" style="color:var(--text-muted);width:20px;"></i>
+                    تسجيل إحالة يدوية
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <input type="text" id="manualReferralCode" placeholder="أدخل معرف المُحيل (Telegram ID)" style="flex:1;padding:12px 14px;background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-weight:600;font-size:14px;font-family:inherit;min-width:150px;">
+                    <button class="btn btn-primary btn-sm" style="width:auto;padding:12px 20px;" onclick="manualReferral()">
+                        <i class="fas fa-check"></i> تسجيل
+                    </button>
+                </div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">
+                    <i class="fas fa-info-circle"></i> أدخل معرف Telegram الخاص بالشخص الذي دعاك (ستحصل أنت على 300 دج مجمدة)
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-title" style="margin-bottom:12px;"><i class="fas fa-list"></i> قائمة المدعوين</div>
                 <div id="referralsList">
@@ -1532,9 +1483,7 @@
                 <i class="fas fa-user text-accent"></i> الحساب
             </h2>
             <div class="card text-center" style="padding:24px;">
-                <div style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:white;margin:0 auto 12px;box-shadow:var(--shadow-glow);" id="profileAvatar">
-                    ?
-                </div>
+                <div style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:white;margin:0 auto 12px;box-shadow:var(--shadow-glow);" id="profileAvatar">?</div>
                 <div style="font-size:22px;font-weight:900;" id="profileName">المستخدم</div>
                 <div style="color:var(--text-secondary);font-size:14px;" id="profileTelegram">@username</div>
                 <div style="margin-top:8px;"><span class="status status-info">المستوى <span id="profileLevel">1</span></span></div>
@@ -1560,21 +1509,7 @@
                     </button>
                 </div>
             </div>
-            <div class="card">
-                <div style="display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;margin-bottom:12px;">
-                    <i class="fas fa-user-plus" style="color:var(--text-muted);width:20px;"></i>
-                    تسجيل إحالة يدوية
-                </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <input type="text" id="manualReferralCode" placeholder="أدخل معرف المُحيل (Telegram ID)" style="flex:1;padding:12px 14px;background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-weight:600;font-size:14px;font-family:inherit;min-width:150px;">
-                    <button class="btn btn-primary btn-sm" style="width:auto;padding:12px 20px;" onclick="manualReferral()">
-                        <i class="fas fa-check"></i> تسجيل
-                    </button>
-                </div>
-                <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">
-                    <i class="fas fa-info-circle"></i> أدخل معرف Telegram الخاص بالشخص الذي دعاك (ستحصل أنت و هو على مكافأة)
-                </div>
-            </div>
+
             <div class="card">
                 <div style="padding:4px 0 12px 0;border-bottom:1px solid var(--border-light);">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -1680,7 +1615,6 @@
             messagingSenderId: "858898515024",
             appId: "1:858898515024:web:03827d57c2737bbc27bd55"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
@@ -1697,8 +1631,6 @@
         let selectedCurrency = 'USDT';
         let exchangeRate = 250;
         let unsubscribeUser = null;
-
-        // متغيرات المودال
         let currentModalPlan = null;
 
         const BINANCE_ID = '1143951718';
@@ -1707,211 +1639,58 @@
         const MIN_DEPOSIT_DZD = 2000;
 
         // ============================================================
-        // 3. DEFAULT INVESTMENT PLANS - 5 مستويات مع مكافآت
+        // 3. DEFAULT INVESTMENT PLANS (5 مستويات)
         // ============================================================
         const DEFAULT_INVEST_PLANS = [{
             id: 'plan_basic',
-            type: 'investment',
             name: '⭐ المستوى الأساسي',
             icon: '🥉',
             minAmount: 2000,
             maxAmount: 4999,
             dailyReturnPercent: 5,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 1,
             bonusAmount: 500
         }, {
             id: 'plan_advanced',
-            type: 'investment',
             name: '🚀 المستوى المتقدم',
             icon: '🥈',
             minAmount: 5000,
             maxAmount: 9999,
             dailyReturnPercent: 5.5,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 2,
             bonusAmount: 1250
         }, {
             id: 'plan_premium',
-            type: 'investment',
             name: '💎 المستوى المميز',
             icon: '🥇',
             minAmount: 10000,
             maxAmount: 19999,
             dailyReturnPercent: 6,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 3,
             bonusAmount: 2500
         }, {
             id: 'plan_pro',
-            type: 'investment',
             name: '👑 المستوى الاحترافي',
             icon: '💼',
             minAmount: 20000,
             maxAmount: 34999,
             dailyReturnPercent: 6.5,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 4,
             bonusAmount: 5000
         }, {
             id: 'plan_elite',
-            type: 'investment',
             name: '🏆 المستوى النخبة',
             icon: '👑',
             minAmount: 35000,
             maxAmount: 50000,
             dailyReturnPercent: 7,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 5,
             bonusAmount: 8750
         }];
 
         // ============================================================
-        // 4. LOCAL STORAGE HELPERS
+        // 4. HELPERS
         // ============================================================
-        function setLocalUserInfo(displayName, username, photoURL) {
-            try {
-                localStorage.setItem('crynova_user_displayName', displayName || 'مستخدم');
-                localStorage.setItem('crynova_user_username', username || '');
-                localStorage.setItem('crynova_user_photoURL', photoURL || '');
-            } catch (e) { /* ignore */ }
+        function getReferralBonusPercent(level) {
+            const levels = { 1: 10, 2: 12, 3: 14, 4: 16, 5: 18 };
+            return levels[level] || 10;
         }
 
-        function getLocalUserInfo() {
-            try {
-                return {
-                    displayName: localStorage.getItem('crynova_user_displayName') || 'مستخدم',
-                    username: localStorage.getItem('crynova_user_username') || '',
-                    photoURL: localStorage.getItem('crynova_user_photoURL') || ''
-                };
-            } catch (e) {
-                return { displayName: 'مستخدم', username: '', photoURL: '' };
-            }
-        }
-
-        function clearLocalUserInfo() {
-            try {
-                localStorage.removeItem('crynova_user_displayName');
-                localStorage.removeItem('crynova_user_username');
-                localStorage.removeItem('crynova_user_photoURL');
-            } catch (e) { /* ignore */ }
-        }
-
-        // ============================================================
-        // 5. TELEGRAM INTEGRATION
-        // ============================================================
-        function getTelegramUser() {
-            if (window.Telegram && window.Telegram.WebApp) {
-                const tg = window.Telegram.WebApp;
-                tg.expand();
-                tg.enableClosingConfirmation();
-                return tg.initDataUnsafe?.user || null;
-            }
-            return null;
-        }
-
-        // ============================================================
-        // 6. AUTHENTICATION
-        // ============================================================
-        async function authUser() {
-            const tgUser = getTelegramUser();
-            if (!tgUser) {
-                console.error('❌ لا يمكن العثور على مستخدم Telegram');
-                return false;
-            }
-
-            const telegramId = tgUser.id.toString();
-
-            try {
-                const userRef = db.collection('users').doc(telegramId);
-                const docSnap = await userRef.get();
-
-                if (docSnap.exists) {
-                    userData = { telegramId: telegramId, ...docSnap.data() };
-                    const displayName = userData.displayName || tgUser.first_name || 'مستخدم';
-                    const username = userData.username || tgUser.username || '';
-                    const photoURL = userData.photoURL || tgUser.photo_url || '';
-                    setLocalUserInfo(displayName, username, photoURL);
-                    console.log('✅ مرحباً بعودتك,', displayName);
-                } else {
-                    const displayName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
-                    const username = tgUser.username || '';
-                    const photoURL = tgUser.photo_url ||
-                        `https://ui-avatars.com/api/?name=${displayName || 'U'}&background=6c5ce7&color=fff&size=128`;
-
-                    const newUser = {
-                        telegramId: telegramId,
-                        joinDate: firebase.firestore.FieldValue.serverTimestamp(),
-                        level: 1,
-                        status: 'active',
-                        referrer: null,
-                        referrerLevel2: null,
-                        wallets: {
-                            main: 0,
-                            reward: 0,
-                            referral: 0,
-                            locked: 0,
-                            dzd: 0,
-                            dzdReward: 0,
-                            dzdReferral: 0,
-                            dzdLocked: 0
-                        },
-                        investments: [],
-                        totalInvested: 0,
-                        totalInvestmentReturns: 0,
-                        transactions: [],
-                        referrals: [],
-                        deposits: [],
-                        withdrawals: []
-                    };
-                    await userRef.set(newUser);
-                    userData = { telegramId: telegramId, ...newUser };
-                    setLocalUserInfo(displayName, username, photoURL);
-                    console.log('✅ تم إنشاء حساب جديد:', displayName);
-                }
-
-                if (unsubscribeUser) unsubscribeUser();
-                unsubscribeUser = db.collection('users').doc(telegramId).onSnapshot((doc) => {
-                    if (doc.exists) {
-                        userData = { telegramId: doc.id, ...doc.data() };
-                        updateUI();
-                        renderTransactions(userData.transactions || []);
-                        renderReferrals(userData.referrals || []);
-                        renderDeposits(userData.deposits || []);
-                        renderWithdrawals(userData.withdrawals || []);
-                        renderInvestments();
-                        console.log('✅ تحديث لحظي للبيانات');
-                    }
-                });
-
-                await loadPlans();
-                await loadExchangeRate();
-
-                updateUI();
-                startInvestmentReturns();
-
-                renderTransactions(userData.transactions || []);
-                renderReferrals(userData.referrals || []);
-                renderDeposits(userData.deposits || []);
-                renderWithdrawals(userData.withdrawals || []);
-                renderInvestments();
-
-                return true;
-
-            } catch (e) {
-                console.error('❌ خطأ في المصادقة:', e);
-                return false;
-            }
-        }
-
-        // ============================================================
-        // 7. HELPERS
-        // ============================================================
         function formatDate(timestamp) {
             if (!timestamp) return '--';
             const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -1925,65 +1704,34 @@
         }
 
         function getStatusBadge(status) {
-            const map = {
-                'active': 'status-success',
-                'pending': 'status-pending',
-                'completed': 'status-success',
-                'confirmed': 'status-success',
-                'rejected': 'status-danger',
-                'failed': 'status-danger',
-                'processing': 'status-pending',
-                'inactive': 'status-danger'
-            };
+            const map = { 'active': 'status-success', 'pending': 'status-pending', 'completed': 'status-success',
+                'confirmed': 'status-success', 'rejected': 'status-danger', 'failed': 'status-danger',
+                'processing': 'status-pending', 'inactive': 'status-danger' };
             return map[status] || 'status-info';
         }
 
         function getStatusText(status) {
-            const map = {
-                'active': 'نشط',
-                'pending': 'قيد الانتظار',
-                'completed': 'مكتمل',
-                'confirmed': 'مؤكد',
-                'rejected': 'مرفوض',
-                'failed': 'فشل',
-                'processing': 'قيد المعالجة',
-                'inactive': 'غير نشط'
-            };
+            const map = { 'active': 'نشط', 'pending': 'قيد الانتظار', 'completed': 'مكتمل', 'confirmed': 'مؤكد',
+                'rejected': 'مرفوض', 'failed': 'فشل', 'processing': 'قيد المعالجة', 'inactive': 'غير نشط' };
             return map[status] || status;
         }
 
         function getTransactionIcon(type) {
-            const map = {
-                'deposit': 'fa-arrow-down text-success',
-                'withdraw': 'fa-arrow-up text-danger',
-                'investment': 'fa-chart-line text-gold',
-                'investment_return': 'fa-coins text-gold',
-                'referral_bonus': 'fa-users text-accent',
-                'reward': 'fa-gift text-warning'
-            };
+            const map = { 'deposit': 'fa-arrow-down text-success', 'withdraw': 'fa-arrow-up text-danger',
+                'investment': 'fa-chart-line text-gold', 'investment_return': 'fa-coins text-gold',
+                'referral_bonus': 'fa-users text-accent', 'reward': 'fa-gift text-warning' };
             return map[type] || 'fa-circle text-muted';
         }
 
         function getTransactionLabel(type) {
-            const map = {
-                'deposit': 'إيداع',
-                'withdraw': 'سحب',
-                'investment': 'استثمار',
-                'investment_return': 'أرباح استثمار',
-                'referral_bonus': 'عمولة إحالة',
-                'reward': 'مكافأة'
-            };
+            const map = { 'deposit': 'إيداع', 'withdraw': 'سحب', 'investment': 'استثمار',
+                'investment_return': 'أرباح استثمار', 'referral_bonus': 'عمولة إحالة', 'reward': 'مكافأة' };
             return map[type] || type;
         }
 
         function copyText(text) {
-            if (!text || text === 'جاري التحميل...') {
-                showToast('لا يوجد نص للنسخ');
-                return;
-            }
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => showToast('تم النسخ'));
-            } else {
+            if (!text || text === 'جاري التحميل...') { showToast('لا يوجد نص للنسخ'); return; }
+            if (navigator.clipboard) { navigator.clipboard.writeText(text).then(() => showToast('تم النسخ')); } else {
                 const ta = document.createElement('textarea');
                 ta.value = text;
                 document.body.appendChild(ta);
@@ -2012,10 +1760,8 @@
             copyText(input.value);
             btn.classList.add('copied');
             btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
-            setTimeout(() => {
-                btn.classList.remove('copied');
-                btn.innerHTML = '<i class="fas fa-copy"></i> نسخ';
-            }, 2000);
+            setTimeout(() => { btn.classList.remove('copied');
+                btn.innerHTML = '<i class="fas fa-copy"></i> نسخ'; }, 2000);
         }
 
         function showToast(msg) {
@@ -2037,7 +1783,109 @@
         }
 
         // ============================================================
-        // 8. CURRENCY & EXCHANGE RATE
+        // 5. AUTHENTICATION
+        // ============================================================
+        function getTelegramUser() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.expand();
+                tg.enableClosingConfirmation();
+                return tg.initDataUnsafe?.user || null;
+            }
+            return null;
+        }
+
+        function setLocalUserInfo(displayName, username, photoURL) {
+            try {
+                localStorage.setItem('crynova_user_displayName', displayName || 'مستخدم');
+                localStorage.setItem('crynova_user_username', username || '');
+                localStorage.setItem('crynova_user_photoURL', photoURL || '');
+            } catch (e) { /* ignore */ }
+        }
+
+        function getLocalUserInfo() {
+            try {
+                return {
+                    displayName: localStorage.getItem('crynova_user_displayName') || 'مستخدم',
+                    username: localStorage.getItem('crynova_user_username') || '',
+                    photoURL: localStorage.getItem('crynova_user_photoURL') || ''
+                };
+            } catch (e) { return { displayName: 'مستخدم', username: '', photoURL: '' }; }
+        }
+
+        async function authUser() {
+            const tgUser = getTelegramUser();
+            if (!tgUser) { console.error('❌ لا يمكن العثور على مستخدم Telegram'); return false; }
+            const telegramId = tgUser.id.toString();
+
+            try {
+                const userRef = db.collection('users').doc(telegramId);
+                const docSnap = await userRef.get();
+
+                if (docSnap.exists) {
+                    userData = { telegramId: telegramId, ...docSnap.data() };
+                    const displayName = userData.displayName || tgUser.first_name || 'مستخدم';
+                    const username = userData.username || tgUser.username || '';
+                    const photoURL = userData.photoURL || tgUser.photo_url || '';
+                    setLocalUserInfo(displayName, username, photoURL);
+                } else {
+                    const displayName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
+                    const username = tgUser.username || '';
+                    const photoURL = tgUser.photo_url ||
+                        `https://ui-avatars.com/api/?name=${displayName || 'U'}&background=6c5ce7&color=fff&size=128`;
+                    const newUser = {
+                        telegramId: telegramId,
+                        joinDate: firebase.firestore.FieldValue.serverTimestamp(),
+                        level: 1,
+                        status: 'active',
+                        referrer: null,
+                        wallets: { main: 0, reward: 0, referral: 0, locked: 0, dzd: 0, dzdReward: 0, dzdReferral: 0,
+                            dzdLocked: 0 },
+                        investments: [],
+                        totalInvested: 0,
+                        totalInvestmentReturns: 0,
+                        transactions: [],
+                        referrals: [],
+                        deposits: [],
+                        withdrawals: [],
+                        miningData: { totalReferrals: 0 }
+                    };
+                    await userRef.set(newUser);
+                    userData = { telegramId: telegramId, ...newUser };
+                    setLocalUserInfo(displayName, username, photoURL);
+                }
+
+                if (unsubscribeUser) unsubscribeUser();
+                unsubscribeUser = db.collection('users').doc(telegramId).onSnapshot((doc) => {
+                    if (doc.exists) {
+                        userData = { telegramId: doc.id, ...doc.data() };
+                        updateUI();
+                        renderTransactions(userData.transactions || []);
+                        renderReferrals(userData.referrals || []);
+                        renderDeposits(userData.deposits || []);
+                        renderWithdrawals(userData.withdrawals || []);
+                        renderInvestments();
+                    }
+                });
+
+                await loadPlans();
+                await loadExchangeRate();
+                updateUI();
+                startInvestmentReturns();
+                renderTransactions(userData.transactions || []);
+                renderReferrals(userData.referrals || []);
+                renderDeposits(userData.deposits || []);
+                renderWithdrawals(userData.withdrawals || []);
+                renderInvestments();
+                return true;
+            } catch (e) {
+                console.error('❌ خطأ في المصادقة:', e);
+                return false;
+            }
+        }
+
+        // ============================================================
+        // 6. CURRENCY & EXCHANGE RATE
         // ============================================================
         function setCurrency(currency) {
             selectedCurrency = currency;
@@ -2056,7 +1904,7 @@
         }
 
         // ============================================================
-        // 9. INVESTMENT DAILY RETURNS
+        // 7. INVESTMENT DAILY RETURNS
         // ============================================================
         function startInvestmentReturns() {
             if (investmentInterval) clearInterval(investmentInterval);
@@ -2079,11 +1927,8 @@
                 for (let inv of investments) {
                     if (inv.status !== 'active') continue;
                     const endDate = inv.endDate?.toDate ? inv.endDate.toDate() : new Date(inv.endDate);
-                    if (now > endDate) {
-                        inv.status = 'completed';
-                        updated = true;
-                        continue;
-                    }
+                    if (now > endDate) { inv.status = 'completed';
+                        updated = true; continue; }
                     const lastReturnDate = inv.lastReturnDate?.toDate ? inv.lastReturnDate.toDate() : null;
                     if (!lastReturnDate || lastReturnDate.getDate() !== now.getDate() ||
                         lastReturnDate.getMonth() !== now.getMonth() ||
@@ -2092,7 +1937,6 @@
                         inv.totalReturn = (inv.totalReturn || 0) + dailyReturn;
                         inv.lastReturnDate = now;
                         updated = true;
-
                         const isDZD = inv.currency === 'DZD';
                         if (isDZD) {
                             await ref.update({
@@ -2121,10 +1965,8 @@
                                 })
                             });
                         }
-                        console.log(`✅ تم إضافة أرباح استثمار: ${dailyReturn} ${inv.currency}`);
                     }
                 }
-
                 if (updated) {
                     await ref.update({ investments: investments });
                     userData.investments = investments;
@@ -2141,7 +1983,7 @@
         });
 
         // ============================================================
-        // 10. NAVIGATION
+        // 8. NAVIGATION
         // ============================================================
         function navigateTo(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2159,7 +2001,7 @@
         }
 
         // ============================================================
-        // 11. UI UPDATES
+        // 9. UI UPDATES
         // ============================================================
         function updateUI() {
             if (!userData) return;
@@ -2199,7 +2041,7 @@
             if (!userData) return;
             const localInfo = getLocalUserInfo();
             document.getElementById('profileTelegram').textContent = localInfo.username ? `@${localInfo.username}` :
-                'غير متاح';
+            'غير متاح';
             document.getElementById('profileTelegramId').textContent = userData.telegramId || '--';
             document.getElementById('profileJoinDate').textContent = formatDate(userData.joinDate);
 
@@ -2224,14 +2066,11 @@
             document.getElementById('homeReferrals').textContent = u.miningData?.totalReferrals || 0;
             document.getElementById('homeInvestCount').textContent = (u.investments || []).filter(i => i.status === 'active')
                 .length;
-
             const totalInvested = u.totalInvested || 0;
-            const totalReturn = u.totalInvestmentReturns || 0;
             document.getElementById('homeTotalInvested').textContent = isDZD ? totalInvested.toFixed(2) : (totalInvested /
                 exchangeRate).toFixed(2);
             document.getElementById('homeTotalInvested2').textContent = isDZD ? totalInvested.toFixed(2) : (totalInvested /
                 exchangeRate).toFixed(2);
-
             let daily = 0;
             if (u.investments) {
                 u.investments.forEach(inv => {
@@ -2264,7 +2103,6 @@
             document.getElementById('walletWithdrawable').textContent = total.toFixed(2);
             document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
             document.getElementById('walletBalanceCard').className = isDZD ? 'card dzd-gradient' : 'card gradient';
-
             const minWithdraw = isDZD ? MIN_WITHDRAW_DZD : (MIN_WITHDRAW_DZD / exchangeRate);
             document.getElementById('withdrawMinAmount').textContent = `${minWithdraw.toFixed(2)} ${selectedCurrency}`;
         }
@@ -2274,12 +2112,15 @@
             const isDZD = selectedCurrency === 'DZD';
             const earnings = isDZD ? (userData.wallets?.dzdReferral || 0) : (userData.wallets?.referral || 0);
             document.getElementById('refCount').textContent = userData.miningData?.totalReferrals || 0;
-            document.getElementById('refLevel2Count').textContent = userData.miningData?.totalReferralsLevel2 || 0;
             document.getElementById('refEarnings').textContent = earnings.toFixed(2);
+            const level = userData.level || 1;
+            const percent = getReferralBonusPercent(level);
+            document.getElementById('refBonusPercent').textContent = percent;
+            document.getElementById('refUserLevel').textContent = level;
         }
 
         // ============================================================
-        // 12. DEPOSIT
+        // 10. DEPOSIT
         // ============================================================
         function updateDepositMethod() {
             const currency = document.getElementById('depositCurrency').value;
@@ -2292,13 +2133,11 @@
             const currency = document.getElementById('depositCurrency').value;
             const amount = parseFloat(document.getElementById('depositAmount').value);
             if (!amount || amount < 1) { showToast('أدخل مبلغاً صحيحاً (≥1)'); return; }
-
             const minAmount = currency === 'DZD' ? MIN_DEPOSIT_DZD : (MIN_DEPOSIT_DZD / exchangeRate);
             if (amount < minAmount) {
                 showToast(`الحد الأدنى للإيداع ${minAmount.toFixed(2)} ${currency}`);
                 return;
             }
-
             let address = '';
             let method = '';
             if (currency === 'DZD') {
@@ -2308,11 +2147,9 @@
                 address = `Binance ID: ${BINANCE_ID}`;
                 method = 'Binance Pay';
             }
-
             depositData = { currency, amount, address, method };
             document.getElementById('depositAddress').textContent = address;
             document.getElementById('depositDetails').classList.remove('hidden');
-
             const qr = document.getElementById('depositQR');
             if (currency === 'DZD') {
                 qr.innerHTML = `
@@ -2342,36 +2179,85 @@
             try {
                 const now = new Date();
                 const depositId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+                const depositAmount = depositData.amount;
+                const depositCurrency = depositData.currency;
 
                 const depositObj = {
                     depositId: depositId,
-                    amount: depositData.amount,
-                    currency: depositData.currency,
-                    network: depositData.currency === 'DZD' ? 'Baridi Mob' : 'Binance',
+                    amount: depositAmount,
+                    currency: depositCurrency,
+                    network: depositCurrency === 'DZD' ? 'Baridi Mob' : 'Binance',
                     walletAddress: depositData.address,
                     transactionId: txId,
                     status: 'pending',
                     createdAt: now
                 };
 
-                await db.collection('users').doc(userData.telegramId).update({
+                const userRef = db.collection('users').doc(userData.telegramId);
+                const userDoc = await userRef.get();
+                if (!userDoc.exists) throw new Error('المستخدم غير موجود');
+                const currentData = userDoc.data();
+                const lockedBonus = currentData.wallets?.dzdLocked || 0;
+                const isFirstDeposit = (currentData.deposits || []).length === 0;
+
+                const updates = {
                     'deposits': firebase.firestore.FieldValue.arrayUnion(depositObj),
                     'transactions': firebase.firestore.FieldValue.arrayUnion({
                         type: 'deposit',
-                        amount: depositData.amount,
-                        currency: depositData.currency,
-                        description: `إيداع ${depositData.amount} ${depositData.currency}`,
+                        amount: depositAmount,
+                        currency: depositCurrency,
+                        description: `إيداع ${depositAmount} ${depositCurrency}`,
                         timestamp: now,
                         status: 'pending',
                         depositId: depositId
                     })
-                });
+                };
 
-                showToast('✅ تم إرسال طلب الإيداع، في انتظار المراجعة');
+                // تحرير الرصيد المجمد (أول إيداع)
+                if (isFirstDeposit && lockedBonus > 0) {
+                    updates['wallets.dzdLocked'] = firebase.firestore.FieldValue.increment(-lockedBonus);
+                    updates['wallets.dzdReward'] = firebase.firestore.FieldValue.increment(lockedBonus);
+                    updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
+                        type: 'reward',
+                        amount: lockedBonus,
+                        currency: 'DZD',
+                        description: `🔓 تم تحرير مكافأة التسجيل (${lockedBonus} DZD) بعد الإيداع`,
+                        timestamp: now,
+                        status: 'completed'
+                    });
+                }
+
+                // مكافأة المُحيل المباشر (مستوى واحد فقط)
+                if (userData.referrer) {
+                    const referrerId = userData.referrer;
+                    const referrerRef = db.collection('users').doc(referrerId);
+                    const referrerDoc = await referrerRef.get();
+                    if (referrerDoc.exists) {
+                        const referrerData = referrerDoc.data();
+                        const referrerLevel = referrerData.level || 1;
+                        const bonusPercent = getReferralBonusPercent(referrerLevel);
+                        const bonusAmount = (depositAmount * bonusPercent) / 100;
+                        const bonusCurrency = depositCurrency === 'DZD' ? 'dzdReferral' : 'referral';
+                        const bonusUpdate = {};
+                        bonusUpdate[`wallets.${bonusCurrency}`] = firebase.firestore.FieldValue.increment(bonusAmount);
+                        bonusUpdate['transactions'] = firebase.firestore.FieldValue.arrayUnion({
+                            type: 'referral_bonus',
+                            amount: bonusAmount,
+                            currency: depositCurrency,
+                            description: `عمولة إحالة من ${userData.displayName || 'مستخدم'} (${bonusPercent}%)`,
+                            timestamp: now,
+                            status: 'completed'
+                        });
+                        await referrerRef.update(bonusUpdate);
+                    }
+                }
+
+                await userRef.update(updates);
+                showToast('✅ تم إرسال طلب الإيداع، في انتظار المراجعة' +
+                    (isFirstDeposit && lockedBonus > 0 ? ` 🔓 تم تحرير ${lockedBonus} DZD من المكافأة المجمدة` : ''));
                 document.getElementById('depositTransactionId').value = '';
                 document.getElementById('depositDetails').classList.add('hidden');
                 depositData = null;
-
                 await loadDeposits();
                 await loadTransactions();
                 updateUI();
@@ -2391,10 +2277,7 @@
                     return timeB - timeA;
                 });
                 renderDeposits(list);
-            } catch (e) {
-                console.error(e);
-                renderDeposits([]);
-            }
+            } catch (e) { renderDeposits([]); }
         }
 
         function renderDeposits(list) {
@@ -2411,7 +2294,7 @@
         }
 
         // ============================================================
-        // 13. WITHDRAW
+        // 11. WITHDRAW
         // ============================================================
         function updateWithdrawMethod() {
             const currency = document.getElementById('withdrawCurrency').value;
@@ -2428,7 +2311,6 @@
                 showToast(`الحد الأدنى للسحب ${minAmount.toFixed(2)} ${currency}`);
                 return;
             }
-
             let totalBal = 0;
             if (currency === 'USDT') {
                 totalBal = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral ||
@@ -2438,7 +2320,6 @@
                     ?.dzdReferral || 0);
             }
             if (amount > totalBal) { showToast('الرصيد غير كافٍ'); return; }
-
             let recipient = '';
             if (currency === 'DZD') {
                 recipient = document.getElementById('withdrawBaridiId').value.trim();
@@ -2447,7 +2328,6 @@
                 recipient = document.getElementById('withdrawBinanceId').value.trim();
                 if (!recipient) { showToast('أدخل معرف Binance Pay الخاص بك'); return; }
             }
-
             const fee = amount * 0.10;
             const total = amount + fee;
             if (!confirm(`تأكيد سحب ${amount} ${currency}? الرسوم: ${fee.toFixed(2)}`)) return;
@@ -2455,7 +2335,6 @@
             try {
                 const now = new Date();
                 const withdrawalId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-
                 const withdrawObj = {
                     withdrawalId: withdrawalId,
                     amount: amount,
@@ -2471,7 +2350,6 @@
                     const ref = db.collection('users').doc(userData.telegramId);
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
-
                     let bal = 0;
                     if (currency === 'USDT') {
                         bal = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward || 0) + (doc.data()
@@ -2481,7 +2359,6 @@
                             .wallets?.dzdReferral || 0);
                     }
                     if (bal < total) throw new Error('رصيد غير كاف');
-
                     let rem = total;
                     const upd = {};
                     if (currency === 'USDT') {
@@ -2529,7 +2406,6 @@
                 document.getElementById('withdrawBinanceId').value = '';
                 document.getElementById('withdrawBaridiId').value = '';
                 document.getElementById('withdrawAmount').value = '';
-
                 await loadWithdrawals();
                 await loadTransactions();
                 updateUI();
@@ -2548,10 +2424,7 @@
                     return timeB - timeA;
                 });
                 renderWithdrawals(list);
-            } catch (e) {
-                console.error(e);
-                renderWithdrawals([]);
-            }
+            } catch (e) { renderWithdrawals([]); }
         }
 
         function renderWithdrawals(list) {
@@ -2568,12 +2441,9 @@
         }
 
         // ============================================================
-        // 14. PLANS (Investment only) - مع عرض المكافأة بالعملة المختارة
+        // 12. PLANS
         // ============================================================
-        const PLANS_CACHE_KEY = 'crynova_plans_cache';
-        const PLANS_CACHE_TTL = 3600000;
-
-        async function loadPlans(force = false) {
+        async function loadPlans() {
             let investPlans = [];
             try {
                 const plansSnap = await db.collection('packages')
@@ -2581,29 +2451,11 @@
                     .where('isActive', '==', true)
                     .orderBy('displayOrder')
                     .get();
-
-                plansSnap.forEach(doc => {
-                    investPlans.push({ id: doc.id, ...doc.data() });
-                });
-            } catch (e) {
-                console.warn('⚠️ فشل تحميل الخطط من Firestore، سيتم استخدام الخطط الافتراضية');
-            }
-
-            if (investPlans.length === 0) {
-                investPlans = DEFAULT_INVEST_PLANS;
-            }
-
+                plansSnap.forEach(doc => { investPlans.push({ id: doc.id, ...doc.data() }); });
+            } catch (e) { console.warn('⚠️ فشل تحميل الخطط من Firestore، سيتم استخدام الخطط الافتراضية'); }
+            if (investPlans.length === 0) investPlans = DEFAULT_INVEST_PLANS;
             allInvestPlans = investPlans;
-
-            try {
-                localStorage.setItem(PLANS_CACHE_KEY, JSON.stringify({
-                    investPlans: allInvestPlans,
-                    timestamp: Date.now()
-                }));
-            } catch (e) { /* ignore */ }
-
             renderPlans();
-            console.log('📦 تم عرض خطط العوائد الثابتة (5 مستويات) مع الربح اليومي');
         }
 
         function renderPlans() {
@@ -2613,31 +2465,23 @@
                     `<div class="card text-center" style="padding:32px 0;"><div style="font-size:48px;">📊</div><div style="font-size:18px;font-weight:700;">لا توجد خطط</div></div>`;
                 return;
             }
-
             const isDZD = selectedCurrency === 'DZD';
-            container.innerHTML = allInvestPlans.map((p, i) => {
+            container.innerHTML = allInvestPlans.map((p) => {
                 const minAmount = isDZD ? p.minAmount : (p.minAmount / exchangeRate);
                 const maxAmount = isDZD ? p.maxAmount : (p.maxAmount / exchangeRate);
                 const cur = isDZD ? 'DZD' : 'USDT';
                 const isPopular = (p.id === 'plan_premium' || p.id === 'plan_elite');
-
-                // حساب الربح اليومي المتوقع
                 const dailyMin = (minAmount * p.dailyReturnPercent) / 100;
                 const dailyMax = (maxAmount * p.dailyReturnPercent) / 100;
-
-                // عرض المكافأة بالعملة المختارة
                 let bonusDisplay = '';
                 if (p.bonusAmount) {
                     let bonusValue = p.bonusAmount;
                     let bonusCurrency = 'DZD';
-                    if (!isDZD) {
-                        bonusValue = bonusValue / exchangeRate;
-                        bonusCurrency = 'USDT';
-                    }
+                    if (!isDZD) { bonusValue = bonusValue / exchangeRate;
+                        bonusCurrency = 'USDT'; }
                     bonusDisplay =
                         `<li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: <strong>${bonusValue.toFixed(2)} ${bonusCurrency}</strong></li>`;
                 }
-
                 return `
                     <div class="plan-card ${isPopular ? 'popular' : ''}">
                         ${isPopular ? '<div class="badge-popular">⭐ الأفضل</div>' : ''}
@@ -2658,16 +2502,12 @@
         }
 
         // ============================================================
-        // 15. MODAL FUNCTIONS
+        // 13. MODAL FUNCTIONS
         // ============================================================
         function showInvestmentModal(planId) {
             const plan = allInvestPlans.find(p => p.id === planId);
-            if (!plan) {
-                showToast('الخطة غير موجودة');
-                return;
-            }
+            if (!plan) { showToast('الخطة غير موجودة'); return; }
             currentModalPlan = plan;
-
             const isDZD = selectedCurrency === 'DZD';
             const minAmount = isDZD ? plan.minAmount : (plan.minAmount / exchangeRate);
             const maxAmount = isDZD ? plan.maxAmount : (plan.maxAmount / exchangeRate);
@@ -2678,36 +2518,26 @@
             document.getElementById('modalCurrencyLabel').textContent = cur;
             document.getElementById('modalRangeHint').textContent = `المسموح: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}`;
 
-            // تحديث الربح اليومي المتوقع عند تغيير المبلغ
             const amountInput = document.getElementById('modalAmount');
             amountInput.value = '';
             amountInput.min = minAmount;
             amountInput.max = maxAmount;
             amountInput.placeholder = `أدخل المبلغ (${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)})`;
-            amountInput.oninput = function() {
-                updateExpectedDaily(plan);
-            };
+            amountInput.oninput = function() { updateExpectedDaily(plan); };
 
-            // عرض المكافأة بالعملة المختارة
             const bonusInfo = document.getElementById('modalBonusInfo');
             if (plan.bonusAmount && plan.bonusAmount > 0) {
                 let bonusValue = plan.bonusAmount;
                 let bonusCurrency = 'DZD';
-                if (!isDZD) {
-                    bonusValue = bonusValue / exchangeRate;
-                    bonusCurrency = 'USDT';
-                }
+                if (!isDZD) { bonusValue = bonusValue / exchangeRate;
+                    bonusCurrency = 'USDT'; }
                 document.getElementById('modalBonusAmount').textContent = bonusValue.toFixed(2);
                 document.getElementById('modalBonusCurrency').textContent = bonusCurrency;
                 bonusInfo.style.display = 'block';
             } else {
                 bonusInfo.style.display = 'none';
             }
-
-            // تحديث الربح الابتدائي
             updateExpectedDaily(plan);
-
-            // إظهار المودال
             document.getElementById('investmentModal').style.display = 'flex';
             setTimeout(() => amountInput.focus(), 100);
         }
@@ -2731,17 +2561,11 @@
         }
 
         // ============================================================
-        // 16. CONFIRM INVESTMENT (من المودال)
+        // 14. CONFIRM INVESTMENT
         // ============================================================
         async function confirmInvestment() {
-            if (!userData) {
-                showToast('يرجى تسجيل الدخول');
-                return;
-            }
-            if (!currentModalPlan) {
-                showToast('حدث خطأ، حاول مرة أخرى');
-                return;
-            }
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+            if (!currentModalPlan) { showToast('حدث خطأ، حاول مرة أخرى'); return; }
             const plan = currentModalPlan;
             const isDZD = selectedCurrency === 'DZD';
             const minAmount = isDZD ? plan.minAmount : (plan.minAmount / exchangeRate);
@@ -2754,35 +2578,21 @@
                 showToast(`المبلغ يجب أن يكون بين ${minAmount.toFixed(0)} و ${maxAmount.toFixed(0)} ${cur}`);
                 return;
             }
-
             const baseAmount = isDZD ? amount : amount * exchangeRate;
-
-            // التحقق من الرصيد
             let bal = 0;
             if (isDZD) bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
                 ?.dzdReferral || 0);
             else bal = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
-            if (bal < amount) {
-                showToast(`الرصيد غير كافٍ (${amount.toFixed(2)} ${cur})`);
-                return;
-            }
+            if (bal < amount) { showToast(`الرصيد غير كافٍ (${amount.toFixed(2)} ${cur})`); return; }
 
-            // التحقق من أول استثمار في هذه الخطة
             const isFirstInvestment = !(userData.investments || []).some(inv => inv.planId === plan.id);
-
-            // تأكيد المستخدم
-            if (!confirm(`تأكيد استثمار ${amount.toFixed(2)} ${cur} في "${plan.name}"؟`)) {
-                return;
-            }
-
-            // إغلاق المودال
+            if (!confirm(`تأكيد استثمار ${amount.toFixed(2)} ${cur} في "${plan.name}"؟`)) return;
             closeInvestmentModal();
 
             try {
                 const now = new Date();
                 const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
                 const investmentId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-
                 const investmentObj = {
                     investmentId: investmentId,
                     planId: plan.id,
@@ -2803,8 +2613,6 @@
                     const ref = db.collection('users').doc(userData.telegramId);
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
-
-                    // خصم المبلغ من المحفظة
                     let rem = amount;
                     const upd = {};
                     if (isDZD) {
@@ -2834,7 +2642,6 @@
                         upd['wallets.reward'] = r - fr;
                         upd['wallets.referral'] = refr - fref;
                     }
-
                     upd['investments'] = firebase.firestore.FieldValue.arrayUnion(investmentObj);
                     upd['totalInvested'] = firebase.firestore.FieldValue.increment(baseAmount);
                     upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
@@ -2846,7 +2653,6 @@
                         investmentId: investmentId,
                         status: 'completed'
                     });
-
                     if (isFirstInvestment && plan.bonusAmount > 0) {
                         const bonus = plan.bonusAmount;
                         upd['wallets.dzdReward'] = firebase.firestore.FieldValue.increment(bonus);
@@ -2859,7 +2665,6 @@
                             status: 'completed'
                         });
                     }
-
                     t.update(ref, upd);
                 });
 
@@ -2873,7 +2678,7 @@
         }
 
         // ============================================================
-        // 17. RENDER INVESTMENTS
+        // 15. RENDER INVESTMENTS
         // ============================================================
         function renderInvestments() {
             const container = document.getElementById('activeInvestments');
@@ -2884,7 +2689,6 @@
                 document.getElementById('investTotalReturn').textContent = '0.00';
                 return;
             }
-
             const isDZD = selectedCurrency === 'DZD';
             const totalInvested = userData.totalInvested || 0;
             const totalReturn = userData.totalInvestmentReturns || 0;
@@ -2892,14 +2696,12 @@
                 exchangeRate).toFixed(2);
             document.getElementById('investTotalReturn').textContent = isDZD ? totalReturn.toFixed(2) : (totalReturn /
                 exchangeRate).toFixed(2);
-
             const list = userData.investments.filter(inv => inv.status === 'active');
             if (list.length === 0) {
                 container.innerHTML =
                     '<div class="text-muted text-center" style="padding:30px 0;font-size:15px;">لا توجد استثمارات نشطة حالياً</div>';
                 return;
             }
-
             container.innerHTML = list.map(inv => {
                 const cur = inv.currency || 'DZD';
                 const amount = isDZD ? inv.amount : (inv.amount / exchangeRate);
@@ -2937,94 +2739,28 @@
         }
 
         // ============================================================
-        // 18. REFERRALS (مستويين)
-        // ============================================================
-        async function loadReferrals() {
-            if (!userData) return;
-            try {
-                const list = userData.referrals || [];
-                renderReferrals(list);
-            } catch (e) {
-                console.error(e);
-                renderReferrals([]);
-            }
-        }
-
-        function renderReferrals(list) {
-            const c = document.getElementById('referralsList');
-            if (!list || !list.length) { c.innerHTML =
-                    '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>';
-                return; }
-            c.innerHTML = list.map(r => {
-                const level = r.level || 1;
-                return `
-                    <div class="list-item">
-                        <div class="left"><div class="avatar" style="width:36px;height:36px;font-size:14px;">${(r.displayName||'م').charAt(0)}</div>
-                            <div><div class="title">${r.displayName||'مستخدم'} <span class="status status-info" style="font-size:10px;padding:2px 8px;">المستوى ${level}</span></div>
-                            <div class="sub">${formatDate(r.joinedAt)}</div></div>
-                        </div>
-                        <div class="right"><div style="color:var(--success);font-weight:700;">${r.commissionEarned||0} ${r.currency||'USDT'}</div></div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ============================================================
-        // 19. MANUAL REFERRAL
+        // 16. REFERRALS
         // ============================================================
         async function manualReferral() {
-            if (!userData) {
-                showToast('❌ يرجى تسجيل الدخول أولاً');
-                return;
-            }
-
+            if (!userData) { showToast('❌ يرجى تسجيل الدخول أولاً'); return; }
             const codeInput = document.getElementById('manualReferralCode');
             const referralCode = codeInput.value.trim();
-            if (!referralCode) {
-                showToast('⚠️ أدخل معرف المُحيل');
-                return;
-            }
-            if (referralCode === userData.telegramId) {
-                showToast('⚠️ لا يمكنك إحالة نفسك');
-                return;
-            }
-
-            if (userData.referrer) {
-                showToast('⚠️ لديك إحالة مسجلة مسبقاً');
-                return;
-            }
+            if (!referralCode) { showToast('⚠️ أدخل معرف المُحيل'); return; }
+            if (referralCode === userData.telegramId) { showToast('⚠️ لا يمكنك إحالة نفسك'); return; }
+            if (userData.referrer) { showToast('⚠️ لديك إحالة مسجلة مسبقاً'); return; }
 
             let referrerDoc;
             try {
                 const ref = db.collection('users').doc(referralCode);
                 referrerDoc = await ref.get();
-                if (!referrerDoc.exists) {
-                    showToast('⚠️ لم يتم العثور على مستخدم بهذا المعرف');
-                    return;
-                }
-            } catch (e) {
-                showToast('❌ حدث خطأ أثناء البحث عن المُحيل');
-                return;
-            }
+                if (!referrerDoc.exists) { showToast('⚠️ لم يتم العثور على مستخدم بهذا المعرف'); return; }
+            } catch (e) { showToast('❌ حدث خطأ أثناء البحث عن المُحيل'); return; }
 
             try {
                 await db.runTransaction(async (transaction) => {
                     const userRef = db.collection('users').doc(userData.telegramId);
                     const refRef = db.collection('users').doc(referralCode);
-
                     transaction.update(userRef, { referrer: referralCode });
-
-                    const referrerData = referrerDoc.data();
-                    const referrerLevel2 = referrerData.referrer || null;
-
-                    if (referrerLevel2) {
-                        transaction.update(userRef, { referrerLevel2: referrerLevel2 });
-                        const ref2Ref = db.collection('users').doc(referrerLevel2);
-                        transaction.update(ref2Ref, {
-                            'miningData.totalReferralsLevel2': firebase.firestore.FieldValue.increment(1)
-                        });
-                    }
-
                     const now = new Date();
                     transaction.update(refRef, {
                         'miningData.totalReferrals': firebase.firestore.FieldValue.increment(1),
@@ -3032,51 +2768,60 @@
                             referredUid: userData.telegramId,
                             displayName: userData.displayName || 'مستخدم',
                             joinedAt: now,
-                            level: 1,
                             commissionEarned: 0
                         })
                     });
-
-                    if (referrerLevel2) {
-                        const ref2Ref = db.collection('users').doc(referrerLevel2);
-                        transaction.update(ref2Ref, {
-                            'referrals': firebase.firestore.FieldValue.arrayUnion({
-                                referredUid: userData.telegramId,
-                                displayName: userData.displayName || 'مستخدم',
-                                joinedAt: now,
-                                level: 2,
-                                commissionEarned: 0
-                            })
-                        });
-                    }
-
+                    // 300 دج مجمدة للمدعو الجديد
                     transaction.update(userRef, {
-                        'wallets.dzdReward': firebase.firestore.FieldValue.increment(500),
+                        'wallets.dzdLocked': firebase.firestore.FieldValue.increment(300),
                         'transactions': firebase.firestore.FieldValue.arrayUnion({
                             type: 'reward',
-                            amount: 500,
+                            amount: 300,
                             currency: 'DZD',
-                            description: 'مكافأة التسجيل',
-                            timestamp: now
+                            description: '🔒 مكافأة تسجيل مجمدة (تتحرر بعد الإيداع)',
+                            timestamp: now,
+                            status: 'locked'
                         })
                     });
                 });
-
                 userData.referrer = referralCode;
-                showToast('✅ تم تسجيل الإحالة بنجاح!');
+                showToast('✅ تم تسجيل الإحالة! حصلت على 300 دج مجمدة، ستتحرر بعد أول إيداع');
                 codeInput.value = '';
                 await loadReferrals();
                 await loadTransactions();
                 updateUI();
-
             } catch (error) {
                 console.error('❌ فشل تسجيل الإحالة اليدوية:', error);
                 showToast('❌ حدث خطأ: ' + error.message);
             }
         }
 
+        async function loadReferrals() {
+            if (!userData) return;
+            try {
+                const list = userData.referrals || [];
+                renderReferrals(list);
+            } catch (e) { renderReferrals([]); }
+        }
+
+        function renderReferrals(list) {
+            const c = document.getElementById('referralsList');
+            if (!list || !list.length) { c.innerHTML =
+                    '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>';
+                return; }
+            c.innerHTML = list.map(r => `
+                <div class="list-item">
+                    <div class="left"><div class="avatar" style="width:36px;height:36px;font-size:14px;">${(r.displayName||'م').charAt(0)}</div>
+                        <div><div class="title">${r.displayName||'مستخدم'}</div>
+                        <div class="sub">${formatDate(r.joinedAt)}</div></div>
+                    </div>
+                    <div class="right"><div style="color:var(--success);font-weight:700;">${r.commissionEarned||0} DZD</div></div>
+                </div>
+            `).join('');
+        }
+
         // ============================================================
-        // 20. TRANSACTIONS
+        // 17. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -3089,12 +2834,9 @@
                 });
                 renderTransactions(allTransactions);
                 renderRecentTransactions(allTransactions.slice(0, 5));
-            } catch (e) {
-                console.error(e);
-                allTransactions = [];
+            } catch (e) { allTransactions = [];
                 renderTransactions([]);
-                renderRecentTransactions([]);
-            }
+                renderRecentTransactions([]); }
         }
 
         function renderTransactions(list) {
@@ -3139,25 +2881,7 @@
         }
 
         // ============================================================
-        // 21. WITHDRAW CALCULATION
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            const amt = document.getElementById('withdrawAmount');
-            if (amt) {
-                amt.addEventListener('input', function() {
-                    const a = parseFloat(this.value) || 0;
-                    const fee = a * 0.10;
-                    document.getElementById('withdrawFee').textContent = fee.toFixed(2);
-                    document.getElementById('withdrawTotal').textContent = (a + fee).toFixed(2);
-                });
-            }
-            document.getElementById('withdrawCurrency')?.addEventListener('change', updateWithdrawMethod);
-            updateDepositMethod();
-            updateWithdrawMethod();
-        });
-
-        // ============================================================
-        // 22. THEME TOGGLE
+        // 18. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -3204,7 +2928,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 23. INIT
+        // 19. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -3219,7 +2943,23 @@
             }
         });
 
-        console.log('🚀 Crynova V7 - مودال استثمار متطور وعرض المكافأة بالعملة المختارة');
+        // إضافة مستمع لحساب رسوم السحب
+        document.addEventListener('DOMContentLoaded', function() {
+            const amt = document.getElementById('withdrawAmount');
+            if (amt) {
+                amt.addEventListener('input', function() {
+                    const a = parseFloat(this.value) || 0;
+                    const fee = a * 0.10;
+                    document.getElementById('withdrawFee').textContent = fee.toFixed(2);
+                    document.getElementById('withdrawTotal').textContent = (a + fee).toFixed(2);
+                });
+            }
+            document.getElementById('withdrawCurrency')?.addEventListener('change', updateWithdrawMethod);
+            updateDepositMethod();
+            updateWithdrawMethod();
+        });
+
+        console.log('🚀 Crynova V8 - جميع التعديلات النهائية (مستوى واحد، مكافآت محدثة، مودال متطور)');
     </script>
 </body>
 </html>
