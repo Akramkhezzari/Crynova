@@ -1952,7 +1952,7 @@
         const FIRST_BONUS_PERCENT = 7; // 7%
 
         // ============================================================
-        // 3. DEFAULT INVESTMENT PLANS
+        // 3. DEFAULT INVESTMENT PLANS (مخزنة محلياً فقط)
         // ============================================================
         const DEFAULT_INVEST_PLANS = [{
             id: 'plan_basic',
@@ -2133,6 +2133,7 @@
                     }
                 });
 
+                // ✅ تحميل الخطط محلياً (بدون Firestore)
                 await loadPlans();
                 await loadExchangeRate();
 
@@ -2154,7 +2155,7 @@
         }
 
         // ============================================================
-        // 7. HELPERS - تم تعديل تنسيق التاريخ هنا
+        // 7. HELPERS
         // ============================================================
         function formatDate(timestamp) {
             if (!timestamp) return '--';
@@ -2583,7 +2584,6 @@
             }
         }
 
-        // دالة لإلغاء تفاصيل الإيداع والعودة للنموذج
         function cancelDepositDetails() {
             document.getElementById('depositDetails').classList.add('hidden');
             depositData = null;
@@ -2823,42 +2823,13 @@
         }
 
         // ============================================================
-        // 14. PLANS & RENDER
+        // 14. PLANS & RENDER (مخزنة محلياً - لا اتصال بـ Firebase)
         // ============================================================
-        const PLANS_CACHE_KEY = 'crynova_plans_cache';
-        const PLANS_CACHE_TTL = 3600000;
-
-        async function loadPlans(force = false) {
-            let investPlans = [];
-            try {
-                const plansSnap = await db.collection('packages')
-                    .where('type', '==', 'investment')
-                    .where('isActive', '==', true)
-                    .orderBy('displayOrder')
-                    .get();
-
-                plansSnap.forEach(doc => {
-                    investPlans.push({ id: doc.id, ...doc.data() });
-                });
-            } catch (e) {
-                console.warn('⚠️ فشل تحميل الخطط من Firestore، سيتم استخدام الخطط الافتراضية');
-            }
-
-            if (investPlans.length === 0) {
-                investPlans = DEFAULT_INVEST_PLANS;
-            }
-
-            allInvestPlans = investPlans;
-
-            try {
-                localStorage.setItem(PLANS_CACHE_KEY, JSON.stringify({
-                    investPlans: allInvestPlans,
-                    timestamp: Date.now()
-                }));
-            } catch (e) { /* ignore */ }
-
+        async function loadPlans() {
+            // الاعتماد على الخطط الافتراضية فقط (لا نقرأ من Firestore)
+            allInvestPlans = DEFAULT_INVEST_PLANS;
             renderPlans();
-            console.log('📦 تم عرض خطط العوائد الثابتة');
+            console.log('📦 تم تحميل خطط العوائد الثابتة من الكود المحلي (بدون Firebase)');
         }
 
         function renderPlans() {
@@ -2899,29 +2870,15 @@
         }
 
         // ============================================================
-        // 15. MODAL FUNCTIONS (محسنة - إصلاح نهائي)
+        // 15. MODAL FUNCTIONS
         // ============================================================
-        let modalOverlayClickHandler = null;
-
         function openInvestmentModal(planId) {
-            // التأكد من أن المودال غير مفتوح بالفعل
-            if (isModalOpen) {
-                console.warn('⚠️ المودال مفتوح بالفعل');
-                return;
-            }
-
-            if (!userData) {
-                showToast('يرجى تسجيل الدخول');
-                return;
-            }
+            if (isModalOpen) return;
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
             const plan = allInvestPlans.find(p => p.id === planId);
-            if (!plan) {
-                showToast('الخطة غير موجودة');
-                return;
-            }
+            if (!plan) { showToast('الخطة غير موجودة'); return; }
 
-            // تعيين الحالة
             currentSelectedPlanId = planId;
             isModalOpen = true;
 
@@ -2930,7 +2887,6 @@
             const minAmount = isDZD ? plan.minAmount : (plan.minAmount / exchangeRate);
             const maxAmount = isDZD ? plan.maxAmount : (plan.maxAmount / exchangeRate);
 
-            // تحديث عناصر المودال
             document.getElementById('modalPlanName').textContent = plan.name;
             document.getElementById('modalPlanReturn').textContent = `${plan.dailyReturnPercent}% يومياً`;
             document.getElementById('modalCurrencyLabel').textContent = `(${cur})`;
@@ -2942,7 +2898,6 @@
             const input = document.getElementById('modalAmountInput');
             const slider = document.getElementById('modalRangeSlider');
 
-            // إعادة تعيين القيم
             input.min = minAmount;
             input.max = maxAmount;
             input.step = isDZD ? 100 : 1;
@@ -2953,7 +2908,6 @@
             slider.step = isDZD ? 100 : 1;
             slider.value = minAmount;
 
-            // تحديث الرصيد
             let balance = 0;
             if (isDZD) {
                 balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
@@ -2962,60 +2916,32 @@
             }
             document.getElementById('modalUserBalance').textContent = balance.toFixed(2);
 
-            // إجراء الحسابات
             updateModalCalculations();
 
-            // عرض المودال
             const modal = document.getElementById('investmentModal');
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
 
-            // إزالة أي مستمع سابق
-            if (modalOverlayClickHandler) {
-                modal.removeEventListener('click', modalOverlayClickHandler);
-                modalOverlayClickHandler = null;
-            }
-
-            // إضافة مستمع جديد للإغلاق عند النقر على الخلفية
-            modalOverlayClickHandler = function(e) {
-                if (e.target === modal) {
+            modal.onclick = null;
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
                     closeInvestmentModal();
                 }
-            };
-            modal.addEventListener('click', modalOverlayClickHandler);
+            });
         }
 
         function closeInvestmentModal() {
-            // تحرير القفل فوراً لمنع أي تعارض
-            isModalOpen = false;
-
             const modal = document.getElementById('investmentModal');
             modal.classList.remove('active');
             document.body.style.overflow = '';
-
-            // إزالة مستمع الخلفية
-            if (modalOverlayClickHandler) {
-                modal.removeEventListener('click', modalOverlayClickHandler);
-                modalOverlayClickHandler = null;
-            }
-
-            // إعادة تعيين المتغيرات الأخرى
+            isModalOpen = false;
             currentSelectedPlanId = null;
             depositData = null;
-
-            // إعادة تعيين الحقول (اختياري)
             document.getElementById('modalAmountInput').value = 0;
             document.getElementById('modalRangeSlider').value = 0;
-
-            // إعادة تمكين زر التأكيد (في حال كان معطلاً)
-            const confirmBtn = document.getElementById('modalConfirmBtn');
-            confirmBtn.disabled = false;
-            confirmBtn.style.opacity = '1';
-            confirmBtn.style.cursor = 'pointer';
         }
 
         function adjustAmount(change) {
-            // منع انتشار الحدث
             event?.preventDefault?.();
             event?.stopPropagation?.();
 
@@ -3031,38 +2957,30 @@
             updateModalCalculations();
         }
 
-        // إعداد المستمعات لعناصر الإدخال (مرة واحدة فقط)
-        let modalInputListenersAttached = false;
+        // إعادة تعيين المستمعين عند التحميل
         document.addEventListener('DOMContentLoaded', function() {
-            if (modalInputListenersAttached) return;
-            modalInputListenersAttached = true;
-
             const input = document.getElementById('modalAmountInput');
             const slider = document.getElementById('modalRangeSlider');
 
-            // استبدال العناصر لإزالة أي مستمعات قديمة
-            const newInput = input.cloneNode(true);
-            const newSlider = slider.cloneNode(true);
-            input.parentNode.replaceChild(newInput, input);
-            slider.parentNode.replaceChild(newSlider, slider);
+            input.replaceWith(input.cloneNode(true));
+            slider.replaceWith(slider.cloneNode(true));
 
-            // إضافة المستمعات الجديدة
-            const finalInput = document.getElementById('modalAmountInput');
-            const finalSlider = document.getElementById('modalRangeSlider');
+            const newInput = document.getElementById('modalAmountInput');
+            const newSlider = document.getElementById('modalRangeSlider');
 
-            finalInput.addEventListener('input', function() {
+            newInput.addEventListener('input', function() {
                 let val = parseFloat(this.value) || 0;
                 const min = parseFloat(this.min);
                 const max = parseFloat(this.max);
                 if (val < min) val = min;
                 if (val > max) val = max;
-                finalSlider.value = val;
+                newSlider.value = val;
                 updateModalCalculations();
             });
 
-            finalSlider.addEventListener('input', function() {
+            newSlider.addEventListener('input', function() {
                 const val = parseFloat(this.value);
-                finalInput.value = val;
+                newInput.value = val;
                 updateModalCalculations();
             });
         });
@@ -3151,7 +3069,6 @@
 
             if (!confirm(`تأكيد استثمار ${amount.toFixed(2)} ${cur} في "${plan.name}"؟`)) return;
 
-            // إغلاق المودال فوراً
             closeInvestmentModal();
 
             try {
@@ -3609,7 +3526,7 @@
             }
         });
 
-        console.log('🚀 Crynova V7.6 - إصلاح نهائي لمشكلة توقف المودال بعد الفتح الأولى');
+        console.log('🚀 Crynova V8.0 - خطط العوائد مخزنة محلياً (بدون Firebase)');
     </script>
 </body>
 </html>
