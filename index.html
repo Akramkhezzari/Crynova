@@ -2899,18 +2899,27 @@
         }
 
         // ============================================================
-        // 15. MODAL FUNCTIONS (محسنة - إصلاح مشكلة التوقف)
+        // 15. MODAL FUNCTIONS (محسنة - إصلاح نهائي)
         // ============================================================
-        // متغيرات لإدارة المستمعات
         let modalOverlayClickHandler = null;
-        let modalCloseHandler = null;
 
         function openInvestmentModal(planId) {
-            if (isModalOpen) return;
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+            // التأكد من أن المودال غير مفتوح بالفعل
+            if (isModalOpen) {
+                console.warn('⚠️ المودال مفتوح بالفعل');
+                return;
+            }
+
+            if (!userData) {
+                showToast('يرجى تسجيل الدخول');
+                return;
+            }
 
             const plan = allInvestPlans.find(p => p.id === planId);
-            if (!plan) { showToast('الخطة غير موجودة'); return; }
+            if (!plan) {
+                showToast('الخطة غير موجودة');
+                return;
+            }
 
             // تعيين الحالة
             currentSelectedPlanId = planId;
@@ -2961,7 +2970,7 @@
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
 
-            // إزالة المستمعات القديمة إن وجدت
+            // إزالة أي مستمع سابق
             if (modalOverlayClickHandler) {
                 modal.removeEventListener('click', modalOverlayClickHandler);
                 modalOverlayClickHandler = null;
@@ -2977,6 +2986,9 @@
         }
 
         function closeInvestmentModal() {
+            // تحرير القفل فوراً لمنع أي تعارض
+            isModalOpen = false;
+
             const modal = document.getElementById('investmentModal');
             modal.classList.remove('active');
             document.body.style.overflow = '';
@@ -2987,8 +2999,7 @@
                 modalOverlayClickHandler = null;
             }
 
-            // إعادة تعيين الحالة
-            isModalOpen = false;
+            // إعادة تعيين المتغيرات الأخرى
             currentSelectedPlanId = null;
             depositData = null;
 
@@ -3020,7 +3031,7 @@
             updateModalCalculations();
         }
 
-        // إعادة تعيين مستمعي الإدخال عند التحميل (مرة واحدة فقط)
+        // إعداد المستمعات لعناصر الإدخال (مرة واحدة فقط)
         let modalInputListenersAttached = false;
         document.addEventListener('DOMContentLoaded', function() {
             if (modalInputListenersAttached) return;
@@ -3029,13 +3040,13 @@
             const input = document.getElementById('modalAmountInput');
             const slider = document.getElementById('modalRangeSlider');
 
-            // إزالة أي مستمعين سابقين (باستخدام cloneNode لإزالة الكل)
+            // استبدال العناصر لإزالة أي مستمعات قديمة
             const newInput = input.cloneNode(true);
             const newSlider = slider.cloneNode(true);
             input.parentNode.replaceChild(newInput, input);
             slider.parentNode.replaceChild(newSlider, slider);
 
-            // إضافة المستمعين الجدد
+            // إضافة المستمعات الجديدة
             const finalInput = document.getElementById('modalAmountInput');
             const finalSlider = document.getElementById('modalRangeSlider');
 
