@@ -2455,7 +2455,7 @@
         }
 
         // ============================================================
-        // 14. PLANS (Investment only)
+        // 14. PLANS (Investment only) - مع إضافة الربح اليومي المتوقع
         // ============================================================
         const PLANS_CACHE_KEY = 'crynova_plans_cache';
         const PLANS_CACHE_TTL = 3600000;
@@ -2490,7 +2490,7 @@
             } catch (e) { /* ignore */ }
 
             renderPlans();
-            console.log('📦 تم عرض خطط العوائد الثابتة (5 مستويات)');
+            console.log('📦 تم عرض خطط العوائد الثابتة (5 مستويات) مع الربح اليومي');
         }
 
         function renderPlans() {
@@ -2507,6 +2507,11 @@
                 const maxAmount = isDZD ? p.maxAmount : (p.maxAmount / exchangeRate);
                 const cur = isDZD ? 'DZD' : 'USDT';
                 const isPopular = (p.id === 'plan_premium' || p.id === 'plan_elite');
+
+                // حساب الربح اليومي المتوقع
+                const dailyMin = (minAmount * p.dailyReturnPercent) / 100;
+                const dailyMax = (maxAmount * p.dailyReturnPercent) / 100;
+
                 return `
                     <div class="plan-card ${isPopular ? 'popular' : ''}">
                         ${isPopular ? '<div class="badge-popular">⭐ الأفضل</div>' : ''}
@@ -2515,6 +2520,7 @@
                         <div class="return ${isDZD ? 'dzd-return' : ''}">${p.dailyReturnPercent}% <small>يومياً</small></div>
                         <ul class="features">
                             <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}</li>
+                            <li><i class="fas fa-chart-line" style="color:var(--gold);"></i> الربح اليومي: ${dailyMin.toFixed(0)} - ${dailyMax.toFixed(0)} ${cur}</li>
                             ${p.bonusAmount ? `<li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: <strong>${p.bonusAmount} DZD</strong></li>` : ''}
                         </ul>
                         <button class="btn ${isPopular ? (isDZD ? 'btn-dzd' : 'btn-primary') : 'btn-outline'}" onclick="purchaseInvestment('${p.id}')">
@@ -2577,7 +2583,7 @@
                     status: 'active',
                     totalReturn: 0,
                     lastReturnDate: null,
-                    capitalReturnable: true // لا يظهر لكن يحتفظ به
+                    capitalReturnable: true
                 };
 
                 await db.runTransaction(async (t) => {
@@ -3002,7 +3008,7 @@
             }
         });
 
-        console.log('🚀 Crynova V6 - 5 مستويات مع مكافآت (بدون وصف، مدة، استرداد)');
+        console.log('🚀 Crynova V6 - 5 مستويات مع مكافآت وعرض الربح اليومي المتوقع');
     </script>
 </body>
 </html>
