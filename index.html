@@ -854,6 +854,255 @@
             margin-left: 6px;
         }
 
+        /* ============================================================
+           INVESTMENT MODAL (النافذة المنبثقة المتطورة)
+           ============================================================ */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .modal-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            max-width: 420px;
+            width: 100%;
+            padding: 28px 24px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-card .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-card .modal-header h3 {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-primary);
+        }
+        .modal-card .modal-header .close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0 8px;
+            transition: var(--transition);
+        }
+        .modal-card .modal-header .close-modal:hover {
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+
+        .modal-plan-detail {
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .modal-plan-detail .label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .modal-plan-detail .value {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        .modal-plan-detail .value.dzd-color {
+            color: var(--dzd-color);
+        }
+
+        .modal-amount-section {
+            margin: 16px 0;
+        }
+        .modal-amount-section label {
+            font-weight: 700;
+            font-size: 15px;
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        .amount-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border);
+            transition: var(--transition);
+            padding: 4px;
+        }
+        .amount-input-wrapper:focus-within {
+            border-color: var(--accent);
+            box-shadow: var(--accent-glow);
+        }
+        .amount-input-wrapper button {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 22px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .amount-input-wrapper button:hover {
+            background: var(--accent);
+            color: white;
+        }
+        .amount-input-wrapper input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px 4px;
+            font-size: 22px;
+            font-weight: 800;
+            text-align: center;
+            color: var(--text-primary);
+            font-family: inherit;
+            outline: none;
+            min-width: 60px;
+        }
+        .amount-input-wrapper input[type="number"]::-webkit-inner-spin-button,
+        .amount-input-wrapper input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .amount-input-wrapper input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .range-slider {
+            width: 100%;
+            margin: 12px 0 8px;
+            -webkit-appearance: none;
+            background: var(--bg-input);
+            height: 6px;
+            border-radius: 10px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            cursor: pointer;
+            box-shadow: var(--shadow-glow);
+        }
+        .range-slider::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            cursor: pointer;
+            border: none;
+        }
+
+        .modal-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .modal-info-item {
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            text-align: center;
+        }
+        .modal-info-item .number {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--accent);
+        }
+        .modal-info-item .number.dzd-color {
+            color: var(--dzd-color);
+        }
+        .modal-info-item .number.gold-color {
+            color: var(--gold);
+        }
+        .modal-info-item .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .modal-balance-warning {
+            background: var(--success-light);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 12px 0 16px;
+            border: 1px solid var(--success);
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--success);
+        }
+        .modal-balance-warning i {
+            font-size: 20px;
+        }
+        .modal-balance-warning.insufficient {
+            background: var(--danger-light);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .modal-actions .btn {
+            flex: 1;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 420px) {
             .app-container {
@@ -907,6 +1156,16 @@
             .currency-selector button {
                 font-size: 12px;
                 padding: 6px 10px;
+            }
+            .modal-card {
+                padding: 20px 16px;
+            }
+            .modal-info-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .modal-actions {
+                flex-direction: column;
             }
         }
 
@@ -1531,6 +1790,60 @@
 
     </div>
 
+    <!-- ================================================================
+         INVESTMENT MODAL (النافذة المنبثقة المتطورة)
+         ================================================================ -->
+    <div class="modal-overlay" id="investmentModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modalPlanName">الخطة الاستثمارية</h3>
+                <button class="close-modal" onclick="closeInvestmentModal()">&times;</button>
+            </div>
+
+            <div class="modal-plan-detail">
+                <span class="label">العائد اليومي</span>
+                <span class="value" id="modalPlanReturn">5%</span>
+            </div>
+
+            <div class="modal-amount-section">
+                <label>المبلغ المستثمر <span id="modalCurrencyLabel">(DZD)</span></label>
+                <div class="amount-input-wrapper">
+                    <button onclick="adjustAmount(-100)">−</button>
+                    <input type="number" id="modalAmountInput" min="0" step="1" value="2000">
+                    <button onclick="adjustAmount(100)">+</button>
+                </div>
+                <input type="range" id="modalRangeSlider" class="range-slider" min="0" max="50000" step="100" value="2000">
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);padding:0 4px;">
+                    <span id="modalMinDisplay">0</span>
+                    <span id="modalMaxDisplay">50,000</span>
+                </div>
+            </div>
+
+            <div class="modal-info-grid">
+                <div class="modal-info-item">
+                    <div class="number gold-color" id="modalDailyProfit">100.00</div>
+                    <div class="label">الربح اليومي</div>
+                </div>
+                <div class="modal-info-item">
+                    <div class="number" id="modalTotalReturn">3,000.00</div>
+                    <div class="label">إجمالي الأرباح (30 يوم)</div>
+                </div>
+            </div>
+
+            <div class="modal-balance-warning" id="modalBalanceStatus">
+                <i class="fas fa-wallet"></i>
+                <span>رصيدك المتاح: <strong id="modalUserBalance">0.00</strong> <span id="modalBalanceCurrency">DZD</span></span>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeInvestmentModal()">إلغاء</button>
+                <button class="btn btn-primary" id="modalConfirmBtn" onclick="confirmInvestment()">
+                    <i class="fas fa-check-circle"></i> تأكيد الاستثمار
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== BOTTOM NAVIGATION ===== -->
     <nav class="bottom-nav" id="bottomNav">
         <button class="nav-item active" data-page="home" onclick="navigateTo('home')">
@@ -1584,6 +1897,7 @@
         let selectedCurrency = 'USDT';
         let exchangeRate = 250;
         let unsubscribeUser = null;
+        let currentSelectedPlanId = null; // لتخزين الخطة المختارة حالياً في المودال
 
         const BINANCE_ID = '1143951718';
         const POSTAL_ACCOUNT = '0799999002385412178';
@@ -1591,7 +1905,7 @@
         const MIN_DEPOSIT_DZD = 2000;
 
         // ============================================================
-        // 3. DEFAULT INVESTMENT PLANS - المستويات الخمسة (بدون أيقونات، مدة، استرداد)
+        // 3. DEFAULT INVESTMENT PLANS
         // ============================================================
         const DEFAULT_INVEST_PLANS = [{
             id: 'plan_basic',
@@ -2447,7 +2761,7 @@
         }
 
         // ============================================================
-        // 14. PLANS (Investment only) - مع التعديلات المطلوبة
+        // 14. PLANS & RENDER
         // ============================================================
         const PLANS_CACHE_KEY = 'crynova_plans_cache';
         const PLANS_CACHE_TTL = 3600000;
@@ -2485,7 +2799,6 @@
             console.log('📦 تم عرض خطط العوائد الثابتة');
         }
 
-        // ========== دالة renderPlans المُعدَّلة ==========
         function renderPlans() {
             const container = document.getElementById('investPlansList');
             if (!allInvestPlans.length) {
@@ -2499,8 +2812,6 @@
                 const minAmount = isDZD ? p.minAmount : (p.minAmount / exchangeRate);
                 const maxAmount = isDZD ? p.maxAmount : (p.maxAmount / exchangeRate);
                 const cur = isDZD ? 'DZD' : 'USDT';
-
-                // حساب الربح اليومي الأدنى والأعلى
                 const minDailyProfit = (minAmount * p.dailyReturnPercent) / 100;
                 const maxDailyProfit = (maxAmount * p.dailyReturnPercent) / 100;
 
@@ -2508,13 +2819,12 @@
                     <div class="plan-card ${i===1?'popular':''}">
                         ${i===1?'<div class="badge-popular">⭐ الأفضل</div>':''}
                         <div class="name">${p.name}</div>
-                        <!-- تم إزالة سطر subtitle -->
                         <div class="return ${isDZD?'dzd-return':''}">${p.dailyReturnPercent}% <small>يومياً</small></div>
                         <ul class="features">
                             <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}</li>
                             <li><i class="fas fa-chart-line"></i> الربح اليومي: ${minDailyProfit.toFixed(2)} - ${maxDailyProfit.toFixed(2)} ${cur}</li>
                         </ul>
-                        <button class="btn ${i===1?(isDZD?'btn-dzd':'btn-primary'):'btn-outline'}" onclick="purchaseInvestment('${p.id}')">
+                        <button class="btn ${i===1?(isDZD?'btn-dzd':'btn-primary'):'btn-outline'}" onclick="openInvestmentModal('${p.id}')">
                             <i class="fas fa-plus-circle"></i> استثمر الآن
                         </button>
                     </div>
@@ -2523,39 +2833,201 @@
         }
 
         // ============================================================
-        // 15. PURCHASE INVESTMENT
+        // 15. MODAL FUNCTIONS (النافذة المنبثقة المتطورة)
         // ============================================================
-        async function purchaseInvestment(planId) {
+        function openInvestmentModal(planId) {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
             const plan = allInvestPlans.find(p => p.id === planId);
             if (!plan) { showToast('الخطة غير موجودة'); return; }
+
+            currentSelectedPlanId = planId;
+
+            const isDZD = selectedCurrency === 'DZD';
+            const cur = isDZD ? 'DZD' : 'USDT';
+            const minAmount = isDZD ? plan.minAmount : (plan.minAmount / exchangeRate);
+            const maxAmount = isDZD ? plan.maxAmount : (plan.maxAmount / exchangeRate);
+
+            // عرض اسم الخطة
+            document.getElementById('modalPlanName').textContent = plan.name;
+
+            // عرض النسبة
+            document.getElementById('modalPlanReturn').textContent = `${plan.dailyReturnPercent}% يومياً`;
+
+            // تعيين العملة
+            document.getElementById('modalCurrencyLabel').textContent = `(${cur})`;
+            document.getElementById('modalBalanceCurrency').textContent = cur;
+
+            // تعيين الحد الأدنى والأعلى للشريط وحقل الإدخال
+            document.getElementById('modalMinDisplay').textContent = minAmount.toFixed(0);
+            document.getElementById('modalMaxDisplay').textContent = maxAmount.toFixed(0);
+
+            const input = document.getElementById('modalAmountInput');
+            const slider = document.getElementById('modalRangeSlider');
+
+            input.min = minAmount;
+            input.max = maxAmount;
+            input.step = isDZD ? 100 : 1;
+            input.value = minAmount;
+
+            slider.min = minAmount;
+            slider.max = maxAmount;
+            slider.step = isDZD ? 100 : 1;
+            slider.value = minAmount;
+
+            // عرض رصيد المستخدم
+            let balance = 0;
+            if (isDZD) {
+                balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            } else {
+                balance = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
+            }
+            document.getElementById('modalUserBalance').textContent = balance.toFixed(2);
+
+            // تحديث الحسابات الفورية
+            updateModalCalculations();
+
+            // إظهار المودال
+            document.getElementById('investmentModal').classList.add('active');
+
+            // منع التمرير في الخلف
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeInvestmentModal() {
+            document.getElementById('investmentModal').classList.remove('active');
+            document.body.style.overflow = '';
+            currentSelectedPlanId = null;
+        }
+
+        function adjustAmount(change) {
+            const input = document.getElementById('modalAmountInput');
+            let val = parseFloat(input.value) || 0;
+            val = Math.max(parseFloat(input.min), Math.min(parseFloat(input.max), val + change));
+            // تقريب وفق الخطوة
+            const step = parseFloat(input.step) || 1;
+            val = Math.round(val / step) * step;
+            input.value = val;
+            document.getElementById('modalRangeSlider').value = val;
+            updateModalCalculations();
+        }
+
+        // ربط أحداث الإدخال
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('modalAmountInput');
+            const slider = document.getElementById('modalRangeSlider');
+
+            input.addEventListener('input', function() {
+                let val = parseFloat(this.value) || 0;
+                const min = parseFloat(this.min);
+                const max = parseFloat(this.max);
+                if (val < min) val = min;
+                if (val > max) val = max;
+                slider.value = val;
+                updateModalCalculations();
+            });
+
+            slider.addEventListener('input', function() {
+                const val = parseFloat(this.value);
+                input.value = val;
+                updateModalCalculations();
+            });
+
+            // إغلاق المودال عند الضغط على الخلفية
+            document.getElementById('investmentModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeInvestmentModal();
+                }
+            });
+        });
+
+        function updateModalCalculations() {
+            const plan = allInvestPlans.find(p => p.id === currentSelectedPlanId);
+            if (!plan) return;
+
+            const input = document.getElementById('modalAmountInput');
+            const amount = parseFloat(input.value) || 0;
+
+            const dailyProfit = (amount * plan.dailyReturnPercent) / 100;
+            const totalProfit = dailyProfit * 30; // 30 يوم
+
+            document.getElementById('modalDailyProfit').textContent = dailyProfit.toFixed(2);
+            document.getElementById('modalTotalReturn').textContent = totalProfit.toFixed(2);
+
+            // التحقق من الرصيد
+            const isDZD = selectedCurrency === 'DZD';
+            let balance = 0;
+            if (isDZD) {
+                balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            } else {
+                balance = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
+            }
+
+            const statusEl = document.getElementById('modalBalanceStatus');
+            const balSpan = document.getElementById('modalUserBalance');
+            balSpan.textContent = balance.toFixed(2);
+
+            if (amount > balance) {
+                statusEl.className = 'modal-balance-warning insufficient';
+                statusEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <span>رصيد غير كافٍ! المتاح: <strong>${balance.toFixed(2)}</strong> ${document.getElementById('modalBalanceCurrency').textContent}</span>`;
+                document.getElementById('modalConfirmBtn').disabled = true;
+                document.getElementById('modalConfirmBtn').style.opacity = '0.5';
+                document.getElementById('modalConfirmBtn').style.cursor = 'not-allowed';
+            } else {
+                statusEl.className = 'modal-balance-warning';
+                statusEl.innerHTML = `<i class="fas fa-wallet"></i> <span>رصيدك المتاح: <strong>${balance.toFixed(2)}</strong> ${document.getElementById('modalBalanceCurrency').textContent}</span>`;
+                document.getElementById('modalConfirmBtn').disabled = false;
+                document.getElementById('modalConfirmBtn').style.opacity = '1';
+                document.getElementById('modalConfirmBtn').style.cursor = 'pointer';
+            }
+        }
+
+        // ============================================================
+        // 16. CONFIRM INVESTMENT (استدعاء عملية الشراء)
+        // ============================================================
+        async function confirmInvestment() {
+            if (!currentSelectedPlanId) { showToast('حدث خطأ، حاول مرة أخرى'); return; }
+
+            const plan = allInvestPlans.find(p => p.id === currentSelectedPlanId);
+            if (!plan) { showToast('الخطة غير موجودة'); return; }
+
+            const input = document.getElementById('modalAmountInput');
+            const amount = parseFloat(input.value) || 0;
 
             const isDZD = selectedCurrency === 'DZD';
             const minAmount = isDZD ? plan.minAmount : (plan.minAmount / exchangeRate);
             const maxAmount = isDZD ? plan.maxAmount : (plan.maxAmount / exchangeRate);
             const cur = isDZD ? 'DZD' : 'USDT';
 
-            const amountStr = prompt(`أدخل المبلغ للاستثمار في "${plan.name}" (${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}):`);
-            if (!amountStr) return;
-            const amount = parseFloat(amountStr);
-            if (isNaN(amount) || amount < minAmount || amount > maxAmount) {
+            if (amount < minAmount || amount > maxAmount) {
                 showToast(`المبلغ يجب أن يكون بين ${minAmount.toFixed(0)} و ${maxAmount.toFixed(0)} ${cur}`);
                 return;
             }
 
-            const baseAmount = isDZD ? amount : amount * exchangeRate;
+            // التحقق من الرصيد مجدداً
+            let balance = 0;
+            if (isDZD) {
+                balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            } else {
+                balance = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
+            }
 
-            let bal = 0;
-            if (isDZD) bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
-            else bal = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
-            if (bal < amount) { showToast(`الرصيد غير كافٍ (${amount.toFixed(2)} ${cur})`); return; }
+            if (balance < amount) {
+                showToast(`الرصيد غير كافٍ (${balance.toFixed(2)} ${cur})`);
+                return;
+            }
 
+            // تأكيد نهائي
             if (!confirm(`تأكيد استثمار ${amount.toFixed(2)} ${cur} في "${plan.name}"؟`)) return;
 
+            // إغلاق المودال
+            closeInvestmentModal();
+
+            // تنفيذ عملية الشراء الأصلية
             try {
+                const baseAmount = isDZD ? amount : amount * exchangeRate;
                 const now = new Date();
-                const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 يوم افتراضي (ثابت)
+                const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
                 const investmentId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
                 const investmentObj = {
@@ -2571,7 +3043,7 @@
                     status: 'active',
                     totalReturn: 0,
                     lastReturnDate: null,
-                    capitalReturnable: true // نحتفظ بها داخل النظام لاسترداد رأس المال لكن لا نعرضها
+                    capitalReturnable: true
                 };
 
                 await db.runTransaction(async (t) => {
@@ -2640,7 +3112,7 @@
         }
 
         // ============================================================
-        // 16. RENDER INVESTMENTS
+        // 17. RENDER INVESTMENTS
         // ============================================================
         function renderInvestments() {
             const container = document.getElementById('activeInvestments');
@@ -2704,7 +3176,7 @@
         }
 
         // ============================================================
-        // 17. REFERRALS (مستويين)
+        // 18. REFERRALS
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -2737,7 +3209,7 @@
         }
 
         // ============================================================
-        // 18. MANUAL REFERRAL
+        // 19. MANUAL REFERRAL
         // ============================================================
         async function manualReferral() {
             if (!userData) {
@@ -2843,7 +3315,7 @@
         }
 
         // ============================================================
-        // 19. TRANSACTIONS
+        // 20. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -2906,7 +3378,7 @@
         }
 
         // ============================================================
-        // 20. WITHDRAW CALCULATION
+        // 21. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -2924,7 +3396,7 @@
         });
 
         // ============================================================
-        // 21. THEME TOGGLE
+        // 22. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -2971,7 +3443,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 22. INIT
+        // 23. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -2986,7 +3458,7 @@
             }
         });
 
-        console.log('🚀 Crynova V6 - تم تحديث خطط العوائد الثابتة (5 مستويات) بدون أيقونات أو مدة أو استرداد رأس مال معروض');
+        console.log('🚀 Crynova V7 - تم تطوير زر "استثمر الآن" بنافذة منبثقة متطورة مع شريط تمرير وحساب فوري للربح اليومي');
     </script>
 </body>
 </html>
