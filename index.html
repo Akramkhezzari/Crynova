@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Crynova - استثمر واربح</title>
+    <title>Crynova - العوائد الثابتة</title>
 
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js">
@@ -1028,6 +1028,14 @@
             margin-top: 4px;
             font-weight: 600;
         }
+
+        /* Admin page hidden by default */
+        #page-admin {
+            display: none;
+        }
+        #page-admin.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -1131,17 +1139,17 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: PACKAGES (العوائد الثابتة - 5 مستويات) ========== -->
+        <!-- ========== PAGE: PACKAGES (العوائد الثابتة) ========== -->
         <div class="page" id="page-packages">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
-                <i class="fas fa-cubes text-accent"></i> خطط العوائد الثابتة (5 مستويات)
+                <i class="fas fa-cubes text-accent"></i> العوائد الثابتة
             </h2>
             <div id="investPlansList">
                 <!-- سيتم ملؤها بواسطة JS -->
             </div>
         </div>
 
-        <!-- ========== PAGE: INVESTMENTS ========== -->
+        <!-- ========== PAGE: INVESTMENTS (استثماراتي) ========== -->
         <div class="page" id="page-investments">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-chart-line text-gold"></i> استثماراتي
@@ -1422,6 +1430,74 @@
             </div>
         </div>
 
+        <!-- ========== PAGE: PROMO CODES (استلام المكافآت) ========== -->
+        <div class="page" id="page-promo">
+            <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+                <i class="fas fa-gift text-gold"></i> استلام المكافآت
+            </h2>
+            <div class="card" style="background:var(--accent-glow);border:2px solid var(--accent-light);">
+                <div class="text-center">
+                    <div style="font-size:48px;margin-bottom:8px;">🎉</div>
+                    <div style="font-size:18px;font-weight:800;">أدخل رمز المكافأة الذي حصلت عليه</div>
+                    <div style="color:var(--text-secondary);font-size:14px;">سيتم إضافة المبلغ إلى رصيد المكافآت الخاص بك</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="input-group">
+                    <label>رمز المكافأة <span class="required">*</span></label>
+                    <div class="input-icon">
+                        <i class="fas fa-tag"></i>
+                        <input type="text" id="promoCodeInput" placeholder="أدخل الرمز هنا" style="text-transform:uppercase;letter-spacing:1px;">
+                    </div>
+                </div>
+                <button class="btn btn-gold" onclick="redeemPromoCode()">
+                    <i class="fas fa-check-circle"></i> استلام المكافأة
+                </button>
+                <div id="promoResult" class="mt-8 text-center" style="font-weight:700;"></div>
+            </div>
+            <div class="card">
+                <div class="card-title" style="margin-bottom:12px;"><i class="fas fa-clock-rotate-left"></i> سجل المكافآت المستلمة</div>
+                <div id="promoHistory">
+                    <div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لا توجد مكافآت مستلمة بعد</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== PAGE: ADMIN (لإصدار الرموز - مخفي) ========== -->
+        <div class="page" id="page-admin">
+            <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+                <i class="fas fa-crown text-gold"></i> لوحة الإدارة - إصدار الرموز
+            </h2>
+            <div class="card">
+                <div class="input-group">
+                    <label>المبلغ <span class="required">*</span></label>
+                    <input type="number" id="adminAmount" placeholder="المبلغ" min="1" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label>العملة <span class="required">*</span></label>
+                    <select id="adminCurrency">
+                        <option value="USDT">USDT</option>
+                        <option value="DZD">DZD</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>عدد مرات الاستخدام (لكل مستخدم) <span class="required">*</span></label>
+                    <input type="number" id="adminUses" placeholder="1" min="1" value="1">
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">كم مرة يمكن لكل مستخدم استخدام هذا الرمز (يفضل 1)</div>
+                </div>
+                <button class="btn btn-primary" onclick="generatePromoCode()">
+                    <i class="fas fa-plus-circle"></i> إنشاء رمز جديد
+                </button>
+                <div id="adminResult" class="mt-8 text-center" style="font-weight:700;"></div>
+            </div>
+            <div class="card">
+                <div class="card-title" style="margin-bottom:12px;">📋 الرموز النشطة</div>
+                <div id="activePromoCodes">
+                    <div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لا توجد رموز نشطة</div>
+                </div>
+            </div>
+        </div>
+
         <!-- ========== PAGE: TRANSACTIONS ========== -->
         <div class="page" id="page-transactions">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
@@ -1435,6 +1511,7 @@
                     <button class="btn btn-sm btn-ghost" data-filter="investment" onclick="filterTransactions('investment')">استثمار</button>
                     <button class="btn btn-sm btn-ghost" data-filter="investment_return" onclick="filterTransactions('investment_return')">أرباح</button>
                     <button class="btn btn-sm btn-ghost" data-filter="referral_bonus" onclick="filterTransactions('referral_bonus')">إحالات</button>
+                    <button class="btn btn-sm btn-ghost" data-filter="promo_reward" onclick="filterTransactions('promo_reward')">مكافآت</button>
                 </div>
             </div>
             <div class="card">
@@ -1484,7 +1561,7 @@
             <div class="card">
                 <div style="display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;margin-bottom:12px;">
                     <i class="fas fa-user-plus" style="color:var(--text-muted);width:20px;"></i>
-                    تسجيل إحالة يدوية
+                    تسجيل إحالة يدوية (مرة واحدة فقط)
                 </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                     <input type="text" id="manualReferralCode" placeholder="أدخل معرف المُحيل (Telegram ID)" style="flex:1;padding:12px 14px;background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-weight:600;font-size:14px;font-family:inherit;min-width:150px;">
@@ -1495,6 +1572,7 @@
                 <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">
                     <i class="fas fa-info-circle"></i> أدخل معرف Telegram الخاص بالشخص الذي دعاك (ستحصل أنت و هو على مكافأة)
                 </div>
+                <div id="referralStatus" class="mt-8 text-center" style="font-weight:700;"></div>
             </div>
             <div class="card">
                 <div style="padding:4px 0 12px 0;border-bottom:1px solid var(--border-light);">
@@ -1545,9 +1623,9 @@
             <i class="fas fa-chart-line"></i>
             <span>استثماراتي</span>
         </button>
-        <button class="nav-item" data-page="wallet" onclick="navigateTo('wallet')">
-            <i class="fas fa-wallet"></i>
-            <span>المحفظة</span>
+        <button class="nav-item" data-page="promo" onclick="navigateTo('promo')">
+            <i class="fas fa-gift"></i>
+            <span>المكافآت</span>
         </button>
         <button class="nav-item" data-page="profile" onclick="navigateTo('profile')">
             <i class="fas fa-user"></i>
@@ -1591,84 +1669,64 @@
         const MIN_DEPOSIT_DZD = 2000;
 
         // ============================================================
-        // 3. DEFAULT INVESTMENT PLANS - 5 مستويات مع مكافآت
+        // 3. NEW INVESTMENT LEVELS (5 Levels)
         // ============================================================
-        const DEFAULT_INVEST_PLANS = [{
-            id: 'plan_basic',
-            type: 'investment',
-            name: '⭐ المستوى الأساسي',
-            description: 'بداية ممتازة للاستثمار',
-            icon: '🥉',
+        const INVESTMENT_LEVELS = [{
+            id: 'level_basic',
+            name: '🟢 المستوى الأساسي',
+            icon: '🌟',
             minAmount: 2000,
             maxAmount: 4999,
             dailyReturnPercent: 5,
-            durationDays: 30,
-            capitalReturnable: true,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 1,
-            bonusAmount: 500
+            description: 'من 2,000 دج إلى 4,999 دج',
+            displayOrder: 1
         }, {
-            id: 'plan_advanced',
-            type: 'investment',
-            name: '🚀 المستوى المتقدم',
-            description: 'عوائد متزايدة مع مبلغ أعلى',
-            icon: '🥈',
+            id: 'level_advanced',
+            name: '🔵 المستوى المتقدم',
+            icon: '💎',
             minAmount: 5000,
             maxAmount: 9999,
             dailyReturnPercent: 5.5,
-            durationDays: 30,
-            capitalReturnable: true,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 2,
-            bonusAmount: 1250
+            description: 'من 5,000 دج إلى 9,999 دج',
+            displayOrder: 2
         }, {
-            id: 'plan_premium',
-            type: 'investment',
-            name: '💎 المستوى المميز',
-            description: 'أفضل توازن بين المخاطرة والعائد',
-            icon: '🥇',
+            id: 'level_premium',
+            name: '🟣 المستوى المميز',
+            icon: '👑',
             minAmount: 10000,
             maxAmount: 19999,
             dailyReturnPercent: 6,
-            durationDays: 30,
-            capitalReturnable: true,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 3,
-            bonusAmount: 2500
+            description: 'من 10,000 دج إلى 19,999 دج',
+            displayOrder: 3
         }, {
-            id: 'plan_pro',
-            type: 'investment',
-            name: '👑 المستوى الاحترافي',
-            description: 'للمستثمرين الجادين',
-            icon: '💼',
+            id: 'level_pro',
+            name: '🟠 المستوى الاحترافي',
+            icon: '🔥',
             minAmount: 20000,
             maxAmount: 34999,
             dailyReturnPercent: 6.5,
-            durationDays: 30,
-            capitalReturnable: true,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 4,
-            bonusAmount: 5000
+            description: 'من 20,000 دج إلى 34,999 دج',
+            displayOrder: 4
         }, {
-            id: 'plan_elite',
-            type: 'investment',
-            name: '🏆 المستوى النخبة',
-            description: 'أعلى عائد وأعلى استثمار',
-            icon: '👑',
+            id: 'level_elite',
+            name: '🔴 مستوى النخبة',
+            icon: '⭐',
             minAmount: 35000,
             maxAmount: 50000,
             dailyReturnPercent: 7,
-            durationDays: 30,
-            capitalReturnable: true,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 5,
-            bonusAmount: 8750
+            description: 'من 35,000 دج إلى 50,000 دج',
+            displayOrder: 5
         }];
+
+        // دالة لتحديد المستوى بناءً على المبلغ
+        function getInvestmentLevel(amount) {
+            for (let level of INVESTMENT_LEVELS) {
+                if (amount >= level.minAmount && amount <= level.maxAmount) {
+                    return level;
+                }
+            }
+            return null; // المبلغ خارج النطاق
+        }
 
         // ============================================================
         // 4. LOCAL STORAGE HELPERS
@@ -1766,7 +1824,8 @@
                         transactions: [],
                         referrals: [],
                         deposits: [],
-                        withdrawals: []
+                        withdrawals: [],
+                        promoHistory: []
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -1784,6 +1843,7 @@
                         renderDeposits(userData.deposits || []);
                         renderWithdrawals(userData.withdrawals || []);
                         renderInvestments();
+                        renderPromoHistory();
                         console.log('✅ تحديث لحظي للبيانات');
                     }
                 });
@@ -1799,6 +1859,7 @@
                 renderDeposits(userData.deposits || []);
                 renderWithdrawals(userData.withdrawals || []);
                 renderInvestments();
+                renderPromoHistory();
 
                 return true;
 
@@ -1858,6 +1919,7 @@
                 'investment': 'fa-chart-line text-gold',
                 'investment_return': 'fa-coins text-gold',
                 'referral_bonus': 'fa-users text-accent',
+                'promo_reward': 'fa-gift text-gold',
                 'reward': 'fa-gift text-warning'
             };
             return map[type] || 'fa-circle text-muted';
@@ -1870,6 +1932,7 @@
                 'investment': 'استثمار',
                 'investment_return': 'أرباح استثمار',
                 'referral_bonus': 'عمولة إحالة',
+                'promo_reward': 'مكافأة رمز',
                 'reward': 'مكافأة'
             };
             return map[type] || type;
@@ -2055,6 +2118,7 @@
             if (page === 'referrals') updateReferralUI();
             if (page === 'profile') updateProfileUI();
             if (page === 'investments') renderInvestments();
+            if (page === 'promo') renderPromoHistory();
         }
 
         // ============================================================
@@ -2109,6 +2173,13 @@
                 refLink.value = 'جاري التحميل...';
             }
             document.getElementById('currentCurrencyDisplay').textContent = selectedCurrency;
+
+            const statusDiv = document.getElementById('referralStatus');
+            if (userData.referrer) {
+                statusDiv.innerHTML = `<span style="color:var(--success);">✅ تم تسجيل الإحالة بنجاح! (المُحيل: ${userData.referrer})</span>`;
+            } else {
+                statusDiv.innerHTML = `<span style="color:var(--text-muted);">⚠️ لم تقم بتسجيل إحالة بعد</span>`;
+            }
         }
 
         function updateHomeUI() {
@@ -2467,40 +2538,14 @@
         }
 
         // ============================================================
-        // 14. PLANS (Investment only)
+        // 14. PLANS - USING NEW LEVELS
         // ============================================================
         const PLANS_CACHE_KEY = 'crynova_plans_cache';
         const PLANS_CACHE_TTL = 3600000;
 
         async function loadPlans(force = false) {
-            let investPlans = [];
-            try {
-                const plansSnap = await db.collection('packages')
-                    .where('type', '==', 'investment')
-                    .where('isActive', '==', true)
-                    .orderBy('displayOrder')
-                    .get();
-
-                plansSnap.forEach(doc => {
-                    investPlans.push({ id: doc.id, ...doc.data() });
-                });
-            } catch (e) {
-                console.warn('⚠️ فشل تحميل الخطط من Firestore، سيتم استخدام الخطط الافتراضية');
-            }
-
-            if (investPlans.length === 0) {
-                investPlans = DEFAULT_INVEST_PLANS;
-            }
-
-            allInvestPlans = investPlans;
-
-            try {
-                localStorage.setItem(PLANS_CACHE_KEY, JSON.stringify({
-                    investPlans: allInvestPlans,
-                    timestamp: Date.now()
-                }));
-            } catch (e) { /* ignore */ }
-
+            // نستخدم المستويات الجديدة مباشرة
+            allInvestPlans = INVESTMENT_LEVELS;
             renderPlans();
             console.log('📦 تم عرض خطط العوائد الثابتة (5 مستويات)');
         }
@@ -2518,23 +2563,24 @@
                 const minAmount = isDZD ? p.minAmount : (p.minAmount / exchangeRate);
                 const maxAmount = isDZD ? p.maxAmount : (p.maxAmount / exchangeRate);
                 const cur = isDZD ? 'DZD' : 'USDT';
-                // تمييز الخطة المميزة (المستوى الثالث) أو النخبة حسب الرغبة
-                const isPopular = (p.id === 'plan_premium' || p.id === 'plan_elite');
+                // حساب العائد اليومي لأعلى مبلغ في النطاق
+                const maxReturn = (p.maxAmount * p.dailyReturnPercent) / 100;
+                const maxReturnDisplay = isDZD ? maxReturn : (maxReturn / exchangeRate);
                 return `
-                    <div class="plan-card ${isPopular ? 'popular' : ''}">
-                        ${isPopular ? '<div class="badge-popular">⭐ الأفضل</div>' : ''}
-                        <div class="icon">${p.icon || '📈'}</div>
+                    <div class="plan-card ${i===2?'popular':''}">
+                        ${i===2?'<div class="badge-popular">⭐ الأفضل</div>':''}
+                        <div class="icon">${p.icon||'📈'}</div>
                         <div class="name">${p.name}</div>
-                        <div class="subtitle">${p.description || 'استثمر واربح يومياً'}</div>
-                        <div class="return ${isDZD ? 'dzd-return' : ''}">${p.dailyReturnPercent}% <small>يومياً</small></div>
+                        <div class="subtitle">${p.description}</div>
+                        <div class="return ${isDZD?'dzd-return':''}">${p.dailyReturnPercent}% <small>يومياً</small></div>
                         <ul class="features">
                             <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}</li>
-                            <li><i class="fas fa-clock"></i> المدة: ${p.durationDays || 30} يوم</li>
-                            <li><i class="fas fa-percent"></i> العائد: ${p.dailyReturnPercent}% يومياً</li>
-                            ${p.capitalReturnable ? '<li><i class="fas fa-undo"></i> استرداد رأس المال</li>' : ''}
-                            ${p.bonusAmount ? `<li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: <strong>${p.bonusAmount} DZD</strong></li>` : ''}
+                            <li><i class="fas fa-percent"></i> النسبة: ${p.dailyReturnPercent}%</li>
+                            <li><i class="fas fa-calendar-day"></i> العائد اليومي: حتى ${maxReturnDisplay.toFixed(2)} ${cur}</li>
+                            <li><i class="fas fa-clock"></i> المدة: 30 يوم</li>
+                            <li><i class="fas fa-undo"></i> استرداد رأس المال</li>
                         </ul>
-                        <button class="btn ${isPopular ? (isDZD ? 'btn-dzd' : 'btn-primary') : 'btn-outline'}" onclick="purchaseInvestment('${p.id}')">
+                        <button class="btn ${i===2?(isDZD?'btn-dzd':'btn-primary'):'btn-outline'}" onclick="purchaseInvestment()">
                             <i class="fas fa-plus-circle"></i> استثمر الآن
                         </button>
                     </div>
@@ -2543,19 +2589,17 @@
         }
 
         // ============================================================
-        // 15. PURCHASE INVESTMENT (مع مكافآت أول استثمار)
+        // 15. PURCHASE INVESTMENT (مع نظام المستويات الجديد)
         // ============================================================
-        async function purchaseInvestment(planId) {
+        async function purchaseInvestment() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-            const plan = allInvestPlans.find(p => p.id === planId);
-            if (!plan) { showToast('الخطة غير موجودة'); return; }
 
             const isDZD = selectedCurrency === 'DZD';
-            const minAmount = isDZD ? plan.minAmount : (plan.minAmount / exchangeRate);
-            const maxAmount = isDZD ? plan.maxAmount : (plan.maxAmount / exchangeRate);
             const cur = isDZD ? 'DZD' : 'USDT';
+            const minAmount = isDZD ? 2000 : (2000 / exchangeRate);
+            const maxAmount = isDZD ? 50000 : (50000 / exchangeRate);
 
-            const amountStr = prompt(`أدخل المبلغ للاستثمار في "${plan.name}" (${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}):`);
+            const amountStr = prompt(`أدخل المبلغ للاستثمار (${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} ${cur}):`);
             if (!amountStr) return;
             const amount = parseFloat(amountStr);
             if (isNaN(amount) || amount < minAmount || amount > maxAmount) {
@@ -2563,38 +2607,43 @@
                 return;
             }
 
+            // تحديد المستوى بناءً على المبلغ (بالعملة الأساسية DZD)
             const baseAmount = isDZD ? amount : amount * exchangeRate;
+            const level = getInvestmentLevel(baseAmount);
+            if (!level) {
+                showToast('المبلغ خارج النطاق المسموح (2000-50000 DZD)');
+                return;
+            }
 
+            // التحقق من الرصيد
             let bal = 0;
             if (isDZD) bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
                 ?.dzdReferral || 0);
             else bal = (userData.wallets?.main || 0) + (userData.wallets?.reward || 0) + (userData.wallets?.referral || 0);
             if (bal < amount) { showToast(`الرصيد غير كافٍ (${amount.toFixed(2)} ${cur})`); return; }
 
-            if (!confirm(`تأكيد استثمار ${amount.toFixed(2)} ${cur} في "${plan.name}"؟`)) return;
-
-            // التحقق مما إذا كان هذا هو أول استثمار في هذه الخطة
-            const isFirstInvestment = !(userData.investments || []).some(inv => inv.planId === plan.id);
+            if (!confirm(`تأكيد استثمار ${amount.toFixed(2)} ${cur} في "${level.name}" (العائد ${level.dailyReturnPercent}%)؟`))
+                return;
 
             try {
                 const now = new Date();
-                const endDate = new Date(Date.now() + (plan.durationDays || 30) * 24 * 60 * 60 * 1000);
+                const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 يوم
                 const investmentId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
                 const investmentObj = {
                     investmentId: investmentId,
-                    planId: plan.id,
-                    planName: plan.name,
+                    planId: level.id,
+                    planName: level.name,
                     amount: baseAmount,
                     currency: isDZD ? 'DZD' : 'USDT',
-                    dailyReturnPercent: plan.dailyReturnPercent,
-                    durationDays: plan.durationDays || 30,
+                    dailyReturnPercent: level.dailyReturnPercent,
+                    durationDays: 30,
                     startDate: now,
                     endDate: endDate,
                     status: 'active',
                     totalReturn: 0,
                     lastReturnDate: null,
-                    capitalReturnable: plan.capitalReturnable || false
+                    capitalReturnable: true
                 };
 
                 await db.runTransaction(async (t) => {
@@ -2602,7 +2651,13 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    // خصم المبلغ من المحفظة
+                    let b = 0;
+                    if (isDZD) b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                        .wallets?.dzdReferral || 0);
+                    else b = (doc.data().wallets?.main || 0) + (doc.data().wallets?.reward || 0) + (doc.data()
+                        .wallets?.referral || 0);
+                    if (b < amount) throw new Error('رصيد غير كاف');
+
                     let rem = amount;
                     const upd = {};
                     if (isDZD) {
@@ -2633,37 +2688,21 @@
                         upd['wallets.referral'] = refr - fref;
                     }
 
-                    // إضافة الاستثمار
                     upd['investments'] = firebase.firestore.FieldValue.arrayUnion(investmentObj);
                     upd['totalInvested'] = firebase.firestore.FieldValue.increment(baseAmount);
                     upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                         type: 'investment',
                         amount: amount,
                         currency: cur,
-                        description: `استثمار في ${plan.name} (${amount.toFixed(2)} ${cur})`,
+                        description: `استثمار في ${level.name} (${amount.toFixed(2)} ${cur})`,
                         timestamp: now,
                         investmentId: investmentId,
                         status: 'completed'
                     });
-
-                    // إضافة المكافأة إذا كان أول استثمار في هذه الخطة
-                    if (isFirstInvestment && plan.bonusAmount > 0) {
-                        const bonus = plan.bonusAmount;
-                        upd['wallets.dzdReward'] = firebase.firestore.FieldValue.increment(bonus);
-                        upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
-                            type: 'reward',
-                            amount: bonus,
-                            currency: 'DZD',
-                            description: `🎁 مكافأة أول استثمار في "${plan.name}" (${bonus} DZD)`,
-                            timestamp: now,
-                            status: 'completed'
-                        });
-                    }
-
                     t.update(ref, upd);
                 });
 
-                showToast(`✅ تم الاستثمار في "${plan.name}" بنجاح!${isFirstInvestment && plan.bonusAmount > 0 ? ` 🎁 حصلت على مكافأة ${plan.bonusAmount} DZD` : ''}`);
+                showToast(`✅ تم الاستثمار في "${level.name}" بنجاح!`);
                 await loadTransactions();
                 updateUI();
                 renderInvestments();
@@ -2737,7 +2776,7 @@
         }
 
         // ============================================================
-        // 17. REFERRALS (مستويين)
+        // 17. REFERRALS (مستويين) - مع منع تكرار الإحالة
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -2770,11 +2809,16 @@
         }
 
         // ============================================================
-        // 18. MANUAL REFERRAL
+        // 18. MANUAL REFERRAL (مرة واحدة فقط)
         // ============================================================
         async function manualReferral() {
             if (!userData) {
                 showToast('❌ يرجى تسجيل الدخول أولاً');
+                return;
+            }
+
+            if (userData.referrer) {
+                showToast('⚠️ لديك إحالة مسجلة مسبقاً، لا يمكنك التسجيل مرة أخرى');
                 return;
             }
 
@@ -2786,11 +2830,6 @@
             }
             if (referralCode === userData.telegramId) {
                 showToast('⚠️ لا يمكنك إحالة نفسك');
-                return;
-            }
-
-            if (userData.referrer) {
-                showToast('⚠️ لديك إحالة مسجلة مسبقاً');
                 return;
             }
 
@@ -2876,7 +2915,208 @@
         }
 
         // ============================================================
-        // 19. TRANSACTIONS
+        // 19. PROMO CODE SYSTEM (المكافآت بالرموز)
+        // ============================================================
+
+        async function generatePromoCode() {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
+            const adminIds = ['1143951718'];
+            if (!adminIds.includes(userData.telegramId)) {
+                showToast('⚠️ هذه الصفحة للأدمن فقط');
+                return;
+            }
+
+            const amount = parseFloat(document.getElementById('adminAmount').value);
+            const currency = document.getElementById('adminCurrency').value;
+            const uses = parseInt(document.getElementById('adminUses').value) || 1;
+
+            if (!amount || amount <= 0) {
+                showToast('أدخل مبلغاً صحيحاً');
+                return;
+            }
+            if (uses < 1) {
+                showToast('عدد الاستخدامات يجب أن يكون 1 على الأقل');
+                return;
+            }
+
+            try {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let code = '';
+                for (let i = 0; i < 8; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+
+                const promoData = {
+                    code: code,
+                    amount: amount,
+                    currency: currency,
+                    maxUsesPerUser: uses,
+                    usedBy: [],
+                    createdBy: userData.telegramId,
+                    createdAt: new Date(),
+                    isActive: true
+                };
+
+                await db.collection('promoCodes').doc(code).set(promoData);
+
+                document.getElementById('adminResult').innerHTML =
+                    `<span style="color:var(--success);">✅ تم إنشاء الرمز: <strong style="font-size:20px;">${code}</strong> (المبلغ: ${amount} ${currency})</span>`;
+                document.getElementById('adminAmount').value = '';
+                document.getElementById('adminUses').value = '1';
+                loadActivePromoCodes();
+                showToast('✅ تم إنشاء الرمز بنجاح!');
+            } catch (e) {
+                console.error(e);
+                document.getElementById('adminResult').innerHTML = `<span style="color:var(--danger);">❌ حدث خطأ: ${e.message}</span>`;
+            }
+        }
+
+        async function redeemPromoCode() {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
+            const input = document.getElementById('promoCodeInput');
+            const code = input.value.trim().toUpperCase();
+            if (!code) {
+                showToast('⚠️ أدخل رمز المكافأة');
+                return;
+            }
+
+            try {
+                const docRef = db.collection('promoCodes').doc(code);
+                const doc = await docRef.get();
+                if (!doc.exists) {
+                    document.getElementById('promoResult').innerHTML = `<span style="color:var(--danger);">❌ الرمز غير صحيح</span>`;
+                    return;
+                }
+
+                const data = doc.data();
+                if (!data.isActive) {
+                    document.getElementById('promoResult').innerHTML = `<span style="color:var(--danger);">❌ الرمز غير نشط</span>`;
+                    return;
+                }
+
+                if (data.usedBy && data.usedBy.includes(userData.telegramId)) {
+                    document.getElementById('promoResult').innerHTML =
+                        `<span style="color:var(--warning);">⚠️ لقد استخدمت هذا الرمز مسبقاً</span>`;
+                    return;
+                }
+
+                const userUses = data.usedBy ? data.usedBy.filter(id => id === userData.telegramId).length : 0;
+                if (userUses >= data.maxUsesPerUser) {
+                    document.getElementById('promoResult').innerHTML =
+                        `<span style="color:var(--warning);">⚠️ لقد استخدمت الحد الأقصى لهذا الرمز (${data.maxUsesPerUser})</span>`;
+                    return;
+                }
+
+                const now = new Date();
+                const ref = db.collection('users').doc(userData.telegramId);
+                const amount = data.amount;
+                const currency = data.currency;
+
+                let updateData = {};
+                if (currency === 'USDT') {
+                    updateData['wallets.reward'] = firebase.firestore.FieldValue.increment(amount);
+                } else {
+                    updateData['wallets.dzdReward'] = firebase.firestore.FieldValue.increment(amount);
+                }
+
+                updateData['transactions'] = firebase.firestore.FieldValue.arrayUnion({
+                    type: 'promo_reward',
+                    amount: amount,
+                    currency: currency,
+                    description: `مكافأة رمز "${code}" (${amount} ${currency})`,
+                    timestamp: now,
+                    promoCode: code
+                });
+
+                updateData['promoHistory'] = firebase.firestore.FieldValue.arrayUnion({
+                    code: code,
+                    amount: amount,
+                    currency: currency,
+                    redeemedAt: now
+                });
+
+                await docRef.update({
+                    usedBy: firebase.firestore.FieldValue.arrayUnion(userData.telegramId)
+                });
+
+                await ref.update(updateData);
+
+                document.getElementById('promoResult').innerHTML =
+                    `<span style="color:var(--success);">✅ تم استلام المكافأة بنجاح! (${amount} ${currency})</span>`;
+                input.value = '';
+                showToast(`✅ تم إضافة ${amount} ${currency} إلى رصيد المكافآت`);
+
+                await loadTransactions();
+                updateUI();
+                renderPromoHistory();
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('promoResult').innerHTML = `<span style="color:var(--danger);">❌ حدث خطأ: ${e.message}</span>`;
+            }
+        }
+
+        function renderPromoHistory() {
+            const container = document.getElementById('promoHistory');
+            if (!userData || !userData.promoHistory || userData.promoHistory.length === 0) {
+                container.innerHTML =
+                    '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لا توجد مكافآت مستلمة بعد</div>';
+                return;
+            }
+
+            container.innerHTML = userData.promoHistory.map(item => `
+                <div class="list-item">
+                    <div class="left">
+                        <div><i class="fas fa-tag" style="color:var(--gold);"></i></div>
+                        <div>
+                            <div class="title">${item.code}</div>
+                            <div class="sub">${formatDateTime(item.redeemedAt)}</div>
+                        </div>
+                    </div>
+                    <div class="right"><div style="color:var(--success);font-weight:700;">+${item.amount} ${item.currency}</div></div>
+                </div>
+            `).join('');
+        }
+
+        async function loadActivePromoCodes() {
+            try {
+                const snap = await db.collection('promoCodes')
+                    .where('isActive', '==', true)
+                    .orderBy('createdAt', 'desc')
+                    .limit(20)
+                    .get();
+
+                const container = document.getElementById('activePromoCodes');
+                if (snap.empty) {
+                    container.innerHTML =
+                        '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لا توجد رموز نشطة</div>';
+                    return;
+                }
+
+                let html = '';
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    const usedCount = data.usedBy ? data.usedBy.length : 0;
+                    html += `
+                        <div class="list-item">
+                            <div class="left">
+                                <div><span style="font-weight:800;font-size:16px;">${doc.id}</span></div>
+                                <div class="sub">${data.amount} ${data.currency} | مستخدم: ${usedCount}</div>
+                            </div>
+                            <div class="right"><span class="status status-success">نشط</span></div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // ============================================================
+        // 20. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -2939,7 +3179,7 @@
         }
 
         // ============================================================
-        // 20. WITHDRAW CALCULATION
+        // 21. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -2957,7 +3197,7 @@
         });
 
         // ============================================================
-        // 21. THEME TOGGLE
+        // 22. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -3004,7 +3244,34 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 22. INIT
+        // 23. ADMIN PAGE VISIBILITY
+        // ============================================================
+        let adminClickCount = 0;
+        document.addEventListener('DOMContentLoaded', function() {
+            const logo = document.querySelector('.logo');
+            if (logo) {
+                logo.addEventListener('click', function(e) {
+                    adminClickCount++;
+                    if (adminClickCount >= 5) {
+                        adminClickCount = 0;
+                        document.getElementById('page-admin').style.display = 'block';
+                        navigateTo('admin');
+                        loadActivePromoCodes();
+                        showToast('🔐 تم فتح لوحة الإدارة');
+                    }
+                });
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('admin') === 'true') {
+                document.getElementById('page-admin').style.display = 'block';
+                navigateTo('admin');
+                loadActivePromoCodes();
+            }
+        });
+
+        // ============================================================
+        // 24. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -3019,7 +3286,7 @@
             }
         });
 
-        console.log('🚀 Crynova V6 - 5 مستويات استثمار مع مكافآت أول استثمار');
+        console.log('🚀 Crynova V8 - تم تحديث نظام الاستثمار إلى 5 مستويات مع نسب مئوية متغيرة');
     </script>
 </body>
 </html>
