@@ -1944,7 +1944,7 @@
         let isModalOpen = false;
 
         const BINANCE_ID = '1143951718';
-        const POSTAL_ACCOUNT = '0799999002385412178';
+        const POSTAL_ACCOUNT = '00799999002385412178';
         const MIN_WITHDRAW_DZD = 1000;
         const MIN_DEPOSIT_DZD = 2000;
 
@@ -2111,7 +2111,8 @@
                         miningData: {
                             totalReferrals: 0,
                             totalReferralsLevel2: 0
-                        }
+                        },
+                        lastDailyDistribution: null // ⬅️ الحقل الجديد
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -2305,12 +2306,12 @@
         }
 
         // ============================================================
-        // 9. INVESTMENT DAILY RETURNS
+        // 9. INVESTMENT DAILY RETURNS (يتم توزيعها مرة واحدة يومياً عند منتصف الليل)
         // ============================================================
         function startInvestmentReturns() {
             if (investmentInterval) clearInterval(investmentInterval);
             investmentInterval = setInterval(() => {
-                if (!userData || !userData.investments || userData.investments.length === 0) return;
+                if (!userData) return;
                 processInvestmentReturns();
             }, 60000);
         }
@@ -2321,73 +2322,99 @@
                 const doc = await ref.get();
                 if (!doc.exists) return;
                 const data = doc.data();
+
+                // تاريخ اليوم بدون وقت
+                const today = new Date();
+                const todayStr = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+
+                // إذا تم التوزيع اليوم بالفعل، نخرج
+                if (data.lastDailyDistribution === todayStr) {
+                    return;
+                }
+
                 const investments = data.investments || [];
                 let updated = false;
+                let totalDZD = 0;
+                let totalUSDT = 0;
                 const now = new Date();
 
+                // حساب الأرباح اليومية لكل استثمار نشط
                 for (let inv of investments) {
                     if (inv.status !== 'active') continue;
+
+                    // التحقق من انتهاء مدة الاستثمار
                     const endDate = inv.endDate?.toDate ? inv.endDate.toDate() : new Date(inv.endDate);
                     if (now > endDate) {
                         inv.status = 'completed';
                         updated = true;
                         continue;
                     }
-                    const lastReturnDate = inv.lastReturnDate?.toDate ? inv.lastReturnDate.toDate() : null;
-                    if (!lastReturnDate || lastReturnDate.getDate() !== now.getDate() ||
-                        lastReturnDate.getMonth() !== now.getMonth() ||
-                        lastReturnDate.getFullYear() !== now.getFullYear()) {
-                        const dailyReturn = (inv.amount * inv.dailyReturnPercent) / 100;
-                        inv.totalReturn = (inv.totalReturn || 0) + dailyReturn;
-                        inv.lastReturnDate = now;
-                        updated = true;
 
-                        const isDZD = inv.currency === 'DZD';
-                        if (isDZD) {
-                            await ref.update({
-                                'wallets.dzdReward': firebase.firestore.FieldValue.increment(dailyReturn),
-                                'totalInvestmentReturns': firebase.firestore.FieldValue.increment(dailyReturn),
-                                'transactions': firebase.firestore.FieldValue.arrayUnion({
-                                    type: 'investment_return',
-                                    amount: dailyReturn,
-                                    currency: 'DZD',
-                                    description: `أرباح استثمار (${dailyReturn.toFixed(2)} DZD)`,
-                                    timestamp: now,
-                                    investmentId: inv.investmentId
-                                })
-                            });
-                        } else {
-                            await ref.update({
-                                'wallets.reward': firebase.firestore.FieldValue.increment(dailyReturn),
-                                'totalInvestmentReturns': firebase.firestore.FieldValue.increment(dailyReturn),
-                                'transactions': firebase.firestore.FieldValue.arrayUnion({
-                                    type: 'investment_return',
-                                    amount: dailyReturn,
-                                    currency: 'USDT',
-                                    description: `أرباح استثمار (${dailyReturn.toFixed(2)} USDT)`,
-                                    timestamp: now,
-                                    investmentId: inv.investmentId
-                                })
-                            });
-                        }
-                        console.log(`✅ تم إضافة أرباح استثمار: ${dailyReturn} ${inv.currency}`);
+                    // حساب الربح اليومي بناءً على النسبة المئوية للباقة
+                    const dailyReturn = (inv.amount * inv.dailyReturnPercent) / 100;
+                    inv.totalReturn = (inv.totalReturn || 0) + dailyReturn;
+                    inv.lastReturnDate = now;
+                    updated = true;
+
+                    // تجميع الأرباح حسب العملة
+                    if (inv.currency === 'DZD') {
+                        totalDZD += dailyReturn;
+                    } else {
+                        totalUSDT += dailyReturn;
                     }
                 }
 
-                if (updated) {
-                    await ref.update({ investments: investments });
+                // إذا لم يتغير شيء (مثلاً لا توجد استثمارات نشطة)
+                if (!updated && totalDZD === 0 && totalUSDT === 0) {
+                    // نحدّث lastDailyDistribution لمنع المحاولات المتكررة
+                    await ref.update({ lastDailyDistribution: todayStr });
+                    return;
+                }
+
+                // بناء كائن التحديثات
+                const updates = {};
+                updates['investments'] = investments;
+                updates['lastDailyDistribution'] = todayStr;
+
+                // إضافة الأرباح إلى المحافظ وسجل المعاملات
+                if (totalDZD > 0) {
+                    updates['wallets.dzdReward'] = firebase.firestore.FieldValue.increment(totalDZD);
+                    updates['totalInvestmentReturns'] = firebase.firestore.FieldValue.increment(totalDZD);
+                    updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
+                        type: 'investment_return',
+                        amount: totalDZD,
+                        currency: 'DZD',
+                        description: `أرباح يومية (${totalDZD.toFixed(2)} DZD)`,
+                        timestamp: now,
+                    });
+                }
+
+                if (totalUSDT > 0) {
+                    updates['wallets.reward'] = firebase.firestore.FieldValue.increment(totalUSDT);
+                    updates['totalInvestmentReturns'] = firebase.firestore.FieldValue.increment(totalUSDT);
+                    updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
+                        type: 'investment_return',
+                        amount: totalUSDT,
+                        currency: 'USDT',
+                        description: `أرباح يومية (${totalUSDT.toFixed(2)} USDT)`,
+                        timestamp: now,
+                    });
+                }
+
+                await ref.update(updates);
+                console.log(`✅ تم توزيع الأرباح اليومية: ${totalDZD} DZD, ${totalUSDT} USDT`);
+
+                // تحديث الواجهة
+                if (userData) {
                     userData.investments = investments;
                     renderInvestments();
                     updateUI();
                 }
+
             } catch (e) {
-                console.error('❌ فشل توزيع أرباح الاستثمار:', e);
+                console.error('❌ فشل توزيع الأرباح اليومية:', e);
             }
         }
-
-        window.addEventListener('beforeunload', () => {
-            if (investmentInterval) clearInterval(investmentInterval);
-        });
 
         // ============================================================
         // 10. NAVIGATION
@@ -3106,7 +3133,7 @@
                     if (b < amount) throw new Error('رصيد غير كاف');
 
                     let rem = amount;
-                    const upd = {};
+                    const updates = {};
                     if (isDZD) {
                         const m = doc.data().wallets?.dzd || 0,
                             r = doc.data().wallets?.dzdReward || 0,
@@ -3117,9 +3144,9 @@
                         rem -= fr;
                         const fref = Math.min(rem, refr);
                         rem -= fref;
-                        upd['wallets.dzd'] = m - fm;
-                        upd['wallets.dzdReward'] = r - fr;
-                        upd['wallets.dzdReferral'] = refr - fref;
+                        updates['wallets.dzd'] = m - fm;
+                        updates['wallets.dzdReward'] = r - fr;
+                        updates['wallets.dzdReferral'] = refr - fref;
                     } else {
                         const m = doc.data().wallets?.main || 0,
                             r = doc.data().wallets?.reward || 0,
@@ -3130,14 +3157,14 @@
                         rem -= fr;
                         const fref = Math.min(rem, refr);
                         rem -= fref;
-                        upd['wallets.main'] = m - fm;
-                        upd['wallets.reward'] = r - fr;
-                        upd['wallets.referral'] = refr - fref;
+                        updates['wallets.main'] = m - fm;
+                        updates['wallets.reward'] = r - fr;
+                        updates['wallets.referral'] = refr - fref;
                     }
 
-                    upd['investments'] = firebase.firestore.FieldValue.arrayUnion(investmentObj);
-                    upd['totalInvested'] = firebase.firestore.FieldValue.increment(baseAmount);
-                    upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
+                    updates['investments'] = firebase.firestore.FieldValue.arrayUnion(investmentObj);
+                    updates['totalInvested'] = firebase.firestore.FieldValue.increment(baseAmount);
+                    updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                         type: 'investment',
                         amount: amount,
                         currency: cur,
@@ -3147,16 +3174,17 @@
                         status: 'completed'
                     });
 
+                    // التحقق من أن هذا هو أول استثمار للمستخدم
                     const existingInvestments = doc.data().investments || [];
                     if (existingInvestments.length === 0) {
                         const bonusAmount = (baseAmount * FIRST_BONUS_PERCENT) / 100;
                         const bonusCurrency = isDZD ? 'DZD' : 'USDT';
                         if (isDZD) {
-                            upd['wallets.dzdReward'] = firebase.firestore.FieldValue.increment(bonusAmount);
+                            updates['wallets.dzdReward'] = firebase.firestore.FieldValue.increment(bonusAmount);
                         } else {
-                            upd['wallets.reward'] = firebase.firestore.FieldValue.increment(bonusAmount);
+                            updates['wallets.reward'] = firebase.firestore.FieldValue.increment(bonusAmount);
                         }
-                        upd['transactions'] = firebase.firestore.FieldValue.arrayUnion({
+                        updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                             type: 'first_investment_bonus',
                             amount: bonusAmount,
                             currency: bonusCurrency,
@@ -3167,7 +3195,7 @@
                         console.log(`🎁 تم إضافة مكافأة أول استثمار: ${bonusAmount} ${bonusCurrency}`);
                     }
 
-                    t.update(ref, upd);
+                    t.update(ref, updates);
                 });
 
                 showToast(`✅ تم الاستثمار في "${plan.name}" بنجاح!`);
@@ -3526,7 +3554,7 @@
             }
         });
 
-        console.log('🚀 Crynova V8.0 - خطط العوائد مخزنة محلياً (بدون Firebase)');
+        console.log('🚀 Crynova V9.0 - توزيع الأرباح اليومية مرة واحدة عند منتصف الليل مع مكافأة أول استثمار');
     </script>
 </body>
 </html>
