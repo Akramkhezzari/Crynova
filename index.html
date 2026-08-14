@@ -2331,7 +2331,7 @@
                 let updated = false;
                 let totalDZD = 0;
                 let totalUSDT = 0;
-                let totalDZDInDZD = 0; // للمحافظة على totalInvestmentReturns بالدينار
+                let totalDZDInDZD = 0;
                 let totalUSDTInDZD = 0;
                 const now = new Date();
 
@@ -2345,7 +2345,6 @@
                         continue;
                     }
 
-                    // المبلغ بالعملة الأصلية
                     const dailyReturn = (inv.amount * inv.dailyReturnPercent) / 100;
                     inv.totalReturn = (inv.totalReturn || 0) + dailyReturn;
                     inv.lastReturnDate = now;
@@ -2492,21 +2491,18 @@
             document.getElementById('homeInvestCount').textContent = (u.investments || []).filter(i => i.status === 'active')
                 .length;
 
-            // totalInvested مخزن بالدينار، نعرضه حسب العملة
             const totalInvested = u.totalInvested || 0;
-            const totalReturn = u.totalInvestmentReturns || 0; // مخزن بالدينار
+            const totalReturn = u.totalInvestmentReturns || 0;
             document.getElementById('homeTotalInvested').textContent = isDZD ? totalInvested.toFixed(2) : (totalInvested /
                 exchangeRate).toFixed(2);
             document.getElementById('homeTotalInvested2').textContent = isDZD ? totalInvested.toFixed(2) : (totalInvested /
                 exchangeRate).toFixed(2);
 
-            // الأرباح اليومية الحالية (مجموع dailyReturn لكل استثمار نشط)
             let daily = 0;
             if (u.investments) {
                 u.investments.forEach(inv => {
                     if (inv.status === 'active') {
                         const dailyReturn = (inv.amount * inv.dailyReturnPercent) / 100;
-                        // نحول إلى العملة المختارة
                         if (isDZD && inv.currency === 'USDT') {
                             daily += dailyReturn * exchangeRate;
                         } else if (!isDZD && inv.currency === 'DZD') {
@@ -2732,6 +2728,7 @@
 
             const fee = amount * 0.10;
             const total = amount + fee;
+            // إزالة confirm الإضافية هنا أيضاً
             if (!confirm(`تأكيد سحب ${amount} ${currency}? الرسوم: ${fee.toFixed(2)}`)) return;
 
             try {
@@ -3052,7 +3049,7 @@
         }
 
         // ============================================================
-        // 16. CONFIRM INVESTMENT (المعدل)
+        // 16. CONFIRM INVESTMENT (تم إزالة confirm() الإضافية)
         // ============================================================
         async function confirmInvestment() {
             if (!currentSelectedPlanId) {
@@ -3091,7 +3088,8 @@
                 return;
             }
 
-            if (!confirm(`تأكيد استثمار ${amount.toFixed(2)} ${cur} في "${plan.name}"؟`)) return;
+            // ⬇️ تم إزالة confirm() الإضافية هنا ⬇️
+            // if (!confirm(`تأكيد استثمار ${amount.toFixed(2)} ${cur} في "${plan.name}"؟`)) return;
 
             closeInvestmentModal();
 
@@ -3100,14 +3098,13 @@
                 const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
                 const investmentId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
-                // تحويل المبلغ إلى DZD للتخزين في totalInvested
                 const amountInDZD = isDZD ? amount : amount * exchangeRate;
 
                 const investmentObj = {
                     investmentId: investmentId,
                     planId: plan.id,
                     planName: plan.name,
-                    amount: amount, // المبلغ الأصلي
+                    amount: amount,
                     currency: cur,
                     dailyReturnPercent: plan.dailyReturnPercent,
                     durationDays: 30,
@@ -3117,7 +3114,7 @@
                     totalReturn: 0,
                     lastReturnDate: null,
                     capitalReturnable: true,
-                    amountInDZD: amountInDZD // للرجوع
+                    amountInDZD: amountInDZD
                 };
 
                 await db.runTransaction(async (t) => {
@@ -3174,7 +3171,6 @@
                         status: 'completed'
                     });
 
-                    // مكافأة أول استثمار
                     const existingInvestments = doc.data().investments || [];
                     if (existingInvestments.length === 0) {
                         const bonusAmount = (amount * FIRST_BONUS_PERCENT) / 100;
@@ -3220,8 +3216,8 @@
             }
 
             const isDZD = selectedCurrency === 'DZD';
-            const totalInvested = userData.totalInvested || 0; // بالدينار
-            const totalReturn = userData.totalInvestmentReturns || 0; // بالدينار
+            const totalInvested = userData.totalInvested || 0;
+            const totalReturn = userData.totalInvestmentReturns || 0;
             document.getElementById('investTotalInvested').textContent = isDZD ? totalInvested.toFixed(2) : (totalInvested /
                 exchangeRate).toFixed(2);
             document.getElementById('investTotalReturn').textContent = isDZD ? totalReturn.toFixed(2) : (totalReturn /
@@ -3555,7 +3551,7 @@
             }
         });
 
-        console.log('🚀 Crynova V10 - تم ضبط مكافأة أول استثمار والأرباح اليومية بالعملة الصحيحة');
+        console.log('🚀 Crynova V10 - تم ضبط مكافأة أول استثمار والأرباح اليومية، وإزالة التأكيد الإضافي');
     </script>
 </body>
 </html>
