@@ -88,7 +88,7 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
-            padding-bottom: 90px;
+            padding-bottom: 100px;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -549,7 +549,7 @@
             text-align: center;
         }
 
-        /* BOTTOM NAVIGATION */
+        /* BOTTOM NAVIGATION - 6 items - حجم أكبر */
         .bottom-nav {
             position: fixed;
             bottom: 16px;
@@ -560,13 +560,15 @@
             background: var(--bg-nav);
             display: flex;
             justify-content: space-around;
-            padding: 6px 4px;
+            padding: 12px 6px;
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border);
             z-index: 1000;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
+            gap: 8px;
+            min-height: 76px;
         }
         .nav-item {
             display: flex;
@@ -574,8 +576,8 @@
             align-items: center;
             color: var(--text-muted);
             text-decoration: none;
-            font-size: 11px;
-            padding: 6px 12px;
+            font-size: 13px;
+            padding: 6px 8px;
             border-radius: var(--radius-sm);
             transition: var(--transition);
             cursor: pointer;
@@ -587,7 +589,7 @@
             flex: 1;
         }
         .nav-item i {
-            font-size: 22px;
+            font-size: 24px;
             margin-bottom: 2px;
             transition: var(--transition);
         }
@@ -600,16 +602,63 @@
         .nav-item.active::before {
             content: '';
             position: absolute;
-            top: -6px;
+            top: -8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 20px;
-            height: 3px;
+            width: 24px;
+            height: 4px;
             background: var(--accent);
             border-radius: 10px;
         }
         .nav-item:hover {
             color: var(--text-primary);
+        }
+        .nav-item span {
+            line-height: 1.2;
+            font-size: 12px;
+        }
+
+        /* تحسين للشاشات الصغيرة جداً */
+        @media (max-width: 420px) {
+            .bottom-nav {
+                bottom: 12px;
+                width: calc(100% - 24px);
+                padding: 10px 4px;
+                gap: 4px;
+                min-height: 64px;
+            }
+            .nav-item {
+                padding: 4px 4px;
+                font-size: 11px;
+            }
+            .nav-item i {
+                font-size: 20px;
+            }
+            .nav-item span {
+                font-size: 10px;
+            }
+            .nav-item.active::before {
+                width: 18px;
+                height: 3px;
+                top: -6px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .bottom-nav {
+                bottom: 24px;
+                padding: 14px 8px;
+                min-height: 82px;
+            }
+            .nav-item i {
+                font-size: 26px;
+            }
+            .nav-item {
+                font-size: 14px;
+            }
+            .nav-item span {
+                font-size: 13px;
+            }
         }
 
         /* INPUTS */
@@ -1127,18 +1176,6 @@
             .plan-card .return {
                 font-size: 22px;
             }
-            .bottom-nav {
-                bottom: 12px;
-                width: calc(100% - 24px);
-                padding: 4px 2px;
-            }
-            .nav-item {
-                padding: 4px 6px;
-                font-size: 10px;
-            }
-            .nav-item i {
-                font-size: 18px;
-            }
             .card {
                 padding: 16px;
             }
@@ -1180,10 +1217,6 @@
         @media (min-width: 768px) {
             .app-container {
                 padding: 24px;
-            }
-            .bottom-nav {
-                bottom: 24px;
-                padding: 8px 6px;
             }
         }
 
@@ -1493,6 +1526,79 @@
             </div>
         </div>
 
+        <!-- ========== PAGE: REFERRALS (جديدة) ========== -->
+        <div class="page" id="page-referrals">
+            <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+                <i class="fas fa-users text-accent"></i> الإحالات
+                <button class="back-btn" onclick="navigateTo('home')" style="margin-right:auto;">
+                    <i class="fas fa-arrow-right"></i> رجوع
+                </button>
+            </h2>
+
+            <div class="card" style="background:var(--accent-glow);border:2px solid var(--accent-light);">
+                <div class="text-center">
+                    <div style="font-size:52px;margin-bottom:8px;">🎁</div>
+                    <div style="font-size:20px;font-weight:900;">اربح 15% من إيداع المدعو</div>
+                    <div style="color:var(--text-secondary);font-size:15px;">و 5% من إيداع مدعو مدعوك</div>
+                </div>
+            </div>
+
+            <div class="grid-3">
+                <div class="stat-box">
+                    <span class="icon">👤</span>
+                    <div class="number" id="refCount">0</div>
+                    <div class="label">المدعوين المباشرين</div>
+                </div>
+                <div class="stat-box">
+                    <span class="icon">👥</span>
+                    <div class="number" id="refLevel2Count">0</div>
+                    <div class="label">المدعوين غير المباشرين</div>
+                </div>
+                <div class="stat-box">
+                    <span class="icon">💰</span>
+                    <div class="number" id="refEarnings">0.00</div>
+                    <div class="label">العمولات</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="font-size:14px;color:var(--text-secondary);font-weight:600;margin-bottom:8px;">رابط الدعوة الخاص بك</div>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" id="referralLink" readonly value="جاري التحميل..." style="flex:1;padding:12px 14px;background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-weight:600;font-size:14px;">
+                    <button class="btn btn-primary btn-sm" style="width:auto;padding:12px 16px;" onclick="copyText(document.getElementById('referralLink').value)">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <button class="btn btn-sm btn-ghost mt-8" onclick="shareReferral()" style="width:auto;">
+                    <i class="fas fa-share-alt"></i> مشاركة الرابط
+                </button>
+            </div>
+
+            <!-- نظام تسجيل الإحالة اليدوية (منقول هنا) -->
+            <div class="card">
+                <div style="display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;margin-bottom:12px;">
+                    <i class="fas fa-user-plus" style="color:var(--text-muted);width:20px;"></i>
+                    تسجيل إحالة يدوية
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <input type="text" id="manualReferralCode" placeholder="أدخل معرف المُحيل (Telegram ID)" style="flex:1;padding:12px 14px;background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-weight:600;font-size:14px;font-family:inherit;min-width:150px;">
+                    <button class="btn btn-primary btn-sm" style="width:auto;padding:12px 20px;" onclick="manualReferral()">
+                        <i class="fas fa-check"></i> تسجيل
+                    </button>
+                </div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">
+                    <i class="fas fa-info-circle"></i> أدخل معرف Telegram الخاص بالشخص الذي دعاك (ستحصل أنت و هو على مكافأة)
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title" style="margin-bottom:12px;"><i class="fas fa-list"></i> قائمة المدعوين</div>
+                <div id="referralsList">
+                    <div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>
+                </div>
+            </div>
+        </div>
+
         <!-- ========== PAGE: DEPOSIT (مع زر إلغاء) ========== -->
         <div class="page" id="page-deposit">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
@@ -1670,55 +1776,6 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: REFERRALS ========== -->
-        <div class="page" id="page-referrals">
-            <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
-                <i class="fas fa-users text-accent"></i> الإحالات
-            </h2>
-            <div class="card" style="background:var(--accent-glow);border:2px solid var(--accent-light);">
-                <div class="text-center">
-                    <div style="font-size:52px;margin-bottom:8px;">🎁</div>
-                    <div style="font-size:20px;font-weight:900;">اربح 15% من إيداع المدعو</div>
-                    <div style="color:var(--text-secondary);font-size:15px;">و 5% من إيداع مدعو مدعوك</div>
-                </div>
-            </div>
-            <div class="grid-3">
-                <div class="stat-box">
-                    <span class="icon">👤</span>
-                    <div class="number" id="refCount">0</div>
-                    <div class="label">المدعوين المباشرين</div>
-                </div>
-                <div class="stat-box">
-                    <span class="icon">👥</span>
-                    <div class="number" id="refLevel2Count">0</div>
-                    <div class="label">المدعوين غير المباشرين</div>
-                </div>
-                <div class="stat-box">
-                    <span class="icon">💰</span>
-                    <div class="number" id="refEarnings">0.00</div>
-                    <div class="label">العمولات</div>
-                </div>
-            </div>
-            <div class="card">
-                <div style="font-size:14px;color:var(--text-secondary);font-weight:600;margin-bottom:8px;">رابط الدعوة الخاص بك</div>
-                <div style="display:flex;gap:8px;">
-                    <input type="text" id="referralLink" readonly value="جاري التحميل..." style="flex:1;padding:12px 14px;background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-weight:600;font-size:14px;">
-                    <button class="btn btn-primary btn-sm" style="width:auto;padding:12px 16px;" onclick="copyText(document.getElementById('referralLink').value)">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                </div>
-                <button class="btn btn-sm btn-ghost mt-8" onclick="shareReferral()" style="width:auto;">
-                    <i class="fas fa-share-alt"></i> مشاركة الرابط
-                </button>
-            </div>
-            <div class="card">
-                <div class="card-title" style="margin-bottom:12px;"><i class="fas fa-list"></i> قائمة المدعوين</div>
-                <div id="referralsList">
-                    <div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>
-                </div>
-            </div>
-        </div>
-
         <!-- ========== PAGE: TRANSACTIONS ========== -->
         <div class="page" id="page-transactions">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
@@ -1748,6 +1805,9 @@
         <div class="page" id="page-profile">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-user text-accent"></i> الحساب
+                <button class="back-btn" onclick="navigateTo('home')" style="margin-right:auto;">
+                    <i class="fas fa-arrow-right"></i> رجوع
+                </button>
             </h2>
             <div class="card text-center" style="padding:24px;">
                 <div style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:white;margin:0 auto 12px;box-shadow:var(--shadow-glow);" id="profileAvatar">
@@ -1776,21 +1836,6 @@
                     <button class="btn btn-sm btn-outline" style="width:auto;" onclick="copyText(document.getElementById('referralLink').value)">
                         <i class="fas fa-copy"></i> نسخ
                     </button>
-                </div>
-            </div>
-            <div class="card">
-                <div style="display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;margin-bottom:12px;">
-                    <i class="fas fa-user-plus" style="color:var(--text-muted);width:20px;"></i>
-                    تسجيل إحالة يدوية
-                </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <input type="text" id="manualReferralCode" placeholder="أدخل معرف المُحيل (Telegram ID)" style="flex:1;padding:12px 14px;background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-weight:600;font-size:14px;font-family:inherit;min-width:150px;">
-                    <button class="btn btn-primary btn-sm" style="width:auto;padding:12px 20px;" onclick="manualReferral()">
-                        <i class="fas fa-check"></i> تسجيل
-                    </button>
-                </div>
-                <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">
-                    <i class="fas fa-info-circle"></i> أدخل معرف Telegram الخاص بالشخص الذي دعاك (ستحصل أنت و هو على مكافأة)
                 </div>
             </div>
             <div class="card">
@@ -1887,7 +1932,7 @@
         </div>
     </div>
 
-    <!-- ===== BOTTOM NAVIGATION ===== -->
+    <!-- ===== BOTTOM NAVIGATION (6 أزرار) ===== -->
     <nav class="bottom-nav" id="bottomNav">
         <button class="nav-item active" data-page="home" onclick="navigateTo('home')">
             <i class="fas fa-house"></i>
@@ -1904,6 +1949,10 @@
         <button class="nav-item" data-page="wallet" onclick="navigateTo('wallet')">
             <i class="fas fa-wallet"></i>
             <span>المحفظة</span>
+        </button>
+        <button class="nav-item" data-page="referrals" onclick="navigateTo('referrals')">
+            <i class="fas fa-users"></i>
+            <span>الإحالات</span>
         </button>
         <button class="nav-item" data-page="profile" onclick="navigateTo('profile')">
             <i class="fas fa-user"></i>
@@ -2728,7 +2777,6 @@
 
             const fee = amount * 0.10;
             const total = amount + fee;
-            // إزالة confirm الإضافية هنا أيضاً
             if (!confirm(`تأكيد سحب ${amount} ${currency}? الرسوم: ${fee.toFixed(2)}`)) return;
 
             try {
@@ -3049,7 +3097,7 @@
         }
 
         // ============================================================
-        // 16. CONFIRM INVESTMENT (تم إزالة confirm() الإضافية)
+        // 16. CONFIRM INVESTMENT
         // ============================================================
         async function confirmInvestment() {
             if (!currentSelectedPlanId) {
@@ -3088,9 +3136,7 @@
                 return;
             }
 
-            // ⬇️ تم إزالة confirm() الإضافية هنا ⬇️
-            // if (!confirm(`تأكيد استثمار ${amount.toFixed(2)} ${cur} في "${plan.name}"؟`)) return;
-
+            // تم إزالة confirm() الإضافية
             closeInvestmentModal();
 
             try {
@@ -3551,7 +3597,7 @@
             }
         });
 
-        console.log('🚀 Crynova V10 - تم ضبط مكافأة أول استثمار والأرباح اليومية، وإزالة التأكيد الإضافي');
+        console.log('🚀 Crynova V12 - تنقل سفلي أكبر حجماً مع 6 أزرار');
     </script>
 </body>
 </html>
