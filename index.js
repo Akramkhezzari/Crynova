@@ -33,7 +33,6 @@ if (!TOKEN) {
 }
 const bot = new TelegramBot(TOKEN, { polling: false });
 
-// استخدم الرابط الصحيح للخدمة على Render
 const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://crynova-1.onrender.com/webhook';
 bot.setWebHook(WEBHOOK_URL).then(() => {
     console.log(`✅ Webhook مضبوط على: ${WEBHOOK_URL}`);
@@ -41,25 +40,21 @@ bot.setWebHook(WEBHOOK_URL).then(() => {
     console.error('❌ فشل تعيين Webhook:', err.message);
 });
 
-// ==================== 3. نقطة نهاية Webhook ====================
 app.post('/webhook', (req, res) => {
     bot.processUpdate(req.body);
     res.sendStatus(200);
 });
 
-// ==================== 4. معالجة رسائل /start ====================
+// ==================== 3. معالجة رسائل /start ====================
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text || '';
 
-    // تجاهل أي رسالة ليست /start
     if (!text.startsWith('/start')) return;
 
-    // استخراج البارامتر (معرف المُحيل)
     const parts = text.split(' ');
     let referrerId = parts.length > 1 ? parts[1].trim() : null;
 
-    // بيانات المستخدم الجديد
     const newUserId = msg.from.id.toString();
     const firstName = msg.from.first_name || 'مستخدم';
     const username = msg.from.username || '';
@@ -68,12 +63,11 @@ bot.on('message', async (msg) => {
     console.log(`📩 استقبال /start من ${firstName} (${newUserId}) مع مُحيل: ${referrerId || 'لا يوجد'}`);
 
     try {
-        // ========== أ. التأكد من وجود المستخدم الجديد في Firebase ==========
+        // ===== أ. إنشاء المستخدم الجديد إذا لم يكن موجوداً =====
         const newUserRef = db.collection('users').doc(newUserId);
         const newUserDoc = await newUserRef.get();
 
         if (!newUserDoc.exists) {
-            // إنشاء المستخدم الجديد مع جميع الحقول المطلوبة
             await newUserRef.set({
                 telegramId: newUserId,
                 displayName: firstName,
@@ -105,7 +99,6 @@ bot.on('message', async (msg) => {
             });
             console.log(`✅ تم إنشاء مستخدم جديد: ${newUserId}`);
         } else {
-            // تحديث بيانات المستخدم إذا تغيرت
             await newUserRef.update({
                 displayName: firstName,
                 username: username,
@@ -114,18 +107,16 @@ bot.on('message', async (msg) => {
             console.log(`ℹ️ مستخدم موجود مسبقاً: ${newUserId}`);
         }
 
-        // ========== ب. تسجيل الإحالة إذا وُجد مُحيل ==========
+        // ===== ب. تسجيل الإحالة إذا وُجد مُحيل =====
         if (referrerId && referrerId !== newUserId) {
             const referrerRef = db.collection('users').doc(referrerId);
             const referrerDoc = await referrerRef.get();
 
             if (referrerDoc.exists) {
-                const referrerData = referrerDoc.data();
-                const referrals = referrerData.referrals || [];
+                const referrals = referrerDoc.data().referrals || [];
                 const alreadyExists = referrals.some(r => r.referredUid === newUserId);
 
                 if (!alreadyExists) {
-                    // تحديث المُحيل: إضافة المدعو وزيادة العدد
                     await referrerRef.update({
                         'miningData.totalReferrals': admin.firestore.FieldValue.increment(1),
                         'referrals': admin.firestore.FieldValue.arrayUnion({
@@ -138,7 +129,7 @@ bot.on('message', async (msg) => {
                     });
                     console.log(`✅ تم تسجيل إحالة جديدة: ${newUserId} بواسطة ${referrerId}`);
 
-                    // مكافأة ترحيبية للمستخدم الجديد (500 DZD)
+                    // مكافأة ترحيبية للمستخدم الجديد
                     await newUserRef.update({
                         'wallets.dzdReward': admin.firestore.FieldValue.increment(500),
                         'transactions': admin.firestore.FieldValue.arrayUnion({
@@ -151,14 +142,14 @@ bot.on('message', async (msg) => {
                     });
                     console.log(`🎁 مكافأة ترحيبية 500 DZD للمستخدم الجديد`);
                 } else {
-                    console.log(`⚠️ الإحالة مكررة: ${newUserId} سبق أن سُجلت للمُحيل ${referrerId}`);
+                    console.log(`⚠️ الإحالة مكررة`);
                 }
             } else {
                 console.log(`⚠️ المُحيل ${referrerId} غير موجود في Firebase`);
             }
         }
 
-        // ========== ج. إرسال رد للمستخدم مع زر فتح التطبيق ==========
+        // ===== ج. إرسال رد مع زر فتح التطبيق =====
         const webAppUrl = process.env.WEBAPP_URL || 'https://Akramkhezzari.github.io/Crynova/';
         const keyboard = {
             inline_keyboard: [
@@ -166,30 +157,19 @@ bot.on('message', async (msg) => {
             ]
         };
 
-        const welcomeMessage = `
-👋 مرحباً ${firstName}!
-
-تم تسجيل دخولك بنجاح.
-💰 استثمر واربح مع Crynova.
-
-اضغط على الزر أدناه لبدء الاستثمار.
-        `;
-
-        await bot.sendMessage(chatId, welcomeMessage, {
+        await bot.sendMessage(chatId, `👋 مرحباً ${firstName}!\nتم تسجيل دخولك بنجاح.\n💰 استثمر واربح مع Crynova.`, {
             reply_markup: keyboard
         });
 
         console.log(`✅ تم إرسال رسالة الترحيب إلى ${newUserId}`);
 
     } catch (error) {
-        console.error('❌ خطأ أثناء معالجة /start:', error);
-        await bot.sendMessage(chatId, 'حدث خطأ، حاول مرة أخرى لاحقاً.');
+        console.error('❌ خطأ:', error);
+        await bot.sendMessage(chatId, 'حدث خطأ، حاول مرة أخرى.');
     }
 });
 
-// ==================== 5. تشغيل الخادم ====================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 الخادم يعمل على المنفذ ${PORT}`);
-    console.log(`📡 Webhook: ${WEBHOOK_URL}`);
 });
