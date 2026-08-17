@@ -1522,22 +1522,7 @@
                 </button>
             </div>
 
-            <!-- نظام تسجيل الإحالة اليدوية -->
-            <div class="card">
-                <div style="display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;margin-bottom:12px;">
-                    <i class="fas fa-user-plus" style="color:var(--text-muted);width:20px;"></i>
-                    تسجيل إحالة يدوية
-                </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <input type="text" id="manualReferralCode" placeholder="أدخل معرف المُحيل (Telegram ID)" style="flex:1;padding:12px 14px;background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-weight:600;font-size:14px;font-family:inherit;min-width:150px;">
-                    <button class="btn btn-primary btn-sm" style="width:auto;padding:12px 20px;" onclick="manualReferral()">
-                        <i class="fas fa-check"></i> تسجيل
-                    </button>
-                </div>
-                <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">
-                    <i class="fas fa-info-circle"></i> أدخل معرف Telegram الخاص بالشخص الذي دعاك (ستحصل أنت و هو على مكافأة)
-                </div>
-            </div>
+            <!-- تم إزالة نظام تسجيل الإحالة اليدوية -->
 
             <div class="card">
                 <div class="card-title" style="margin-bottom:12px;"><i class="fas fa-list"></i> قائمة المدعوين</div>
@@ -1556,7 +1541,6 @@
                 </button>
             </h2>
             <div class="card">
-                <!-- تم إزالة خيار العملة - العملة ثابتة DZD -->
                 <div class="input-group" id="depositEccpGroup">
                     <label>رقم حساب Baridi Mob <span class="required">*</span></label>
                     <div style="display:flex;gap:8px;align-items:center;">
@@ -1652,7 +1636,6 @@
                 <div style="font-size:13px;color:var(--text-secondary);margin-top:8px;">رسوم السحب: 10% من المبلغ</div>
             </div>
             <div class="card">
-                <!-- تم إزالة خيار العملة - العملة ثابتة DZD -->
                 <div class="input-group" id="withdrawBaridiGroup">
                     <label>معرف Baridi Mob الخاص بك <span class="required">*</span></label>
                     <div class="input-icon">
@@ -1740,16 +1723,7 @@
                     <span class="left"><i class="fas fa-calendar" style="color:var(--text-muted);width:20px;"></i> تاريخ التسجيل</span>
                     <span id="profileJoinDate" style="font-weight:600;">--</span>
                 </div>
-                <div class="list-item">
-                    <span class="left"><i class="fas fa-id-badge" style="color:var(--text-muted);width:20px;"></i> معرف Telegram</span>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <span id="profileTelegramId" style="font-weight:600;">--</span>
-                        <button class="btn btn-sm btn-outline" style="width:auto;padding:6px 12px;" onclick="copyText(document.getElementById('profileTelegramId').textContent)">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                </div>
-                <!-- تم إزالة رابط الإحالة ومحدد العملة -->
+                <!-- تم إزالة معرف Telegram -->
             </div>
             <div class="card">
                 <div class="list-item clickable" onclick="toggleLanguage()" style="padding-top:14px;">
@@ -1881,7 +1855,7 @@
         let depositData = null;
         let isDarkTheme = false;
         let investmentInterval = null;
-        let selectedCurrency = 'DZD'; // ثابت
+        let selectedCurrency = 'DZD';
         let unsubscribeUser = null;
         let currentSelectedPlanId = null;
         let isModalOpen = false;
@@ -1892,7 +1866,7 @@
         const FIRST_BONUS_PERCENT = 7;
 
         // ============================================================
-        // 3. DEFAULT INVESTMENT PLANS (مخزنة محلياً)
+        // 3. DEFAULT INVESTMENT PLANS
         // ============================================================
         const DEFAULT_INVEST_PLANS = [{
             id: 'plan_basic',
@@ -2276,12 +2250,10 @@
             const localInfo = getLocalUserInfo();
             document.getElementById('profileTelegram').textContent = localInfo.username ? `@${localInfo.username}` :
                 'غير متاح';
-            document.getElementById('profileTelegramId').textContent = userData.telegramId || '--';
             document.getElementById('profileJoinDate').textContent = formatDate(userData.joinDate);
 
             const refLink = document.getElementById('referralLink');
             if (userData.telegramId) {
-                // ✅ الرابط الجديد الذي يفتح البوت أولاً
                 refLink.value = `https://t.me/Crynova_bot?start=${userData.telegramId}`;
             } else {
                 refLink.value = 'جاري التحميل...';
@@ -2748,7 +2720,7 @@
         }
 
         // ============================================================
-        // 14. CONFIRM INVESTMENT (مع مكافأة أول استثمار)
+        // 14. CONFIRM INVESTMENT
         // ============================================================
         async function confirmInvestment() {
             if (!currentSelectedPlanId) {
@@ -2965,114 +2937,10 @@
             }).join('');
         }
 
-        // ============================================================
-        // 17. MANUAL REFERRAL
-        // ============================================================
-        async function manualReferral() {
-            if (!userData) {
-                showToast('❌ يرجى تسجيل الدخول أولاً');
-                return;
-            }
-
-            const codeInput = document.getElementById('manualReferralCode');
-            const referralCode = codeInput.value.trim();
-            if (!referralCode) {
-                showToast('⚠️ أدخل معرف المُحيل');
-                return;
-            }
-            if (referralCode === userData.telegramId) {
-                showToast('⚠️ لا يمكنك إحالة نفسك');
-                return;
-            }
-
-            if (userData.referrer) {
-                showToast('⚠️ لديك إحالة مسجلة مسبقاً');
-                return;
-            }
-
-            let referrerDoc;
-            try {
-                const ref = db.collection('users').doc(referralCode);
-                referrerDoc = await ref.get();
-                if (!referrerDoc.exists) {
-                    showToast('⚠️ لم يتم العثور على مستخدم بهذا المعرف');
-                    return;
-                }
-            } catch (e) {
-                showToast('❌ حدث خطأ أثناء البحث عن المُحيل');
-                return;
-            }
-
-            try {
-                await db.runTransaction(async (transaction) => {
-                    const userRef = db.collection('users').doc(userData.telegramId);
-                    const refRef = db.collection('users').doc(referralCode);
-
-                    transaction.update(userRef, { referrer: referralCode });
-
-                    const referrerData = referrerDoc.data();
-                    const referrerLevel2 = referrerData.referrer || null;
-
-                    if (referrerLevel2) {
-                        transaction.update(userRef, { referrerLevel2: referrerLevel2 });
-                        const ref2Ref = db.collection('users').doc(referrerLevel2);
-                        transaction.update(ref2Ref, {
-                            'miningData.totalReferralsLevel2': firebase.firestore.FieldValue.increment(1)
-                        });
-                    }
-
-                    const now = new Date();
-                    transaction.update(refRef, {
-                        'miningData.totalReferrals': firebase.firestore.FieldValue.increment(1),
-                        'referrals': firebase.firestore.FieldValue.arrayUnion({
-                            referredUid: userData.telegramId,
-                            displayName: userData.displayName || 'مستخدم',
-                            joinedAt: now,
-                            level: 1,
-                            commissionEarned: 0
-                        })
-                    });
-
-                    if (referrerLevel2) {
-                        const ref2Ref = db.collection('users').doc(referrerLevel2);
-                        transaction.update(ref2Ref, {
-                            'referrals': firebase.firestore.FieldValue.arrayUnion({
-                                referredUid: userData.telegramId,
-                                displayName: userData.displayName || 'مستخدم',
-                                joinedAt: now,
-                                level: 2,
-                                commissionEarned: 0
-                            })
-                        });
-                    }
-
-                    transaction.update(userRef, {
-                        'wallets.dzdReward': firebase.firestore.FieldValue.increment(500),
-                        'transactions': firebase.firestore.FieldValue.arrayUnion({
-                            type: 'reward',
-                            amount: 500,
-                            currency: 'DZD',
-                            description: 'مكافأة التسجيل',
-                            timestamp: now
-                        })
-                    });
-                });
-
-                userData.referrer = referralCode;
-                showToast('✅ تم تسجيل الإحالة بنجاح!');
-                codeInput.value = '';
-                await loadReferrals();
-                await loadTransactions();
-                updateUI();
-
-            } catch (error) {
-                console.error('❌ فشل تسجيل الإحالة اليدوية:', error);
-                showToast('❌ حدث خطأ: ' + error.message);
-            }
-        }
+        // تم إزالة دالة manualReferral بالكامل
 
         // ============================================================
-        // 18. TRANSACTIONS
+        // 17. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -3135,7 +3003,7 @@
         }
 
         // ============================================================
-        // 19. WITHDRAW CALCULATION
+        // 18. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -3150,7 +3018,7 @@
         });
 
         // ============================================================
-        // 20. INVESTMENT DAILY RETURNS
+        // 19. INVESTMENT DAILY RETURNS
         // ============================================================
         function startInvestmentReturns() {
             if (investmentInterval) clearInterval(investmentInterval);
@@ -3232,7 +3100,7 @@
         }
 
         // ============================================================
-        // 21. THEME TOGGLE
+        // 20. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -3279,7 +3147,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 22. INIT
+        // 21. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -3293,7 +3161,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة DZD فقط مع رابط الإحالة للبوت');
+        console.log('🚀 Crynova - النسخة النهائية مع رابط الإحالة للبوت');
     </script>
 </body>
 </html>
