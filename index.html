@@ -1566,46 +1566,6 @@
                 </button>
             </div>
 
-            <div id="depositDetails" class="hidden">
-                <div class="card" style="border:2px solid var(--success);">
-                    <div class="text-center">
-                        <div style="font-size:14px;color:var(--text-secondary);font-weight:600;">أرسل المبلغ إلى الحساب التالي</div>
-                        <div style="font-size:16px;font-weight:700;word-break:break-all;padding:14px;background:var(--bg-input);border-radius:var(--radius-sm);margin:12px 0;border:1px dashed var(--border);" id="depositAddress">
-                            Baridi Mob: 00799999002385412178
-                        </div>
-                        <button class="btn btn-sm btn-outline" style="width:auto;" onclick="copyText(document.getElementById('depositAddress').textContent)">
-                            <i class="fas fa-copy"></i> نسخ الحساب
-                        </button>
-                    </div>
-                    <div class="qr-container" id="depositQR">
-                        <div style="background:var(--accent-glow);padding:20px;border-radius:var(--radius-sm);text-align:center;border:2px dashed var(--accent);width:100%;">
-                            <i class="fas fa-mobile-screen-button" style="font-size:48px;color:var(--dzd-color);"></i>
-                            <div style="font-weight:700;margin-top:8px;font-size:16px;">Baridi Mob</div>
-                            <div style="font-size:13px;color:var(--text-secondary);">رقم الحساب: 00799999002385412178</div>
-                            <div style="font-size:20px;font-weight:900;color:var(--dzd-color);margin-top:4px;" id="depositQRAmount">0 DZD</div>
-                        </div>
-                    </div>
-                    <div class="input-group mt-16">
-                        <label>رقم عملية التحويل <span class="required">*</span></label>
-                        <div class="input-icon">
-                            <i class="fas fa-receipt"></i>
-                            <input type="text" id="depositTransactionId" placeholder="أدخل رقم العملية من وصل التحويل">
-                        </div>
-                        <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">
-                            <i class="fas fa-info-circle"></i> أدخل رقم العملية الموجود في وصل التحويل
-                        </div>
-                    </div>
-                    <div style="display:flex;gap:8px;">
-                        <button class="btn btn-primary" onclick="submitDepositProof()">
-                            <i class="fas fa-check-circle"></i> تأكيد الإيداع
-                        </button>
-                        <button class="btn btn-outline" onclick="cancelDepositDetails()" style="flex:0.5;">
-                            <i class="fas fa-times"></i> إلغاء
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <div class="card">
                 <div class="card-title" style="margin-bottom:12px;"><i class="fas fa-clock-rotate-left"></i> طلبات الإيداع</div>
                 <div id="depositRequests">
@@ -1796,6 +1756,65 @@
                 <button class="btn btn-outline" onclick="closeInvestmentModal()">إلغاء</button>
                 <button class="btn btn-primary" id="modalConfirmBtn" onclick="confirmInvestment()">
                     <i class="fas fa-check-circle"></i> تأكيد الاستثمار
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL 1: عرض تفاصيل الحساب ===== -->
+    <div class="modal-overlay" id="depositStep1Modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>تفاصيل التحويل</h3>
+                <button class="close-modal" onclick="closeAllDepositModals()">&times;</button>
+            </div>
+            <div class="text-center">
+                <div style="font-size:14px;color:var(--text-secondary);font-weight:600;">أرسل المبلغ إلى الحساب التالي</div>
+                <div style="font-size:16px;font-weight:700;word-break:break-all;padding:14px;background:var(--bg-input);border-radius:var(--radius-sm);margin:12px 0;border:1px dashed var(--border);" id="depositAddressDisplay">
+                    Baridi Mob: 00799999002385412178
+                </div>
+                <button class="btn btn-sm btn-outline" style="width:auto;" onclick="copyText(document.getElementById('depositAddressDisplay').textContent)">
+                    <i class="fas fa-copy"></i> نسخ الحساب
+                </button>
+            </div>
+            <div class="qr-container" id="depositQRDisplay">
+                <div style="background:var(--accent-glow);padding:20px;border-radius:var(--radius-sm);text-align:center;border:2px dashed var(--accent);width:100%;">
+                    <i class="fas fa-mobile-screen-button" style="font-size:48px;color:var(--dzd-color);"></i>
+                    <div style="font-weight:700;margin-top:8px;font-size:16px;">Baridi Mob</div>
+                    <div style="font-size:13px;color:var(--text-secondary);">رقم الحساب: 00799999002385412178</div>
+                    <div style="font-size:20px;font-weight:900;color:var(--dzd-color);margin-top:4px;" id="depositQRAmountDisplay">0 DZD</div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeAllDepositModals()">إلغاء</button>
+                <button class="btn btn-success" onclick="showDepositStep2()">
+                    <i class="fas fa-check-circle"></i> أتممت التحويل
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL 2: إدخال رقم التحويل ===== -->
+    <div class="modal-overlay" id="depositStep2Modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>تأكيد الإيداع</h3>
+                <button class="close-modal" onclick="closeAllDepositModals()">&times;</button>
+            </div>
+            <div class="input-group">
+                <label>رقم عملية التحويل <span class="required">*</span></label>
+                <div class="input-icon">
+                    <i class="fas fa-receipt"></i>
+                    <input type="text" id="depositTransactionId" placeholder="أدخل رقم العملية من وصل التحويل">
+                </div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">
+                    <i class="fas fa-info-circle"></i> أدخل رقم العملية الموجود في وصل التحويل
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeAllDepositModals()">إلغاء</button>
+                <button class="btn btn-primary" onclick="submitDepositProof()">
+                    <i class="fas fa-check-circle"></i> تأكيد الإيداع
                 </button>
             </div>
         </div>
@@ -2314,7 +2333,7 @@
         }
 
         // ============================================================
-        // 10. DEPOSIT
+        // 10. DEPOSIT (مع النوافذ المنبثقة)
         // ============================================================
         function generateDeposit() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -2326,13 +2345,26 @@
 
             const address = `Baridi Mob: ${POSTAL_ACCOUNT}`;
             depositData = { currency: 'DZD', amount, address, method: 'Baridi Mob' };
-            document.getElementById('depositAddress').textContent = address;
-            document.getElementById('depositDetails').classList.remove('hidden');
-            document.getElementById('depositQRAmount').textContent = `${amount} DZD`;
+
+            // تعبئة النافذة الأولى
+            document.getElementById('depositAddressDisplay').textContent = address;
+            document.getElementById('depositQRAmountDisplay').textContent = `${amount} DZD`;
+
+            // إظهار النافذة الأولى
+            document.getElementById('depositStep1Modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
 
-        function cancelDepositDetails() {
-            document.getElementById('depositDetails').classList.add('hidden');
+        function showDepositStep2() {
+            document.getElementById('depositStep1Modal').classList.remove('active');
+            document.getElementById('depositStep2Modal').classList.add('active');
+            document.getElementById('depositTransactionId').value = '';
+        }
+
+        function closeAllDepositModals() {
+            document.getElementById('depositStep1Modal').classList.remove('active');
+            document.getElementById('depositStep2Modal').classList.remove('active');
+            document.body.style.overflow = '';
             depositData = null;
             document.getElementById('depositTransactionId').value = '';
         }
@@ -2370,10 +2402,7 @@
                 });
 
                 showToast('✅ تم إرسال طلب الإيداع، في انتظار المراجعة');
-                document.getElementById('depositTransactionId').value = '';
-                document.getElementById('depositDetails').classList.add('hidden');
-                depositData = null;
-
+                closeAllDepositModals();
                 await loadDeposits();
                 await loadTransactions();
                 updateUI();
@@ -2936,8 +2965,6 @@
                 `;
             }).join('');
         }
-
-        // تم إزالة دالة manualReferral بالكامل
 
         // ============================================================
         // 17. TRANSACTIONS
