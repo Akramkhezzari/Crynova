@@ -1513,13 +1513,7 @@
                 </button>
             </h2>
 
-            <div class="card" style="background:var(--accent-glow);border:2px solid var(--accent-light);">
-                <div class="text-center">
-                    <div style="font-size:52px;margin-bottom:8px;">🎁</div>
-                    <div style="font-size:20px;font-weight:900;">اربح 15% من إيداع المدعو</div>
-                    <!-- تم إزالة النص: "و 5% من إيداع مدعو مدعوك" -->
-                </div>
-            </div>
+            <!-- تم إزالة البطاقة الوصفية (🎁 اربح 15% من إيداع المدعو) -->
 
             <div class="grid-3">
                 <div class="stat-box">
@@ -1527,13 +1521,11 @@
                     <div class="number" id="refCount">0</div>
                     <div class="label">المدعوين المباشرين</div>
                 </div>
-                <!-- تم إزالة مربع "المدعوين غير المباشرين" -->
                 <div class="stat-box">
                     <span class="icon">💰</span>
                     <div class="number" id="refEarnings">0.00</div>
                     <div class="label">العمولات</div>
                 </div>
-                <!-- أضفنا مربعاً بديلاً أو يمكن تركه فارغاً، لكننا سنضيف مربعاً ليكون grid-3 متناظراً -->
                 <div class="stat-box">
                     <span class="icon">📊</span>
                     <div class="number" id="refTotalReferrals">0</div>
@@ -2939,8 +2931,6 @@
                     '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>';
                 return; }
             c.innerHTML = list.map(r => {
-                const level = r.level || 1;
-                // نعرض المستوى ولكن لا نستخدمه في التصنيف
                 return `
                     <div class="list-item">
                         <div class="left"><div class="avatar" style="width:36px;height:36px;font-size:14px;">${(r.displayName||'م').charAt(0)}</div>
@@ -3175,7 +3165,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع إزالة نظام المدعوين غير المباشرين');
+        console.log('🚀 Crynova - النسخة النهائية مع إزالة البطاقة الوصفية من الإحالات');
     </script>
 </body>
 </html>
