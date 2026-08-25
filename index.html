@@ -1569,7 +1569,7 @@
                 </button>
             </h2>
 
-            <!-- البطاقة الرئيسية للإيداع -->
+            <!-- البطاقة الرئيسية للإيداع (تحتوي الآن على حقل رقم العملية) -->
             <div class="card" id="depositMainCard">
                 <div class="input-group" id="depositEccpGroup">
                     <label>رقم حساب Baridi Mob <span class="required">*</span></label>
@@ -1591,32 +1591,8 @@
                     </div>
                     <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">الحد الأدنى للإيداع: 2000 DZD</div>
                 </div>
-                <button class="btn btn-success" id="depositCreateBtn" onclick="generateDeposit()">
-                    <i class="fas fa-qrcode"></i> إنشاء طلب إيداع
-                </button>
-            </div>
 
-            <!-- خطوة تأكيد الإيداع (تظهر مباشرة بعد إنشاء الطلب) -->
-            <div class="card deposit-step" id="depositConfirmStep">
-                <div class="text-center">
-                    <div style="font-size:14px;color:var(--text-secondary);font-weight:600;">أرسل المبلغ إلى الحساب التالي</div>
-                    <div class="deposit-info-box">
-                        <div class="label">رقم الحساب</div>
-                        <div class="value" id="depositAddressDisplay">Baridi Mob: 00799999002385412178</div>
-                    </div>
-                    <button class="btn btn-sm btn-outline" style="width:auto;" onclick="copyText(document.getElementById('depositAddressDisplay').textContent)">
-                        <i class="fas fa-copy"></i> نسخ الحساب
-                    </button>
-                </div>
-                <div class="qr-container">
-                    <div style="background:var(--accent-glow);padding:20px;border-radius:var(--radius-sm);text-align:center;border:2px dashed var(--accent);width:100%;">
-                        <i class="fas fa-mobile-screen-button" style="font-size:48px;color:var(--dzd-color);"></i>
-                        <div style="font-weight:700;margin-top:8px;font-size:16px;">Baridi Mob</div>
-                        <div style="font-size:13px;color:var(--text-secondary);">رقم الحساب: 00799999002385412178</div>
-                        <div style="font-size:20px;font-weight:900;color:var(--dzd-color);margin-top:4px;" id="depositQRAmountDisplay">0 DZD</div>
-                    </div>
-                </div>
-                <div class="divider"></div>
+                <!-- حقل رقم عملية التحويل (منقول إلى هنا) -->
                 <div class="input-group">
                     <label>رقم عملية التحويل <span class="required">*</span></label>
                     <div class="input-icon">
@@ -1627,14 +1603,10 @@
                         <i class="fas fa-info-circle"></i> أدخل رقم العملية الموجود في وصل التحويل
                     </div>
                 </div>
-                <div style="display:flex;gap:8px;">
-                    <button class="btn btn-outline" onclick="cancelDeposit()" style="flex:1;">
-                        <i class="fas fa-times"></i> إلغاء
-                    </button>
-                    <button class="btn btn-primary" onclick="submitDepositProof()" style="flex:1;">
-                        <i class="fas fa-check-circle"></i> تأكيد الإيداع
-                    </button>
-                </div>
+
+                <button class="btn btn-success" id="depositCreateBtn" onclick="submitDeposit()">
+                    <i class="fas fa-check-circle"></i> تأكيد الإيداع
+                </button>
             </div>
 
             <!-- قائمة طلبات الإيداع -->
@@ -1883,7 +1855,6 @@
         let allInvestPlans = [];
         let allTransactions = [];
         let currentFilter = 'all';
-        let depositData = null;
         let isDarkTheme = false;
         let investmentInterval = null;
         let selectedCurrency = 'DZD';
@@ -2237,7 +2208,6 @@
             if (page === 'referrals') updateReferralUI();
             if (page === 'profile') updateProfileUI();
             if (page === 'investments') renderInvestments();
-            if (page === 'deposit') resetDepositUI();
         }
 
         // ============================================================
@@ -2346,58 +2316,32 @@
         }
 
         // ============================================================
-        // 10. DEPOSIT (خطوتين فقط: إنشاء الطلب ثم تأكيد الإيداع مباشرة)
+        // 10. DEPOSIT - دالة واحدة للإرسال مباشرة
         // ============================================================
-        function resetDepositUI() {
-            document.getElementById('depositConfirmStep').classList.remove('active');
-            document.getElementById('depositMainCard').style.display = 'block';
-            document.getElementById('depositCreateBtn').style.display = 'flex';
-            depositData = null;
-            document.getElementById('depositTransactionId').value = '';
-        }
-
-        function generateDeposit() {
+        async function submitDeposit() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
             const amount = parseFloat(document.getElementById('depositAmount').value);
             if (!amount || amount < MIN_DEPOSIT) {
                 showToast(`الحد الأدنى للإيداع ${MIN_DEPOSIT} DZD`);
                 return;
             }
 
-            const address = `Baridi Mob: ${POSTAL_ACCOUNT}`;
-            depositData = { currency: 'DZD', amount, address, method: 'Baridi Mob' };
-
-            // تعبئة بيانات التأكيد
-            document.getElementById('depositAddressDisplay').textContent = address;
-            document.getElementById('depositQRAmountDisplay').textContent = `${amount} DZD`;
-
-            // إخفاء البطاقة الرئيسية وإظهار خطوة التأكيد
-            document.getElementById('depositMainCard').style.display = 'none';
-            document.getElementById('depositCreateBtn').style.display = 'none';
-            document.getElementById('depositConfirmStep').classList.add('active');
-            document.getElementById('depositTransactionId').value = '';
-        }
-
-        function cancelDeposit() {
-            resetDepositUI();
-            document.getElementById('depositMainCard').style.display = 'block';
-            document.getElementById('depositCreateBtn').style.display = 'flex';
-        }
-
-        async function submitDepositProof() {
-            if (!userData || !depositData) { showToast('أنشئ طلب إيداع أولاً'); return; }
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
+
+            const address = `Baridi Mob: ${POSTAL_ACCOUNT}`;
+
             try {
                 const now = new Date();
                 const depositId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
                 const depositObj = {
                     depositId: depositId,
-                    amount: depositData.amount,
+                    amount: amount,
                     currency: 'DZD',
                     network: 'Baridi Mob',
-                    walletAddress: depositData.address,
+                    walletAddress: address,
                     transactionId: txId,
                     status: 'pending',
                     createdAt: now
@@ -2407,9 +2351,9 @@
                     'deposits': firebase.firestore.FieldValue.arrayUnion(depositObj),
                     'transactions': firebase.firestore.FieldValue.arrayUnion({
                         type: 'deposit',
-                        amount: depositData.amount,
+                        amount: amount,
                         currency: 'DZD',
-                        description: `إيداع ${depositData.amount} DZD`,
+                        description: `إيداع ${amount} DZD`,
                         timestamp: now,
                         status: 'pending',
                         depositId: depositId
@@ -2417,7 +2361,8 @@
                 });
 
                 showToast('✅ تم إرسال طلب الإيداع، في انتظار المراجعة');
-                cancelDeposit();
+                document.getElementById('depositAmount').value = '';
+                document.getElementById('depositTransactionId').value = '';
                 await loadDeposits();
                 await loadTransactions();
                 updateUI();
@@ -2676,7 +2621,6 @@
             document.body.style.overflow = '';
             isModalOpen = false;
             currentSelectedPlanId = null;
-            depositData = null;
             document.getElementById('modalAmountInput').value = 0;
             document.getElementById('modalRangeSlider').value = 0;
         }
@@ -3203,7 +3147,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع نظام الإيداع المباشر (بدون خطوة وسيطة)');
+        console.log('🚀 Crynova - نسخة نهائية مع نظام إيداع مبسط (حقل رقم العملية في نفس النافذة)');
     </script>
 </body>
 </html>
