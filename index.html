@@ -1517,7 +1517,7 @@
                 <div class="text-center">
                     <div style="font-size:52px;margin-bottom:8px;">🎁</div>
                     <div style="font-size:20px;font-weight:900;">اربح 15% من إيداع المدعو</div>
-                    <div style="color:var(--text-secondary);font-size:15px;">و 5% من إيداع مدعو مدعوك</div>
+                    <!-- تم إزالة النص: "و 5% من إيداع مدعو مدعوك" -->
                 </div>
             </div>
 
@@ -1527,15 +1527,17 @@
                     <div class="number" id="refCount">0</div>
                     <div class="label">المدعوين المباشرين</div>
                 </div>
-                <div class="stat-box">
-                    <span class="icon">👥</span>
-                    <div class="number" id="refLevel2Count">0</div>
-                    <div class="label">المدعوين غير المباشرين</div>
-                </div>
+                <!-- تم إزالة مربع "المدعوين غير المباشرين" -->
                 <div class="stat-box">
                     <span class="icon">💰</span>
                     <div class="number" id="refEarnings">0.00</div>
                     <div class="label">العمولات</div>
+                </div>
+                <!-- أضفنا مربعاً بديلاً أو يمكن تركه فارغاً، لكننا سنضيف مربعاً ليكون grid-3 متناظراً -->
+                <div class="stat-box">
+                    <span class="icon">📊</span>
+                    <div class="number" id="refTotalReferrals">0</div>
+                    <div class="label">إجمالي الإحالات</div>
                 </div>
             </div>
 
@@ -1592,7 +1594,7 @@
                     <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">الحد الأدنى للإيداع: 2000 DZD</div>
                 </div>
 
-                <!-- حقل رقم عملية التحويل (منقول إلى هنا) -->
+                <!-- حقل رقم عملية التحويل -->
                 <div class="input-group">
                     <label>رقم عملية التحويل <span class="required">*</span></label>
                     <div class="input-icon">
@@ -2018,7 +2020,7 @@
                         withdrawals: [],
                         miningData: {
                             totalReferrals: 0,
-                            totalReferralsLevel2: 0
+                            totalReferralsLevel2: 0 // تم الاحتفاظ به ولكن لا نستخدمه في UI
                         },
                         lastDailyDistribution: null
                     };
@@ -2310,9 +2312,11 @@
         function updateReferralUI() {
             if (!userData) return;
             const earnings = userData.wallets?.dzdReferral || 0;
-            document.getElementById('refCount').textContent = userData.miningData?.totalReferrals || 0;
-            document.getElementById('refLevel2Count').textContent = userData.miningData?.totalReferralsLevel2 || 0;
+            const totalRefs = userData.miningData?.totalReferrals || 0;
+            document.getElementById('refCount').textContent = totalRefs;
             document.getElementById('refEarnings').textContent = earnings.toFixed(2);
+            document.getElementById('refTotalReferrals').textContent = totalRefs;
+            // تم إزالة totalReferralsLevel2 من الواجهة
         }
 
         // ============================================================
@@ -2331,11 +2335,10 @@
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
 
             // ========== منع الإيداعات المكررة ==========
-            // التحقق من وجود إيداع بنفس رقم العملية والمبلغ (سواء كان pending أو confirmed أو أي حالة)
             const existingDeposits = userData.deposits || [];
             const duplicate = existingDeposits.find(d =>
                 d.transactionId === txId &&
-                Math.abs(d.amount - amount) < 0.01 // نفس المبلغ (مع مراعاة أخطاء الفاصلة العائمة)
+                Math.abs(d.amount - amount) < 0.01
             );
 
             if (duplicate) {
@@ -2343,7 +2346,6 @@
                 return;
             }
 
-            // يمكن أيضاً التحقق من التكرار خلال آخر 5 دقائق لمنع الإرسال المتكرر السريع
             const now = new Date();
             const recentDuplicate = existingDeposits.find(d =>
                 d.transactionId === txId &&
@@ -2938,10 +2940,11 @@
                 return; }
             c.innerHTML = list.map(r => {
                 const level = r.level || 1;
+                // نعرض المستوى ولكن لا نستخدمه في التصنيف
                 return `
                     <div class="list-item">
                         <div class="left"><div class="avatar" style="width:36px;height:36px;font-size:14px;">${(r.displayName||'م').charAt(0)}</div>
-                            <div><div class="title">${r.displayName||'مستخدم'} <span class="status status-info" style="font-size:10px;padding:2px 8px;">المستوى ${level}</span></div>
+                            <div><div class="title">${r.displayName||'مستخدم'}</div>
                             <div class="sub">${formatDate(r.joinedAt)}</div></div>
                         </div>
                         <div class="right"><div style="color:var(--success);font-weight:700;">${r.commissionEarned||0} DZD</div></div>
@@ -3172,7 +3175,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع منع الإيداعات المكررة');
+        console.log('🚀 Crynova - النسخة النهائية مع إزالة نظام المدعوين غير المباشرين');
     </script>
 </body>
 </html>
