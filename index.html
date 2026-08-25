@@ -1515,12 +1515,8 @@
 
             <!-- تم إزالة البطاقة الوصفية (🎁 اربح 15% من إيداع المدعو) -->
 
-            <div class="grid-3">
-                <div class="stat-box">
-                    <span class="icon">👤</span>
-                    <div class="number" id="refCount">0</div>
-                    <div class="label">المدعوين المباشرين</div>
-                </div>
+            <div class="grid-2">
+                <!-- تم إزالة مربع "المدعوين المباشرين" -->
                 <div class="stat-box">
                     <span class="icon">💰</span>
                     <div class="number" id="refEarnings">0.00</div>
@@ -2293,7 +2289,7 @@
             if (!userData) return;
             const earnings = userData.wallets?.dzdReferral || 0;
             const totalRefs = userData.miningData?.totalReferrals || 0;
-            document.getElementById('refCount').textContent = totalRefs;
+            // لم نعد نستخدم refCount لأننا أزلناه من الواجهة
             document.getElementById('refEarnings').textContent = earnings.toFixed(2);
             document.getElementById('refTotalReferrals').textContent = totalRefs;
         }
@@ -3152,7 +3148,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع إزالة زر مشاركة الرابط من الإحالات');
+        console.log('🚀 Crynova - النسخة النهائية مع إزالة المدعوين المباشرين من الإحالات');
     </script>
 </body>
 </html>
