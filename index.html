@@ -2316,7 +2316,7 @@
         }
 
         // ============================================================
-        // 10. DEPOSIT - دالة واحدة للإرسال مباشرة
+        // 10. DEPOSIT - مع منع التكرار
         // ============================================================
         async function submitDeposit() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -2330,10 +2330,35 @@
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
 
+            // ========== منع الإيداعات المكررة ==========
+            // التحقق من وجود إيداع بنفس رقم العملية والمبلغ (سواء كان pending أو confirmed أو أي حالة)
+            const existingDeposits = userData.deposits || [];
+            const duplicate = existingDeposits.find(d =>
+                d.transactionId === txId &&
+                Math.abs(d.amount - amount) < 0.01 // نفس المبلغ (مع مراعاة أخطاء الفاصلة العائمة)
+            );
+
+            if (duplicate) {
+                showToast('⚠️ تم تسجيل هذا الإيداع مسبقاً بنفس رقم العملية والمبلغ!');
+                return;
+            }
+
+            // يمكن أيضاً التحقق من التكرار خلال آخر 5 دقائق لمنع الإرسال المتكرر السريع
+            const now = new Date();
+            const recentDuplicate = existingDeposits.find(d =>
+                d.transactionId === txId &&
+                Math.abs(d.amount - amount) < 0.01 &&
+                (now - (d.createdAt?.toDate ? d.createdAt.toDate() : new Date(d.createdAt))) < 5 * 60 * 1000
+            );
+
+            if (recentDuplicate) {
+                showToast('⚠️ تم إرسال هذا الإيداع مؤخراً، يرجى الانتظار قليلاً');
+                return;
+            }
+
             const address = `Baridi Mob: ${POSTAL_ACCOUNT}`;
 
             try {
-                const now = new Date();
                 const depositId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
                 const depositObj = {
@@ -2395,7 +2420,7 @@
                 return; }
             c.innerHTML = list.map(d => `
                 <div class="list-item">
-                    <div class="left"><div><div class="title">${d.amount} DZD</div><div class="sub">${formatDateTime(d.createdAt)}</div></div></div>
+                    <div class="left"><div><div class="title">${d.amount} DZD</div><div class="sub">رقم العملية: ${d.transactionId} • ${formatDateTime(d.createdAt)}</div></div></div>
                     <div class="right"><span class="status ${getStatusBadge(d.status)}">${getStatusText(d.status)}</span></div>
                 </div>
             `).join('');
@@ -3147,7 +3172,7 @@
             }
         });
 
-        console.log('🚀 Crynova - نسخة نهائية مع نظام إيداع مبسط (حقل رقم العملية في نفس النافذة)');
+        console.log('🚀 Crynova - النسخة النهائية مع منع الإيداعات المكررة');
     </script>
 </body>
 </html>
