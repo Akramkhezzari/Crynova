@@ -1541,9 +1541,7 @@
                         <i class="fas fa-copy"></i>
                     </button>
                 </div>
-                <button class="btn btn-sm btn-ghost mt-8" onclick="shareReferral()" style="width:auto;">
-                    <i class="fas fa-share-alt"></i> مشاركة الرابط
-                </button>
+                <!-- تم إزالة زر "مشاركة الرابط" -->
             </div>
 
             <div class="card">
@@ -2144,17 +2142,7 @@
             }
         }
 
-        function shareReferral() {
-            const link = document.getElementById('referralLink').value;
-            if (link && link !== 'جاري التحميل...') {
-                if (navigator.share) {
-                    navigator.share({ title: 'انضم إلى Crynova', text: 'استثمر واربح مع Crynova!', url: link })
-                        .catch(() => copyText(link));
-                } else {
-                    copyText(link);
-                }
-            }
-        }
+        // تم إزالة دالة shareReferral لأن الزر غير موجود
 
         function copyDepositAccount(event) {
             const btn = event.currentTarget;
@@ -2308,7 +2296,6 @@
             document.getElementById('refCount').textContent = totalRefs;
             document.getElementById('refEarnings').textContent = earnings.toFixed(2);
             document.getElementById('refTotalReferrals').textContent = totalRefs;
-            // تم إزالة totalReferralsLevel2 من الواجهة
         }
 
         // ============================================================
@@ -3165,7 +3152,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع إزالة البطاقة الوصفية من الإحالات');
+        console.log('🚀 Crynova - النسخة النهائية مع إزالة زر مشاركة الرابط من الإحالات');
     </script>
 </body>
 </html>
