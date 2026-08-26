@@ -160,23 +160,6 @@
             box-shadow: var(--shadow-md);
         }
 
-        /* شارة التوثيق في الرأس */
-        .header-verified-badge {
-            background: var(--accent-gradient);
-            color: white;
-            border-radius: 20px;
-            padding: 2px 10px;
-            font-size: 11px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin-right: 6px;
-        }
-        .header-verified-badge i {
-            font-size: 12px;
-        }
-
         /* PAGES */
         .page {
             display: none;
@@ -244,6 +227,91 @@
         .card.gold-gradient .text-muted,
         .card.gold-gradient .balance-label {
             color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* شريط الإحصائيات الجديد */
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 16px 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .stats-bar .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+        .stats-bar .stat-item .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .stats-bar .stat-item .stat-label i {
+            margin-left: 4px;
+            color: var(--accent);
+        }
+        .stats-bar .stat-item .stat-value {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text-primary);
+            min-width: 30px;
+            text-align: center;
+        }
+        .stats-bar .stat-divider {
+            width: 1px;
+            height: 30px;
+            background: var(--border);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title i {
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        /* BALANCE */
+        .balance-large {
+            font-size: 40px;
+            font-weight: 900;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            letter-spacing: -1px;
+        }
+        .balance-large.white {
+            -webkit-text-fill-color: white;
+            background: none;
+        }
+        .balance-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .balance-currency {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-right: 4px;
         }
 
         /* STAT BOXES */
@@ -522,7 +590,7 @@
             text-align: center;
         }
 
-        /* BOTTOM NAVIGATION */
+        /* BOTTOM NAVIGATION - 6 items - حجم أكبر */
         .bottom-nav {
             position: fixed;
             bottom: 16px;
@@ -590,7 +658,7 @@
             line-height: 1.2;
         }
 
-        /* RESPONSIVE */
+        /* تحسين للشاشات الصغيرة جداً */
         @media (max-width: 420px) {
             .bottom-nav {
                 bottom: 12px;
@@ -606,51 +674,14 @@
             .nav-item i {
                 font-size: 20px;
             }
-            .app-container {
-                padding: 12px;
-            }
-            .balance-large {
-                font-size: 32px;
-            }
-            .grid-2 {
-                gap: 8px;
-            }
-            .grid-3 {
-                gap: 6px;
-            }
-            .stat-box .number {
-                font-size: 18px;
-            }
-            .stat-box {
-                padding: 10px 8px;
-            }
-            .plan-card .return {
-                font-size: 22px;
-            }
-            .card {
-                padding: 16px;
-            }
-            .btn {
-                padding: 12px 18px;
-                font-size: 14px;
-            }
-            .user-mini .user-name {
-                font-size: 11px;
-            }
-            .user-mini .avatar-small {
-                width: 28px;
-                height: 28px;
+            .stats-bar .stat-item .stat-label {
                 font-size: 12px;
             }
-        }
-
-        @media (min-width: 768px) {
-            .app-container {
-                padding: 24px;
+            .stats-bar .stat-item .stat-value {
+                font-size: 16px;
             }
-            .bottom-nav {
-                bottom: 24px;
-                padding: 14px 8px;
+            .stats-bar .stat-item {
+                gap: 4px;
             }
         }
 
@@ -790,13 +821,42 @@
             background: rgba(249, 168, 37, 0.15);
             color: var(--gold);
         }
-        .status-verified {
-            background: var(--accent-gradient);
-            color: white;
+
+        /* QR CODE */
+        .qr-container {
+            display: flex;
+            justify-content: center;
+            padding: 16px 0;
         }
-        .status-unverified {
-            background: var(--danger-light);
-            color: var(--danger);
+        .qr-container .qr-placeholder {
+            background: white;
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-sm);
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            color: var(--accent);
+            background: var(--bg-input);
+        }
+
+        /* LOADING */
+        .loader {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* USER INFO IN HEADER */
@@ -830,445 +890,9 @@
             padding: 2px 8px;
             border-radius: 10px;
         }
-        .user-mini .user-verified {
-            font-size: 10px;
-            color: var(--success);
-        }
-
-        /* UTILITY */
-        .text-center {
-            text-align: center;
-        }
-        .text-accent {
-            color: var(--accent);
-        }
-        .text-success {
-            color: var(--success);
-        }
-        .text-danger {
-            color: var(--danger);
-        }
-        .text-warning {
-            color: var(--warning);
-        }
-        .text-muted {
-            color: var(--text-secondary);
-        }
-        .text-white {
-            color: white;
-        }
-        .text-dzd {
-            color: var(--dzd-color);
-        }
-        .text-gold {
-            color: var(--gold);
-        }
-        .mt-8 {
-            margin-top: 8px;
-        }
-        .mt-16 {
-            margin-top: 16px;
-        }
-        .mt-24 {
-            margin-top: 24px;
-        }
-        .mb-8 {
-            margin-bottom: 8px;
-        }
-        .mb-16 {
-            margin-bottom: 16px;
-        }
-        .flex {
-            display: flex;
-        }
-        .flex-between {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .flex-center {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .flex-wrap {
-            flex-wrap: wrap;
-        }
-        .gap-8 {
-            gap: 8px;
-        }
-        .gap-12 {
-            gap: 12px;
-        }
-        .gap-16 {
-            gap: 16px;
-        }
-        .w-full {
-            width: 100%;
-        }
-        .hidden {
-            display: none !important;
-        }
-        .relative {
-            position: relative;
-        }
-        .rounded-full {
-            border-radius: 50%;
-        }
-        .divider {
-            height: 1px;
-            background: var(--border);
-            margin: 16px 0;
-        }
-        .clickable {
-            cursor: pointer;
-        }
-
-        /* Investment specific */
-        .invest-stat {
-            background: rgba(249, 168, 37, 0.08);
-            border: 1px solid rgba(249, 168, 37, 0.2);
-            border-radius: var(--radius-sm);
-            padding: 12px;
-            text-align: center;
-        }
-        .invest-stat .number {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--gold);
-        }
-        .invest-stat .label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            font-weight: 600;
-        }
-
-        /* زر الرجوع المخصص */
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: none;
-            border: none;
-            color: var(--accent);
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: var(--radius-sm);
-            transition: var(--transition);
-            margin-right: auto;
-        }
-        .back-btn:hover {
-            background: var(--accent-glow);
-        }
 
         /* ============================================================
-           تصغير حجم واجهة الإيداع
-           ============================================================ */
-        #page-deposit .card {
-            padding: 14px 16px;
-            margin-bottom: 12px;
-        }
-        #page-deposit .card .card-title {
-            font-size: 15px;
-        }
-        #page-deposit .card .card-title i {
-            font-size: 16px;
-        }
-        #page-deposit .input-group {
-            margin-bottom: 10px;
-        }
-        #page-deposit .input-group label {
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-        #page-deposit .input-group input {
-            padding: 10px 14px;
-            font-size: 14px;
-        }
-        #page-deposit .input-group .input-icon i {
-            font-size: 14px;
-            right: 12px;
-        }
-        #page-deposit .input-group .input-icon input {
-            padding-right: 36px;
-        }
-        #page-deposit .btn {
-            padding: 10px 16px;
-            font-size: 14px;
-        }
-        #page-deposit .copy-btn {
-            padding: 4px 12px;
-            font-size: 12px;
-        }
-        #page-deposit .list-item {
-            padding: 10px 0;
-        }
-        #page-deposit .list-item .title {
-            font-size: 14px;
-        }
-        #page-deposit .list-item .sub {
-            font-size: 12px;
-        }
-        #page-deposit .list-item .avatar {
-            width: 32px;
-            height: 32px;
-            font-size: 14px;
-        }
-        #page-deposit .status {
-            font-size: 11px;
-            padding: 2px 10px;
-        }
-        #page-deposit h2 {
-            font-size: 20px;
-            margin-bottom: 12px;
-        }
-        #page-deposit h2 i {
-            font-size: 18px;
-        }
-        #page-deposit .deposit-info-box {
-            padding: 8px 12px;
-            margin: 8px 0;
-        }
-        #page-deposit .deposit-info-box .label {
-            font-size: 12px;
-        }
-        #page-deposit .deposit-info-box .value {
-            font-size: 16px;
-        }
-        #page-deposit .flex-between {
-            font-size: 13px;
-        }
-        #page-deposit .flex-between .amount {
-            font-size: 16px;
-        }
-        #page-deposit #depositMainCard .input-group:last-of-type {
-            margin-bottom: 6px;
-        }
-        #page-deposit #depositMainCard .btn {
-            margin-top: 4px;
-        }
-        #page-deposit .input-group .text-muted {
-            font-size: 11px;
-        }
-        #page-deposit .input-group .text-muted i {
-            font-size: 11px;
-        }
-
-        /* ============================================================
-           تصغير حجم واجهة السحب
-           ============================================================ */
-        #page-withdraw .card {
-            padding: 14px 16px;
-            margin-bottom: 12px;
-        }
-        #page-withdraw .card .card-title {
-            font-size: 15px;
-        }
-        #page-withdraw .card .card-title i {
-            font-size: 16px;
-        }
-        #page-withdraw .input-group {
-            margin-bottom: 10px;
-        }
-        #page-withdraw .input-group label {
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-        #page-withdraw .input-group input {
-            padding: 10px 14px;
-            font-size: 14px;
-        }
-        #page-withdraw .input-group .input-icon i {
-            font-size: 14px;
-        }
-        #page-withdraw .btn {
-            padding: 10px 16px;
-            font-size: 14px;
-        }
-        #page-withdraw .flex-between {
-            font-size: 14px;
-        }
-        #page-withdraw .flex-between .amount {
-            font-size: 18px;
-        }
-        #page-withdraw .balance-large {
-            font-size: 28px;
-        }
-        #page-withdraw .balance-label {
-            font-size: 12px;
-        }
-        #page-withdraw .grid-2 .card {
-            padding: 10px 12px;
-        }
-        #page-withdraw .grid-2 .card .amount {
-            font-size: 18px;
-        }
-        #page-withdraw .grid-2 .card .label {
-            font-size: 11px;
-        }
-        #page-withdraw .withdraw-summary {
-            padding: 8px 0;
-            font-size: 13px;
-        }
-        #page-withdraw .withdraw-summary .label {
-            font-size: 13px;
-        }
-        #page-withdraw .withdraw-summary .value {
-            font-size: 18px;
-        }
-        #page-withdraw .card[style*="border:2px solid var(--warning)"] {
-            padding: 12px 16px;
-        }
-        #page-withdraw .card[style*="border:2px solid var(--warning)"] .balance-large {
-            font-size: 24px;
-        }
-        #page-withdraw .card[style*="border:2px solid var(--warning)"] .balance-label {
-            font-size: 12px;
-        }
-        #page-withdraw .card[style*="border:2px solid var(--warning)"] .amount {
-            font-size: 16px;
-        }
-        #page-withdraw .input-icon i {
-            font-size: 14px;
-            right: 12px;
-        }
-        #page-withdraw .input-icon input {
-            padding-right: 36px;
-        }
-        #page-withdraw .list-item {
-            padding: 10px 0;
-        }
-        #page-withdraw .list-item .title {
-            font-size: 14px;
-        }
-        #page-withdraw .list-item .sub {
-            font-size: 12px;
-        }
-        #page-withdraw .list-item .avatar {
-            width: 32px;
-            height: 32px;
-            font-size: 14px;
-        }
-        #page-withdraw .fee-row {
-            padding: 6px 0;
-            font-size: 13px;
-        }
-        #page-withdraw .total-row {
-            padding: 8px 0;
-            font-size: 16px;
-        }
-        #page-withdraw .total-row .amount {
-            font-size: 20px;
-        }
-        #page-withdraw h2 {
-            font-size: 20px;
-            margin-bottom: 12px;
-        }
-        #page-withdraw h2 i {
-            font-size: 18px;
-        }
-        #page-withdraw .page-content {
-            padding-bottom: 8px;
-        }
-
-        /* ============================================================
-           شارة التوثيق (Verification Badge) - محسنة
-           ============================================================ */
-        .verification-status {
-            background: var(--bg-input);
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            margin: 12px 0;
-            border: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .verification-status .label {
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-        .verification-status .value {
-            font-weight: 800;
-            color: var(--accent);
-        }
-        .verification-status .value.verified {
-            color: var(--success);
-        }
-        .verification-status .value.unverified {
-            color: var(--danger);
-        }
-        .verification-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .verification-actions .btn {
-            width: auto;
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-
-        /* شارة التوثيق في الصورة الشخصية */
-        .profile-avatar-wrapper {
-            position: relative;
-            display: inline-block;
-            margin: 0 auto 12px;
-        }
-        .profile-avatar-wrapper .avatar-badge {
-            position: absolute;
-            bottom: -4px;
-            right: -4px;
-            background: var(--accent-gradient);
-            color: white;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            border: 3px solid white;
-            box-shadow: var(--shadow-sm);
-        }
-        .profile-avatar-wrapper .avatar-badge.show {
-            display: flex;
-        }
-
-        /* شارة التوثيق بجانب المستوى */
-        .level-verified-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: var(--accent-gradient);
-            color: white;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-right: 6px;
-        }
-        .level-unverified-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: var(--danger-light);
-            color: var(--danger);
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-right: 6px;
-            border: 1px solid var(--danger);
-        }
-
-        /* ============================================================
-           MODAL (نافذة الاستثمار)
+           INVESTMENT MODAL (النافذة المنبثقة المتطورة) - إصدار أصغر
            ============================================================ */
         .modal-overlay {
             position: fixed;
@@ -1517,7 +1141,44 @@
             font-size: 14px;
         }
 
+        /* RESPONSIVE */
         @media (max-width: 420px) {
+            .app-container {
+                padding: 12px;
+            }
+            .balance-large {
+                font-size: 32px;
+            }
+            .grid-2 {
+                gap: 8px;
+            }
+            .grid-3 {
+                gap: 6px;
+            }
+            .stat-box .number {
+                font-size: 18px;
+            }
+            .stat-box {
+                padding: 10px 8px;
+            }
+            .plan-card .return {
+                font-size: 22px;
+            }
+            .card {
+                padding: 16px;
+            }
+            .btn {
+                padding: 12px 18px;
+                font-size: 14px;
+            }
+            .user-mini .user-name {
+                font-size: 11px;
+            }
+            .user-mini .avatar-small {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
             .modal-card {
                 padding: 16px 14px;
                 max-width: 95%;
@@ -1535,50 +1196,402 @@
             .amount-input-wrapper input {
                 font-size: 16px;
             }
+            .stats-bar .stat-item .stat-label {
+                font-size: 12px;
+            }
+            .stats-bar .stat-item .stat-value {
+                font-size: 16px;
+            }
+            .stats-bar .stat-item {
+                gap: 4px;
+            }
         }
 
-        /* ============================================================
-           STATS BAR (جديد للإحالات)
-           ============================================================ */
-        .stats-bar {
-            display: flex;
-            background: var(--bg-card);
-            border-radius: var(--radius-md);
-            padding: 12px 16px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
+        @media (min-width: 768px) {
+            .app-container {
+                padding: 24px;
+            }
+            .bottom-nav {
+                bottom: 24px;
+                padding: 14px 8px;
+            }
+        }
+
+        /* UTILITY */
+        .text-center {
+            text-align: center;
+        }
+        .text-accent {
+            color: var(--accent);
+        }
+        .text-success {
+            color: var(--success);
+        }
+        .text-danger {
+            color: var(--danger);
+        }
+        .text-warning {
+            color: var(--warning);
+        }
+        .text-muted {
+            color: var(--text-secondary);
+        }
+        .text-white {
+            color: white;
+        }
+        .text-dzd {
+            color: var(--dzd-color);
+        }
+        .text-gold {
+            color: var(--gold);
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mt-16 {
+            margin-top: 16px;
+        }
+        .mt-24 {
+            margin-top: 24px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        .mb-16 {
             margin-bottom: 16px;
-            justify-content: space-around;
-            align-items: center;
         }
-        .stat-item {
+        .flex {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
         }
-        .stat-item .stat-label {
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+        .gap-8 {
+            gap: 8px;
+        }
+        .gap-12 {
+            gap: 12px;
+        }
+        .gap-16 {
+            gap: 16px;
+        }
+        .w-full {
+            width: 100%;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .relative {
+            position: relative;
+        }
+        .rounded-full {
+            border-radius: 50%;
+        }
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 16px 0;
+        }
+        .clickable {
+            cursor: pointer;
+        }
+
+        /* Investment specific */
+        .invest-stat {
+            background: rgba(249, 168, 37, 0.08);
+            border: 1px solid rgba(249, 168, 37, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            text-align: center;
+        }
+        .invest-stat .number {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        .invest-stat .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* زر الرجوع المخصص */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            margin-right: auto;
+        }
+        .back-btn:hover {
+            background: var(--accent-glow);
+        }
+
+        /* ====== أقسام الإيداع ====== */
+        .deposit-step {
+            display: none;
+            animation: fadeSlideIn 0.3s ease;
+        }
+        .deposit-step.active {
+            display: block;
+        }
+        .deposit-step .divider {
+            margin: 16px 0;
+        }
+        .deposit-info-box {
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin: 12px 0;
+            border: 1px dashed var(--border);
+        }
+        .deposit-info-box .label {
             font-size: 13px;
             color: var(--text-secondary);
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
-        .stat-item .stat-label i {
-            font-size: 15px;
-            color: var(--accent);
-        }
-        .stat-item .stat-value {
-            font-size: 22px;
-            font-weight: 900;
+        .deposit-info-box .value {
+            font-size: 18px;
+            font-weight: 800;
             color: var(--text-primary);
-            margin-top: 2px;
+            word-break: break-all;
         }
-        .stat-divider {
-            width: 1px;
-            height: 40px;
-            background: var(--border);
+
+        /* ============================================================
+           تصغير حجم واجهة السحب
+           ============================================================ */
+        #page-withdraw .card {
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+        #page-withdraw .card .card-title {
+            font-size: 15px;
+        }
+        #page-withdraw .card .card-title i {
+            font-size: 16px;
+        }
+        #page-withdraw .input-group {
+            margin-bottom: 10px;
+        }
+        #page-withdraw .input-group label {
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        #page-withdraw .input-group input {
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+        #page-withdraw .input-group .input-icon i {
+            font-size: 14px;
+        }
+        #page-withdraw .btn {
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+        #page-withdraw .flex-between {
+            font-size: 14px;
+        }
+        #page-withdraw .flex-between .amount {
+            font-size: 18px;
+        }
+        #page-withdraw .balance-large {
+            font-size: 28px;
+        }
+        #page-withdraw .balance-label {
+            font-size: 12px;
+        }
+        #page-withdraw .grid-2 .card {
+            padding: 10px 12px;
+        }
+        #page-withdraw .grid-2 .card .amount {
+            font-size: 18px;
+        }
+        #page-withdraw .grid-2 .card .label {
+            font-size: 11px;
+        }
+        #page-withdraw .withdraw-summary {
+            padding: 8px 0;
+            font-size: 13px;
+        }
+        #page-withdraw .withdraw-summary .label {
+            font-size: 13px;
+        }
+        #page-withdraw .withdraw-summary .value {
+            font-size: 18px;
+        }
+        /* تقليل حجم البطاقة التي تعرض الرصيد القابل للسحب */
+        #page-withdraw .card[style*="border:2px solid var(--warning)"] {
+            padding: 12px 16px;
+        }
+        #page-withdraw .card[style*="border:2px solid var(--warning)"] .balance-large {
+            font-size: 24px;
+        }
+        #page-withdraw .card[style*="border:2px solid var(--warning)"] .balance-label {
+            font-size: 12px;
+        }
+        #page-withdraw .card[style*="border:2px solid var(--warning)"] .amount {
+            font-size: 16px;
+        }
+        /* تصغير حجم الأيقونات في المدخلات */
+        #page-withdraw .input-icon i {
+            font-size: 14px;
+            right: 12px;
+        }
+        #page-withdraw .input-icon input {
+            padding-right: 36px;
+        }
+        /* تصغير حجم قائمة طلبات السحب */
+        #page-withdraw .list-item {
+            padding: 10px 0;
+        }
+        #page-withdraw .list-item .title {
+            font-size: 14px;
+        }
+        #page-withdraw .list-item .sub {
+            font-size: 12px;
+        }
+        #page-withdraw .list-item .avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+        }
+        /* تصغير حجم الرسوم والمبلغ الإجمالي */
+        #page-withdraw .fee-row {
+            padding: 6px 0;
+            font-size: 13px;
+        }
+        #page-withdraw .total-row {
+            padding: 8px 0;
+            font-size: 16px;
+        }
+        #page-withdraw .total-row .amount {
+            font-size: 20px;
+        }
+        /* تصغير حجم عنوان الصفحة */
+        #page-withdraw h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        #page-withdraw h2 i {
+            font-size: 18px;
+        }
+        /* تعديل الهامش السفلي للصفحة */
+        #page-withdraw .page-content {
+            padding-bottom: 8px;
+        }
+
+        /* ============================================================
+           تصغير حجم واجهة الإيداع (جديد)
+           ============================================================ */
+        #page-deposit .card {
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+        #page-deposit .card .card-title {
+            font-size: 15px;
+        }
+        #page-deposit .card .card-title i {
+            font-size: 16px;
+        }
+        #page-deposit .input-group {
+            margin-bottom: 10px;
+        }
+        #page-deposit .input-group label {
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        #page-deposit .input-group input {
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+        #page-deposit .input-group .input-icon i {
+            font-size: 14px;
+            right: 12px;
+        }
+        #page-deposit .input-group .input-icon input {
+            padding-right: 36px;
+        }
+        #page-deposit .btn {
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+        #page-deposit .copy-btn {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+        #page-deposit .list-item {
+            padding: 10px 0;
+        }
+        #page-deposit .list-item .title {
+            font-size: 14px;
+        }
+        #page-deposit .list-item .sub {
+            font-size: 12px;
+        }
+        #page-deposit .list-item .avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+        }
+        #page-deposit .status {
+            font-size: 11px;
+            padding: 2px 10px;
+        }
+        #page-deposit h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        #page-deposit h2 i {
+            font-size: 18px;
+        }
+        #page-deposit .deposit-info-box {
+            padding: 8px 12px;
+            margin: 8px 0;
+        }
+        #page-deposit .deposit-info-box .label {
+            font-size: 12px;
+        }
+        #page-deposit .deposit-info-box .value {
+            font-size: 16px;
+        }
+        #page-deposit .flex-between {
+            font-size: 13px;
+        }
+        #page-deposit .flex-between .amount {
+            font-size: 16px;
+        }
+        /* تصغير حجم البطاقة الرئيسية */
+        #page-deposit #depositMainCard .input-group:last-of-type {
+            margin-bottom: 6px;
+        }
+        #page-deposit #depositMainCard .btn {
+            margin-top: 4px;
+        }
+        /* تصغير حجم النص المساعد */
+        #page-deposit .input-group .text-muted {
+            font-size: 11px;
+        }
+        #page-deposit .input-group .text-muted i {
+            font-size: 11px;
         }
     </style>
 </head>
@@ -1597,12 +1610,7 @@
                     <div class="avatar-small" id="headerAvatar">?</div>
                     <div>
                         <div class="user-name" id="headerUserName">مستخدم</div>
-                        <div>
-                            <span class="user-level" id="headerUserLevel">المستوى 1</span>
-                            <span id="headerVerifiedBadge" style="display:none;" class="header-verified-badge">
-                                <i class="fas fa-check-circle"></i> موثق
-                            </span>
-                        </div>
+                        <div class="user-level" id="headerUserLevel">المستوى 1</div>
                     </div>
                 </div>
                 <button onclick="toggleTheme()" class="theme-toggle" id="themeToggle">
@@ -1688,7 +1696,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: PACKAGES ========== -->
+        <!-- ========== PAGE: PACKAGES (خطط العوائد الثابتة) ========== -->
         <div class="page" id="page-packages">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-cubes text-accent"></i> خطط العوائد الثابتة
@@ -1696,10 +1704,12 @@
                     <i class="fas fa-arrow-right"></i> رجوع
                 </button>
             </h2>
-            <div id="investPlansList"></div>
+            <div id="investPlansList">
+                <!-- سيتم ملؤها بواسطة JS -->
+            </div>
         </div>
 
-        <!-- ========== PAGE: INVESTMENTS ========== -->
+        <!-- ========== PAGE: INVESTMENTS (استثماراتي) ========== -->
         <div class="page" id="page-investments">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-chart-line text-gold"></i> استثماراتي
@@ -1771,7 +1781,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: REFERRALS (معدلة) ========== -->
+        <!-- ========== PAGE: REFERRALS ========== -->
         <div class="page" id="page-referrals">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-users text-accent"></i> الإحالات
@@ -1780,16 +1790,16 @@
                 </button>
             </h2>
 
-            <!-- NEW STATS BAR -->
+            <!-- شريط الإحصائيات الجديد -->
             <div class="stats-bar">
                 <div class="stat-item">
-                    <span class="stat-label"><i class="fas fa-user-check"></i> الإحالات</span>
-                    <span class="stat-value" id="totalInvestors">0</span>
+                    <span class="stat-label"><i class="fas fa-users"></i> الإحالات</span>
+                    <span class="stat-value" id="refTotalReferrals">0</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat-item">
                     <span class="stat-label"><i class="fas fa-coins"></i> العمولات</span>
-                    <span class="stat-value" id="totalMinedInvest">0.00</span>
+                    <span class="stat-value" id="refEarnings">0.00</span>
                 </div>
             </div>
 
@@ -1802,6 +1812,7 @@
                     </button>
                 </div>
             </div>
+
             <div class="card">
                 <div class="card-title" style="margin-bottom:12px;"><i class="fas fa-list"></i> قائمة المدعوين</div>
                 <div id="referralsList">
@@ -1810,7 +1821,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: DEPOSIT ========== -->
+        <!-- ========== PAGE: DEPOSIT (مصغرة) ========== -->
         <div class="page" id="page-deposit">
             <h2 style="font-size:20px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-down text-success" style="font-size:18px;"></i> الإيداع
@@ -1818,6 +1829,8 @@
                     <i class="fas fa-arrow-right"></i> رجوع
                 </button>
             </h2>
+
+            <!-- البطاقة الرئيسية للإيداع (مصغرة) -->
             <div class="card" id="depositMainCard" style="padding:14px 16px;">
                 <div class="input-group" id="depositEccpGroup" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;">رقم حساب Baridi Mob <span class="required">*</span></label>
@@ -1839,6 +1852,8 @@
                     </div>
                     <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">الحد الأدنى للإيداع: 2000 DZD</div>
                 </div>
+
+                <!-- حقل رقم عملية التحويل -->
                 <div class="input-group" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;">رقم عملية التحويل <span class="required">*</span></label>
                     <div class="input-icon">
@@ -1849,10 +1864,13 @@
                         <i class="fas fa-info-circle"></i> أدخل رقم العملية الموجود في وصل التحويل
                     </div>
                 </div>
+
                 <button class="btn btn-success" id="depositCreateBtn" onclick="submitDeposit()" style="padding:10px 16px;font-size:14px;margin-top:4px;">
                     <i class="fas fa-check-circle"></i> تأكيد الإيداع
                 </button>
             </div>
+
+            <!-- قائمة طلبات الإيداع (مصغرة) -->
             <div class="card" style="padding:14px 16px;">
                 <div class="card-title" style="font-size:15px;margin-bottom:10px;"><i class="fas fa-clock-rotate-left"></i> طلبات الإيداع</div>
                 <div id="depositRequests">
@@ -1861,7 +1879,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: WITHDRAW ========== -->
+        <!-- ========== PAGE: WITHDRAW (مصغر) ========== -->
         <div class="page" id="page-withdraw">
             <h2 style="font-size:20px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-up text-danger" style="font-size:18px;"></i> السحب
@@ -1869,6 +1887,7 @@
                     <i class="fas fa-arrow-right"></i> رجوع
                 </button>
             </h2>
+            <!-- بطاقة الرصيد القابل للسحب (مصغرة) -->
             <div class="card" style="border:2px solid var(--warning);padding:12px 16px;">
                 <div class="flex-between">
                     <div>
@@ -1880,10 +1899,10 @@
                         <div style="font-size:16px;font-weight:800;" id="withdrawMinAmount">1000 DZD</div>
                     </div>
                 </div>
-                <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">
-                    <span id="withdrawFeeLabel">رسوم السحب: 10% من المبلغ</span>
-                </div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">رسوم السحب: 10% من المبلغ</div>
             </div>
+
+            <!-- بطاقة السحب (مصغرة) -->
             <div class="card" style="padding:14px 16px;">
                 <div class="input-group" id="withdrawBaridiGroup" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;">معرف Baridi Mob الخاص بك <span class="required">*</span></label>
@@ -1904,7 +1923,7 @@
                     <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">الحد الأدنى للسحب: 1000 DZD</div>
                 </div>
                 <div class="flex-between fee-row" style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">
-                    <span style="color:var(--text-secondary);font-weight:600;">الرسوم</span>
+                    <span style="color:var(--text-secondary);font-weight:600;">الرسوم (10%)</span>
                     <span id="withdrawFee" style="font-weight:700;">0.00</span>
                 </div>
                 <div class="flex-between total-row" style="padding:8px 0;font-size:16px;font-weight:900;">
@@ -1915,6 +1934,8 @@
                     <i class="fas fa-paper-plane"></i> طلب السحب
                 </button>
             </div>
+
+            <!-- قائمة طلبات السحب (مصغرة) -->
             <div class="card" style="padding:14px 16px;">
                 <div class="card-title" style="font-size:15px;margin-bottom:10px;"><i class="fas fa-clock-rotate-left"></i> طلبات السحب</div>
                 <div id="withdrawRequests">
@@ -1960,35 +1981,13 @@
                 </button>
             </h2>
             <div class="card text-center" style="padding:24px;">
-                <div class="profile-avatar-wrapper">
-                    <div style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:white;box-shadow:var(--shadow-glow);" id="profileAvatar">
-                        ?
-                    </div>
-                    <div class="avatar-badge" id="profileVerifiedBadge">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
+                <div style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:white;margin:0 auto 12px;box-shadow:var(--shadow-glow);" id="profileAvatar">
+                    ?
                 </div>
                 <div style="font-size:22px;font-weight:900;" id="profileName">المستخدم</div>
                 <div style="color:var(--text-secondary);font-size:14px;" id="profileTelegram">@username</div>
-                <div style="margin-top:8px;">
-                    <span class="status status-info">المستوى <span id="profileLevel">1</span></span>
-                    <span id="profileVerifiedStatus" style="display:none;" class="status status-verified">
-                        <i class="fas fa-check-circle"></i> موثق
-                    </span>
-                    <span id="profileUnverifiedStatus" style="display:none;" class="status status-unverified">
-                        <i class="fas fa-times-circle"></i> لم يتم تحقق من الحساب
-                    </span>
-                </div>
+                <div style="margin-top:8px;"><span class="status status-info">المستوى <span id="profileLevel">1</span></span></div>
             </div>
-
-            <!-- قسم التوثيق -->
-            <div class="card">
-                <div class="card-title" style="margin-bottom:12px;">
-                    <i class="fas fa-shield-alt" style="color:var(--gold);"></i> توثيق الحساب
-                </div>
-                <div id="verificationSection"></div>
-            </div>
-
             <div class="card">
                 <div class="list-item">
                     <span class="left"><i class="fas fa-calendar" style="color:var(--text-muted);width:20px;"></i> تاريخ التسجيل</span>
@@ -2014,7 +2013,7 @@
     </div>
 
     <!-- ================================================================
-         INVESTMENT MODAL
+         INVESTMENT MODAL (النافذة المنبثقة المتطورة) - إصدار أصغر
          ================================================================ -->
     <div class="modal-overlay" id="investmentModal">
         <div class="modal-card">
@@ -2022,10 +2021,12 @@
                 <h3 id="modalPlanName">الخطة الاستثمارية</h3>
                 <button class="close-modal" onclick="closeInvestmentModal()">&times;</button>
             </div>
+
             <div class="modal-plan-detail">
                 <span class="label">العائد اليومي</span>
                 <span class="value" id="modalPlanReturn">5%</span>
             </div>
+
             <div class="modal-amount-section">
                 <label>المبلغ المستثمر <span id="modalCurrencyLabel">(DZD)</span></label>
                 <div class="amount-input-wrapper">
@@ -2039,6 +2040,7 @@
                     <span id="modalMaxDisplay">50,000</span>
                 </div>
             </div>
+
             <div class="modal-info-grid">
                 <div class="modal-info-item">
                     <div class="number gold-color" id="modalDailyProfit">100.00</div>
@@ -2053,10 +2055,12 @@
                     <div class="label">مكافأة أول استثمار</div>
                 </div>
             </div>
+
             <div class="modal-balance-warning" id="modalBalanceStatus">
                 <i class="fas fa-wallet"></i>
                 <span>رصيدك المتاح: <strong id="modalUserBalance">0.00</strong> <span id="modalBalanceCurrency">DZD</span></span>
             </div>
+
             <div class="modal-actions">
                 <button class="btn btn-outline" onclick="closeInvestmentModal()">إلغاء</button>
                 <button class="btn btn-primary" id="modalConfirmBtn" onclick="confirmInvestment()">
@@ -2066,7 +2070,7 @@
         </div>
     </div>
 
-    <!-- ===== BOTTOM NAVIGATION ===== -->
+    <!-- ===== BOTTOM NAVIGATION (6 أزرار - حجم أكبر) ===== -->
     <nav class="bottom-nav" id="bottomNav">
         <button class="nav-item active" data-page="home" onclick="navigateTo('home')">
             <i class="fas fa-house"></i>
@@ -2096,7 +2100,7 @@
 
     <script>
         // ============================================================
-        // FIREBASE CONFIG
+        // 1. FIREBASE CONFIG
         // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyDCF0h_UPivX8oGoQL8Dn1s0lr79VAXpMY",
@@ -2111,7 +2115,7 @@
         const db = firebase.firestore();
 
         // ============================================================
-        // STATE
+        // 2. STATE - DZD ONLY
         // ============================================================
         let userData = null;
         let allInvestPlans = [];
@@ -2119,6 +2123,7 @@
         let currentFilter = 'all';
         let isDarkTheme = false;
         let investmentInterval = null;
+        let selectedCurrency = 'DZD';
         let unsubscribeUser = null;
         let currentSelectedPlanId = null;
         let isModalOpen = false;
@@ -2127,10 +2132,9 @@
         const MIN_WITHDRAW = 1000;
         const MIN_DEPOSIT = 2000;
         const FIRST_BONUS_PERCENT = 7;
-        const VERIFICATION_PRICE = 500;
 
         // ============================================================
-        // DEFAULT INVESTMENT PLANS
+        // 3. DEFAULT INVESTMENT PLANS
         // ============================================================
         const DEFAULT_INVEST_PLANS = [{
             id: 'plan_basic',
@@ -2190,7 +2194,7 @@
         }];
 
         // ============================================================
-        // HELPERS
+        // 4. LOCAL STORAGE HELPERS
         // ============================================================
         function setLocalUserInfo(displayName, username, photoURL) {
             try {
@@ -2212,6 +2216,9 @@
             }
         }
 
+        // ============================================================
+        // 5. TELEGRAM INTEGRATION
+        // ============================================================
         function getTelegramUser() {
             if (window.Telegram && window.Telegram.WebApp) {
                 const tg = window.Telegram.WebApp;
@@ -2222,152 +2229,8 @@
             return null;
         }
 
-        function formatDate(timestamp) {
-            if (!timestamp) return '--';
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-            return date.toISOString().split('T')[0].replace(/-/g, '/');
-        }
-
-        function formatDateTime(timestamp) {
-            if (!timestamp) return '--';
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-            const dateStr = date.toISOString().split('T')[0].replace(/-/g, '/');
-            const timeStr = date.toTimeString().slice(0, 5);
-            return `${dateStr} ${timeStr}`;
-        }
-
-        function getStatusBadge(status) {
-            const map = {
-                'active': 'status-success',
-                'pending': 'status-pending',
-                'completed': 'status-success',
-                'confirmed': 'status-success',
-                'rejected': 'status-danger',
-                'failed': 'status-danger',
-                'processing': 'status-pending',
-                'inactive': 'status-danger'
-            };
-            return map[status] || 'status-info';
-        }
-
-        function getStatusText(status) {
-            const map = {
-                'active': 'نشط',
-                'pending': 'قيد الانتظار',
-                'completed': 'مكتمل',
-                'confirmed': 'مؤكد',
-                'rejected': 'مرفوض',
-                'failed': 'فشل',
-                'processing': 'قيد المعالجة',
-                'inactive': 'غير نشط'
-            };
-            return map[status] || status;
-        }
-
-        function getTransactionIcon(type) {
-            const map = {
-                'deposit': 'fa-arrow-down text-success',
-                'withdraw': 'fa-arrow-up text-danger',
-                'investment': 'fa-chart-line text-gold',
-                'investment_return': 'fa-coins text-gold',
-                'referral_bonus': 'fa-users text-accent',
-                'reward': 'fa-gift text-warning',
-                'first_investment_bonus': 'fa-gift text-gold',
-                'verification': 'fa-shield-alt text-gold'
-            };
-            return map[type] || 'fa-circle text-muted';
-        }
-
-        function getTransactionLabel(type) {
-            const map = {
-                'deposit': 'إيداع',
-                'withdraw': 'سحب',
-                'investment': 'استثمار',
-                'investment_return': 'أرباح استثمار',
-                'referral_bonus': 'عمولة إحالة',
-                'reward': 'مكافأة',
-                'first_investment_bonus': 'مكافأة أول استثمار',
-                'verification': 'توثيق الحساب'
-            };
-            return map[type] || type;
-        }
-
-        function copyText(text) {
-            if (!text || text === 'جاري التحميل...') {
-                showToast('لا يوجد نص للنسخ');
-                return;
-            }
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => showToast('تم النسخ'));
-            } else {
-                const ta = document.createElement('textarea');
-                ta.value = text;
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                ta.remove();
-                showToast('تم النسخ');
-            }
-        }
-
-        function copyDepositAccount(event) {
-            const btn = event.currentTarget;
-            const input = btn.parentElement.querySelector('input');
-            copyText(input.value);
-            btn.classList.add('copied');
-            btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
-            setTimeout(() => {
-                btn.classList.remove('copied');
-                btn.innerHTML = '<i class="fas fa-copy"></i> نسخ';
-            }, 2000);
-        }
-
-        function showToast(msg) {
-            const t = document.createElement('div');
-            t.style.cssText = `
-                position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-                background: var(--accent); color: #fff; padding: 12px 24px;
-                border-radius: 30px; font-weight: 700; z-index: 9999;
-                box-shadow: var(--shadow-lg); font-family: 'Cairo', sans-serif;
-                max-width: 90%; text-align: center;
-            `;
-            t.textContent = msg;
-            document.body.appendChild(t);
-            setTimeout(() => {
-                t.style.opacity = '0';
-                t.style.transition = 'opacity 0.3s';
-                setTimeout(() => t.remove(), 300);
-            }, 3000);
-        }
-
-        function isValidBaridiId(id) {
-            if (!id || typeof id !== 'string') return false;
-            const cleaned = id.replace(/\s/g, '');
-            if (!/^\d{20}$/.test(cleaned)) return false;
-            if (!cleaned.startsWith('00799999')) return false;
-            return true;
-        }
-
         // ============================================================
-        // NAVIGATION
-        // ============================================================
-        function navigateTo(page) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const el = document.getElementById('page-' + page);
-            if (el) el.classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
-            if (window.Telegram?.WebApp) {
-                const tg = window.Telegram.WebApp;
-                page === 'home' ? tg.BackButton.hide() : tg.BackButton.show();
-            }
-            if (page === 'wallet') updateWalletUI();
-            if (page === 'referrals') updateReferralUI();
-            if (page === 'profile') updateProfileUI();
-            if (page === 'investments') renderInvestments();
-        }
-
-        // ============================================================
-        // AUTHENTICATION
+        // 6. AUTHENTICATION
         // ============================================================
         async function authUser() {
             const tgUser = getTelegramUser();
@@ -2423,15 +2286,7 @@
                             totalReferrals: 0,
                             totalReferralsLevel2: 0
                         },
-                        lastDailyDistribution: null,
-                        verified: false,
-                        verifiedUntil: null,
-                        verificationSubscription: {
-                            active: false,
-                            startDate: null,
-                            endDate: null,
-                            autoRenew: false
-                        }
+                        lastDailyDistribution: null
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -2454,8 +2309,10 @@
                 });
 
                 await loadPlans();
+
                 updateUI();
                 startInvestmentReturns();
+
                 renderTransactions(userData.transactions || []);
                 renderReferrals(userData.referrals || []);
                 renderDeposits(userData.deposits || []);
@@ -2471,7 +2328,144 @@
         }
 
         // ============================================================
-        // UI UPDATES
+        // 7. HELPERS
+        // ============================================================
+        function formatDate(timestamp) {
+            if (!timestamp) return '--';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toISOString().split('T')[0].replace(/-/g, '/');
+        }
+
+        function formatDateTime(timestamp) {
+            if (!timestamp) return '--';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const dateStr = date.toISOString().split('T')[0].replace(/-/g, '/');
+            const timeStr = date.toTimeString().slice(0, 5);
+            return `${dateStr} ${timeStr}`;
+        }
+
+        function getStatusBadge(status) {
+            const map = {
+                'active': 'status-success',
+                'pending': 'status-pending',
+                'completed': 'status-success',
+                'confirmed': 'status-success',
+                'rejected': 'status-danger',
+                'failed': 'status-danger',
+                'processing': 'status-pending',
+                'inactive': 'status-danger'
+            };
+            return map[status] || 'status-info';
+        }
+
+        function getStatusText(status) {
+            const map = {
+                'active': 'نشط',
+                'pending': 'قيد الانتظار',
+                'completed': 'مكتمل',
+                'confirmed': 'مؤكد',
+                'rejected': 'مرفوض',
+                'failed': 'فشل',
+                'processing': 'قيد المعالجة',
+                'inactive': 'غير نشط'
+            };
+            return map[status] || status;
+        }
+
+        function getTransactionIcon(type) {
+            const map = {
+                'deposit': 'fa-arrow-down text-success',
+                'withdraw': 'fa-arrow-up text-danger',
+                'investment': 'fa-chart-line text-gold',
+                'investment_return': 'fa-coins text-gold',
+                'referral_bonus': 'fa-users text-accent',
+                'reward': 'fa-gift text-warning',
+                'first_investment_bonus': 'fa-gift text-gold'
+            };
+            return map[type] || 'fa-circle text-muted';
+        }
+
+        function getTransactionLabel(type) {
+            const map = {
+                'deposit': 'إيداع',
+                'withdraw': 'سحب',
+                'investment': 'استثمار',
+                'investment_return': 'أرباح استثمار',
+                'referral_bonus': 'عمولة إحالة',
+                'reward': 'مكافأة',
+                'first_investment_bonus': 'مكافأة أول استثمار'
+            };
+            return map[type] || type;
+        }
+
+        function copyText(text) {
+            if (!text || text === 'جاري التحميل...') {
+                showToast('لا يوجد نص للنسخ');
+                return;
+            }
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => showToast('تم النسخ'));
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+                showToast('تم النسخ');
+            }
+        }
+
+        function copyDepositAccount(event) {
+            const btn = event.currentTarget;
+            const input = btn.parentElement.querySelector('input');
+            copyText(input.value);
+            btn.classList.add('copied');
+            btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
+            setTimeout(() => {
+                btn.classList.remove('copied');
+                btn.innerHTML = '<i class="fas fa-copy"></i> نسخ';
+            }, 2000);
+        }
+
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.style.cssText = `
+                position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+                background: var(--accent); color: #fff; padding: 12px 24px;
+                border-radius: 30px; font-weight: 700; z-index: 9999;
+                box-shadow: var(--shadow-lg); font-family: 'Cairo', sans-serif;
+                max-width: 90%; text-align: center;
+            `;
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => {
+                t.style.opacity = '0';
+                t.style.transition = 'opacity 0.3s';
+                setTimeout(() => t.remove(), 300);
+            }, 3000);
+        }
+
+        // ============================================================
+        // 8. NAVIGATION
+        // ============================================================
+        function navigateTo(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const el = document.getElementById('page-' + page);
+            if (el) el.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+            if (window.Telegram?.WebApp) {
+                const tg = window.Telegram.WebApp;
+                page === 'home' ? tg.BackButton.hide() : tg.BackButton.show();
+            }
+            if (page === 'wallet') updateWalletUI();
+            if (page === 'referrals') updateReferralUI();
+            if (page === 'profile') updateProfileUI();
+            if (page === 'investments') renderInvestments();
+        }
+
+        // ============================================================
+        // 9. UI UPDATES
         // ============================================================
         function updateUI() {
             if (!userData) return;
@@ -2505,7 +2499,6 @@
             updateWalletUI();
             updateReferralUI();
             renderInvestments();
-            updateVerificationUI();
         }
 
         function updateProfileUI() {
@@ -2521,7 +2514,6 @@
             } else {
                 refLink.value = 'جاري التحميل...';
             }
-            renderVerificationSection();
         }
 
         function updateHomeUI() {
@@ -2570,208 +2562,18 @@
         }
 
         // ============================================================
-        // REFERRAL UI (معدلة)
+        // 10. REFERRALS UI
         // ============================================================
         function updateReferralUI() {
             if (!userData) return;
             const earnings = userData.wallets?.dzdReferral || 0;
             const totalRefs = userData.miningData?.totalReferrals || 0;
-            // تحديث المعرفات الجديدة
-            document.getElementById('totalInvestors').textContent = totalRefs;
-            document.getElementById('totalMinedInvest').textContent = earnings.toFixed(2);
-            // احتفظ بالمعرفات القديمة للتوافق مع باقي الصفحات
             document.getElementById('refEarnings').textContent = earnings.toFixed(2);
             document.getElementById('refTotalReferrals').textContent = totalRefs;
         }
 
         // ============================================================
-        // VERIFICATION FUNCTIONS
-        // ============================================================
-        function isVerifiedValid() {
-            if (!userData) return false;
-            const isVerified = userData.verified === true;
-            const verifiedUntil = userData.verifiedUntil?.toDate ? userData.verifiedUntil.toDate() : null;
-            const now = new Date();
-            return isVerified && verifiedUntil && verifiedUntil > now;
-        }
-
-        function updateVerificationUI() {
-            const isValid = isVerifiedValid();
-
-            const headerBadge = document.getElementById('headerVerifiedBadge');
-            if (headerBadge) {
-                headerBadge.style.display = isValid ? 'inline-flex' : 'none';
-            }
-
-            const profileBadge = document.getElementById('profileVerifiedBadge');
-            if (profileBadge) {
-                profileBadge.classList.toggle('show', isValid);
-            }
-
-            const verifiedStatus = document.getElementById('profileVerifiedStatus');
-            const unverifiedStatus = document.getElementById('profileUnverifiedStatus');
-            if (verifiedStatus && unverifiedStatus) {
-                if (isValid) {
-                    verifiedStatus.style.display = 'inline-block';
-                    unverifiedStatus.style.display = 'none';
-                } else {
-                    verifiedStatus.style.display = 'none';
-                    unverifiedStatus.style.display = 'inline-block';
-                }
-            }
-
-            const feeLabel = document.getElementById('withdrawFeeLabel');
-            if (feeLabel) {
-                feeLabel.textContent = isValid ?
-                    'رسوم السحب: 1% من المبلغ (مخفضة للموثقين)' :
-                    'رسوم السحب: 10% من المبلغ';
-            }
-
-            renderVerificationSection();
-        }
-
-        function renderVerificationSection() {
-            const container = document.getElementById('verificationSection');
-            if (!container) return;
-
-            const isValid = isVerifiedValid();
-            const verifiedUntil = userData?.verifiedUntil?.toDate ? userData.verifiedUntil.toDate() : null;
-            const now = new Date();
-
-            let html = '';
-
-            if (isValid && verifiedUntil) {
-                const daysLeft = Math.ceil((verifiedUntil - now) / (1000 * 60 * 60 * 24));
-                html = `
-                    <div class="verification-status" style="border-color:var(--success);background:var(--success-light);">
-                        <div>
-                            <span class="label">الحالة:</span>
-                            <span class="value verified"><i class="fas fa-check-circle"></i> موثق</span>
-                        </div>
-                        <div>
-                            <span class="label">ينتهي خلال:</span>
-                            <span class="value">${daysLeft} يوم</span>
-                        </div>
-                    </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
-                        <button class="btn btn-sm btn-outline" onclick="cancelVerification()">
-                            <i class="fas fa-times-circle"></i> إلغاء التجديد التلقائي
-                        </button>
-                    </div>
-                    <div style="font-size:13px;color:var(--text-muted);margin-top:8px;">
-                        <i class="fas fa-info-circle"></i> المزايا: رسوم سحب 1% • أولوية الدعم
-                    </div>
-                `;
-            } else {
-                html = `
-                    <div class="verification-status" style="border-color:var(--danger);background:var(--danger-light);">
-                        <div>
-                            <span class="label">الحالة:</span>
-                            <span class="value unverified"><i class="fas fa-times-circle"></i> لم يتم تحقق من الحساب</span>
-                        </div>
-                        <div>
-                            <span class="label">السعر:</span>
-                            <span class="value">${VERIFICATION_PRICE} DZD / شهر</span>
-                        </div>
-                    </div>
-                    <div style="margin-top:8px;">
-                        <button class="btn btn-primary btn-sm" onclick="subscribeVerification()" style="width:auto;">
-                            <i class="fas fa-check-circle"></i> اشتراك (${VERIFICATION_PRICE} DZD)
-                        </button>
-                    </div>
-                    <div style="font-size:13px;color:var(--text-muted);margin-top:8px;">
-                        <i class="fas fa-info-circle"></i> المزايا: رسوم سحب 1% • أولوية الدعم
-                    </div>
-                `;
-            }
-
-            container.innerHTML = html;
-        }
-
-        async function subscribeVerification() {
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
-            if (balance < VERIFICATION_PRICE) {
-                showToast(`الرصيد غير كافٍ (${balance.toFixed(2)} DZD)`);
-                return;
-            }
-
-            if (!confirm(`تأكيد الاشتراك في التوثيق لمدة شهر واحد مقابل ${VERIFICATION_PRICE} DZD؟`)) return;
-
-            try {
-                const now = new Date();
-                const endDate = new Date(now);
-                endDate.setMonth(endDate.getMonth() + 1);
-
-                await db.runTransaction(async (t) => {
-                    const ref = db.collection('users').doc(userData.telegramId);
-                    const doc = await t.get(ref);
-                    if (!doc.exists) throw new Error('غير موجود');
-
-                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
-                    if (bal < VERIFICATION_PRICE) throw new Error('رصيد غير كاف');
-
-                    let rem = VERIFICATION_PRICE;
-                    const m = doc.data().wallets?.dzd || 0;
-                    const r = doc.data().wallets?.dzdReward || 0;
-                    const refr = doc.data().wallets?.dzdReferral || 0;
-                    const fm = Math.min(rem, m);
-                    rem -= fm;
-                    const fr = Math.min(rem, r);
-                    rem -= fr;
-                    const fref = Math.min(rem, refr);
-                    rem -= fref;
-
-                    const updates = {
-                        'wallets.dzd': m - fm,
-                        'wallets.dzdReward': r - fr,
-                        'wallets.dzdReferral': refr - fref,
-                        'verified': true,
-                        'verifiedUntil': endDate,
-                        'verificationSubscription': {
-                            active: true,
-                            startDate: now,
-                            endDate: endDate,
-                            autoRenew: true
-                        },
-                        'transactions': firebase.firestore.FieldValue.arrayUnion({
-                            type: 'verification',
-                            amount: VERIFICATION_PRICE,
-                            currency: 'DZD',
-                            description: `اشتراك توثيق (${VERIFICATION_PRICE} DZD)`,
-                            timestamp: now,
-                            status: 'completed'
-                        })
-                    };
-
-                    t.update(ref, updates);
-                });
-
-                showToast('✅ تم تفعيل التوثيق لمدة شهر');
-                await updateUI();
-            } catch (e) {
-                showToast('❌ ' + (e.message || 'حدث خطأ'));
-            }
-        }
-
-        async function cancelVerification() {
-            if (!userData) return;
-            if (!confirm('هل تريد إلغاء التجديد التلقائي للتوثيق؟ سيبقى التوثيق سارياً حتى تاريخ الانتهاء.')) return;
-
-            try {
-                await db.collection('users').doc(userData.telegramId).update({
-                    'verificationSubscription.autoRenew': false
-                });
-                showToast('✅ تم إلغاء التجديد التلقائي');
-                await updateUI();
-            } catch (e) {
-                showToast('❌ ' + e.message);
-            }
-        }
-
-        // ============================================================
-        // DEPOSIT
+        // 11. DEPOSIT - مع منع التكرار
         // ============================================================
         async function submitDeposit() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -2785,6 +2587,7 @@
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
 
+            // منع الإيداعات المكررة
             const existingDeposits = userData.deposits || [];
             const duplicate = existingDeposits.find(d =>
                 d.transactionId === txId &&
@@ -2849,6 +2652,9 @@
             }
         }
 
+        // ============================================================
+        // 12. DEPOSITS LIST
+        // ============================================================
         async function loadDeposits() {
             if (!userData) return;
             try {
@@ -2879,8 +2685,17 @@
         }
 
         // ============================================================
-        // WITHDRAW
+        // 13. WITHDRAW - مع التحقق من صحة معرف Baridi Mob
         // ============================================================
+        function isValidBaridiId(id) {
+            // يجب أن يكون النص مكوناً من أرقام فقط، طوله 20، ويبدأ بـ '00799999'
+            if (!id || typeof id !== 'string') return false;
+            const cleaned = id.replace(/\s/g, ''); // إزالة المسافات
+            if (!/^\d{20}$/.test(cleaned)) return false; // 20 رقم فقط
+            if (!cleaned.startsWith('00799999')) return false; // يبدأ بـ 00799999
+            return true;
+        }
+
         async function requestWithdraw() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
@@ -2889,22 +2704,22 @@
                 return;
             }
 
-            const totalBal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            const totalBal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                ?.dzdReferral || 0);
             if (amount > totalBal) { showToast('الرصيد غير كافٍ'); return; }
 
             const recipient = document.getElementById('withdrawBaridiId').value.trim();
             if (!recipient) { showToast('أدخل معرف Baridi Mob الخاص بك'); return; }
+
+            // --- التحقق من صحة معرف Baridi ---
             if (!isValidBaridiId(recipient)) {
                 showToast('⚠️ معرف Baridi Mob غير صحيح! يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999');
                 return;
             }
 
-            const isValid = isVerifiedValid();
-            const feePercent = isValid ? 0.01 : 0.10;
-            const fee = amount * feePercent;
+            const fee = amount * 0.10;
             const total = amount + fee;
-
-            if (!confirm(`تأكيد سحب ${amount} DZD? الرسوم: ${fee.toFixed(2)} DZD (${feePercent*100}%)`)) return;
+            if (!confirm(`تأكيد سحب ${amount} DZD? الرسوم: ${fee.toFixed(2)} DZD`)) return;
 
             try {
                 const now = new Date();
@@ -2917,7 +2732,6 @@
                     recipientAddress: recipient,
                     network: 'Baridi Mob',
                     fee: fee,
-                    feePercent: feePercent,
                     status: 'pending',
                     createdAt: now
                 };
@@ -2927,7 +2741,8 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
+                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                        .wallets?.dzdReferral || 0);
                     if (bal < total) throw new Error('رصيد غير كاف');
 
                     let rem = total;
@@ -2962,6 +2777,7 @@
                 showToast('✅ تم طلب السحب بنجاح');
                 document.getElementById('withdrawBaridiId').value = '';
                 document.getElementById('withdrawAmount').value = '';
+
                 await loadWithdrawals();
                 await loadTransactions();
                 updateUI();
@@ -3000,7 +2816,7 @@
         }
 
         // ============================================================
-        // PLANS
+        // 14. PLANS & RENDER
         // ============================================================
         async function loadPlans() {
             allInvestPlans = DEFAULT_INVEST_PLANS;
@@ -3043,7 +2859,7 @@
         }
 
         // ============================================================
-        // INVESTMENT MODAL
+        // 15. MODAL FUNCTIONS
         // ============================================================
         function openInvestmentModal(planId) {
             if (isModalOpen) return;
@@ -3079,7 +2895,8 @@
             slider.step = 100;
             slider.value = minAmount;
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                ?.dzdReferral || 0);
             document.getElementById('modalUserBalance').textContent = balance.toFixed(2);
 
             updateModalCalculations();
@@ -3165,7 +2982,8 @@
             document.getElementById('modalTotalReturn').textContent = totalProfit.toFixed(2);
             document.getElementById('modalFirstBonus').textContent = firstBonus.toFixed(2);
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                ?.dzdReferral || 0);
 
             const statusEl = document.getElementById('modalBalanceStatus');
             const balSpan = document.getElementById('modalUserBalance');
@@ -3188,6 +3006,9 @@
             }
         }
 
+        // ============================================================
+        // 16. CONFIRM INVESTMENT
+        // ============================================================
         async function confirmInvestment() {
             if (!currentSelectedPlanId) {
                 showToast('حدث خطأ، حاول مرة أخرى');
@@ -3208,7 +3029,8 @@
                 return;
             }
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                ?.dzdReferral || 0);
             if (balance < amount) {
                 showToast(`الرصيد غير كافٍ (${balance.toFixed(2)} DZD)`);
                 return;
@@ -3246,7 +3068,8 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    let b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
+                    let b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                        .wallets?.dzdReferral || 0);
                     if (b < amount) throw new Error('رصيد غير كاف');
 
                     let rem = amount;
@@ -3310,7 +3133,7 @@
         }
 
         // ============================================================
-        // RENDER INVESTMENTS
+        // 17. RENDER INVESTMENTS
         // ============================================================
         function renderInvestments() {
             const container = document.getElementById('activeInvestments');
@@ -3369,7 +3192,7 @@
         }
 
         // ============================================================
-        // REFERRALS LIST
+        // 18. REFERRALS LIST
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -3401,7 +3224,7 @@
         }
 
         // ============================================================
-        // TRANSACTIONS
+        // 19. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -3464,16 +3287,14 @@
         }
 
         // ============================================================
-        // WITHDRAW CALCULATION
+        // 20. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
             if (amt) {
                 amt.addEventListener('input', function() {
                     const a = parseFloat(this.value) || 0;
-                    const isValid = isVerifiedValid();
-                    const feePercent = isValid ? 0.01 : 0.10;
-                    const fee = a * feePercent;
+                    const fee = a * 0.10;
                     document.getElementById('withdrawFee').textContent = fee.toFixed(2);
                     document.getElementById('withdrawTotal').textContent = (a + fee).toFixed(2);
                 });
@@ -3481,7 +3302,7 @@
         });
 
         // ============================================================
-        // INVESTMENT DAILY RETURNS
+        // 21. INVESTMENT DAILY RETURNS
         // ============================================================
         function startInvestmentReturns() {
             if (investmentInterval) clearInterval(investmentInterval);
@@ -3563,7 +3384,7 @@
         }
 
         // ============================================================
-        // THEME TOGGLE
+        // 22. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -3610,7 +3431,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // INIT
+        // 23. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -3624,7 +3445,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع شارة التوثيق المحسنة');
+        console.log('🚀 Crynova - النسخة النهائية مع التحقق من Baridi ID');
     </script>
 </body>
 </html>
