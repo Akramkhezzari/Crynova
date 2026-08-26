@@ -1326,7 +1326,7 @@
             font-weight: 600;
         }
 
-        /* زر الرجوع المخصص */
+        /* زر الرجوع المخصص - تم إزالته من الواجهة ولكن نحتفظ بالـ class للاستخدام الداخلي إن لزم */
         .back-btn {
             display: inline-flex;
             align-items: center;
@@ -1601,26 +1601,22 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: PACKAGES (خطط العوائد الثابتة) ========== -->
+        <!-- ========== PAGE: PACKAGES ========== -->
         <div class="page" id="page-packages">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-cubes text-accent"></i> خطط العوائد الثابتة
-                <button class="back-btn" onclick="navigateTo('home')">
-                    <i class="fas fa-arrow-right"></i> رجوع
-                </button>
+                <!-- تم إزالة زر الرجوع -->
             </h2>
             <div id="investPlansList">
                 <!-- سيتم ملؤها بواسطة JS -->
             </div>
         </div>
 
-        <!-- ========== PAGE: INVESTMENTS (استثماراتي) ========== -->
+        <!-- ========== PAGE: INVESTMENTS ========== -->
         <div class="page" id="page-investments">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-chart-line text-gold"></i> استثماراتي
-                <button class="back-btn" onclick="navigateTo('home')">
-                    <i class="fas fa-arrow-right"></i> رجوع
-                </button>
+                <!-- تم إزالة زر الرجوع -->
             </h2>
             <div class="card gold-gradient">
                 <div class="flex-between">
@@ -1646,9 +1642,7 @@
         <div class="page" id="page-wallet">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-wallet text-accent"></i> المحفظة
-                <button class="back-btn" onclick="navigateTo('home')">
-                    <i class="fas fa-arrow-right"></i> رجوع
-                </button>
+                <!-- تم إزالة زر الرجوع -->
             </h2>
             <div class="card dzd-gradient" id="walletBalanceCard">
                 <div style="text-align:center;padding:4px 0;">
@@ -1690,9 +1684,7 @@
         <div class="page" id="page-referrals">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-users text-accent"></i> الإحالات
-                <button class="back-btn" onclick="navigateTo('home')">
-                    <i class="fas fa-arrow-right"></i> رجوع
-                </button>
+                <!-- تم إزالة زر الرجوع -->
             </h2>
 
             <!-- شريط الإحصائيات الجديد -->
@@ -1784,7 +1776,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: WITHDRAW (مصغر) ========== -->
+        <!-- ========== PAGE: WITHDRAW ========== -->
         <div class="page" id="page-withdraw">
             <h2 style="font-size:20px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-up text-danger" style="font-size:18px;"></i> السحب
@@ -1881,9 +1873,7 @@
         <div class="page" id="page-profile">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-user text-accent"></i> الحساب
-                <button class="back-btn" onclick="navigateTo('home')">
-                    <i class="fas fa-arrow-right"></i> رجوع
-                </button>
+                <!-- تم إزالة زر الرجوع -->
             </h2>
             <div class="card text-center" style="padding:24px;">
                 <div style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:white;margin:0 auto 12px;box-shadow:var(--shadow-glow);" id="profileAvatar">
@@ -3334,7 +3324,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع تصغير واجهة السحب');
+        console.log('🚀 Crynova - النسخة النهائية مع إزالة أزرار الرجوع من الصفحات المطلوبة');
     </script>
 </body>
 </html>
