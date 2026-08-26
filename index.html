@@ -790,6 +790,14 @@
             background: rgba(249, 168, 37, 0.15);
             color: var(--gold);
         }
+        .status-verified {
+            background: var(--accent-gradient);
+            color: white;
+        }
+        .status-unverified {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
 
         /* USER INFO IN HEADER */
         .user-mini {
@@ -1167,25 +1175,8 @@
         }
 
         /* ============================================================
-           شارة التوثيق (Verification Badge)
+           شارة التوثيق (Verification Badge) - محسنة
            ============================================================ */
-        .verified-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: var(--accent-gradient);
-            color: white;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            box-shadow: var(--shadow-glow);
-            margin-right: 8px;
-        }
-        .verified-badge i {
-            font-size: 14px;
-        }
-
         .verification-status {
             background: var(--bg-input);
             border-radius: var(--radius-sm);
@@ -1209,7 +1200,7 @@
         .verification-status .value.verified {
             color: var(--success);
         }
-        .verification-status .value.expired {
+        .verification-status .value.unverified {
             color: var(--danger);
         }
         .verification-actions {
@@ -1247,6 +1238,33 @@
         }
         .profile-avatar-wrapper .avatar-badge.show {
             display: flex;
+        }
+
+        /* شارة التوثيق بجانب المستوى */
+        .level-verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--accent-gradient);
+            color: white;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-right: 6px;
+        }
+        .level-unverified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--danger-light);
+            color: var(--danger);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-right: 6px;
+            border: 1px solid var(--danger);
         }
 
         /* ============================================================
@@ -1535,10 +1553,12 @@
                     <div class="avatar-small" id="headerAvatar">?</div>
                     <div>
                         <div class="user-name" id="headerUserName">مستخدم</div>
-                        <div class="user-level" id="headerUserLevel">المستوى 1</div>
-                        <span id="headerVerifiedBadge" style="display:none;" class="header-verified-badge">
-                            <i class="fas fa-check-circle"></i> موثق
-                        </span>
+                        <div>
+                            <span class="user-level" id="headerUserLevel">المستوى 1</span>
+                            <span id="headerVerifiedBadge" style="display:none;" class="header-verified-badge">
+                                <i class="fas fa-check-circle"></i> موثق
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <button onclick="toggleTheme()" class="theme-toggle" id="themeToggle">
@@ -1884,7 +1904,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: PROFILE ========== -->
+        <!-- ========== PAGE: PROFILE (معدلة) ========== -->
         <div class="page" id="page-profile">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-user text-accent"></i> الحساب
@@ -1905,8 +1925,11 @@
                 <div style="color:var(--text-secondary);font-size:14px;" id="profileTelegram">@username</div>
                 <div style="margin-top:8px;">
                     <span class="status status-info">المستوى <span id="profileLevel">1</span></span>
-                    <span id="profileVerifiedStatus" style="display:none;" class="status status-success">
+                    <span id="profileVerifiedStatus" style="display:none;" class="status status-verified">
                         <i class="fas fa-check-circle"></i> موثق
+                    </span>
+                    <span id="profileUnverifiedStatus" style="display:none;" class="status status-unverified">
+                        <i class="fas fa-times-circle"></i> لم يتم تحقق من الحساب
                     </span>
                 </div>
             </div>
@@ -2509,7 +2532,7 @@
         }
 
         // ============================================================
-        // VERIFICATION FUNCTIONS
+        // VERIFICATION FUNCTIONS (محسنة)
         // ============================================================
         function isVerifiedValid() {
             if (!userData) return false;
@@ -2535,9 +2558,16 @@
             }
 
             // حالة التوثيق بجانب المستوى
-            const profileStatus = document.getElementById('profileVerifiedStatus');
-            if (profileStatus) {
-                profileStatus.style.display = isValid ? 'inline-block' : 'none';
+            const verifiedStatus = document.getElementById('profileVerifiedStatus');
+            const unverifiedStatus = document.getElementById('profileUnverifiedStatus');
+            if (verifiedStatus && unverifiedStatus) {
+                if (isValid) {
+                    verifiedStatus.style.display = 'inline-block';
+                    unverifiedStatus.style.display = 'none';
+                } else {
+                    verifiedStatus.style.display = 'none';
+                    unverifiedStatus.style.display = 'inline-block';
+                }
             }
 
             // تحديث ملصق رسوم السحب في صفحة السحب
@@ -2585,10 +2615,10 @@
                 `;
             } else {
                 html = `
-                    <div class="verification-status" style="border-color:var(--warning);">
+                    <div class="verification-status" style="border-color:var(--danger);background:var(--danger-light);">
                         <div>
                             <span class="label">الحالة:</span>
-                            <span class="value expired"><i class="fas fa-times-circle"></i> غير موثق</span>
+                            <span class="value unverified"><i class="fas fa-times-circle"></i> لم يتم تحقق من الحساب</span>
                         </div>
                         <div>
                             <span class="label">السعر:</span>
@@ -3546,7 +3576,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع توثيق الحساب وخصم 1% للموثقين');
+        console.log('🚀 Crynova - النسخة النهائية مع شارة التوثيق المحسنة');
     </script>
 </body>
 </html>
