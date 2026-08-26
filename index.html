@@ -229,48 +229,45 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
-        /* بطاقة خضراء للإحالات */
-        .card.success-gradient {
-            background: linear-gradient(135deg, #00b894, #00a381);
-            border: none;
-            color: var(--text-white);
+        /* شريط الإحصائيات الجديد */
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 16px 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
         }
-        .card.success-gradient .card-title i,
-        .card.success-gradient .text-muted,
-        .card.success-gradient .balance-label {
-            color: rgba(255, 255, 255, 0.8);
+        .stats-bar .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
         }
-        .card.success-gradient .number,
-        .card.success-gradient .balance-large {
-            color: white !important;
-            -webkit-text-fill-color: white;
-            background: none;
-        }
-        .card.success-gradient .stat-item {
-            text-align: center;
-            padding: 8px 0;
-        }
-        .card.success-gradient .stat-item .label {
+        .stats-bar .stat-item .stat-label {
             font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--text-secondary);
             font-weight: 600;
         }
-        .card.success-gradient .stat-item .number {
-            font-size: 28px;
+        .stats-bar .stat-item .stat-label i {
+            margin-left: 4px;
+            color: var(--accent);
+        }
+        .stats-bar .stat-item .stat-value {
+            font-size: 20px;
             font-weight: 900;
-            color: white;
+            color: var(--text-primary);
+            min-width: 30px;
+            text-align: center;
         }
-        .card.success-gradient .stat-item .icon {
-            font-size: 24px;
-            margin-bottom: 4px;
-            display: block;
-            color: rgba(255, 255, 255, 0.9);
-        }
-        .card.success-gradient .divider-light {
+        .stats-bar .stat-divider {
             width: 1px;
-            background: rgba(255, 255, 255, 0.25);
-            height: 50px;
-            align-self: center;
+            height: 30px;
+            background: var(--border);
         }
 
         .card-header {
@@ -676,6 +673,15 @@
             }
             .nav-item i {
                 font-size: 20px;
+            }
+            .stats-bar .stat-item .stat-label {
+                font-size: 12px;
+            }
+            .stats-bar .stat-item .stat-value {
+                font-size: 16px;
+            }
+            .stats-bar .stat-item {
+                gap: 4px;
             }
         }
 
@@ -1190,8 +1196,14 @@
             .amount-input-wrapper input {
                 font-size: 16px;
             }
-            .card.success-gradient .stat-item .number {
-                font-size: 22px;
+            .stats-bar .stat-item .stat-label {
+                font-size: 12px;
+            }
+            .stats-bar .stat-item .stat-value {
+                font-size: 16px;
+            }
+            .stats-bar .stat-item {
+                gap: 4px;
             }
         }
 
@@ -1560,31 +1572,16 @@
                 </button>
             </h2>
 
-            <!-- بطاقة الإحصائيات الموحدة بخلفية خضراء -->
-            <div class="card success-gradient">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                    <div class="card-title" style="color:white;font-size:18px;">
-                        <i class="fas fa-chart-simple" style="color:rgba(255,255,255,0.9);"></i> إحصائيات الإحالات
-                    </div>
+            <!-- شريط الإحصائيات الجديد -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-label"><i class="fas fa-users"></i> الإحالات</span>
+                    <span class="stat-value" id="refTotalReferrals">0</span>
                 </div>
-                <div style="display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:8px;">
-                    <div class="stat-item" style="flex:1;min-width:80px;">
-                        <span class="icon">💰</span>
-                        <div class="number" id="refEarnings">0.00</div>
-                        <div class="label">العمولات</div>
-                    </div>
-                    <div class="divider-light"></div>
-                    <div class="stat-item" style="flex:1;min-width:80px;">
-                        <span class="icon">📊</span>
-                        <div class="number" id="refTotalReferrals">0</div>
-                        <div class="label">إجمالي الإحالات</div>
-                    </div>
-                    <div class="divider-light"></div>
-                    <div class="stat-item" style="flex:1;min-width:80px;">
-                        <span class="icon">✅</span>
-                        <div class="number" id="refQualified">0</div>
-                        <div class="label">المؤهلة</div>
-                    </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-label"><i class="fas fa-coins"></i> العمولات</span>
+                    <span class="stat-value" id="refEarnings">0.00</span>
                 </div>
             </div>
 
@@ -2342,24 +2339,18 @@
         }
 
         // ============================================================
-        // 10. REFERRALS UI (مع حساب المؤهلين)
+        // 10. REFERRALS UI
         // ============================================================
         function updateReferralUI() {
             if (!userData) return;
             const earnings = userData.wallets?.dzdReferral || 0;
             const totalRefs = userData.miningData?.totalReferrals || 0;
-
-            // حساب الإحالات المؤهلة: عدد المدعوين الذين لديهم qualified === true
-            const referrals = userData.referrals || [];
-            const qualifiedCount = referrals.filter(r => r.qualified === true).length;
-
             document.getElementById('refEarnings').textContent = earnings.toFixed(2);
             document.getElementById('refTotalReferrals').textContent = totalRefs;
-            document.getElementById('refQualified').textContent = qualifiedCount;
         }
 
         // ============================================================
-        // 11. DEPOSIT - مع منع التكرار وتحديث الإحالات المؤهلة
+        // 11. DEPOSIT - مع منع التكرار
         // ============================================================
         async function submitDeposit() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -2426,11 +2417,6 @@
                     })
                 });
 
-                // تحديث حالة الإحالة المؤهلة للمُحيل
-                if (userData.referrer) {
-                    await updateReferralQualified(userData.telegramId, userData.referrer);
-                }
-
                 showToast('✅ تم إرسال طلب الإيداع، في انتظار المراجعة');
                 document.getElementById('depositAmount').value = '';
                 document.getElementById('depositTransactionId').value = '';
@@ -2444,32 +2430,7 @@
         }
 
         // ============================================================
-        // 12. تحديث حالة الإحالة المؤهلة
-        // ============================================================
-        async function updateReferralQualified(userId, referrerId) {
-            try {
-                const referrerRef = db.collection('users').doc(referrerId);
-                const referrerDoc = await referrerRef.get();
-                if (!referrerDoc.exists) return;
-
-                const referrerData = referrerDoc.data();
-                const referrals = referrerData.referrals || [];
-
-                const referralIndex = referrals.findIndex(r => r.telegramId === userId);
-                if (referralIndex === -1) return;
-
-                if (referrals[referralIndex].qualified !== true) {
-                    referrals[referralIndex].qualified = true;
-                    await referrerRef.update({ referrals: referrals });
-                    console.log(`✅ تم تحديث المدعو ${userId} إلى مؤهل للمُحيل ${referrerId}`);
-                }
-            } catch (e) {
-                console.error('❌ فشل تحديث حالة الإحالة المؤهلة:', e);
-            }
-        }
-
-        // ============================================================
-        // 13. DEPOSITS LIST
+        // 12. DEPOSITS LIST
         // ============================================================
         async function loadDeposits() {
             if (!userData) return;
@@ -2501,7 +2462,7 @@
         }
 
         // ============================================================
-        // 14. WITHDRAW
+        // 13. WITHDRAW
         // ============================================================
         async function requestWithdraw() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -2617,7 +2578,7 @@
         }
 
         // ============================================================
-        // 15. PLANS & RENDER
+        // 14. PLANS & RENDER
         // ============================================================
         async function loadPlans() {
             allInvestPlans = DEFAULT_INVEST_PLANS;
@@ -2660,7 +2621,7 @@
         }
 
         // ============================================================
-        // 16. MODAL FUNCTIONS
+        // 15. MODAL FUNCTIONS
         // ============================================================
         function openInvestmentModal(planId) {
             if (isModalOpen) return;
@@ -2807,7 +2768,7 @@
         }
 
         // ============================================================
-        // 17. CONFIRM INVESTMENT
+        // 16. CONFIRM INVESTMENT
         // ============================================================
         async function confirmInvestment() {
             if (!currentSelectedPlanId) {
@@ -2933,7 +2894,7 @@
         }
 
         // ============================================================
-        // 18. RENDER INVESTMENTS
+        // 17. RENDER INVESTMENTS
         // ============================================================
         function renderInvestments() {
             const container = document.getElementById('activeInvestments');
@@ -2992,7 +2953,7 @@
         }
 
         // ============================================================
-        // 19. REFERRALS LIST
+        // 18. REFERRALS LIST
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -3011,11 +2972,10 @@
                     '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>';
                 return; }
             c.innerHTML = list.map(r => {
-                const qualified = r.qualified ? '✅' : '⏳';
                 return `
                     <div class="list-item">
                         <div class="left"><div class="avatar" style="width:36px;height:36px;font-size:14px;">${(r.displayName||'م').charAt(0)}</div>
-                            <div><div class="title">${r.displayName||'مستخدم'} <span style="font-size:12px;color:var(--text-muted);">${qualified}</span></div>
+                            <div><div class="title">${r.displayName||'مستخدم'}</div>
                             <div class="sub">${formatDate(r.joinedAt)}</div></div>
                         </div>
                         <div class="right"><div style="color:var(--success);font-weight:700;">${r.commissionEarned||0} DZD</div></div>
@@ -3025,7 +2985,7 @@
         }
 
         // ============================================================
-        // 20. TRANSACTIONS
+        // 19. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -3088,7 +3048,7 @@
         }
 
         // ============================================================
-        // 21. WITHDRAW CALCULATION
+        // 20. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -3103,7 +3063,7 @@
         });
 
         // ============================================================
-        // 22. INVESTMENT DAILY RETURNS
+        // 21. INVESTMENT DAILY RETURNS
         // ============================================================
         function startInvestmentReturns() {
             if (investmentInterval) clearInterval(investmentInterval);
@@ -3185,7 +3145,7 @@
         }
 
         // ============================================================
-        // 23. THEME TOGGLE
+        // 22. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -3232,7 +3192,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 24. INIT
+        // 23. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -3246,7 +3206,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع بطاقة إحصائيات خضراء موحدة');
+        console.log('🚀 Crynova - النسخة النهائية مع شريط الإحصائيات الجديد');
     </script>
 </body>
 </html>
