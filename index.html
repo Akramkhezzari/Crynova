@@ -1816,7 +1816,7 @@
                         <input type="text" id="withdrawBaridiId" placeholder="أدخل معرف Baridi Mob الخاص بك" style="padding:10px 14px;font-size:14px;padding-right:36px;">
                     </div>
                     <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
-                        <i class="fas fa-info-circle"></i> سيتم تحويل المبلغ إلى حساب Baridi Mob هذا
+                        <i class="fas fa-info-circle"></i> يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999
                     </div>
                 </div>
                 <div class="input-group" style="margin-bottom:10px;">
@@ -1935,9 +1935,9 @@
             <div class="modal-amount-section">
                 <label>المبلغ المستثمر <span id="modalCurrencyLabel">(DZD)</span></label>
                 <div class="amount-input-wrapper">
-                    <button onclick="adjustAmount(-100)">−</button>
+                    <button onclick="adjustAmount(-100, event)">−</button>
                     <input type="number" id="modalAmountInput" min="0" step="100" value="2000">
-                    <button onclick="adjustAmount(100)">+</button>
+                    <button onclick="adjustAmount(100, event)">+</button>
                 </div>
                 <input type="range" id="modalRangeSlider" class="range-slider" min="0" max="50000" step="100" value="2000">
                 <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);padding:0 4px;">
@@ -2590,8 +2590,17 @@
         }
 
         // ============================================================
-        // 13. WITHDRAW
+        // 13. WITHDRAW - مع التحقق من صحة معرف Baridi Mob
         // ============================================================
+        function isValidBaridiId(id) {
+            // يجب أن يكون النص مكوناً من أرقام فقط، طوله 20، ويبدأ بـ '00799999'
+            if (!id || typeof id !== 'string') return false;
+            const cleaned = id.replace(/\s/g, ''); // إزالة المسافات
+            if (!/^\d{20}$/.test(cleaned)) return false; // 20 رقم فقط
+            if (!cleaned.startsWith('00799999')) return false; // يبدأ بـ 00799999
+            return true;
+        }
+
         async function requestWithdraw() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
@@ -2606,6 +2615,12 @@
 
             const recipient = document.getElementById('withdrawBaridiId').value.trim();
             if (!recipient) { showToast('أدخل معرف Baridi Mob الخاص بك'); return; }
+
+            // --- التحقق من صحة معرف Baridi ---
+            if (!isValidBaridiId(recipient)) {
+                showToast('⚠️ معرف Baridi Mob غير صحيح! يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999');
+                return;
+            }
 
             const fee = amount * 0.10;
             const total = amount + fee;
@@ -2813,10 +2828,11 @@
             document.getElementById('modalRangeSlider').value = 0;
         }
 
-        function adjustAmount(change) {
-            event?.preventDefault?.();
-            event?.stopPropagation?.();
-
+        function adjustAmount(change, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
             const input = document.getElementById('modalAmountInput');
             let val = parseFloat(input.value) || 0;
             const min = parseFloat(input.min) || 0;
@@ -3334,7 +3350,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع تصغير واجهة السحب');
+        console.log('🚀 Crynova - النسخة النهائية مع التحقق من Baridi ID');
     </script>
 </body>
 </html>
