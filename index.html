@@ -1515,17 +1515,24 @@
 
             <!-- تم إزالة البطاقة الوصفية (🎁 اربح 15% من إيداع المدعو) -->
 
-            <div class="grid-2">
-                <!-- تم إزالة مربع "المدعوين المباشرين" -->
+            <div class="grid-3">
+                <!-- بطاقة العمولات -->
                 <div class="stat-box">
                     <span class="icon">💰</span>
                     <div class="number" id="refEarnings">0.00</div>
                     <div class="label">العمولات</div>
                 </div>
+                <!-- بطاقة إجمالي الإحالات -->
                 <div class="stat-box">
                     <span class="icon">📊</span>
                     <div class="number" id="refTotalReferrals">0</div>
                     <div class="label">إجمالي الإحالات</div>
+                </div>
+                <!-- بطاقة الإحالات المؤهلة - بالون أخضر -->
+                <div class="stat-box" style="background: var(--success-light); border: 2px solid var(--success);">
+                    <span class="icon">✅</span>
+                    <div class="number" style="color: var(--success);" id="refQualified">0</div>
+                    <div class="label">الإحالات المؤهلة</div>
                 </div>
             </div>
 
@@ -2006,7 +2013,7 @@
                         withdrawals: [],
                         miningData: {
                             totalReferrals: 0,
-                            totalReferralsLevel2: 0 // تم الاحتفاظ به ولكن لا نستخدمه في UI
+                            totalReferralsLevel2: 0
                         },
                         lastDailyDistribution: null
                     };
@@ -2285,17 +2292,25 @@
             document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
         }
 
+        // ============================================================
+        // 10. REFERRALS UI (مع حساب المؤهلين)
+        // ============================================================
         function updateReferralUI() {
             if (!userData) return;
             const earnings = userData.wallets?.dzdReferral || 0;
             const totalRefs = userData.miningData?.totalReferrals || 0;
-            // لم نعد نستخدم refCount لأننا أزلناه من الواجهة
+
+            // حساب الإحالات المؤهلة: عدد المدعوين الذين لديهم qualified === true
+            const referrals = userData.referrals || [];
+            const qualifiedCount = referrals.filter(r => r.qualified === true).length;
+
             document.getElementById('refEarnings').textContent = earnings.toFixed(2);
             document.getElementById('refTotalReferrals').textContent = totalRefs;
+            document.getElementById('refQualified').textContent = qualifiedCount;
         }
 
         // ============================================================
-        // 10. DEPOSIT - مع منع التكرار
+        // 11. DEPOSIT - مع منع التكرار وتحديث الإحالات المؤهلة
         // ============================================================
         async function submitDeposit() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -2349,6 +2364,7 @@
                     createdAt: now
                 };
 
+                // تحديث بيانات المستخدم
                 await db.collection('users').doc(userData.telegramId).update({
                     'deposits': firebase.firestore.FieldValue.arrayUnion(depositObj),
                     'transactions': firebase.firestore.FieldValue.arrayUnion({
@@ -2362,6 +2378,11 @@
                     })
                 });
 
+                // ========== تحديث حالة الإحالة المؤهلة للمُحيل ==========
+                if (userData.referrer) {
+                    await updateReferralQualified(userData.telegramId, userData.referrer);
+                }
+
                 showToast('✅ تم إرسال طلب الإيداع، في انتظار المراجعة');
                 document.getElementById('depositAmount').value = '';
                 document.getElementById('depositTransactionId').value = '';
@@ -2374,6 +2395,38 @@
             }
         }
 
+        // ============================================================
+        // 12. تحديث حالة الإحالة المؤهلة
+        // ============================================================
+        async function updateReferralQualified(userId, referrerId) {
+            try {
+                // جلب بيانات المُحيل
+                const referrerRef = db.collection('users').doc(referrerId);
+                const referrerDoc = await referrerRef.get();
+                if (!referrerDoc.exists) return;
+
+                const referrerData = referrerDoc.data();
+                const referrals = referrerData.referrals || [];
+
+                // البحث عن المدعو في قائمة المُحيل
+                const referralIndex = referrals.findIndex(r => r.telegramId === userId);
+                if (referralIndex === -1) return;
+
+                // إذا كان المدعو موجوداً ولكن ليس مؤهلاً بعد
+                if (referrals[referralIndex].qualified !== true) {
+                    // تحديث حالة المدعو إلى مؤهل
+                    referrals[referralIndex].qualified = true;
+                    await referrerRef.update({ referrals: referrals });
+                    console.log(`✅ تم تحديث المدعو ${userId} إلى مؤهل للمُحيل ${referrerId}`);
+                }
+            } catch (e) {
+                console.error('❌ فشل تحديث حالة الإحالة المؤهلة:', e);
+            }
+        }
+
+        // ============================================================
+        // 13. DEPOSITS LIST
+        // ============================================================
         async function loadDeposits() {
             if (!userData) return;
             try {
@@ -2404,7 +2457,7 @@
         }
 
         // ============================================================
-        // 11. WITHDRAW
+        // 14. WITHDRAW
         // ============================================================
         async function requestWithdraw() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -2520,7 +2573,7 @@
         }
 
         // ============================================================
-        // 12. PLANS & RENDER
+        // 15. PLANS & RENDER
         // ============================================================
         async function loadPlans() {
             allInvestPlans = DEFAULT_INVEST_PLANS;
@@ -2563,7 +2616,7 @@
         }
 
         // ============================================================
-        // 13. MODAL FUNCTIONS
+        // 16. MODAL FUNCTIONS
         // ============================================================
         function openInvestmentModal(planId) {
             if (isModalOpen) return;
@@ -2710,7 +2763,7 @@
         }
 
         // ============================================================
-        // 14. CONFIRM INVESTMENT
+        // 17. CONFIRM INVESTMENT
         // ============================================================
         async function confirmInvestment() {
             if (!currentSelectedPlanId) {
@@ -2836,7 +2889,7 @@
         }
 
         // ============================================================
-        // 15. RENDER INVESTMENTS
+        // 18. RENDER INVESTMENTS
         // ============================================================
         function renderInvestments() {
             const container = document.getElementById('activeInvestments');
@@ -2895,7 +2948,7 @@
         }
 
         // ============================================================
-        // 16. REFERRALS
+        // 19. REFERRALS LIST
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -2914,10 +2967,11 @@
                     '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>';
                 return; }
             c.innerHTML = list.map(r => {
+                const qualified = r.qualified ? '✅' : '⏳';
                 return `
                     <div class="list-item">
                         <div class="left"><div class="avatar" style="width:36px;height:36px;font-size:14px;">${(r.displayName||'م').charAt(0)}</div>
-                            <div><div class="title">${r.displayName||'مستخدم'}</div>
+                            <div><div class="title">${r.displayName||'مستخدم'} <span style="font-size:12px;color:var(--text-muted);">${qualified}</span></div>
                             <div class="sub">${formatDate(r.joinedAt)}</div></div>
                         </div>
                         <div class="right"><div style="color:var(--success);font-weight:700;">${r.commissionEarned||0} DZD</div></div>
@@ -2927,7 +2981,7 @@
         }
 
         // ============================================================
-        // 17. TRANSACTIONS
+        // 20. TRANSACTIONS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
@@ -2990,7 +3044,7 @@
         }
 
         // ============================================================
-        // 18. WITHDRAW CALCULATION
+        // 21. WITHDRAW CALCULATION
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
@@ -3005,7 +3059,7 @@
         });
 
         // ============================================================
-        // 19. INVESTMENT DAILY RETURNS
+        // 22. INVESTMENT DAILY RETURNS
         // ============================================================
         function startInvestmentReturns() {
             if (investmentInterval) clearInterval(investmentInterval);
@@ -3087,7 +3141,7 @@
         }
 
         // ============================================================
-        // 20. THEME TOGGLE
+        // 23. THEME TOGGLE
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -3134,7 +3188,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 21. INIT
+        // 24. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -3148,7 +3202,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع إزالة المدعوين المباشرين من الإحالات');
+        console.log('🚀 Crynova - النسخة النهائية مع الإحالات المؤهلة');
     </script>
 </body>
 </html>
