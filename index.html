@@ -229,6 +229,50 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
+        /* بطاقة خضراء للإحالات */
+        .card.success-gradient {
+            background: linear-gradient(135deg, #00b894, #00a381);
+            border: none;
+            color: var(--text-white);
+        }
+        .card.success-gradient .card-title i,
+        .card.success-gradient .text-muted,
+        .card.success-gradient .balance-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .card.success-gradient .number,
+        .card.success-gradient .balance-large {
+            color: white !important;
+            -webkit-text-fill-color: white;
+            background: none;
+        }
+        .card.success-gradient .stat-item {
+            text-align: center;
+            padding: 8px 0;
+        }
+        .card.success-gradient .stat-item .label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+        }
+        .card.success-gradient .stat-item .number {
+            font-size: 28px;
+            font-weight: 900;
+            color: white;
+        }
+        .card.success-gradient .stat-item .icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .card.success-gradient .divider-light {
+            width: 1px;
+            background: rgba(255, 255, 255, 0.25);
+            height: 50px;
+            align-self: center;
+        }
+
         .card-header {
             display: flex;
             justify-content: space-between;
@@ -1146,6 +1190,9 @@
             .amount-input-wrapper input {
                 font-size: 16px;
             }
+            .card.success-gradient .stat-item .number {
+                font-size: 22px;
+            }
         }
 
         @media (min-width: 768px) {
@@ -1513,26 +1560,31 @@
                 </button>
             </h2>
 
-            <!-- تم إزالة البطاقة الوصفية (🎁 اربح 15% من إيداع المدعو) -->
-
-            <div class="grid-3">
-                <!-- بطاقة العمولات -->
-                <div class="stat-box">
-                    <span class="icon">💰</span>
-                    <div class="number" id="refEarnings">0.00</div>
-                    <div class="label">العمولات</div>
+            <!-- بطاقة الإحصائيات الموحدة بخلفية خضراء -->
+            <div class="card success-gradient">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <div class="card-title" style="color:white;font-size:18px;">
+                        <i class="fas fa-chart-simple" style="color:rgba(255,255,255,0.9);"></i> إحصائيات الإحالات
+                    </div>
                 </div>
-                <!-- بطاقة إجمالي الإحالات -->
-                <div class="stat-box">
-                    <span class="icon">📊</span>
-                    <div class="number" id="refTotalReferrals">0</div>
-                    <div class="label">إجمالي الإحالات</div>
-                </div>
-                <!-- بطاقة الإحالات المؤهلة - بالون أخضر -->
-                <div class="stat-box" style="background: var(--success-light); border: 2px solid var(--success);">
-                    <span class="icon">✅</span>
-                    <div class="number" style="color: var(--success);" id="refQualified">0</div>
-                    <div class="label">الإحالات المؤهلة</div>
+                <div style="display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:8px;">
+                    <div class="stat-item" style="flex:1;min-width:80px;">
+                        <span class="icon">💰</span>
+                        <div class="number" id="refEarnings">0.00</div>
+                        <div class="label">العمولات</div>
+                    </div>
+                    <div class="divider-light"></div>
+                    <div class="stat-item" style="flex:1;min-width:80px;">
+                        <span class="icon">📊</span>
+                        <div class="number" id="refTotalReferrals">0</div>
+                        <div class="label">إجمالي الإحالات</div>
+                    </div>
+                    <div class="divider-light"></div>
+                    <div class="stat-item" style="flex:1;min-width:80px;">
+                        <span class="icon">✅</span>
+                        <div class="number" id="refQualified">0</div>
+                        <div class="label">المؤهلة</div>
+                    </div>
                 </div>
             </div>
 
@@ -1544,7 +1596,6 @@
                         <i class="fas fa-copy"></i>
                     </button>
                 </div>
-                <!-- تم إزالة زر "مشاركة الرابط" -->
             </div>
 
             <div class="card">
@@ -1564,7 +1615,7 @@
                 </button>
             </h2>
 
-            <!-- البطاقة الرئيسية للإيداع (تحتوي الآن على حقل رقم العملية) -->
+            <!-- البطاقة الرئيسية للإيداع -->
             <div class="card" id="depositMainCard">
                 <div class="input-group" id="depositEccpGroup">
                     <label>رقم حساب Baridi Mob <span class="required">*</span></label>
@@ -2145,8 +2196,6 @@
             }
         }
 
-        // تم إزالة دالة shareReferral لأن الزر غير موجود
-
         function copyDepositAccount(event) {
             const btn = event.currentTarget;
             const input = btn.parentElement.querySelector('input');
@@ -2324,7 +2373,7 @@
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
 
-            // ========== منع الإيداعات المكررة ==========
+            // منع الإيداعات المكررة
             const existingDeposits = userData.deposits || [];
             const duplicate = existingDeposits.find(d =>
                 d.transactionId === txId &&
@@ -2364,7 +2413,6 @@
                     createdAt: now
                 };
 
-                // تحديث بيانات المستخدم
                 await db.collection('users').doc(userData.telegramId).update({
                     'deposits': firebase.firestore.FieldValue.arrayUnion(depositObj),
                     'transactions': firebase.firestore.FieldValue.arrayUnion({
@@ -2378,7 +2426,7 @@
                     })
                 });
 
-                // ========== تحديث حالة الإحالة المؤهلة للمُحيل ==========
+                // تحديث حالة الإحالة المؤهلة للمُحيل
                 if (userData.referrer) {
                     await updateReferralQualified(userData.telegramId, userData.referrer);
                 }
@@ -2400,7 +2448,6 @@
         // ============================================================
         async function updateReferralQualified(userId, referrerId) {
             try {
-                // جلب بيانات المُحيل
                 const referrerRef = db.collection('users').doc(referrerId);
                 const referrerDoc = await referrerRef.get();
                 if (!referrerDoc.exists) return;
@@ -2408,13 +2455,10 @@
                 const referrerData = referrerDoc.data();
                 const referrals = referrerData.referrals || [];
 
-                // البحث عن المدعو في قائمة المُحيل
                 const referralIndex = referrals.findIndex(r => r.telegramId === userId);
                 if (referralIndex === -1) return;
 
-                // إذا كان المدعو موجوداً ولكن ليس مؤهلاً بعد
                 if (referrals[referralIndex].qualified !== true) {
-                    // تحديث حالة المدعو إلى مؤهل
                     referrals[referralIndex].qualified = true;
                     await referrerRef.update({ referrals: referrals });
                     console.log(`✅ تم تحديث المدعو ${userId} إلى مؤهل للمُحيل ${referrerId}`);
@@ -3202,7 +3246,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع الإحالات المؤهلة');
+        console.log('🚀 Crynova - النسخة النهائية مع بطاقة إحصائيات خضراء موحدة');
     </script>
 </body>
 </html>
