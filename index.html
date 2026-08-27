@@ -1593,6 +1593,44 @@
         #page-deposit .input-group .text-muted i {
             font-size: 11px;
         }
+
+        /* ====== تبويبات الملف الشخصي ====== */
+        .profile-tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+        .profile-tab-btn i {
+            font-size: 16px;
+        }
+        .profile-tab-btn:hover {
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
+        .profile-tab-btn.active {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+        .profile-tab-panel {
+            display: none;
+            animation: fadeSlideIn 0.3s ease;
+        }
+        .profile-tab-panel.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -1972,7 +2010,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: PROFILE ========== -->
+        <!-- ========== PAGE: PROFILE (مع التبويبات) ========== -->
         <div class="page" id="page-profile">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-user text-accent"></i> الحساب
@@ -1980,6 +2018,8 @@
                     <i class="fas fa-arrow-right"></i> رجوع
                 </button>
             </h2>
+
+            <!-- البطاقة الشخصية (ثابتة في كل التبويبات) -->
             <div class="card text-center" style="padding:24px;">
                 <div style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:white;margin:0 auto 12px;box-shadow:var(--shadow-glow);" id="profileAvatar">
                     ?
@@ -1988,24 +2028,62 @@
                 <div style="color:var(--text-secondary);font-size:14px;" id="profileTelegram">@username</div>
                 <div style="margin-top:8px;"><span class="status status-info">المستوى <span id="profileLevel">1</span></span></div>
             </div>
-            <div class="card">
-                <div class="list-item">
-                    <span class="left"><i class="fas fa-calendar" style="color:var(--text-muted);width:20px;"></i> تاريخ التسجيل</span>
-                    <span id="profileJoinDate" style="font-weight:600;">--</span>
-                </div>
+
+            <!-- أزرار التبويبات -->
+            <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:8px;">
+                <button class="profile-tab-btn active" data-tab="profile" onclick="switchProfileTab('profile')">
+                    <i class="fas fa-user"></i> الملف
+                </button>
+                <button class="profile-tab-btn" data-tab="verification" onclick="switchProfileTab('verification')">
+                    <i class="fas fa-shield-alt"></i> التوثيق
+                </button>
+                <button class="profile-tab-btn" data-tab="subscription" onclick="switchProfileTab('subscription')">
+                    <i class="fas fa-crown"></i> الاشتراك
+                </button>
             </div>
-            <div class="card">
-                <div class="list-item clickable" onclick="toggleLanguage()" style="padding-top:14px;">
-                    <span class="left"><i class="fas fa-globe" style="color:var(--text-muted);width:20px;"></i> اللغة</span>
-                    <span style="font-weight:600;">العربية <i class="fas fa-chevron-left" style="font-size:12px;color:var(--text-muted);"></i></span>
+
+            <!-- محتوى التبويبات -->
+            <div id="profileTabContent">
+                <!-- تبويب الملف (الإعدادات) -->
+                <div class="profile-tab-panel active" id="panel-profile">
+                    <div class="card">
+                        <div class="list-item">
+                            <span class="left"><i class="fas fa-calendar" style="color:var(--text-muted);width:20px;"></i> تاريخ التسجيل</span>
+                            <span id="profileJoinDate" style="font-weight:600;">--</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="list-item clickable" onclick="toggleLanguage()" style="padding-top:14px;">
+                            <span class="left"><i class="fas fa-globe" style="color:var(--text-muted);width:20px;"></i> اللغة</span>
+                            <span style="font-weight:600;">العربية <i class="fas fa-chevron-left" style="font-size:12px;color:var(--text-muted);"></i></span>
+                        </div>
+                        <div class="list-item" style="border-bottom:none;padding-bottom:0;">
+                            <span class="left"><i class="fas fa-moon" style="color:var(--text-muted);width:20px;"></i> الوضع المظلم</span>
+                            <label style="position:relative;display:inline-block;width:48px;height:26px;">
+                                <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()" style="opacity:0;width:0;height:0;">
+                                <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:26px;transition:0.3s;"></span>
+                                <span style="position:absolute;content:'';height:18px;width:18px;left:4px;bottom:4px;background:white;border-radius:50%;transition:0.3s;box-shadow:var(--shadow-sm);" id="darkModeSlider"></span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
-                <div class="list-item" style="border-bottom:none;padding-bottom:0;">
-                    <span class="left"><i class="fas fa-moon" style="color:var(--text-muted);width:20px;"></i> الوضع المظلم</span>
-                    <label style="position:relative;display:inline-block;width:48px;height:26px;">
-                        <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()" style="opacity:0;width:0;height:0;">
-                        <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:26px;transition:0.3s;"></span>
-                        <span style="position:absolute;content:'';height:18px;width:18px;left:4px;bottom:4px;background:white;border-radius:50%;transition:0.3s;box-shadow:var(--shadow-sm);" id="darkModeSlider"></span>
-                    </label>
+
+                <!-- تبويب التوثيق (فارغ) -->
+                <div class="profile-tab-panel" id="panel-verification">
+                    <div class="card text-center" style="padding:40px 20px;">
+                        <i class="fas fa-shield-alt" style="font-size:48px;color:var(--text-muted);margin-bottom:12px;"></i>
+                        <h3 style="font-weight:700;margin-bottom:8px;">قريباً</h3>
+                        <p style="color:var(--text-secondary);font-size:14px;">سيتم إتاحة خاصية التوثيق قريباً</p>
+                    </div>
+                </div>
+
+                <!-- تبويب الاشتراك (فارغ) -->
+                <div class="profile-tab-panel" id="panel-subscription">
+                    <div class="card text-center" style="padding:40px 20px;">
+                        <i class="fas fa-crown" style="font-size:48px;color:var(--text-muted);margin-bottom:12px;"></i>
+                        <h3 style="font-weight:700;margin-bottom:8px;">قريباً</h3>
+                        <p style="color:var(--text-secondary);font-size:14px;">خطط الاشتراك المميز قادمة قريباً</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3431,7 +3509,28 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // 23. INIT
+        // 23. PROFILE TABS SWITCH
+        // ============================================================
+        function switchProfileTab(tabId) {
+            // إخفاء كل اللوحات
+            document.querySelectorAll('.profile-tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            // إظهار اللوحة المطلوبة
+            const targetPanel = document.getElementById('panel-' + tabId);
+            if (targetPanel) targetPanel.classList.add('active');
+
+            // تحديث حالة الأزرار
+            document.querySelectorAll('.profile-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.tab === tabId) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // ============================================================
+        // 24. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -3445,7 +3544,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع التحقق من Baridi ID');
+        console.log('🚀 Crynova - النسخة النهائية مع تبويبات الحساب');
     </script>
 </body>
 </html>
