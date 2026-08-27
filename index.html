@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet" />
 
     <style>
         /* ============================================================
@@ -84,7 +84,7 @@
         }
 
         body {
-            font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
@@ -590,7 +590,7 @@
             text-align: center;
         }
 
-        /* BOTTOM NAVIGATION - 6 items - حجم أكبر */
+        /* BOTTOM NAVIGATION - 6 items */
         .bottom-nav {
             position: fixed;
             bottom: 16px;
@@ -658,7 +658,6 @@
             line-height: 1.2;
         }
 
-        /* تحسين للشاشات الصغيرة جداً */
         @media (max-width: 420px) {
             .bottom-nav {
                 bottom: 12px;
@@ -891,8 +890,262 @@
             border-radius: 10px;
         }
 
+        /* ====== باقات الاشتراك (Pricing Widget) ====== */
+        .pricing-widget {
+            max-width: 650px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            font-family: 'Tajawal', 'Cairo', sans-serif;
+        }
+
+        .pricing-widget .pc-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border);
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+        .pricing-widget .pc-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.07);
+        }
+
+        .pricing-widget .pc-stripe {
+            height: 6px;
+            width: 100%;
+        }
+
+        .pricing-widget .pc-body {
+            padding: 1.2rem 1.5rem 1.5rem 1.5rem;
+        }
+
+        .pricing-widget .pc-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .pricing-widget .pc-name-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .pricing-widget .pc-name-badge i {
+            font-size: 1.4rem;
+        }
+        .pricing-widget .pc-name-badge h3 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
+        }
+        .pricing-widget .pc-price {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+        .pricing-widget .pc-price small {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .pricing-widget .pc-sticker {
+            background: #fbbf24;
+            color: #1a1a2e;
+            font-size: 0.55rem;
+            font-weight: 800;
+            padding: 0.15rem 0.7rem;
+            border-radius: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            box-shadow: 0 2px 6px rgba(251, 191, 36, 0.3);
+        }
+        .pricing-widget .pc-sticker-pro {
+            background: #f43f5e;
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(244, 63, 94, 0.3);
+        }
+
+        .pricing-widget .pc-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.4rem 0.8rem;
+            background: var(--bg-input);
+            padding: 0.7rem 0.9rem;
+            border-radius: 14px;
+            margin: 0.6rem 0 1rem 0;
+        }
+        .pricing-widget .pc-features span {
+            font-size: 0.78rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .pricing-widget .pc-features span i {
+            font-size: 0.7rem;
+            width: 1.1rem;
+            color: #3b82f6;
+        }
+        .pricing-widget .pc-features .fa-check-circle {
+            color: #22c55e;
+        }
+        .pricing-widget .pc-features .fa-star {
+            color: #fbbf24;
+        }
+        .pricing-widget .pc-features .fa-bolt {
+            color: #f43f5e;
+        }
+        .pricing-widget .pc-features .fa-gem {
+            color: #a855f7;
+        }
+        .pricing-widget .pc-features .fa-infinity {
+            color: #f43f5e;
+        }
+
+        .pricing-widget .pc-btn {
+            width: 100%;
+            padding: 0.6rem 0;
+            border: none;
+            border-radius: 60px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .pricing-widget .pc-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+        .pricing-widget .pc-btn:active {
+            transform: scale(0.96);
+        }
+        .pricing-widget .pc-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ===== ألوان الباقات ===== */
+        .pc-starter .pc-stripe {
+            background: #22c55e;
+        }
+        .pc-starter .pc-name-badge i {
+            color: #22c55e;
+        }
+        .pc-starter .pc-name-badge h3 {
+            color: #15803d;
+        }
+        .pc-starter .pc-btn {
+            background: #22c55e;
+        }
+        .pc-starter .pc-btn:hover:not(:disabled) {
+            background: #16a34a;
+        }
+
+        .pc-basic .pc-stripe {
+            background: #3b82f6;
+        }
+        .pc-basic .pc-name-badge i {
+            color: #3b82f6;
+        }
+        .pc-basic .pc-name-badge h3 {
+            color: #2563eb;
+        }
+        .pc-basic .pc-btn {
+            background: #3b82f6;
+        }
+        .pc-basic .pc-btn:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        .pc-advanced .pc-stripe {
+            background: #a855f7;
+        }
+        .pc-advanced .pc-name-badge i {
+            color: #a855f7;
+        }
+        .pc-advanced .pc-name-badge h3 {
+            color: #7e22ce;
+        }
+        .pc-advanced .pc-btn {
+            background: #a855f7;
+        }
+        .pc-advanced .pc-btn:hover:not(:disabled) {
+            background: #8b34e6;
+        }
+
+        .pc-premium .pc-stripe {
+            background: #f59e0b;
+        }
+        .pc-premium .pc-name-badge i {
+            color: #f59e0b;
+        }
+        .pc-premium .pc-name-badge h3 {
+            color: #b45309;
+        }
+        .pc-premium .pc-btn {
+            background: #f59e0b;
+        }
+        .pc-premium .pc-btn:hover:not(:disabled) {
+            background: #d97706;
+        }
+
+        .pc-pro .pc-stripe {
+            background: #f43f5e;
+        }
+        .pc-pro .pc-name-badge i {
+            color: #f43f5e;
+        }
+        .pc-pro .pc-name-badge h3 {
+            color: #be123c;
+        }
+        .pc-pro .pc-btn {
+            background: #f43f5e;
+        }
+        .pc-pro .pc-btn:hover:not(:disabled) {
+            background: #e11d48;
+        }
+
+        @media (max-width: 480px) {
+            .pricing-widget .pc-body {
+                padding: 1rem;
+            }
+            .pricing-widget .pc-price {
+                font-size: 1.5rem;
+            }
+            .pricing-widget .pc-features {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.2rem 0.6rem;
+            }
+            .pricing-widget .pc-features span {
+                font-size: 0.7rem;
+            }
+            .pricing-widget .pc-name-badge h3 {
+                font-size: 1rem;
+            }
+            .pricing-widget .pc-btn {
+                font-size: 0.8rem;
+            }
+        }
+
         /* ============================================================
-           INVESTMENT MODAL (النافذة المنبثقة المتطورة) - إصدار أصغر
+           INVESTMENT MODAL
            ============================================================ */
         .modal-overlay {
             position: fixed;
@@ -1326,7 +1579,6 @@
             font-weight: 600;
         }
 
-        /* زر الرجوع المخصص */
         .back-btn {
             display: inline-flex;
             align-items: center;
@@ -1346,7 +1598,7 @@
             background: var(--accent-glow);
         }
 
-        /* ====== أقسام الإيداع ====== */
+        /* ====== أقسام الإيداع والسحب ====== */
         .deposit-step {
             display: none;
             animation: fadeSlideIn 0.3s ease;
@@ -1376,9 +1628,6 @@
             word-break: break-all;
         }
 
-        /* ============================================================
-           تصغير حجم واجهة السحب
-           ============================================================ */
         #page-withdraw .card {
             padding: 14px 16px;
             margin-bottom: 12px;
@@ -1438,7 +1687,6 @@
         #page-withdraw .withdraw-summary .value {
             font-size: 18px;
         }
-        /* تقليل حجم البطاقة التي تعرض الرصيد القابل للسحب */
         #page-withdraw .card[style*="border:2px solid var(--warning)"] {
             padding: 12px 16px;
         }
@@ -1451,7 +1699,6 @@
         #page-withdraw .card[style*="border:2px solid var(--warning)"] .amount {
             font-size: 16px;
         }
-        /* تصغير حجم الأيقونات في المدخلات */
         #page-withdraw .input-icon i {
             font-size: 14px;
             right: 12px;
@@ -1459,7 +1706,6 @@
         #page-withdraw .input-icon input {
             padding-right: 36px;
         }
-        /* تصغير حجم قائمة طلبات السحب */
         #page-withdraw .list-item {
             padding: 10px 0;
         }
@@ -1474,7 +1720,6 @@
             height: 32px;
             font-size: 14px;
         }
-        /* تصغير حجم الرسوم والمبلغ الإجمالي */
         #page-withdraw .fee-row {
             padding: 6px 0;
             font-size: 13px;
@@ -1486,7 +1731,6 @@
         #page-withdraw .total-row .amount {
             font-size: 20px;
         }
-        /* تصغير حجم عنوان الصفحة */
         #page-withdraw h2 {
             font-size: 20px;
             margin-bottom: 12px;
@@ -1494,14 +1738,10 @@
         #page-withdraw h2 i {
             font-size: 18px;
         }
-        /* تعديل الهامش السفلي للصفحة */
         #page-withdraw .page-content {
             padding-bottom: 8px;
         }
 
-        /* ============================================================
-           تصغير حجم واجهة الإيداع (جديد)
-           ============================================================ */
         #page-deposit .card {
             padding: 14px 16px;
             margin-bottom: 12px;
@@ -1579,14 +1819,12 @@
         #page-deposit .flex-between .amount {
             font-size: 16px;
         }
-        /* تصغير حجم البطاقة الرئيسية */
         #page-deposit #depositMainCard .input-group:last-of-type {
             margin-bottom: 6px;
         }
         #page-deposit #depositMainCard .btn {
             margin-top: 4px;
         }
-        /* تصغير حجم النص المساعد */
         #page-deposit .input-group .text-muted {
             font-size: 11px;
         }
@@ -1701,7 +1939,6 @@
                 </div>
             </div>
 
-            <!-- إحصائيات الاستثمار -->
             <div class="card gold-gradient">
                 <div class="flex-between">
                     <div>
@@ -1828,7 +2065,6 @@
                 </button>
             </h2>
 
-            <!-- شريط الإحصائيات الجديد -->
             <div class="stats-bar">
                 <div class="stat-item">
                     <span class="stat-label"><i class="fas fa-users"></i> الإحالات</span>
@@ -1859,7 +2095,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: DEPOSIT (مصغرة) ========== -->
+        <!-- ========== PAGE: DEPOSIT ========== -->
         <div class="page" id="page-deposit">
             <h2 style="font-size:20px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-down text-success" style="font-size:18px;"></i> الإيداع
@@ -1868,7 +2104,6 @@
                 </button>
             </h2>
 
-            <!-- البطاقة الرئيسية للإيداع (مصغرة) -->
             <div class="card" id="depositMainCard" style="padding:14px 16px;">
                 <div class="input-group" id="depositEccpGroup" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;">رقم حساب Baridi Mob <span class="required">*</span></label>
@@ -1891,7 +2126,6 @@
                     <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">الحد الأدنى للإيداع: 2000 DZD</div>
                 </div>
 
-                <!-- حقل رقم عملية التحويل -->
                 <div class="input-group" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;">رقم عملية التحويل <span class="required">*</span></label>
                     <div class="input-icon">
@@ -1908,7 +2142,6 @@
                 </button>
             </div>
 
-            <!-- قائمة طلبات الإيداع (مصغرة) -->
             <div class="card" style="padding:14px 16px;">
                 <div class="card-title" style="font-size:15px;margin-bottom:10px;"><i class="fas fa-clock-rotate-left"></i> طلبات الإيداع</div>
                 <div id="depositRequests">
@@ -1917,7 +2150,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: WITHDRAW (مصغر) ========== -->
+        <!-- ========== PAGE: WITHDRAW ========== -->
         <div class="page" id="page-withdraw">
             <h2 style="font-size:20px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-up text-danger" style="font-size:18px;"></i> السحب
@@ -1925,7 +2158,6 @@
                     <i class="fas fa-arrow-right"></i> رجوع
                 </button>
             </h2>
-            <!-- بطاقة الرصيد القابل للسحب (مصغرة) -->
             <div class="card" style="border:2px solid var(--warning);padding:12px 16px;">
                 <div class="flex-between">
                     <div>
@@ -1940,7 +2172,6 @@
                 <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">رسوم السحب: 10% من المبلغ</div>
             </div>
 
-            <!-- بطاقة السحب (مصغرة) -->
             <div class="card" style="padding:14px 16px;">
                 <div class="input-group" id="withdrawBaridiGroup" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;">معرف Baridi Mob الخاص بك <span class="required">*</span></label>
@@ -1973,7 +2204,6 @@
                 </button>
             </div>
 
-            <!-- قائمة طلبات السحب (مصغرة) -->
             <div class="card" style="padding:14px 16px;">
                 <div class="card-title" style="font-size:15px;margin-bottom:10px;"><i class="fas fa-clock-rotate-left"></i> طلبات السحب</div>
                 <div id="withdrawRequests">
@@ -2019,7 +2249,7 @@
                 </button>
             </h2>
 
-            <!-- البطاقة الشخصية (ثابتة في كل التبويبات) -->
+            <!-- البطاقة الشخصية -->
             <div class="card text-center" style="padding:24px;">
                 <div style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:white;margin:0 auto 12px;box-shadow:var(--shadow-glow);" id="profileAvatar">
                     ?
@@ -2044,7 +2274,7 @@
 
             <!-- محتوى التبويبات -->
             <div id="profileTabContent">
-                <!-- تبويب الملف (الإعدادات) -->
+                <!-- تبويب الملف -->
                 <div class="profile-tab-panel active" id="panel-profile">
                     <div class="card">
                         <div class="list-item">
@@ -2068,7 +2298,7 @@
                     </div>
                 </div>
 
-                <!-- تبويب التوثيق (فارغ) -->
+                <!-- تبويب التوثيق -->
                 <div class="profile-tab-panel" id="panel-verification">
                     <div class="card text-center" style="padding:40px 20px;">
                         <i class="fas fa-shield-alt" style="font-size:48px;color:var(--text-muted);margin-bottom:12px;"></i>
@@ -2077,12 +2307,132 @@
                     </div>
                 </div>
 
-                <!-- تبويب الاشتراك (فارغ) -->
+                <!-- ===== تبويب الاشتراك (باقات جديدة) ===== -->
                 <div class="profile-tab-panel" id="panel-subscription">
-                    <div class="card text-center" style="padding:40px 20px;">
-                        <i class="fas fa-crown" style="font-size:48px;color:var(--text-muted);margin-bottom:12px;"></i>
-                        <h3 style="font-weight:700;margin-bottom:8px;">قريباً</h3>
-                        <p style="color:var(--text-secondary);font-size:14px;">خطط الاشتراك المميز قادمة قريباً</p>
+                    <div class="pricing-widget">
+                        <!-- Starter -->
+                        <div class="pc-card pc-starter">
+                            <div class="pc-stripe"></div>
+                            <div class="pc-body">
+                                <div class="pc-top">
+                                    <div class="pc-name-badge">
+                                        <i class="fas fa-seedling"></i>
+                                        <h3>Starter</h3>
+                                    </div>
+                                    <span class="pc-price">300 <small>دج</small></span>
+                                </div>
+                                <div class="pc-features">
+                                    <span><i class="fas fa-arrow-up"></i> حد 1,000 دج</span>
+                                    <span><i class="fas fa-percent"></i> عمولة 2%</span>
+                                    <span><i class="fas fa-headset"></i> دعم عادي</span>
+                                    <span><i class="fas fa-check-circle"></i> أساسيات</span>
+                                </div>
+                                <button class="pc-btn" data-plan="starter" onclick="subscribeToPlan('starter')">
+                                    <i class="fas fa-shopping-cart"></i> اشتراك
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Basic -->
+                        <div class="pc-card pc-basic">
+                            <div class="pc-stripe"></div>
+                            <div class="pc-body">
+                                <div class="pc-top">
+                                    <div class="pc-name-badge">
+                                        <i class="fas fa-layer-group"></i>
+                                        <h3>Basic</h3>
+                                    </div>
+                                    <span class="pc-price">500 <small>دج</small></span>
+                                </div>
+                                <div class="pc-features">
+                                    <span><i class="fas fa-arrow-up"></i> حد 2,000 دج</span>
+                                    <span><i class="fas fa-percent"></i> عمولة 1.5%</span>
+                                    <span><i class="fas fa-headset"></i> دعم عادي</span>
+                                    <span><i class="fas fa-clock"></i> أولوية بسيطة</span>
+                                    <span><i class="fas fa-check-circle"></i> كل Starter</span>
+                                </div>
+                                <button class="pc-btn" data-plan="basic" onclick="subscribeToPlan('basic')">
+                                    <i class="fas fa-shopping-cart"></i> اشتراك
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Advanced -->
+                        <div class="pc-card pc-advanced">
+                            <div class="pc-stripe"></div>
+                            <div class="pc-body">
+                                <div class="pc-top">
+                                    <div class="pc-name-badge">
+                                        <i class="fas fa-rocket"></i>
+                                        <h3>Advanced</h3>
+                                    </div>
+                                    <span class="pc-price">750 <small>دج</small></span>
+                                </div>
+                                <div class="pc-features">
+                                    <span><i class="fas fa-arrow-up"></i> حد 3,500 دج</span>
+                                    <span><i class="fas fa-percent"></i> عمولة 1%</span>
+                                    <span><i class="fas fa-headset"></i> دعم أولوية</span>
+                                    <span><i class="fas fa-bolt"></i> معالجة أسرع</span>
+                                    <span><i class="fas fa-check-circle"></i> كل Basic</span>
+                                </div>
+                                <button class="pc-btn" data-plan="advanced" onclick="subscribeToPlan('advanced')">
+                                    <i class="fas fa-shopping-cart"></i> اشتراك
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Premium -->
+                        <div class="pc-card pc-premium">
+                            <div class="pc-stripe"></div>
+                            <div class="pc-body">
+                                <div class="pc-top">
+                                    <div class="pc-name-badge">
+                                        <i class="fas fa-crown"></i>
+                                        <h3>Premium</h3>
+                                        <span class="pc-sticker"><i class="fas fa-star"></i> الأفضل</span>
+                                    </div>
+                                    <span class="pc-price">1,500 <small>دج</small></span>
+                                </div>
+                                <div class="pc-features">
+                                    <span><i class="fas fa-arrow-up"></i> حد 5,000 دج</span>
+                                    <span><i class="fas fa-percent"></i> عمولة 0%</span>
+                                    <span><i class="fas fa-headset"></i> دعم VIP</span>
+                                    <span><i class="fas fa-check-circle"></i> شارة موثّقة</span>
+                                    <span><i class="fas fa-clock"></i> أولوية معالجة</span>
+                                    <span><i class="fas fa-check-circle"></i> كل Advanced</span>
+                                </div>
+                                <button class="pc-btn" data-plan="premium" onclick="subscribeToPlan('premium')">
+                                    <i class="fas fa-shopping-cart"></i> اشتراك
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Pro -->
+                        <div class="pc-card pc-pro">
+                            <div class="pc-stripe"></div>
+                            <div class="pc-body">
+                                <div class="pc-top">
+                                    <div class="pc-name-badge">
+                                        <i class="fas fa-infinity"></i>
+                                        <h3>Pro</h3>
+                                        <span class="pc-sticker pc-sticker-pro"><i class="fas fa-bolt"></i> الأعلى</span>
+                                    </div>
+                                    <span class="pc-price">3,500 <small>دج</small></span>
+                                </div>
+                                <div class="pc-features">
+                                    <span><i class="fas fa-infinity"></i> حد غير محدود</span>
+                                    <span><i class="fas fa-percent"></i> عمولة 0%</span>
+                                    <span><i class="fas fa-headset"></i> دعم خاص</span>
+                                    <span><i class="fas fa-check-circle"></i> شارة موثّقة</span>
+                                    <span><i class="fas fa-bolt"></i> أولوية قصوى</span>
+                                    <span><i class="fas fa-gem"></i> مزايا مستقبلية</span>
+                                    <span><i class="fas fa-check-circle"></i> كل Premium</span>
+                                </div>
+                                <button class="pc-btn" data-plan="pro" onclick="subscribeToPlan('pro')">
+                                    <i class="fas fa-shopping-cart"></i> اشتراك
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2091,7 +2441,7 @@
     </div>
 
     <!-- ================================================================
-         INVESTMENT MODAL (النافذة المنبثقة المتطورة) - إصدار أصغر
+         INVESTMENT MODAL
          ================================================================ -->
     <div class="modal-overlay" id="investmentModal">
         <div class="modal-card">
@@ -2148,7 +2498,7 @@
         </div>
     </div>
 
-    <!-- ===== BOTTOM NAVIGATION (6 أزرار - حجم أكبر) ===== -->
+    <!-- ===== BOTTOM NAVIGATION ===== -->
     <nav class="bottom-nav" id="bottomNav">
         <button class="nav-item active" data-page="home" onclick="navigateTo('home')">
             <i class="fas fa-house"></i>
@@ -2193,7 +2543,7 @@
         const db = firebase.firestore();
 
         // ============================================================
-        // 2. STATE - DZD ONLY
+        // 2. STATE
         // ============================================================
         let userData = null;
         let allInvestPlans = [];
@@ -2364,7 +2714,14 @@
                             totalReferrals: 0,
                             totalReferralsLevel2: 0
                         },
-                        lastDailyDistribution: null
+                        lastDailyDistribution: null,
+                        // حقل الاشتراك
+                        subscription: {
+                            plan: null, // 'starter', 'basic', 'advanced', 'premium', 'pro'
+                            startDate: null,
+                            endDate: null,
+                            status: 'inactive' // 'inactive', 'active', 'expired'
+                        }
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -2382,6 +2739,7 @@
                         renderDeposits(userData.deposits || []);
                         renderWithdrawals(userData.withdrawals || []);
                         renderInvestments();
+                        updateSubscriptionUI();
                         console.log('✅ تحديث لحظي للبيانات');
                     }
                 });
@@ -2396,6 +2754,7 @@
                 renderDeposits(userData.deposits || []);
                 renderWithdrawals(userData.withdrawals || []);
                 renderInvestments();
+                updateSubscriptionUI();
 
                 return true;
 
@@ -2512,7 +2871,7 @@
                 position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
                 background: var(--accent); color: #fff; padding: 12px 24px;
                 border-radius: 30px; font-weight: 700; z-index: 9999;
-                box-shadow: var(--shadow-lg); font-family: 'Cairo', sans-serif;
+                box-shadow: var(--shadow-lg); font-family: 'Cairo', 'Tajawal', sans-serif;
                 max-width: 90%; text-align: center;
             `;
             t.textContent = msg;
@@ -2651,7 +3010,7 @@
         }
 
         // ============================================================
-        // 11. DEPOSIT - مع منع التكرار
+        // 11. DEPOSIT
         // ============================================================
         async function submitDeposit() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -2665,7 +3024,6 @@
             const txId = document.getElementById('depositTransactionId').value.trim();
             if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
 
-            // منع الإيداعات المكررة
             const existingDeposits = userData.deposits || [];
             const duplicate = existingDeposits.find(d =>
                 d.transactionId === txId &&
@@ -2763,14 +3121,13 @@
         }
 
         // ============================================================
-        // 13. WITHDRAW - مع التحقق من صحة معرف Baridi Mob
+        // 13. WITHDRAW
         // ============================================================
         function isValidBaridiId(id) {
-            // يجب أن يكون النص مكوناً من أرقام فقط، طوله 20، ويبدأ بـ '00799999'
             if (!id || typeof id !== 'string') return false;
-            const cleaned = id.replace(/\s/g, ''); // إزالة المسافات
-            if (!/^\d{20}$/.test(cleaned)) return false; // 20 رقم فقط
-            if (!cleaned.startsWith('00799999')) return false; // يبدأ بـ 00799999
+            const cleaned = id.replace(/\s/g, '');
+            if (!/^\d{20}$/.test(cleaned)) return false;
+            if (!cleaned.startsWith('00799999')) return false;
             return true;
         }
 
@@ -2789,7 +3146,6 @@
             const recipient = document.getElementById('withdrawBaridiId').value.trim();
             if (!recipient) { showToast('أدخل معرف Baridi Mob الخاص بك'); return; }
 
-            // --- التحقق من صحة معرف Baridi ---
             if (!isValidBaridiId(recipient)) {
                 showToast('⚠️ معرف Baridi Mob غير صحيح! يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999');
                 return;
@@ -3512,15 +3868,12 @@
         // 23. PROFILE TABS SWITCH
         // ============================================================
         function switchProfileTab(tabId) {
-            // إخفاء كل اللوحات
             document.querySelectorAll('.profile-tab-panel').forEach(panel => {
                 panel.classList.remove('active');
             });
-            // إظهار اللوحة المطلوبة
             const targetPanel = document.getElementById('panel-' + tabId);
             if (targetPanel) targetPanel.classList.add('active');
 
-            // تحديث حالة الأزرار
             document.querySelectorAll('.profile-tab-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.dataset.tab === tabId) {
@@ -3530,7 +3883,141 @@
         }
 
         // ============================================================
-        // 24. INIT
+        // 24. SUBSCRIPTION LOGIC (NEW)
+        // ============================================================
+        function updateSubscriptionUI() {
+            if (!userData) return;
+            const sub = userData.subscription || { plan: null, status: 'inactive' };
+            const plan = sub.plan;
+            const status = sub.status;
+
+            // تعطيل جميع الأزرار أولاً ثم تفعيل المناسب
+            document.querySelectorAll('.pc-btn').forEach(btn => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك';
+            });
+
+            if (status === 'active' && plan) {
+                // تفعيل زر الخطة الحالية مع إظهار "مفعل"
+                const activeBtn = document.querySelector(`.pc-btn[data-plan="${plan}"]`);
+                if (activeBtn) {
+                    activeBtn.disabled = true;
+                    activeBtn.innerHTML = '<i class="fas fa-check-circle"></i> مفعّل';
+                }
+                // تعطيل باقي الأزرار (لا يمكن الاشتراك في أكثر من خطة)
+                document.querySelectorAll('.pc-btn').forEach(btn => {
+                    if (btn.dataset.plan !== plan) {
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fas fa-lock"></i> غير متاح';
+                    }
+                });
+            } else if (status === 'expired') {
+                // يمكن الاشتراك مرة أخرى، نترك كل الأزرار مفعلة
+                // لكن نضيف رسالة انتهاء الصلاحية على الخطة السابقة
+                if (plan) {
+                    const expiredBtn = document.querySelector(`.pc-btn[data-plan="${plan}"]`);
+                    if (expiredBtn) {
+                        expiredBtn.innerHTML = '<i class="fas fa-clock"></i> انتهى';
+                        expiredBtn.disabled = false; // يمكن الاشتراك مجدداً
+                    }
+                }
+            }
+        }
+
+        async function subscribeToPlan(planId) {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
+            // التحقق من وجود اشتراك نشط مسبقاً
+            const sub = userData.subscription || {};
+            if (sub.status === 'active') {
+                showToast(`⚠️ لديك اشتراك نشط في خطة ${sub.plan}. انتظر انتهاءه أو قم بتجديده.`);
+                return;
+            }
+
+            // أسعار الخطط (بالدج)
+            const prices = {
+                starter: 300,
+                basic: 500,
+                advanced: 750,
+                premium: 1500,
+                pro: 3500
+            };
+
+            const price = prices[planId];
+            if (!price) { showToast('خطة غير معروفة'); return; }
+
+            // التحقق من الرصيد الكافي
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                ?.dzdReferral || 0);
+            if (balance < price) {
+                showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
+                return;
+            }
+
+            if (!confirm(`تأكيد الاشتراك في خطة ${planId} بمبلغ ${price} DZD؟`)) return;
+
+            try {
+                const now = new Date();
+                const endDate = new Date(now);
+                endDate.setMonth(endDate.getMonth() + 1); // صلاحية شهر واحد
+
+                // خصم المبلغ من المحفظة
+                await db.runTransaction(async (t) => {
+                    const ref = db.collection('users').doc(userData.telegramId);
+                    const doc = await t.get(ref);
+                    if (!doc.exists) throw new Error('غير موجود');
+
+                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                        .wallets?.dzdReferral || 0);
+                    if (bal < price) throw new Error('رصيد غير كاف');
+
+                    // خصم من المحافظ بالترتيب
+                    let rem = price;
+                    const m = doc.data().wallets?.dzd || 0,
+                        r = doc.data().wallets?.dzdReward || 0,
+                        refr = doc.data().wallets?.dzdReferral || 0;
+                    const fm = Math.min(rem, m);
+                    rem -= fm;
+                    const fr = Math.min(rem, r);
+                    rem -= fr;
+                    const fref = Math.min(rem, refr);
+                    rem -= fref;
+
+                    const updates = {
+                        'wallets.dzd': m - fm,
+                        'wallets.dzdReward': r - fr,
+                        'wallets.dzdReferral': refr - fref,
+                        'subscription': {
+                            plan: planId,
+                            startDate: now,
+                            endDate: endDate,
+                            status: 'active'
+                        },
+                        'transactions': firebase.firestore.FieldValue.arrayUnion({
+                            type: 'subscription',
+                            amount: price,
+                            currency: 'DZD',
+                            description: `اشتراك خطة ${planId} (${price} DZD)`,
+                            timestamp: now,
+                            plan: planId,
+                            status: 'completed'
+                        })
+                    };
+                    t.update(ref, updates);
+                });
+
+                showToast(`✅ تم تفعيل اشتراك ${planId} بنجاح!`);
+                // تحديث الواجهة
+                await updateUI();
+                updateSubscriptionUI();
+            } catch (e) {
+                showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e);
+            }
+        }
+
+        // ============================================================
+        // 25. INIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             authUser();
@@ -3544,7 +4031,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع تبويبات الحساب');
+        console.log('🚀 Crynova - النسخة النهائية مع باقات الاشتراك');
     </script>
 </body>
 </html>
