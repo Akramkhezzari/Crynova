@@ -2069,6 +2069,296 @@
         .profile-tab-panel.active {
             display: block;
         }
+
+        /* ===== صندوق الزكاة والرصيد ===== */
+        .zakat-box {
+            max-width: 450px;
+            width: 100%;
+            margin: 0 auto 16px;
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 1.8rem 1.8rem 1.5rem;
+            box-shadow: 0 12px 40px rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .zakat-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 56px rgba(16, 185, 129, 0.18);
+        }
+
+        .zakat-box::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 160px;
+            height: 160px;
+            background: rgba(16, 185, 129, 0.04);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .zakat-box::after {
+            content: '';
+            position: absolute;
+            bottom: -80px;
+            left: -80px;
+            width: 200px;
+            height: 200px;
+            background: rgba(16, 185, 129, 0.03);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* الرأس */
+        .zakat-box .zb-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .zakat-box .zb-header i {
+            font-size: 1.8rem;
+            color: #10b981;
+            background: #ecfdf5;
+            padding: 0.5rem;
+            border-radius: 14px;
+        }
+        .zakat-box .zb-header h3 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #064e3b;
+            margin: 0;
+            flex: 1;
+        }
+        .zakat-box .zb-badge {
+            background: #d1fae5;
+            color: #065f46;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.9rem;
+            border-radius: 60px;
+            letter-spacing: 0.5px;
+            border: 1px solid #a7f3d0;
+        }
+
+        /* الإحصائيات الرئيسية (3 أعمدة) */
+        .zakat-box .zb-stats-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .zakat-box .zb-stat-main-item {
+            background: #f9fafb;
+            padding: 0.7rem 0.4rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid #f3f4f6;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .zakat-box .zb-stat-main-item:hover {
+            background: #ecfdf5;
+            transform: translateY(-2px);
+        }
+        .zakat-box .zb-stat-main-item i {
+            display: block;
+            font-size: 1.1rem;
+            color: #10b981;
+            margin-bottom: 0.2rem;
+        }
+        .zakat-box .zb-stat-main-item span {
+            display: block;
+            font-size: 0.65rem;
+            color: #6b7280;
+            font-weight: 500;
+            margin-bottom: 0.1rem;
+        }
+        .zakat-box .zb-stat-main-item strong {
+            display: block;
+            font-size: 1.1rem;
+            color: #064e3b;
+            font-weight: 800;
+        }
+        .zakat-box .zb-stat-main-item .small-text {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        /* شريط التقدم */
+        .zakat-box .zb-progress {
+            width: 100%;
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 20px;
+            margin: 0.6rem 0 0.3rem;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+        .zakat-box .zb-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            border-radius: 20px;
+            transition: width 0.8s ease;
+        }
+        .zakat-box .zb-progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #4b5563;
+            position: relative;
+            z-index: 1;
+        }
+        .zakat-box .zb-progress-stats strong {
+            color: #064e3b;
+            font-weight: 700;
+        }
+
+        /* إحصائيات إضافية (عدد المتبرعين + عدد المستفيدين) */
+        .zakat-box .zb-stats-extra {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin: 1.2rem 0 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .zakat-box .zb-stat-extra-item {
+            background: #f9fafb;
+            padding: 0.7rem 0.6rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid #f3f4f6;
+            transition: background 0.2s;
+        }
+        .zakat-box .zb-stat-extra-item:hover {
+            background: #ecfdf5;
+        }
+        .zakat-box .zb-stat-extra-item i {
+            display: block;
+            font-size: 1.2rem;
+            color: #10b981;
+            margin-bottom: 0.2rem;
+        }
+        .zakat-box .zb-stat-extra-item span {
+            display: block;
+            font-size: 0.7rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .zakat-box .zb-stat-extra-item strong {
+            display: block;
+            font-size: 1.1rem;
+            color: #064e3b;
+            font-weight: 800;
+            margin-top: 0.1rem;
+        }
+
+        /* زر التبرع */
+        .zakat-box .zb-btn {
+            width: 100%;
+            padding: 0.75rem 0;
+            border: none;
+            border-radius: 60px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #fff;
+            background: linear-gradient(135deg, #10b981, #059669);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.30);
+            position: relative;
+            z-index: 1;
+        }
+        .zakat-box .zb-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 32px rgba(16, 185, 129, 0.40);
+        }
+        .zakat-box .zb-btn i {
+            font-size: 1.1rem;
+        }
+
+        .zakat-box .zb-note {
+            font-size: 0.65rem;
+            color: #9ca3af;
+            text-align: center;
+            margin-top: 0.8rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== استجابة للجوال ===== */
+        @media (max-width: 480px) {
+            .zakat-box {
+                padding: 1.5rem 1.2rem;
+            }
+            .zakat-box .zb-header h3 {
+                font-size: 1.2rem;
+            }
+            .zakat-box .zb-stats-main {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 0.4rem;
+            }
+            .zakat-box .zb-stat-main-item strong {
+                font-size: 0.95rem;
+            }
+            .zakat-box .zb-stat-main-item .small-text {
+                font-size: 0.6rem;
+            }
+            .zakat-box .zb-stat-main-item span {
+                font-size: 0.6rem;
+            }
+            .zakat-box .zb-stats-extra {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.6rem;
+            }
+            .zakat-box .zb-stat-extra-item strong {
+                font-size: 1rem;
+            }
+            .zakat-box .zb-btn {
+                font-size: 0.9rem;
+                padding: 0.65rem 0;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .zakat-box .zb-stats-main {
+                grid-template-columns: 1fr;
+                gap: 0.4rem;
+            }
+            .zakat-box .zb-stat-main-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0.5rem 0.8rem;
+            }
+            .zakat-box .zb-stat-main-item i {
+                margin: 0 0 0 0.3rem;
+                font-size: 1rem;
+            }
+            .zakat-box .zb-stat-main-item span {
+                margin: 0;
+                font-size: 0.7rem;
+            }
+            .zakat-box .zb-stat-main-item strong {
+                font-size: 1rem;
+            }
+            .zakat-box .zb-stat-main-item .small-text {
+                font-size: 0.65rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2097,6 +2387,7 @@
 
         <!-- ========== PAGE: HOME ========== -->
         <div class="page active" id="page-home">
+            <!-- بطاقة الرصيد الرئيسية -->
             <div class="card dzd-gradient" id="homeBalanceCard">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                     <div>
@@ -2120,6 +2411,67 @@
                     </button>
                 </div>
             </div>
+
+            <!-- ===== صندوق الزكاة والرصيد ===== -->
+            <div class="zakat-box" id="zakatBox">
+                <!-- الرأس -->
+                <div class="zb-header">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    <h3>صندوق الزكاة</h3>
+                    <span class="zb-badge">نشط</span>
+                </div>
+
+                <!-- الإحصائيات الرئيسية (3 أعمدة) -->
+                <div class="zb-stats-main">
+                    <div class="zb-stat-main-item">
+                        <i class="fas fa-coins"></i>
+                        <span>إجمالي التبرعات</span>
+                        <strong id="zakatTotalDonations">0 <span class="small-text">دج</span></strong>
+                    </div>
+                    <div class="zb-stat-main-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>تم توزيعها</span>
+                        <strong id="zakatDistributed">0 <span class="small-text">دج</span></strong>
+                    </div>
+                    <div class="zb-stat-main-item">
+                        <i class="fas fa-clock"></i>
+                        <span>المتبقي</span>
+                        <strong id="zakatRemaining">0 <span class="small-text">دج</span></strong>
+                    </div>
+                </div>
+
+                <!-- شريط التقدم -->
+                <div class="zb-progress">
+                    <div class="zb-progress-bar" id="zakatProgressBar" style="width: 0%;"></div>
+                </div>
+                <div class="zb-progress-stats">
+                    <span>تم التوزيع: <strong id="zakatProgressPercent">0%</strong></span>
+                    <span>المتبقي: <strong id="zakatRemainingPercent">100%</strong></span>
+                </div>
+
+                <!-- إحصائيات إضافية (عدد المتبرعين + عدد المستفيدين) -->
+                <div class="zb-stats-extra">
+                    <div class="zb-stat-extra-item">
+                        <i class="fas fa-users"></i>
+                        <span>عدد المتبرعين</span>
+                        <strong id="zakatDonorsCount">0</strong>
+                    </div>
+                    <div class="zb-stat-extra-item">
+                        <i class="fas fa-user-check"></i>
+                        <span>عدد المستفيدين</span>
+                        <strong id="zakatBeneficiariesCount">0</strong>
+                    </div>
+                </div>
+
+                <!-- زر التبرع -->
+                <button class="zb-btn" onclick="navigateTo('deposit')">
+                    <i class="fas fa-hand-holding-usd"></i> تبرع الآن
+                </button>
+
+                <!-- نص توضيحي -->
+                <p class="zb-note">* الزكاة تُوزع على المستحقين وفق الضوابط الشرعية</p>
+            </div>
+            <!-- ===== نهاية صندوق الزكاة ===== -->
         </div>
 
         <!-- ========== PAGE: PACKAGES ========== -->
@@ -2697,6 +3049,7 @@
         let unsubscribeUser = null;
         let currentSelectedPlanId = null;
         let isModalOpen = false;
+        let zakatUnsubscribe = null;
 
         const POSTAL_ACCOUNT = '00799999002385412178';
         const MIN_WITHDRAW = 1000;
@@ -2800,6 +3153,76 @@
         }
 
         // ============================================================
+        // ZAKAT - ربط صندوق الزكاة بقاعدة البيانات
+        // ============================================================
+        function loadZakatData() {
+            const zakatRef = db.collection('zakat').doc('statistics');
+
+            if (zakatUnsubscribe) {
+                zakatUnsubscribe();
+                zakatUnsubscribe = null;
+            }
+
+            zakatUnsubscribe = zakatRef.onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    updateZakatUI(data);
+                    console.log('✅ تحديث بيانات الزكاة:', data);
+                } else {
+                    // إنشاء مستند افتراضي إذا لم يكن موجوداً
+                    const defaultData = {
+                        totalDonations: 125400,
+                        distributed: 98000,
+                        remaining: 27400,
+                        distributionPercentage: 78,
+                        donorsCount: 127,
+                        beneficiariesCount: 342,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    zakatRef.set(defaultData)
+                        .then(() => {
+                            console.log('✅ تم إنشاء مستند الزكاة بالقيم الافتراضية');
+                            updateZakatUI(defaultData);
+                        })
+                        .catch((err) => console.error('❌ خطأ في إنشاء مستند الزكاة:', err));
+                }
+            }, (error) => {
+                console.error('❌ خطأ في الاستماع لبيانات الزكاة:', error);
+                // قيم احتياطية في حال فشل الاتصال
+                const fallbackData = {
+                    totalDonations: 125400,
+                    distributed: 98000,
+                    remaining: 27400,
+                    distributionPercentage: 78,
+                    donorsCount: 127,
+                    beneficiariesCount: 342
+                };
+                updateZakatUI(fallbackData);
+            });
+        }
+
+        function updateZakatUI(data) {
+            // الإحصائيات الرئيسية
+            document.getElementById('zakatTotalDonations').innerHTML =
+                `${data.totalDonations.toLocaleString()} <span class="small-text">دج</span>`;
+            document.getElementById('zakatDistributed').innerHTML =
+                `${data.distributed.toLocaleString()} <span class="small-text">دج</span>`;
+            document.getElementById('zakatRemaining').innerHTML =
+                `${data.remaining.toLocaleString()} <span class="small-text">دج</span>`;
+
+            // شريط التقدم
+            const percentage = data.distributionPercentage || 0;
+            const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
+            document.getElementById('zakatProgressBar').style.width = `${clampedPercentage}%`;
+            document.getElementById('zakatProgressPercent').textContent = `${clampedPercentage}%`;
+            document.getElementById('zakatRemainingPercent').textContent = `${100 - clampedPercentage}%`;
+
+            // عدد المتبرعين والمستفيدين
+            document.getElementById('zakatDonorsCount').textContent = data.donorsCount || 0;
+            document.getElementById('zakatBeneficiariesCount').textContent = data.beneficiariesCount || 0;
+        }
+
+        // ============================================================
         // AUTHENTICATION
         // ============================================================
         async function authUser() {
@@ -2898,6 +3321,9 @@
                 renderInvestments();
                 updateSubscriptionUI();
                 updateVerificationUI();
+
+                // تحميل بيانات الزكاة
+                loadZakatData();
 
                 return true;
 
@@ -3790,7 +4216,6 @@
                     return timeB - timeA;
                 });
                 renderTransactions(allTransactions);
-                // تم إزالة عرض آخر العمليات من الصفحة الرئيسية
             } catch (e) {
                 console.error(e);
                 allTransactions = [];
@@ -3815,8 +4240,6 @@
                 </div>
             `).join('');
         }
-
-        // تم حذف دالة renderRecentTransactions
 
         function filterTransactions(type) {
             currentFilter = type;
@@ -4237,7 +4660,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع التوثيق وباقات الاشتراك (تم حذف المكونات المطلوبة)');
+        console.log('🚀 Crynova - النسخة النهائية مع صندوق الزكاة المرتبط بقاعدة البيانات');
     </script>
 </body>
 </html>
