@@ -229,7 +229,7 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
-        /* شريط الإحصائيات */
+        /* stats-bar retained for other pages */
         .stats-bar {
             display: flex;
             justify-content: space-around;
@@ -2120,64 +2120,13 @@
                     </button>
                 </div>
             </div>
-
-            <div class="grid-3">
-                <div class="stat-box">
-                    <span class="icon">👥</span>
-                    <div class="number" id="homeReferrals">0</div>
-                    <div class="label">الإحالات</div>
-                </div>
-                <div class="stat-box">
-                    <span class="icon">📊</span>
-                    <div class="number" id="homeInvestCount">0</div>
-                    <div class="label">الاستثمارات</div>
-                </div>
-                <div class="stat-box">
-                    <span class="icon">💰</span>
-                    <div class="number" id="homeTotalInvested">0.00</div>
-                    <div class="label">إجمالي المستثمر</div>
-                </div>
-            </div>
-
-            <div class="card gold-gradient">
-                <div class="flex-between">
-                    <div>
-                        <div style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;">💰 إجمالي الاستثمارات</div>
-                        <div style="font-size:28px;font-weight:900;color:white;" id="homeTotalInvested2">0.00</div>
-                    </div>
-                    <div style="text-align:left;">
-                        <div style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;">الأرباح اليومية</div>
-                        <div style="font-size:22px;font-weight:900;color:white;" id="homeDailyReturn">0.00</div>
-                    </div>
-                </div>
-                <div style="margin-top:12px;display:flex;gap:8px;">
-                    <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white;width:auto;flex:1;" onclick="navigateTo('investments')">
-                        <i class="fas fa-chart-line"></i> استثماراتي
-                    </button>
-                    <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white;width:auto;flex:1;" onclick="navigateTo('packages')">
-                        <i class="fas fa-plus-circle"></i> استثمر الآن
-                    </button>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title"><i class="fas fa-clock-rotate-left"></i> آخر العمليات</div>
-                    <button class="btn btn-sm btn-ghost" onclick="navigateTo('transactions')">عرض الكل</button>
-                </div>
-                <div id="recentTransactions">
-                    <div class="text-muted text-center" style="padding:20px 0;font-size:14px;">لا توجد عمليات حديثة</div>
-                </div>
-            </div>
         </div>
 
         <!-- ========== PAGE: PACKAGES ========== -->
         <div class="page" id="page-packages">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-cubes text-accent"></i> خطط العوائد الثابتة
-                <button class="back-btn" onclick="navigateTo('home')">
-                    <i class="fas fa-arrow-right"></i> رجوع
-                </button>
+                <!-- تم إزالة زر الرجوع -->
             </h2>
             <div id="investPlansList"></div>
         </div>
@@ -2186,9 +2135,7 @@
         <div class="page" id="page-investments">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-chart-line text-gold"></i> استثماراتي
-                <button class="back-btn" onclick="navigateTo('home')">
-                    <i class="fas fa-arrow-right"></i> رجوع
-                </button>
+                <!-- تم إزالة زر الرجوع -->
             </h2>
             <div class="card gold-gradient">
                 <div class="flex-between">
@@ -2214,9 +2161,7 @@
         <div class="page" id="page-wallet">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-wallet text-accent"></i> المحفظة
-                <button class="back-btn" onclick="navigateTo('home')">
-                    <i class="fas fa-arrow-right"></i> رجوع
-                </button>
+                <!-- تم إزالة زر الرجوع -->
             </h2>
             <div class="card dzd-gradient" id="walletBalanceCard">
                 <div style="text-align:center;padding:4px 0;">
@@ -2258,9 +2203,7 @@
         <div class="page" id="page-referrals">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-users text-accent"></i> الإحالات
-                <button class="back-btn" onclick="navigateTo('home')">
-                    <i class="fas fa-arrow-right"></i> رجوع
-                </button>
+                <!-- تم إزالة زر الرجوع -->
             </h2>
             <div class="stats-bar">
                 <div class="stat-item">
@@ -2433,9 +2376,7 @@
         <div class="page" id="page-profile">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-user text-accent"></i> الحساب
-                <button class="back-btn" onclick="navigateTo('home')">
-                    <i class="fas fa-arrow-right"></i> رجوع
-                </button>
+                <!-- تم إزالة زر الرجوع -->
             </h2>
 
             <!-- البطاقة الشخصية -->
@@ -2487,7 +2428,7 @@
                     </div>
                 </div>
 
-                <!-- ===== تبويب التوثيق (بطاقة التوثيق الجديدة) ===== -->
+                <!-- ===== تبويب التوثيق ===== -->
                 <div class="profile-tab-panel" id="panel-verification">
                     <div class="verify-card">
                         <div class="vc-stripe"></div>
@@ -2515,7 +2456,7 @@
                     </div>
                 </div>
 
-                <!-- ===== تبويب الاشتراك (باقات الاشتراك) ===== -->
+                <!-- ===== تبويب الاشتراك ===== -->
                 <div class="profile-tab-panel" id="panel-subscription">
                     <div class="pricing-widget">
                         <!-- Starter -->
@@ -2916,14 +2857,12 @@
                             totalReferralsLevel2: 0
                         },
                         lastDailyDistribution: null,
-                        // حقل الاشتراك
                         subscription: {
                             plan: null,
                             startDate: null,
                             endDate: null,
                             status: 'inactive'
                         },
-                        // حقل التوثيق
                         verified: false,
                         verificationDate: null
                     };
@@ -3157,30 +3096,13 @@
             }
         }
 
+        // تحديث الرصيد فقط في الصفحة الرئيسية
         function updateHomeUI() {
             if (!userData) return;
             const u = userData;
             const balance = (u.wallets?.dzd || 0) + (u.wallets?.dzdReward || 0) + (u.wallets?.dzdReferral || 0);
             document.getElementById('homeBalance').textContent = balance.toFixed(2);
             document.getElementById('homeCurrency').textContent = 'DZD';
-            document.getElementById('homeReferrals').textContent = u.miningData?.totalReferrals || 0;
-            document.getElementById('homeInvestCount').textContent = (u.investments || []).filter(i => i.status === 'active')
-                .length;
-
-            const totalInvested = u.totalInvested || 0;
-            document.getElementById('homeTotalInvested').textContent = totalInvested.toFixed(2);
-            document.getElementById('homeTotalInvested2').textContent = totalInvested.toFixed(2);
-
-            let daily = 0;
-            if (u.investments) {
-                u.investments.forEach(inv => {
-                    if (inv.status === 'active') {
-                        const dailyReturn = (inv.amount * inv.dailyReturnPercent) / 100;
-                        daily += dailyReturn;
-                    }
-                });
-            }
-            document.getElementById('homeDailyReturn').textContent = daily.toFixed(2);
         }
 
         function updateWalletUI() {
@@ -3868,12 +3790,11 @@
                     return timeB - timeA;
                 });
                 renderTransactions(allTransactions);
-                renderRecentTransactions(allTransactions.slice(0, 5));
+                // تم إزالة عرض آخر العمليات من الصفحة الرئيسية
             } catch (e) {
                 console.error(e);
                 allTransactions = [];
                 renderTransactions([]);
-                renderRecentTransactions([]);
             }
         }
 
@@ -3895,20 +3816,7 @@
             `).join('');
         }
 
-        function renderRecentTransactions(list) {
-            const c = document.getElementById('recentTransactions');
-            if (!list || !list.length) { c.innerHTML =
-                    '<div class="text-muted text-center" style="padding:20px 0;font-size:14px;">لا توجد عمليات حديثة</div>';
-                return; }
-            c.innerHTML = list.map(t => `
-                <div class="list-item">
-                    <div class="left"><div style="width:28px;text-align:center;"><i class="fas ${getTransactionIcon(t.type)}" style="font-size:14px;"></i></div>
-                        <div><div class="title" style="font-size:14px;">${getTransactionLabel(t.type)}</div><div class="sub" style="font-size:12px;">${formatDateTime(t.timestamp)}</div></div>
-                    </div>
-                    <div class="right"><div style="font-size:14px;font-weight:700;color:${t.type==='withdraw'?'var(--danger)':'var(--success)'}">${t.type==='withdraw'?'−':'+'}${t.amount.toFixed(2)} DZD</div></div>
-                </div>
-            `).join('');
-        }
+        // تم حذف دالة renderRecentTransactions
 
         function filterTransactions(type) {
             currentFilter = type;
@@ -4204,7 +4112,7 @@
         }
 
         // ============================================================
-        // VERIFICATION LOGIC (NEW)
+        // VERIFICATION LOGIC
         // ============================================================
         function updateVerificationUI() {
             if (!userData) return;
@@ -4222,7 +4130,6 @@
                     priceSpan.style.background = '#ecfdf5';
                     priceSpan.style.color = '#16a34a';
                 }
-                // إضافة علامة موثق بجانب الاسم في البطاقة الشخصية
                 const nameEl = document.getElementById('profileName');
                 if (nameEl && !nameEl.querySelector('.verified-badge')) {
                     const badge = document.createElement('span');
@@ -4242,7 +4149,6 @@
                     priceSpan.style.background = '#eff6ff';
                     priceSpan.style.color = '#2563eb';
                 }
-                // إزالة علامة موثق إذا كانت موجودة
                 const nameEl = document.getElementById('profileName');
                 const badge = nameEl?.querySelector('.verified-badge');
                 if (badge) badge.remove();
@@ -4252,15 +4158,13 @@
         async function requestVerification() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
-            // التحقق من أن المستخدم غير موثق بالفعل
             if (userData.verified) {
                 showToast('حسابك موثق بالفعل!');
                 return;
             }
 
-            const price = 100; // سعر التوثيق
+            const price = 100;
 
-            // التحقق من الرصيد
             const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
                 ?.dzdReferral || 0);
             if (balance < price) {
@@ -4276,12 +4180,10 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    // التحقق مرة أخرى من الرصيد
                     let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
                         .wallets?.dzdReferral || 0);
                     if (bal < price) throw new Error('رصيد غير كاف');
 
-                    // خصم المبلغ
                     let rem = price;
                     const m = doc.data().wallets?.dzd || 0,
                         r = doc.data().wallets?.dzdReward || 0,
@@ -4312,7 +4214,6 @@
                 });
 
                 showToast('✅ تم توثيق حسابك بنجاح!');
-                // تحديث الواجهة
                 await updateUI();
                 updateVerificationUI();
             } catch (e) {
@@ -4336,7 +4237,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع التوثيق وباقات الاشتراك');
+        console.log('🚀 Crynova - النسخة النهائية مع التوثيق وباقات الاشتراك (تم حذف المكونات المطلوبة)');
     </script>
 </body>
 </html>
