@@ -2751,7 +2751,10 @@
                 </div>
                 <div style="font-size:22px;font-weight:900;" id="profileName">المستخدم</div>
                 <div style="color:var(--text-secondary);font-size:14px;" id="profileTelegram">@username</div>
-                <div style="margin-top:8px;"><span class="status status-info">المستوى <span id="profileLevel">1</span></span></div>
+                <div style="margin-top:8px;">
+                    <span class="status status-info">المستوى <span id="profileLevel">1</span></span>
+                    <span id="verificationStatus" style="margin-right:8px;font-weight:700;font-size:14px;"></span>
+                </div>
             </div>
 
             <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:8px;">
@@ -3387,7 +3390,7 @@
         });
 
         // ============================================================
-        // CONFIRM DONATION (تأكيد التبرع - تم إزالة التأكيد الثاني)
+        // CONFIRM DONATION (تأكيد التبرع من النافذة المنبثقة)
         // ============================================================
         async function confirmDonation() {
             if (!userData) {
@@ -3404,7 +3407,7 @@
                 return;
             }
 
-            // تم إزالة confirm() الإضافي هنا
+            if (!confirm(`تأكيد التبرع بمبلغ ${amount.toFixed(2)} DZD من رصيدك؟`)) return;
 
             try {
                 // 1. خصم من المستخدم
@@ -3755,6 +3758,7 @@
             updateWalletUI();
             updateReferralUI();
             renderInvestments();
+            updateVerificationStatus(); // تحديث حالة التوثيق
         }
 
         function updateProfileUI() {
@@ -3769,6 +3773,36 @@
                 refLink.value = `https://t.me/Crynova_bot?start=${userData.telegramId}`;
             } else {
                 refLink.value = 'جاري التحميل...';
+            }
+            updateVerificationStatus();
+        }
+
+        // ===== دالة تحديث حالة التوثيق =====
+        function updateVerificationStatus() {
+            const el = document.getElementById('verificationStatus');
+            if (!userData) {
+                el.textContent = '';
+                el.style.display = 'none';
+                return;
+            }
+            if (userData.verified) {
+                el.textContent = '✅ تم التحقق منه';
+                el.style.color = '#22c55e';
+                el.style.backgroundColor = '#ecfdf5';
+                el.style.padding = '2px 10px';
+                el.style.borderRadius = '20px';
+                el.style.display = 'inline-block';
+                el.style.fontSize = '13px';
+                el.style.fontWeight = '700';
+            } else {
+                el.textContent = '❌ لم يتم التحقق منه';
+                el.style.color = '#e17055';
+                el.style.backgroundColor = '#fde8e8';
+                el.style.padding = '2px 10px';
+                el.style.borderRadius = '20px';
+                el.style.display = 'inline-block';
+                el.style.fontSize = '13px';
+                el.style.fontWeight = '700';
             }
         }
 
@@ -4795,6 +4829,7 @@
                 const badge = nameEl?.querySelector('.verified-badge');
                 if (badge) badge.remove();
             }
+            updateVerificationStatus(); // تحديث حالة التوثيق في الأعلى
         }
 
         async function requestVerification() {
@@ -4879,7 +4914,7 @@
             }
         });
 
-        console.log('🚀 Crynova - مع نافذة تبرع مخصصة وصندوق زكاة مشترك (تم إزالة التأكيد الثاني)');
+        console.log('🚀 Crynova - مع نافذة تبرع مخصصة وصندوق زكاة مشترك');
     </script>
 </body>
 </html>
