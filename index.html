@@ -2464,7 +2464,7 @@
                 </div>
 
                 <!-- زر التبرع -->
-                <button class="zb-btn" onclick="navigateTo('deposit')">
+                <button class="zb-btn" onclick="donateToZakat()">
                     <i class="fas fa-hand-holding-usd"></i> تبرع الآن
                 </button>
 
@@ -3223,6 +3223,103 @@
         }
 
         // ============================================================
+        // DONATE - التبرع من الرصيد الحالي
+        // ============================================================
+        async function donateToZakat() {
+            if (!userData) {
+                showToast('يرجى تسجيل الدخول');
+                return;
+            }
+
+            const amountInput = prompt('أدخل المبلغ الذي تريد التبرع به (DZD):', '100');
+            if (amountInput === null) return; // إلغاء
+            const amount = parseFloat(amountInput);
+            if (isNaN(amount) || amount <= 0) {
+                showToast('المبلغ غير صحيح');
+                return;
+            }
+
+            // التحقق من الرصيد (نستخدم المحفظة الرئيسية فقط)
+            const balance = userData.wallets?.dzd || 0;
+            if (amount > balance) {
+                showToast(`⚠️ رصيد غير كافٍ! المتاح: ${balance.toFixed(2)} DZD`);
+                return;
+            }
+
+            if (!confirm(`تأكيد التبرع بمبلغ ${amount.toFixed(2)} DZD من رصيدك؟`)) return;
+
+            try {
+                // 1. خصم المبلغ من رصيد المستخدم وتسجيل المعاملة
+                await db.runTransaction(async (t) => {
+                    const userRef = db.collection('users').doc(userData.telegramId);
+                    const doc = await t.get(userRef);
+                    if (!doc.exists) throw new Error('مستخدم غير موجود');
+                    const currentBalance = doc.data().wallets?.dzd || 0;
+                    if (currentBalance < amount) throw new Error('رصيد غير كاف');
+                    t.update(userRef, {
+                        'wallets.dzd': firebase.firestore.FieldValue.increment(-amount),
+                        'transactions': firebase.firestore.FieldValue.arrayUnion({
+                            type: 'donation',
+                            amount: amount,
+                            currency: 'DZD',
+                            description: `تبرع لصندوق الزكاة (${amount.toFixed(2)} DZD)`,
+                            timestamp: new Date(),
+                            status: 'completed'
+                        })
+                    });
+                });
+
+                // 2. تحديث بيانات صندوق الزكاة
+                const zakatRef = db.collection('zakat').doc('statistics');
+                await db.runTransaction(async (t) => {
+                    const doc = await t.get(zakatRef);
+                    if (!doc.exists) {
+                        // إنشاء مستند جديد
+                        t.set(zakatRef, {
+                            totalDonations: amount,
+                            distributed: 0,
+                            remaining: amount,
+                            distributionPercentage: 0,
+                            donorsCount: 1,
+                            beneficiariesCount: 0,
+                            lastUpdated: new Date()
+                        });
+                    } else {
+                        const data = doc.data();
+                        const newTotal = (data.totalDonations || 0) + amount;
+                        const newRemaining = (data.remaining || 0) + amount;
+                        let newDonorsCount = data.donorsCount || 0;
+                        // زيادة عدد المتبرعين مرة واحدة فقط لكل مستخدم
+                        if (!userData.hasDonated) {
+                            newDonorsCount += 1;
+                            // تحديث حقل hasDonated في userData
+                            await db.collection('users').doc(userData.telegramId).update({
+                                hasDonated: true
+                            });
+                        }
+                        // حساب النسبة المئوية (إذا كان هناك توزيع)
+                        const newPercentage = data.distributed > 0 ? (data.distributed / newTotal) * 100 : 0;
+                        t.update(zakatRef, {
+                            totalDonations: newTotal,
+                            remaining: newRemaining,
+                            distributionPercentage: newPercentage,
+                            donorsCount: newDonorsCount,
+                            lastUpdated: new Date()
+                        });
+                    }
+                });
+
+                showToast(`✅ تم التبرع بمبلغ ${amount.toFixed(2)} DZD بنجاح!`);
+                // تحديث الواجهة
+                await updateUI();
+                // تحديث بيانات الزكاة (سيتم تحديثها تلقائياً عبر المستمع)
+            } catch (e) {
+                showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e);
+            }
+        }
+
+        // ============================================================
         // AUTHENTICATION
         // ============================================================
         async function authUser() {
@@ -3287,7 +3384,8 @@
                             status: 'inactive'
                         },
                         verified: false,
-                        verificationDate: null
+                        verificationDate: null,
+                        hasDonated: false // لتتبع التبرع
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -3386,7 +3484,8 @@
                 'investment_return': 'fa-coins text-gold',
                 'referral_bonus': 'fa-users text-accent',
                 'reward': 'fa-gift text-warning',
-                'first_investment_bonus': 'fa-gift text-gold'
+                'first_investment_bonus': 'fa-gift text-gold',
+                'donation': 'fa-hand-holding-heart text-success'
             };
             return map[type] || 'fa-circle text-muted';
         }
@@ -3399,7 +3498,8 @@
                 'investment_return': 'أرباح استثمار',
                 'referral_bonus': 'عمولة إحالة',
                 'reward': 'مكافأة',
-                'first_investment_bonus': 'مكافأة أول استثمار'
+                'first_investment_bonus': 'مكافأة أول استثمار',
+                'donation': 'تبرع'
             };
             return map[type] || type;
         }
@@ -4660,7 +4760,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع صندوق الزكاة المرتبط بقاعدة البيانات');
+        console.log('🚀 Crynova - النسخة النهائية مع صندوق الزكاة والربط بقاعدة البيانات والتبرع من الرصيد');
     </script>
 </body>
 </html>
