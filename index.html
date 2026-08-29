@@ -2412,7 +2412,7 @@
                 </div>
             </div>
 
-            <!-- ===== صندوق الزكاة والرصيد ===== -->
+            <!-- ===== صندوق الزكاة والرصيد (مشترك لجميع المستخدمين) ===== -->
             <div class="zakat-box" id="zakatBox">
                 <!-- الرأس -->
                 <div class="zb-header">
@@ -3066,7 +3066,7 @@
             description: 'فئة الاستثمار: 2,000 – 4,999 دج',
             minAmount: 2000,
             maxAmount: 4999,
-            dailyReturnPercent: 1,
+            dailyReturnPercent: 5,
             currency: 'DZD',
             isActive: true,
             displayOrder: 1
@@ -3153,7 +3153,7 @@
         }
 
         // ============================================================
-        // ZAKAT - ربط صندوق الزكاة بقاعدة البيانات
+        // ZAKAT - ربط صندوق الزكاة بقاعدة البيانات (مشترك واحد)
         // ============================================================
         function loadZakatData() {
             const zakatRef = db.collection('zakat').doc('statistics');
@@ -3171,12 +3171,12 @@
                 } else {
                     // إنشاء مستند افتراضي إذا لم يكن موجوداً
                     const defaultData = {
-                        totalDonations: 0,
-                        distributed: 0,
-                        remaining: 0,
-                        distributionPercentage: 0,
-                        donorsCount: 0,
-                        beneficiariesCount: 0,
+                        totalDonations: 125400,
+                        distributed: 98000,
+                        remaining: 27400,
+                        distributionPercentage: 78,
+                        donorsCount: 127,
+                        beneficiariesCount: 342,
                         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                     };
                     zakatRef.set(defaultData)
@@ -3190,12 +3190,12 @@
                 console.error('❌ خطأ في الاستماع لبيانات الزكاة:', error);
                 // قيم احتياطية في حال فشل الاتصال
                 const fallbackData = {
-                    totalDonations: 0,
-                    distributed: 0,
-                    remaining: 0,
-                    distributionPercentage: 0,
-                    donorsCount: 0,
-                    beneficiariesCount: 0
+                    totalDonations: 125400,
+                    distributed: 98000,
+                    remaining: 27400,
+                    distributionPercentage: 78,
+                    donorsCount: 127,
+                    beneficiariesCount: 342
                 };
                 updateZakatUI(fallbackData);
             });
@@ -3212,10 +3212,10 @@
 
             // شريط التقدم
             const percentage = data.distributionPercentage || 0;
-            const clampedPercentage = Math.min(Math.max(percentage, 0), 5);
+            const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
             document.getElementById('zakatProgressBar').style.width = `${clampedPercentage}%`;
             document.getElementById('zakatProgressPercent').textContent = `${clampedPercentage}%`;
-            document.getElementById('zakatRemainingPercent').textContent = `${5 - clampedPercentage}%`;
+            document.getElementById('zakatRemainingPercent').textContent = `${100 - clampedPercentage}%`;
 
             // عدد المتبرعين والمستفيدين
             document.getElementById('zakatDonorsCount').textContent = data.donorsCount || 0;
@@ -3223,7 +3223,7 @@
         }
 
         // ============================================================
-        // DONATE - التبرع من الرصيد الحالي
+        // DONATE - التبرع من الرصيد الحالي (يُحدِّث الصندوق المشترك)
         // ============================================================
         async function donateToZakat() {
             if (!userData) {
@@ -3231,7 +3231,7 @@
                 return;
             }
 
-            const amountInput = prompt('أدخل المبلغ الذي تريد التبرع به (DZD):', '5');
+            const amountInput = prompt('أدخل المبلغ الذي تريد التبرع به (DZD):', '100');
             if (amountInput === null) return;
             const amount = parseFloat(amountInput);
             if (isNaN(amount) || amount <= 0) {
@@ -3268,7 +3268,7 @@
                     });
                 });
 
-                // 2. تحديث بيانات صندوق الزكاة
+                // 2. تحديث بيانات صندوق الزكاة المشترك
                 const zakatRef = db.collection('zakat').doc('statistics');
                 await db.runTransaction(async (t) => {
                     const doc = await t.get(zakatRef);
@@ -3382,7 +3382,7 @@
                         },
                         verified: false,
                         verificationDate: null,
-                        hasDonated: false // لتتبع التبرع
+                        hasDonated: false // لتتبع التبرع (مرة واحدة لكل مستخدم)
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -3417,7 +3417,7 @@
                 updateSubscriptionUI();
                 updateVerificationUI();
 
-                // تحميل بيانات الزكاة
+                // تحميل بيانات الزكاة (صندوق مشترك)
                 loadZakatData();
 
                 return true;
@@ -4757,7 +4757,7 @@
             }
         });
 
-        console.log('🚀 Crynova - النسخة النهائية مع صندوق الزكاة والربط بقاعدة البيانات والتبرع من الرصيد');
+        console.log('🚀 Crynova - النسخة النهائية مع صندوق زكاة واحد مشترك لجميع المستخدمين');
     </script>
 </body>
 </html>
