@@ -4806,15 +4806,6 @@
                     priceSpan.style.background = '#ecfdf5';
                     priceSpan.style.color = '#16a34a';
                 }
-                const nameEl = document.getElementById('profileName');
-                if (nameEl && !nameEl.querySelector('.verified-badge')) {
-                    const badge = document.createElement('span');
-                    badge.className = 'verified-badge';
-                    badge.style.cssText =
-                        'font-size:0.8rem;color:#2563eb;margin-right:6px;background:#dbeafe;padding:0 8px;border-radius:20px;display:inline-block;';
-                    badge.innerHTML = '<i class="fas fa-check-circle"></i> موثق';
-                    nameEl.appendChild(badge);
-                }
             } else {
                 btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
                 btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
