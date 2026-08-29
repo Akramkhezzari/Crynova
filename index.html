@@ -3232,14 +3232,13 @@
             }
 
             const amountInput = prompt('أدخل المبلغ الذي تريد التبرع به (DZD):', '100');
-            if (amountInput === null) return; // إلغاء
+            if (amountInput === null) return;
             const amount = parseFloat(amountInput);
             if (isNaN(amount) || amount <= 0) {
                 showToast('المبلغ غير صحيح');
                 return;
             }
 
-            // التحقق من الرصيد (نستخدم المحفظة الرئيسية فقط)
             const balance = userData.wallets?.dzd || 0;
             if (amount > balance) {
                 showToast(`⚠️ رصيد غير كافٍ! المتاح: ${balance.toFixed(2)} DZD`);
@@ -3274,7 +3273,6 @@
                 await db.runTransaction(async (t) => {
                     const doc = await t.get(zakatRef);
                     if (!doc.exists) {
-                        // إنشاء مستند جديد
                         t.set(zakatRef, {
                             totalDonations: amount,
                             distributed: 0,
@@ -3312,7 +3310,6 @@
                 showToast(`✅ تم التبرع بمبلغ ${amount.toFixed(2)} DZD بنجاح!`);
                 // تحديث الواجهة
                 await updateUI();
-                // تحديث بيانات الزكاة (سيتم تحديثها تلقائياً عبر المستمع)
             } catch (e) {
                 showToast('❌ ' + (e.message || 'حدث خطأ'));
                 console.error(e);
