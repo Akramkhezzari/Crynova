@@ -4797,20 +4797,20 @@
             const priceSpan = document.querySelector('.vc-price');
 
             if (verified) {
-    // ...
-    if (priceSpan) {
-        priceSpan.innerHTML = '<i class="fas fa-check-circle" style="color:#22c55e;"></i> موثق';
-        priceSpan.style.background = '#ecfdf5';
-        priceSpan.style.color = '#16a34a';
-    }
-} else {
-    // ...
-    if (priceSpan) {
-        priceSpan.innerHTML = '100 <small>دج</small>';
-        priceSpan.style.background = '#eff6ff';
-        priceSpan.style.color = '#2563eb';
-    }
+                // ...
+                if (priceSpan) {
+                    priceSpan.innerHTML = '<i class="fas fa-check-circle" style="color:#22c55e;"></i> موثق';
+                    priceSpan.style.background = '#ecfdf5';
+                    priceSpan.style.color = '#16a34a';
+                }
+            } else {
+                // ...
+                if (priceSpan) {
+                    priceSpan.innerHTML = '100 <small>دج</small>';
+                    priceSpan.style.background = '#eff6ff';
+                    priceSpan.style.color = '#2563eb';
             }
+                }
                 const nameEl = document.getElementById('profileName');
                 const badge = nameEl?.querySelector('.verified-badge');
                 if (badge) badge.remove();
