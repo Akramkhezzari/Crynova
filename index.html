@@ -2815,7 +2815,7 @@
                             <button class="vc-btn" onclick="requestVerification()">
                                 <i class="fas fa-badge-check"></i> وثّق حسابي الآن
                             </button>
-                            <p class="vc-note">* عملية توثيق لمرة واحدة، لا توجد رسوم شهرية</p>
+                            <p class="vc-note">* اشتراك شهري قابل للتجديد</p>
                         </div>
                     </div>
                 </div>
@@ -3538,7 +3538,7 @@
                             status: 'inactive'
                         },
                         verified: false,
-                        verificationDate: null,
+                        verificationExpiry: null,
                         hasDonated: false
                     };
                     await userRef.set(newUser);
@@ -3758,7 +3758,8 @@
             updateWalletUI();
             updateReferralUI();
             renderInvestments();
-            updateVerificationStatus(); // تحديث حالة التوثيق
+            updateVerificationStatus();
+            checkVerificationExpiry();
         }
 
         function updateProfileUI() {
@@ -3785,17 +3786,30 @@
                 el.style.display = 'none';
                 return;
             }
-            if (userData.verified) {
-                el.textContent = '✅ تم التحقق منه';
-                el.style.color = '#22c55e';
-                el.style.backgroundColor = '#ecfdf5';
-                el.style.padding = '2px 10px';
-                el.style.borderRadius = '20px';
-                el.style.display = 'inline-block';
-                el.style.fontSize = '13px';
-                el.style.fontWeight = '700';
+            if (userData.verified && userData.verificationExpiry) {
+                const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
+                if (expiry > new Date()) {
+                    const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24));
+                    el.textContent = `✅ موثق (متبقي ${daysLeft} يوم)`;
+                    el.style.color = '#22c55e';
+                    el.style.backgroundColor = '#ecfdf5';
+                    el.style.padding = '2px 10px';
+                    el.style.borderRadius = '20px';
+                    el.style.display = 'inline-block';
+                    el.style.fontSize = '13px';
+                    el.style.fontWeight = '700';
+                } else {
+                    el.textContent = '⏳ انتهى التوثيق - جدد الآن';
+                    el.style.color = '#b45309';
+                    el.style.backgroundColor = '#fef3c7';
+                    el.style.padding = '2px 10px';
+                    el.style.borderRadius = '20px';
+                    el.style.display = 'inline-block';
+                    el.style.fontSize = '13px';
+                    el.style.fontWeight = '700';
+                }
             } else {
-                el.textContent = '❌ لم يتم التحقق منه';
+                el.textContent = '❌ غير موثق';
                 el.style.color = '#e17055';
                 el.style.backgroundColor = '#fde8e8';
                 el.style.padding = '2px 10px';
@@ -3839,6 +3853,32 @@
             const totalRefs = userData.miningData?.totalReferrals || 0;
             document.getElementById('refEarnings').textContent = earnings.toFixed(2);
             document.getElementById('refTotalReferrals').textContent = totalRefs;
+        }
+
+        // ============================================================
+        // CHECK VERIFICATION EXPIRY (تفحص انتهاء صلاحية التوثيق)
+        // ============================================================
+        async function checkVerificationExpiry() {
+            if (!userData) return;
+            if (!userData.verified || !userData.verificationExpiry) return;
+
+            const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
+            if (expiry <= new Date()) {
+                // انتهت صلاحية التوثيق
+                try {
+                    await db.collection('users').doc(userData.telegramId).update({
+                        verified: false,
+                        verificationExpiry: null
+                    });
+                    userData.verified = false;
+                    userData.verificationExpiry = null;
+                    showToast('⏳ انتهت صلاحية التوثيق، يرجى التجديد');
+                    updateVerificationUI();
+                    updateVerificationStatus();
+                } catch (e) {
+                    console.error('❌ فشل تحديث حالة التوثيق:', e);
+                }
+            }
         }
 
         // ============================================================
@@ -4788,39 +4828,56 @@
         }
 
         // ============================================================
-        // VERIFICATION LOGIC - تم تعديلها حسب الطلب
+        // VERIFICATION LOGIC - اشتراك شهري قابل للتجديد
         // ============================================================
         function updateVerificationUI() {
             if (!userData) return;
             const verified = userData.verified || false;
+            const expiry = userData.verificationExpiry;
             const btn = document.querySelector('.vc-btn');
             const priceSpan = document.querySelector('.vc-price');
 
-            if (verified) {
-                btn.innerHTML = '<i class="fas fa-check-circle"></i> حساب موثق';
-                btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
-                btn.disabled = true;
-                btn.style.cursor = 'default';
-                // إخفاء عنصر السعر (مكان "موثق") بدون أي نص أو أيقونة
-                if (priceSpan) {
-                    priceSpan.style.display = 'none';
+            if (verified && expiry) {
+                const expiryDate = expiry.toDate ? expiry.toDate() : new Date(expiry);
+                const now = new Date();
+                if (expiryDate > now) {
+                    // نشط
+                    const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+                    btn.innerHTML = `<i class="fas fa-check-circle"></i> موثق (متبقي ${daysLeft} يوم)`;
+                    btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                    btn.disabled = false;
+                    btn.style.cursor = 'pointer';
+                    btn.onclick = function() { requestVerification(); };
+                    if (priceSpan) {
+                        priceSpan.style.display = 'none';
+                    }
+                } else {
+                    // منتهي
+                    btn.innerHTML = '<i class="fas fa-clock"></i> انتهى التوثيق - جدد الآن';
+                    btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                    btn.disabled = false;
+                    btn.style.cursor = 'pointer';
+                    btn.onclick = function() { requestVerification(); };
+                    if (priceSpan) {
+                        priceSpan.style.display = 'inline-block';
+                        priceSpan.innerHTML = '100 <small>دج</small>';
+                        priceSpan.style.background = '#fef3c7';
+                        priceSpan.style.color = '#b45309';
+                    }
                 }
             } else {
+                // غير موثق
                 btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
                 btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
                 btn.disabled = false;
                 btn.style.cursor = 'pointer';
-                // إظهار السعر مع المحتوى الأصلي
+                btn.onclick = function() { requestVerification(); };
                 if (priceSpan) {
                     priceSpan.style.display = 'inline-block';
                     priceSpan.innerHTML = '100 <small>دج</small>';
                     priceSpan.style.background = '#eff6ff';
                     priceSpan.style.color = '#2563eb';
                 }
-                // إزالة أي علامة موثق سابقة من اسم المستخدم إن وجدت
-                const nameEl = document.getElementById('profileName');
-                const badge = nameEl?.querySelector('.verified-badge');
-                if (badge) badge.remove();
             }
             updateVerificationStatus();
         }
@@ -4828,13 +4885,18 @@
         async function requestVerification() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
-            if (userData.verified) {
-                showToast('حسابك موثق بالفعل!');
-                return;
+            // التحقق إذا كان التوثيق نشطاً ولم ينتهِ بعد
+            if (userData.verified && userData.verificationExpiry) {
+                const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
+                if (expiry > new Date()) {
+                    const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24));
+                    if (!confirm(`التوثيق لا يزال نشطاً (متبقي ${daysLeft} يوم). هل تريد التجديد مبكراً؟`)) {
+                        return;
+                    }
+                }
             }
 
             const price = 100;
-
             const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
                 ?.dzdReferral || 0);
             if (balance < price) {
@@ -4842,9 +4904,16 @@
                 return;
             }
 
-            if (!confirm(`تأكيد توثيق الحساب بمبلغ ${price} DZD؟`)) return;
+            const isRenewal = userData.verified && userData.verificationExpiry;
+
+            if (!confirm(isRenewal ? `تجديد التوثيق (شهر) بمبلغ ${price} DZD؟` :
+                    `تأكيد توثيق الحساب (شهر) بمبلغ ${price} DZD؟`)) return;
 
             try {
+                const now = new Date();
+                const expiryDate = new Date(now);
+                expiryDate.setMonth(expiryDate.getMonth() + 1); // شهر واحد
+
                 await db.runTransaction(async (t) => {
                     const ref = db.collection('users').doc(userData.telegramId);
                     const doc = await t.get(ref);
@@ -4870,22 +4939,24 @@
                         'wallets.dzdReward': r - fr,
                         'wallets.dzdReferral': refr - fref,
                         'verified': true,
-                        'verificationDate': new Date(),
+                        'verificationExpiry': expiryDate,
                         'transactions': firebase.firestore.FieldValue.arrayUnion({
                             type: 'verification',
                             amount: price,
                             currency: 'DZD',
-                            description: `توثيق الحساب (${price} DZD)`,
+                            description: isRenewal ? `تجديد التوثيق (شهر)` : `توثيق الحساب (شهر)`,
                             timestamp: new Date(),
-                            status: 'completed'
+                            status: 'completed',
+                            expiryDate: expiryDate
                         })
                     };
                     t.update(ref, updates);
                 });
 
-                showToast('✅ تم توثيق حسابك بنجاح!');
+                showToast(isRenewal ? '✅ تم تجديد التوثيق بنجاح!' : '✅ تم توثيق حسابك بنجاح!');
                 await updateUI();
                 updateVerificationUI();
+                updateVerificationStatus();
             } catch (e) {
                 showToast('❌ ' + (e.message || 'حدث خطأ'));
                 console.error(e);
@@ -4907,7 +4978,7 @@
             }
         });
 
-        console.log('🚀 Crynova - مع نافذة تبرع مخصصة وصندوق زكاة مشترك');
+        console.log('🚀 Crynova - مع توثيق شهري وصندوق زكاة مشترك');
     </script>
 </body>
 </html>
