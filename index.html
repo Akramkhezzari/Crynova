@@ -4796,6 +4796,16 @@
             const btn = document.querySelector('.vc-btn');
             const priceSpan = document.querySelector('.vc-price');
 
+            if (verified) {
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> حساب موثق';
+                btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                btn.disabled = true;
+                btn.style.cursor = 'default';
+                if (priceSpan) {
+                    priceSpan.innerHTML = '<i class="fas fa-check-circle" style="color:#22c55e;"></i> موثق';
+                    priceSpan.style.background = '#ecfdf5';
+                    priceSpan.style.color = '#16a34a';
+                }
             } else {
                 btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
                 btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
