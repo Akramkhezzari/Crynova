@@ -4788,7 +4788,7 @@
         }
 
         // ============================================================
-        // VERIFICATION LOGIC
+        // VERIFICATION LOGIC - تم تعديلها حسب الطلب
         // ============================================================
         function updateVerificationUI() {
             if (!userData) return;
@@ -4801,26 +4801,28 @@
                 btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
                 btn.disabled = true;
                 btn.style.cursor = 'default';
+                // إخفاء عنصر السعر (مكان "موثق") بدون أي نص أو أيقونة
                 if (priceSpan) {
-                    priceSpan.innerHTML = '<i class="fas fa-check-circle" style="color:#22c55e;"></i> موثق';
-                    priceSpan.style.background = '#ecfdf5';
-                    priceSpan.style.color = '#16a34a';
+                    priceSpan.style.display = 'none';
                 }
             } else {
                 btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
                 btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
                 btn.disabled = false;
                 btn.style.cursor = 'pointer';
+                // إظهار السعر مع المحتوى الأصلي
                 if (priceSpan) {
+                    priceSpan.style.display = 'inline-block';
                     priceSpan.innerHTML = '100 <small>دج</small>';
                     priceSpan.style.background = '#eff6ff';
                     priceSpan.style.color = '#2563eb';
                 }
+                // إزالة أي علامة موثق سابقة من اسم المستخدم إن وجدت
                 const nameEl = document.getElementById('profileName');
                 const badge = nameEl?.querySelector('.verified-badge');
                 if (badge) badge.remove();
             }
-            updateVerificationStatus(); // تحديث حالة التوثيق في الأعلى
+            updateVerificationStatus();
         }
 
         async function requestVerification() {
