@@ -3778,7 +3778,7 @@
             updateVerificationStatus();
         }
 
-        // ===== دالة تحديث حالة التوثيق =====
+        // ===== دالة تحديث حالة التوثيق - تظهر "✅ تم التحقق منه" فقط =====
         function updateVerificationStatus() {
             const el = document.getElementById('verificationStatus');
             if (!userData) {
@@ -3789,8 +3789,8 @@
             if (userData.verified && userData.verificationExpiry) {
                 const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
                 if (expiry > new Date()) {
-                    const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24));
-                    el.textContent = `✅ موثق (متبقي ${daysLeft} يوم)`;
+                    // عرض النص المطلوب
+                    el.textContent = '✅ تم التحقق منه';
                     el.style.color = '#22c55e';
                     el.style.backgroundColor = '#ecfdf5';
                     el.style.padding = '2px 10px';
@@ -4848,6 +4848,7 @@
                     btn.disabled = false;
                     btn.style.cursor = 'pointer';
                     btn.onclick = function() { requestVerification(); };
+                    // إخفاء السعر نهائياً
                     if (priceSpan) {
                         priceSpan.style.display = 'none';
                     }
