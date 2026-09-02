@@ -2070,6 +2070,44 @@
             display: block;
         }
 
+        /* ===== تبويبات استثماراتي ===== */
+        #page-investments .profile-tab-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+        #page-investments .profile-tab-btn i {
+            font-size: 16px;
+        }
+        #page-investments .profile-tab-btn:hover {
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
+        #page-investments .profile-tab-btn.active {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+        .invest-tab-panel {
+            display: none;
+            animation: fadeSlideIn 0.3s ease;
+        }
+        .invest-tab-panel.active {
+            display: block;
+        }
+
         /* ===== صندوق الزكاة والرصيد ===== */
         .zakat-box {
             max-width: 450px;
@@ -2501,29 +2539,47 @@
             <div id="investPlansList"></div>
         </div>
 
-        <!-- ========== PAGE: INVESTMENTS ========== -->
+        <!-- ========== PAGE: INVESTMENTS (تم التعديل هنا) ========== -->
         <div class="page" id="page-investments">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-chart-line text-gold"></i> استثماراتي
             </h2>
-            <div class="card gold-gradient">
-                <div class="flex-between">
-                    <div>
-                        <div style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;">إجمالي المستثمر</div>
-                        <div style="font-size:32px;font-weight:900;color:white;" id="investTotalInvested">0.00</div>
+
+            <!-- أزرار التبويب -->
+            <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:8px;">
+                <button class="profile-tab-btn active" data-tab="my-investments" onclick="switchInvestTab('my-investments')">
+                    <i class="fas fa-folder-open"></i> استثماراتي
+                </button>
+                <button class="profile-tab-btn" data-tab="invest-plans" onclick="switchInvestTab('invest-plans')">
+                    <i class="fas fa-cubes"></i> باقات العائد الثابت
+                </button>
+            </div>
+
+            <!-- محتوى التبويب الأول: استثماراتي -->
+            <div id="investTabContent">
+                <div class="invest-tab-panel active" id="panel-my-investments">
+                    <div class="card gold-gradient">
+                        <div class="flex-between">
+                            <div>
+                                <div style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;">إجمالي المستثمر</div>
+                                <div style="font-size:32px;font-weight:900;color:white;" id="investTotalInvested">0.00</div>
+                            </div>
+                            <div style="text-align:left;">
+                                <div style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;">إجمالي الأرباح</div>
+                                <div style="font-size:24px;font-weight:900;color:white;" id="investTotalReturn">0.00</div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="text-align:left;">
-                        <div style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;">إجمالي الأرباح</div>
-                        <div style="font-size:24px;font-weight:900;color:white;" id="investTotalReturn">0.00</div>
+                    <div id="activeInvestments">
+                        <div class="text-muted text-center" style="padding:30px 0;font-size:15px;">ليس لديك استثمارات نشطة</div>
                     </div>
                 </div>
+
+                <!-- محتوى التبويب الثاني: باقات العائد الثابت -->
+                <div class="invest-tab-panel" id="panel-invest-plans" style="display:none;">
+                    <div id="investPlansListInside"></div>
+                </div>
             </div>
-            <div id="activeInvestments">
-                <div class="text-muted text-center" style="padding:30px 0;font-size:15px;">ليس لديك استثمارات نشطة</div>
-            </div>
-            <button class="btn btn-gold" onclick="navigateTo('packages')">
-                <i class="fas fa-plus-circle"></i> استثمر الآن
-            </button>
         </div>
 
         <!-- ========== PAGE: WALLET ========== -->
@@ -3745,7 +3801,6 @@
             if (userData.verified && userData.verificationExpiry) {
                 const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
                 if (expiry > new Date()) {
-                    // عرض النص المطلوب
                     el.textContent = '✅ تم التحقق منه';
                     el.style.color = '#22c55e';
                     el.style.backgroundColor = '#ecfdf5';
@@ -4080,11 +4135,14 @@
         async function loadPlans() {
             allInvestPlans = DEFAULT_INVEST_PLANS;
             renderPlans();
+            renderPlansInside(); // لتحديث التبويب الجديد
             console.log('📦 تم تحميل خطط العوائد الثابتة من الكود المحلي');
         }
 
+        // دالة عرض الخطط في صفحة العوائد الرئيسية
         function renderPlans() {
             const container = document.getElementById('investPlansList');
+            if (!container) return;
             if (!allInvestPlans.length) {
                 container.innerHTML =
                     `<div class="card text-center" style="padding:32px 0;"><div style="font-size:48px;">📊</div><div style="font-size:18px;font-weight:700;">لا توجد خطط</div></div>`;
@@ -4115,6 +4173,73 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // دالة عرض الخطط داخل تبويب استثماراتي
+        function renderPlansInside() {
+            const container = document.getElementById('investPlansListInside');
+            if (!container) return;
+            if (!allInvestPlans.length) {
+                container.innerHTML =
+                    `<div class="card text-center" style="padding:32px 0;"><div style="font-size:48px;">📊</div><div style="font-size:18px;font-weight:700;">لا توجد خطط</div></div>`;
+                return;
+            }
+
+            container.innerHTML = allInvestPlans.map((p, i) => {
+                const minAmount = p.minAmount;
+                const maxAmount = p.maxAmount;
+                const minDailyProfit = (minAmount * p.dailyReturnPercent) / 100;
+                const maxDailyProfit = (maxAmount * p.dailyReturnPercent) / 100;
+                const minBonus = (minAmount * FIRST_BONUS_PERCENT) / 100;
+                const maxBonus = (maxAmount * FIRST_BONUS_PERCENT) / 100;
+
+                return `
+                    <div class="plan-card ${i===1?'popular':''}">
+                        ${i===1?'<div class="badge-popular">⭐ الأفضل</div>':''}
+                        <div class="name">${p.name}</div>
+                        <div class="return dzd-return">${p.dailyReturnPercent}% <small>يومياً</small></div>
+                        <ul class="features">
+                            <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} DZD</li>
+                            <li><i class="fas fa-chart-line"></i> الربح اليومي: ${minDailyProfit.toFixed(2)} - ${maxDailyProfit.toFixed(2)} DZD</li>
+                            <li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: ${minBonus.toFixed(2)} - ${maxBonus.toFixed(2)} DZD</li>
+                        </ul>
+                        <button class="btn ${i===1?'btn-dzd':'btn-outline'}" onclick="openInvestmentModal('${p.id}')">
+                            <i class="fas fa-plus-circle"></i> استثمر الآن
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================================
+        // INVESTMENT TABS (داخل صفحة استثماراتي)
+        // ============================================================
+        function switchInvestTab(tabId) {
+            // إخفاء جميع اللوحات
+            document.querySelectorAll('.invest-tab-panel').forEach(panel => {
+                panel.style.display = 'none';
+                panel.classList.remove('active');
+            });
+
+            // إظهار اللوحة المطلوبة
+            const targetPanel = document.getElementById('panel-' + tabId);
+            if (targetPanel) {
+                targetPanel.style.display = 'block';
+                targetPanel.classList.add('active');
+            }
+
+            // تحديث حالة الأزرار
+            document.querySelectorAll('#page-investments .profile-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.tab === tabId) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // إذا كان التبويب هو خطط الاستثمار، قم بعرضها (تأكد من تحميلها)
+            if (tabId === 'invest-plans') {
+                renderPlansInside();
+            }
         }
 
         // ============================================================
@@ -4793,6 +4918,8 @@
             const btn = document.querySelector('.vc-btn');
             const priceSpan = document.querySelector('.vc-price');
 
+            if (!btn) return; // خروج آمن
+
             if (verified && expiry) {
                 const expiryDate = expiry.toDate ? expiry.toDate() : new Date(expiry);
                 const now = new Date();
@@ -4804,7 +4931,6 @@
                     btn.disabled = false;
                     btn.style.cursor = 'pointer';
                     btn.onclick = function() { requestVerification(); };
-                    // إخفاء السعر نهائياً
                     if (priceSpan) {
                         priceSpan.style.display = 'none';
                     }
@@ -4935,7 +5061,7 @@
             }
         });
 
-        console.log('🚀 Crynova - مع توثيق شهري وصندوق زكاة مشترك');
+        console.log('🚀 Crynova - مع توثيق شهري وصندوق زكاة مشترك وتبويب جديد للخطط في استثماراتي');
     </script>
 </body>
 </html>
