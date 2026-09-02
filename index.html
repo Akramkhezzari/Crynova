@@ -4139,40 +4139,12 @@
             console.log('📦 تم تحميل خطط العوائد الثابتة من الكود المحلي');
         }
 
-        // دالة عرض الخطط في صفحة العوائد الرئيسية
+        // دالة عرض الخطط في صفحة العوائد الرئيسية (تم تعديلها لتكون فارغة)
         function renderPlans() {
             const container = document.getElementById('investPlansList');
             if (!container) return;
-            if (!allInvestPlans.length) {
-                container.innerHTML =
-                    `<div class="card text-center" style="padding:32px 0;"><div style="font-size:48px;">📊</div><div style="font-size:18px;font-weight:700;">لا توجد خطط</div></div>`;
-                return;
-            }
-
-            container.innerHTML = allInvestPlans.map((p, i) => {
-                const minAmount = p.minAmount;
-                const maxAmount = p.maxAmount;
-                const minDailyProfit = (minAmount * p.dailyReturnPercent) / 100;
-                const maxDailyProfit = (maxAmount * p.dailyReturnPercent) / 100;
-                const minBonus = (minAmount * FIRST_BONUS_PERCENT) / 100;
-                const maxBonus = (maxAmount * FIRST_BONUS_PERCENT) / 100;
-
-                return `
-                    <div class="plan-card ${i===1?'popular':''}">
-                        ${i===1?'<div class="badge-popular">⭐ الأفضل</div>':''}
-                        <div class="name">${p.name}</div>
-                        <div class="return dzd-return">${p.dailyReturnPercent}% <small>يومياً</small></div>
-                        <ul class="features">
-                            <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} DZD</li>
-                            <li><i class="fas fa-chart-line"></i> الربح اليومي: ${minDailyProfit.toFixed(2)} - ${maxDailyProfit.toFixed(2)} DZD</li>
-                            <li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: ${minBonus.toFixed(2)} - ${maxBonus.toFixed(2)} DZD</li>
-                        </ul>
-                        <button class="btn ${i===1?'btn-dzd':'btn-outline'}" onclick="openInvestmentModal('${p.id}')">
-                            <i class="fas fa-plus-circle"></i> استثمر الآن
-                        </button>
-                    </div>
-                `;
-            }).join('');
+            // الصفحة فارغة تماماً
+            container.innerHTML = '';
         }
 
         // دالة عرض الخطط داخل تبويب استثماراتي
