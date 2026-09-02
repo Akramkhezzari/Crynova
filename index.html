@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Crynova - استثمر واربح (DZD)</title>
+    <title>Crynova - استثمر واربح (DZD & USDT)</title>
 
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js">
@@ -62,6 +62,7 @@
             --dzd-color: #e17055;
             --dzd-light: rgba(225, 112, 85, 0.12);
             --gold: #f9a825;
+            --usdt-color: #26a17b;
 
             --border: #e2e8f0;
             --border-light: #f0f4f8;
@@ -228,6 +229,16 @@
         .card.gold-gradient .balance-label {
             color: rgba(255, 255, 255, 0.8);
         }
+        .card.usdt-gradient {
+            background: linear-gradient(135deg, #26a17b, #1f8b6b);
+            border: none;
+            color: var(--text-white);
+        }
+        .card.usdt-gradient .card-title i,
+        .card.usdt-gradient .text-muted,
+        .card.usdt-gradient .balance-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
 
         /* stats-bar retained for other pages */
         .stats-bar {
@@ -349,6 +360,9 @@
         .stat-box .number.gold {
             color: var(--gold);
         }
+        .stat-box .number.usdt {
+            color: var(--usdt-color);
+        }
         .stat-box .label {
             font-size: 12px;
             color: var(--text-secondary);
@@ -432,6 +446,16 @@
             box-shadow: 0 8px 32px rgba(249, 168, 37, 0.4);
         }
 
+        .btn-usdt {
+            background: linear-gradient(135deg, #26a17b, #1f8b6b);
+            color: white;
+            box-shadow: 0 4px 24px rgba(38, 161, 123, 0.3);
+        }
+        .btn-usdt:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(38, 161, 123, 0.4);
+        }
+
         .btn-outline {
             background: transparent;
             border: 2px solid var(--border);
@@ -492,7 +516,7 @@
             background: var(--success);
         }
 
-        /* PLAN CARDS */
+        /* PLAN CARDS (used in investments tab) */
         .plan-card {
             background: var(--bg-card);
             border-radius: var(--radius-md);
@@ -1594,6 +1618,129 @@
             font-size: 14px;
         }
 
+        /* ===== واجهة التبادل (Swap) ===== */
+        .swap-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        .swap-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent-light);
+        }
+        .swap-direction {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: var(--bg-input);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+        }
+        .swap-direction .dir-label {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .swap-direction .dir-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .swap-direction .dir-badge.dzd {
+            background: var(--dzd-light);
+            color: var(--dzd-color);
+        }
+        .swap-direction .dir-badge.usdt {
+            background: rgba(38, 161, 123, 0.12);
+            color: var(--usdt-color);
+        }
+        .swap-direction .dir-switch-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 4px;
+        }
+        .swap-direction .dir-switch-btn:hover {
+            transform: rotate(180deg);
+        }
+        .swap-amount {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .swap-amount input {
+            flex: 1;
+            padding: 12px 14px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 700;
+            font-family: inherit;
+            outline: none;
+            transition: var(--transition);
+        }
+        .swap-amount input:focus {
+            border-color: var(--accent);
+            box-shadow: var(--accent-glow);
+        }
+        .swap-amount .currency-label {
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-weight: 800;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+        .swap-rate {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            padding: 6px 0 12px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 12px;
+        }
+        .swap-rate strong {
+            color: var(--text-primary);
+        }
+        .swap-result {
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .swap-result .label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        .swap-result .value {
+            font-weight: 800;
+            font-size: 18px;
+        }
+        .swap-result .value.dzd-color {
+            color: var(--dzd-color);
+        }
+        .swap-result .value.usdt-color {
+            color: var(--usdt-color);
+        }
+
         /* RESPONSIVE */
         @media (max-width: 420px) {
             .app-container {
@@ -1658,6 +1805,13 @@
             .stats-bar .stat-item {
                 gap: 4px;
             }
+            .swap-amount {
+                flex-direction: column;
+            }
+            .swap-amount .currency-label {
+                justify-content: center;
+                padding: 8px;
+            }
         }
 
         @media (min-width: 768px) {
@@ -1697,6 +1851,9 @@
         }
         .text-gold {
             color: var(--gold);
+        }
+        .text-usdt {
+            color: var(--usdt-color);
         }
         .mt-8 {
             margin-top: 8px;
@@ -2531,15 +2688,63 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: PACKAGES ========== -->
+        <!-- ========== PAGE: PACKAGES (SWAP PAGE) ========== -->
         <div class="page" id="page-packages">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
-                <i class="fas fa-cubes text-accent"></i> خطط العوائد الثابتة
+                <i class="fas fa-exchange-alt text-accent"></i> تبادل العملات
             </h2>
-            <div id="investPlansList"></div>
+
+            <div class="swap-card">
+                <!-- اتجاه التبادل -->
+                <div class="swap-direction">
+                    <span class="dir-label">من</span>
+                    <span class="dir-badge dzd" id="swapFromLabel">DZD</span>
+                    <button class="dir-switch-btn" onclick="toggleSwapDirection()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <span class="dir-badge usdt" id="swapToLabel">USDT</span>
+                    <span class="dir-label">إلى</span>
+                </div>
+
+                <!-- حقل إدخال المبلغ -->
+                <div class="swap-amount">
+                    <input type="number" id="swapAmountInput" placeholder="أدخل المبلغ" min="0" step="1" value="100">
+                    <span class="currency-label" id="swapInputCurrency">DZD</span>
+                </div>
+
+                <!-- سعر الصرف -->
+                <div class="swap-rate">
+                    سعر الصرف: <strong id="swapRateDisplay">1 USDT = 250 DZD</strong>
+                </div>
+
+                <!-- النتيجة -->
+                <div class="swap-result">
+                    <span class="label">ستحصل على:</span>
+                    <span class="value dzd-color" id="swapResultValue">0.40 USDT</span>
+                </div>
+
+                <!-- زر التبادل -->
+                <button class="btn btn-usdt" onclick="executeSwap()">
+                    <i class="fas fa-exchange-alt"></i> تبادل
+                </button>
+            </div>
+
+            <!-- عرض أرصدة المستخدم -->
+            <div class="card" style="margin-top:8px;">
+                <div style="display:flex;justify-content:space-around;padding:8px 0;">
+                    <div>
+                        <div style="font-size:13px;color:var(--text-secondary);">رصيد DZD</div>
+                        <div style="font-size:20px;font-weight:800;color:var(--dzd-color);" id="swapDzdBalance">0.00</div>
+                    </div>
+                    <div>
+                        <div style="font-size:13px;color:var(--text-secondary);">رصيد USDT</div>
+                        <div style="font-size:20px;font-weight:800;color:var(--usdt-color);" id="swapUsdtBalance">0.00</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- ========== PAGE: INVESTMENTS (تم التعديل هنا) ========== -->
+        <!-- ========== PAGE: INVESTMENTS ========== -->
         <div class="page" id="page-investments">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-chart-line text-gold"></i> استثماراتي
@@ -2589,7 +2794,7 @@
             </h2>
             <div class="card dzd-gradient" id="walletBalanceCard">
                 <div style="text-align:center;padding:4px 0;">
-                    <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">الرصيد الكلي</div>
+                    <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">الرصيد الكلي (DZD)</div>
                     <div style="font-size:44px;font-weight:900;color:white;" id="walletTotal">0.00</div>
                     <div style="color:rgba(255,255,255,0.6);font-size:14px;" id="walletTotalCurrency">DZD</div>
                 </div>
@@ -2612,10 +2817,20 @@
                     <div style="font-size:24px;font-weight:800;" id="walletLocked">0.00</div>
                 </div>
             </div>
+            <!-- رصيد USDT -->
+            <div class="card usdt-gradient" style="margin-top:4px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <div style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;">رصيد USDT</div>
+                        <div style="font-size:28px;font-weight:900;color:white;" id="walletUsdt">0.00</div>
+                    </div>
+                    <div><i class="fas fa-coins" style="font-size:32px;color:rgba(255,255,255,0.6);"></i></div>
+                </div>
+            </div>
             <div class="card" style="background:var(--accent-glow);border-color:var(--accent-light);">
                 <div class="flex-between">
                     <div>
-                        <div style="font-weight:700;font-size:16px;">💰 الرصيد القابل للسحب</div>
+                        <div style="font-weight:700;font-size:16px;">💰 الرصيد القابل للسحب (DZD)</div>
                         <div style="color:var(--text-secondary);font-size:14px;">يمكنك سحب هذا المبلغ</div>
                     </div>
                     <div style="font-size:24px;font-weight:900;color:var(--accent);" id="walletWithdrawable">0.00</div>
@@ -2783,6 +2998,7 @@
                     <button class="btn btn-sm btn-ghost" data-filter="investment" onclick="filterTransactions('investment')">استثمار</button>
                     <button class="btn btn-sm btn-ghost" data-filter="investment_return" onclick="filterTransactions('investment_return')">أرباح</button>
                     <button class="btn btn-sm btn-ghost" data-filter="referral_bonus" onclick="filterTransactions('referral_bonus')">إحالات</button>
+                    <button class="btn btn-sm btn-ghost" data-filter="swap" onclick="filterTransactions('swap')">تبادل</button>
                 </div>
             </div>
             <div class="card">
@@ -3106,8 +3322,8 @@
             <span>الرئيسية</span>
         </button>
         <button class="nav-item" data-page="packages" onclick="navigateTo('packages')">
-            <i class="fas fa-cubes"></i>
-            <span>العوائد</span>
+            <i class="fas fa-exchange-alt"></i>
+            <span>التبادل</span>
         </button>
         <button class="nav-item" data-page="investments" onclick="navigateTo('investments')">
             <i class="fas fa-chart-line"></i>
@@ -3162,6 +3378,12 @@
         const MIN_WITHDRAW = 1000;
         const MIN_DEPOSIT = 2000;
         const FIRST_BONUS_PERCENT = 7;
+
+        // سعر الصرف الثابت
+        const EXCHANGE_RATE = 250; // 1 USDT = 250 DZD
+
+        // اتجاه التبادل: true = DZD -> USDT, false = USDT -> DZD
+        let swapDirection = true;
 
         // ============================================================
         // DEFAULT INVESTMENT PLANS
@@ -3529,7 +3751,8 @@
                             dzd: 0,
                             dzdReward: 0,
                             dzdReferral: 0,
-                            dzdLocked: 0
+                            dzdLocked: 0,
+                            usdt: 0 // إضافة محفظة USDT
                         },
                         investments: [],
                         totalInvested: 0,
@@ -3571,6 +3794,7 @@
                         renderInvestments();
                         updateSubscriptionUI();
                         updateVerificationUI();
+                        updateSwapBalances();
                         console.log('✅ تحديث لحظي للبيانات');
                     }
                 });
@@ -3585,6 +3809,7 @@
                 renderInvestments();
                 updateSubscriptionUI();
                 updateVerificationUI();
+                updateSwapBalances();
 
                 loadZakatData();
 
@@ -3650,7 +3875,8 @@
                 'referral_bonus': 'fa-users text-accent',
                 'reward': 'fa-gift text-warning',
                 'first_investment_bonus': 'fa-gift text-gold',
-                'donation': 'fa-hand-holding-heart text-success'
+                'donation': 'fa-hand-holding-heart text-success',
+                'swap': 'fa-exchange-alt text-usdt'
             };
             return map[type] || 'fa-circle text-muted';
         }
@@ -3664,7 +3890,8 @@
                 'referral_bonus': 'عمولة إحالة',
                 'reward': 'مكافأة',
                 'first_investment_bonus': 'مكافأة أول استثمار',
-                'donation': 'تبرع'
+                'donation': 'تبرع',
+                'swap': 'تبادل عملات'
             };
             return map[type] || type;
         }
@@ -3733,6 +3960,7 @@
             if (page === 'referrals') updateReferralUI();
             if (page === 'profile') updateProfileUI();
             if (page === 'investments') renderInvestments();
+            if (page === 'packages') updateSwapBalances();
         }
 
         // ============================================================
@@ -3772,6 +4000,7 @@
             renderInvestments();
             updateVerificationStatus();
             checkVerificationExpiry();
+            updateSwapBalances();
         }
 
         function updateProfileUI() {
@@ -3856,6 +4085,8 @@
             document.getElementById('walletWithdrawable').textContent = total.toFixed(2);
             document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
             document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
+            // USDT
+            document.getElementById('walletUsdt').textContent = (w.usdt || 0).toFixed(2);
         }
 
         function updateReferralUI() {
@@ -3865,6 +4096,166 @@
             document.getElementById('refEarnings').textContent = earnings.toFixed(2);
             document.getElementById('refTotalReferrals').textContent = totalRefs;
         }
+
+        // ============================================================
+        // SWAP FUNCTIONS
+        // ============================================================
+        function toggleSwapDirection() {
+            swapDirection = !swapDirection;
+            updateSwapUI();
+            calculateSwapResult();
+        }
+
+        function updateSwapUI() {
+            const fromLabel = document.getElementById('swapFromLabel');
+            const toLabel = document.getElementById('swapToLabel');
+            const inputCurrency = document.getElementById('swapInputCurrency');
+            const rateDisplay = document.getElementById('swapRateDisplay');
+
+            if (swapDirection) {
+                // DZD -> USDT
+                fromLabel.textContent = 'DZD';
+                toLabel.textContent = 'USDT';
+                inputCurrency.textContent = 'DZD';
+                rateDisplay.textContent = `1 USDT = ${EXCHANGE_RATE} DZD`;
+            } else {
+                // USDT -> DZD
+                fromLabel.textContent = 'USDT';
+                toLabel.textContent = 'DZD';
+                inputCurrency.textContent = 'USDT';
+                rateDisplay.textContent = `1 USDT = ${EXCHANGE_RATE} DZD`;
+            }
+            // تحديث الألوان
+            fromLabel.className = `dir-badge ${swapDirection ? 'dzd' : 'usdt'}`;
+            toLabel.className = `dir-badge ${swapDirection ? 'usdt' : 'dzd'}`;
+        }
+
+        function calculateSwapResult() {
+            const input = document.getElementById('swapAmountInput');
+            const amount = parseFloat(input.value) || 0;
+            const resultSpan = document.getElementById('swapResultValue');
+
+            if (swapDirection) {
+                // DZD -> USDT
+                const usdt = amount / EXCHANGE_RATE;
+                resultSpan.textContent = `${usdt.toFixed(4)} USDT`;
+                resultSpan.className = 'value usdt-color';
+            } else {
+                // USDT -> DZD
+                const dzd = amount * EXCHANGE_RATE;
+                resultSpan.textContent = `${dzd.toFixed(2)} DZD`;
+                resultSpan.className = 'value dzd-color';
+            }
+        }
+
+        function updateSwapBalances() {
+            if (!userData) return;
+            const dzd = userData.wallets?.dzd || 0;
+            const usdt = userData.wallets?.usdt || 0;
+            document.getElementById('swapDzdBalance').textContent = dzd.toFixed(2);
+            document.getElementById('swapUsdtBalance').textContent = usdt.toFixed(2);
+        }
+
+        async function executeSwap() {
+            if (!userData) {
+                showToast('يرجى تسجيل الدخول');
+                return;
+            }
+
+            const input = document.getElementById('swapAmountInput');
+            const amount = parseFloat(input.value) || 0;
+            if (amount <= 0) {
+                showToast('أدخل مبلغاً صحيحاً');
+                return;
+            }
+
+            let fromCurrency, toCurrency, fromAmount, toAmount;
+
+            if (swapDirection) {
+                // DZD -> USDT
+                fromCurrency = 'dzd';
+                toCurrency = 'usdt';
+                fromAmount = amount;
+                toAmount = amount / EXCHANGE_RATE;
+                if (fromAmount > (userData.wallets?.dzd || 0)) {
+                    showToast('رصيد DZD غير كافٍ');
+                    return;
+                }
+            } else {
+                // USDT -> DZD
+                fromCurrency = 'usdt';
+                toCurrency = 'dzd';
+                fromAmount = amount;
+                toAmount = amount * EXCHANGE_RATE;
+                if (fromAmount > (userData.wallets?.usdt || 0)) {
+                    showToast('رصيد USDT غير كافٍ');
+                    return;
+                }
+            }
+
+            if (!confirm(`تأكيد تبادل ${fromAmount.toFixed(2)} ${fromCurrency.toUpperCase()} إلى ${toAmount.toFixed(4)} ${toCurrency.toUpperCase()}؟`)) {
+                return;
+            }
+
+            try {
+                const now = new Date();
+                const ref = db.collection('users').doc(userData.telegramId);
+
+                await db.runTransaction(async (t) => {
+                    const doc = await t.get(ref);
+                    if (!doc.exists) throw new Error('مستخدم غير موجود');
+
+                    const wallets = doc.data().wallets || {};
+                    if (fromCurrency === 'dzd' && (wallets.dzd || 0) < fromAmount) throw new Error('رصيد DZD غير كاف');
+                    if (fromCurrency === 'usdt' && (wallets.usdt || 0) < fromAmount) throw new Error('رصيد USDT غير كاف');
+
+                    const updates = {};
+                    // خصم من العملة المصدر
+                    updates[`wallets.${fromCurrency}`] = firebase.firestore.FieldValue.increment(-fromAmount);
+                    // إضافة إلى العملة الهدف
+                    updates[`wallets.${toCurrency}`] = firebase.firestore.FieldValue.increment(toAmount);
+
+                    // تسجيل المعاملة
+                    updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
+                        type: 'swap',
+                        amount: fromAmount,
+                        currency: fromCurrency.toUpperCase(),
+                        description: `تبادل ${fromAmount} ${fromCurrency.toUpperCase()} → ${toAmount.toFixed(4)} ${toCurrency.toUpperCase()}`,
+                        timestamp: now,
+                        status: 'completed',
+                        swapDetails: {
+                            from: fromCurrency,
+                            to: toCurrency,
+                            fromAmount: fromAmount,
+                            toAmount: toAmount,
+                            rate: EXCHANGE_RATE
+                        }
+                    });
+
+                    t.update(ref, updates);
+                });
+
+                showToast(`✅ تم التبادل بنجاح!`);
+                await updateUI();
+                updateSwapBalances();
+                await loadTransactions(); // لتحديث قائمة العمليات
+
+            } catch (e) {
+                showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e);
+            }
+        }
+
+        // ربط حدث إدخال المبلغ بحساب النتيجة
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('swapAmountInput');
+            if (input) {
+                input.addEventListener('input', calculateSwapResult);
+            }
+            // تهيئة واجهة التبادل
+            updateSwapUI();
+            calculateSwapResult();
+        });
 
         // ============================================================
         // CHECK VERIFICATION EXPIRY (تفحص انتهاء صلاحية التوثيق)
@@ -4130,24 +4521,24 @@
         }
 
         // ============================================================
-        // PLANS & RENDER
+        // PLANS & RENDER (لصفحة العوائد أصبحت فارغة، ونعرض الخطط فقط في تبويب استثماراتي)
         // ============================================================
         async function loadPlans() {
             allInvestPlans = DEFAULT_INVEST_PLANS;
+            // لا نعرض أي شيء في صفحة العوائد (فارغة)
             renderPlans();
-            renderPlansInside(); // لتحديث التبويب الجديد
+            renderPlansInside(); // لتحديث التبويب الجديد في استثماراتي
             console.log('📦 تم تحميل خطط العوائد الثابتة من الكود المحلي');
         }
 
-        // دالة عرض الخطط في صفحة العوائد الرئيسية (تم تعديلها لتكون فارغة)
+        // صفحة العوائد فارغة تماماً
         function renderPlans() {
             const container = document.getElementById('investPlansList');
             if (!container) return;
-            // الصفحة فارغة تماماً
-            container.innerHTML = '';
+            container.innerHTML = ''; // فارغة
         }
 
-        // دالة عرض الخطط داخل تبويب استثماراتي
+        // عرض الخطط داخل تبويب استثماراتي
         function renderPlansInside() {
             const container = document.getElementById('investPlansListInside');
             if (!container) return;
@@ -4582,7 +4973,7 @@
                     <div class="left"><div style="width:36px;text-align:center;"><i class="fas ${getTransactionIcon(t.type)}" style="font-size:18px;"></i></div>
                         <div><div class="title">${getTransactionLabel(t.type)}</div><div class="sub">${t.description||''} • ${formatDateTime(t.timestamp)}</div></div>
                     </div>
-                    <div class="right"><div class="amount ${t.type==='withdraw'?'text-danger':'text-success'}">${t.type==='withdraw'?'−':'+'}${t.amount.toFixed(2)} DZD</div></div>
+                    <div class="right"><div class="amount ${t.type==='withdraw'?'text-danger':'text-success'}">${t.type==='withdraw'?'−':'+'}${t.amount.toFixed(2)} ${t.currency||'DZD'}</div></div>
                 </div>
             `).join('');
         }
@@ -5031,9 +5422,12 @@
                     else tg.close();
                 });
             }
+            // تهيئة واجهة التبادل
+            updateSwapUI();
+            calculateSwapResult();
         });
 
-        console.log('🚀 Crynova - مع توثيق شهري وصندوق زكاة مشترك وتبويب جديد للخطط في استثماراتي');
+        console.log('🚀 Crynova - مع تبادل DZD/USDT وصفحة عوائد فارغة');
     </script>
 </body>
 </html>
