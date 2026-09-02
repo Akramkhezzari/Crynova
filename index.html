@@ -3121,50 +3121,6 @@
             currency: 'DZD',
             isActive: true,
             displayOrder: 1
-        }, {
-            id: 'plan_advanced',
-            type: 'investment',
-            name: 'المستوى المتقدم',
-            description: 'فئة الاستثمار: 5,000 – 9,999 دج',
-            minAmount: 5000,
-            maxAmount: 9999,
-            dailyReturnPercent: 5.5,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 2
-        }, {
-            id: 'plan_premium',
-            type: 'investment',
-            name: 'المستوى المميز',
-            description: 'فئة الاستثمار: 10,000 – 19,999 دج',
-            minAmount: 10000,
-            maxAmount: 19999,
-            dailyReturnPercent: 6,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 3
-        }, {
-            id: 'plan_pro',
-            type: 'investment',
-            name: 'المستوى الاحترافي',
-            description: 'فئة الاستثمار: 20,000 – 34,999 دج',
-            minAmount: 20000,
-            maxAmount: 34999,
-            dailyReturnPercent: 6.5,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 4
-        }, {
-            id: 'plan_elite',
-            type: 'investment',
-            name: 'مستوى النخبة',
-            description: 'فئة الاستثمار: 35,000 – 50,000 دج',
-            minAmount: 35000,
-            maxAmount: 50000,
-            dailyReturnPercent: 7,
-            currency: 'DZD',
-            isActive: true,
-            displayOrder: 5
         }];
 
         // ============================================================
@@ -3221,12 +3177,12 @@
                     console.log('✅ تحديث بيانات الزكاة:', data);
                 } else {
                     const defaultData = {
-                        totalDonations: 125400,
-                        distributed: 98000,
-                        remaining: 27400,
-                        distributionPercentage: 78,
-                        donorsCount: 127,
-                        beneficiariesCount: 342,
+                        totalDonations: 0,
+                        distributed: 0,
+                        remaining: 0,
+                        distributionPercentage: 0,
+                        donorsCount: 0,
+                        beneficiariesCount: 0,
                         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                     };
                     zakatRef.set(defaultData)
@@ -3239,12 +3195,12 @@
             }, (error) => {
                 console.error('❌ خطأ في الاستماع لبيانات الزكاة:', error);
                 const fallbackData = {
-                    totalDonations: 125400,
-                    distributed: 98000,
-                    remaining: 27400,
-                    distributionPercentage: 78,
-                    donorsCount: 127,
-                    beneficiariesCount: 342
+                    totalDonations: 0,
+                    distributed: 0,
+                    remaining: 0,
+                    distributionPercentage: 0,
+                    donorsCount: 0,
+                    beneficiariesCount: 0
                 };
                 updateZakatUI(fallbackData);
             });
