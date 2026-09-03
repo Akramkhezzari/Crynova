@@ -3078,16 +3078,16 @@
             <div class="input-group">
                 <label for="depositMethodSelect">طريقة الإيداع <span class="required">*</span></label>
                 <select id="depositMethodSelect" class="deposit-method-select" onchange="updateDepositForm(this.value)">
-                    <option value="baridi">🏦 Baridi Mob (DZD)</option>
-                    <option value="binance">🟡 Binance (USDT)</option>
-                    <option value="redotpay">🟣 RedotPay (USDT)</option>
+                    <option value="baridi"> BaridiMob</option>
+                    <option value="binance"> Binance</option>
+                    <option value="redotpay"> RedotPay</option>
                 </select>
             </div>
 
             <div class="card" id="depositMainCard" style="padding:14px 16px;">
                 <!-- حقل رقم الحساب / معرف المحفظة (يتغير حسب الطريقة) -->
                 <div class="input-group" id="depositAccountGroup" style="margin-bottom:10px;">
-                    <label style="font-size:13px;margin-bottom:4px;" id="depositAccountLabel">رقم حساب Baridi Mob <span class="required">*</span></label>
+                    <label style="font-size:13px;margin-bottom:4px;" id="depositAccountLabel">رقم حساب BaridiMob <span class="required">*</span></label>
                     <div style="display:flex;gap:6px;align-items:center;">
                         <input type="text" id="depositAccountInput" value="00799999002385412178" readonly style="flex:1;background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text-primary);font-size:14px;font-weight:600;font-family:inherit;">
                         <button class="copy-btn" onclick="copyDepositAccount(event)" style="padding:4px 12px;font-size:12px;">
@@ -3095,7 +3095,7 @@
                         </button>
                     </div>
                     <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="depositAccountHint">
-                        <i class="fas fa-info-circle"></i> قم بالتحويل إلى حساب BaridiMob هذا
+                        <i class="fas fa-info-circle"></i> قم بتحويل المبلغ إلى حساب البريدي الموضح أدناه لإتمام العملية
                     </div>
                 </div>
 
@@ -3147,9 +3147,9 @@
             <div class="input-group">
                 <label for="withdrawMethodSelect">طريقة السحب <span class="required">*</span></label>
                 <select id="withdrawMethodSelect" class="withdraw-method-select" onchange="updateWithdrawForm(this.value)">
-                    <option value="baridi">🏦 Baridi Mob (DZD)</option>
-                    <option value="binance">🟡 Binance (USDT)</option>
-                    <option value="redotpay">🟣 RedotPay (USDT)</option>
+                    <option value="baridi"> BaridiMob </option>
+                    <option value="binance"> Binance </option>
+                    <option value="redotpay"> RedotPay </option>
                 </select>
             </div>
 
@@ -3170,10 +3170,10 @@
             <div class="card" style="padding:14px 16px;">
                 <!-- حقل المعرف (يتغير حسب الطريقة) -->
                 <div class="input-group" id="withdrawAccountGroup" style="margin-bottom:10px;">
-                    <label style="font-size:13px;margin-bottom:4px;" id="withdrawAccountLabel">معرف Baridi Mob الخاص بك <span class="required">*</span></label>
+                    <label style="font-size:13px;margin-bottom:4px;" id="withdrawAccountLabel"> معرّف حسابك البريدي<span class="required">*</span></label>
                     <div class="input-icon">
                         <i class="fas fa-mobile-screen-button" style="font-size:14px;" id="withdrawAccountIcon"></i>
-                        <input type="text" id="withdrawAccountInput" placeholder="أدخل معرف Baridi Mob الخاص بك" style="padding:10px 14px;font-size:14px;padding-right:36px;">
+                        <input type="text" id="withdrawAccountInput" placeholder="أدخل معرّف حسابك البريدي" style="padding:10px 14px;font-size:14px;padding-right:36px;">
                     </div>
                     <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="withdrawAccountHint">
                         <i class="fas fa-info-circle"></i> يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999
