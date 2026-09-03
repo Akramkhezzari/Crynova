@@ -63,6 +63,8 @@
             --dzd-light: rgba(225, 112, 85, 0.12);
             --gold: #f9a825;
             --usdt-color: #26a17b;
+            --binance-color: #f3ba2f;
+            --redotpay-color: #8b5cf6;
 
             --border: #e2e8f0;
             --border-light: #f0f4f8;
@@ -454,6 +456,26 @@
         .btn-usdt:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 32px rgba(38, 161, 123, 0.4);
+        }
+
+        .btn-binance {
+            background: linear-gradient(135deg, #f3ba2f, #e8a92e);
+            color: #1a1a2e;
+            box-shadow: 0 4px 24px rgba(243, 186, 47, 0.3);
+        }
+        .btn-binance:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(243, 186, 47, 0.4);
+        }
+
+        .btn-redotpay {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            box-shadow: 0 4px 24px rgba(139, 92, 246, 0.3);
+        }
+        .btn-redotpay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4);
         }
 
         .btn-outline {
@@ -1741,6 +1763,153 @@
             color: var(--usdt-color);
         }
 
+        /* ===== قائمة منسدلة لطريقة الإيداع ===== */
+        .deposit-method-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: var(--transition);
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236c5ce7' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 14px center;
+            padding-left: 40px;
+        }
+        .deposit-method-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+            background-color: var(--bg-card);
+        }
+        .deposit-method-select option {
+            padding: 8px;
+            font-weight: 500;
+        }
+        .deposit-method-select option i {
+            margin-left: 8px;
+        }
+
+        /* ===== نافذة تأكيد الإيداع ===== */
+        .deposit-confirm-modal .modal-card {
+            border-top: 6px solid var(--success);
+        }
+        .deposit-confirm-modal .confirm-details {
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            margin: 12px 0;
+        }
+        .deposit-confirm-modal .confirm-details .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 14px;
+        }
+        .deposit-confirm-modal .confirm-details .detail-row:last-child {
+            border-bottom: none;
+        }
+        .deposit-confirm-modal .confirm-details .detail-row .label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .deposit-confirm-modal .confirm-details .detail-row .value {
+            font-weight: 700;
+            color: var(--text-primary);
+            word-break: break-all;
+            text-align: left;
+            max-width: 60%;
+        }
+        .deposit-confirm-modal .confirm-details .detail-row .value.dzd-color {
+            color: var(--dzd-color);
+        }
+        .deposit-confirm-modal .confirm-details .detail-row .value.usdt-color {
+            color: var(--usdt-color);
+        }
+        .deposit-confirm-modal .confirm-details .detail-row .value.method-baridi {
+            color: var(--dzd-color);
+        }
+        .deposit-confirm-modal .confirm-details .detail-row .value.method-binance {
+            color: var(--binance-color);
+        }
+        .deposit-confirm-modal .confirm-details .detail-row .value.method-redotpay {
+            color: var(--redotpay-color);
+        }
+        .deposit-confirm-modal .confirm-warning {
+            background: var(--warning-light);
+            border: 1px solid var(--warning);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-size: 13px;
+            color: #b7950b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .deposit-confirm-modal .confirm-warning i {
+            font-size: 16px;
+        }
+
+        /* ===== قائمة منسدلة لطريقة السحب ===== */
+        .withdraw-method-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: var(--transition);
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236c5ce7' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 14px center;
+            padding-left: 40px;
+        }
+        .withdraw-method-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+            background-color: var(--bg-card);
+        }
+        .withdraw-method-select option {
+            padding: 8px;
+            font-weight: 500;
+        }
+
+        /* ===== نافذة تأكيد السحب ===== */
+        .withdraw-confirm-modal .modal-card {
+            border-top: 6px solid var(--danger);
+        }
+        .withdraw-confirm-modal .confirm-details .detail-row .value.dzd-color {
+            color: var(--dzd-color);
+        }
+        .withdraw-confirm-modal .confirm-details .detail-row .value.usdt-color {
+            color: var(--usdt-color);
+        }
+        .withdraw-confirm-modal .confirm-details .detail-row .value.method-baridi {
+            color: var(--dzd-color);
+        }
+        .withdraw-confirm-modal .confirm-details .detail-row .value.method-binance {
+            color: var(--binance-color);
+        }
+        .withdraw-confirm-modal .confirm-details .detail-row .value.method-redotpay {
+            color: var(--redotpay-color);
+        }
+
         /* RESPONSIVE */
         @media (max-width: 420px) {
             .app-container {
@@ -1811,6 +1980,16 @@
             .swap-amount .currency-label {
                 justify-content: center;
                 padding: 8px;
+            }
+            .deposit-method-select,
+            .withdraw-method-select {
+                font-size: 14px;
+                padding: 10px 14px;
+                padding-left: 36px;
+            }
+            .deposit-confirm-modal .confirm-details .detail-row,
+            .withdraw-confirm-modal .confirm-details .detail-row {
+                font-size: 13px;
             }
         }
 
@@ -2579,6 +2758,21 @@
             font-weight: 800;
             color: #10b981;
         }
+
+        /* ===== قسم الإيداع - حقل رقم العملية ===== */
+        .deposit-tx-id-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .deposit-tx-id-wrapper input {
+            flex: 1;
+        }
+        .deposit-tx-id-wrapper .tx-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
@@ -2871,7 +3065,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: DEPOSIT ========== -->
+        <!-- ========== PAGE: DEPOSIT (Dropdown + Confirmation) ========== -->
         <div class="page" id="page-deposit">
             <h2 style="font-size:20px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-down text-success" style="font-size:18px;"></i> الإيداع
@@ -2879,41 +3073,59 @@
                     <i class="fas fa-arrow-right"></i> رجوع
                 </button>
             </h2>
+
+            <!-- قائمة منسدلة لطريقة الإيداع -->
+            <div class="input-group">
+                <label for="depositMethodSelect">طريقة الإيداع <span class="required">*</span></label>
+                <select id="depositMethodSelect" class="deposit-method-select" onchange="updateDepositForm(this.value)">
+                    <option value="baridi">🏦 Baridi Mob (DZD)</option>
+                    <option value="binance">🟡 Binance (USDT)</option>
+                    <option value="redotpay">🟣 RedotPay (USDT)</option>
+                </select>
+            </div>
+
             <div class="card" id="depositMainCard" style="padding:14px 16px;">
-                <div class="input-group" id="depositEccpGroup" style="margin-bottom:10px;">
-                    <label style="font-size:13px;margin-bottom:4px;">رقم حساب Baridi Mob <span class="required">*</span></label>
+                <!-- حقل رقم الحساب / معرف المحفظة (يتغير حسب الطريقة) -->
+                <div class="input-group" id="depositAccountGroup" style="margin-bottom:10px;">
+                    <label style="font-size:13px;margin-bottom:4px;" id="depositAccountLabel">رقم حساب Baridi Mob <span class="required">*</span></label>
                     <div style="display:flex;gap:6px;align-items:center;">
-                        <input type="text" id="depositEccpId" value="00799999002385412178" readonly style="flex:1;background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text-primary);font-size:14px;font-weight:600;font-family:inherit;">
+                        <input type="text" id="depositAccountInput" value="00799999002385412178" readonly style="flex:1;background:var(--bg-input);border:2px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text-primary);font-size:14px;font-weight:600;font-family:inherit;">
                         <button class="copy-btn" onclick="copyDepositAccount(event)" style="padding:4px 12px;font-size:12px;">
                             <i class="fas fa-copy"></i> نسخ
                         </button>
                     </div>
-                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="depositAccountHint">
                         <i class="fas fa-info-circle"></i> قم بالتحويل إلى حساب BaridiMob هذا
                     </div>
                 </div>
+
+                <!-- حقل المبلغ (يتغير حسب العملة) -->
                 <div class="input-group" style="margin-bottom:10px;">
-                    <label style="font-size:13px;margin-bottom:4px;">المبلغ <span class="required">*</span></label>
+                    <label style="font-size:13px;margin-bottom:4px;" id="depositAmountLabel">المبلغ (DZD) <span class="required">*</span></label>
                     <div class="input-icon">
-                        <i class="fas fa-dinar-sign" style="font-size:14px;"></i>
+                        <i class="fas fa-dinar-sign" style="font-size:14px;" id="depositAmountIcon"></i>
                         <input type="number" id="depositAmount" placeholder="أدخل المبلغ" min="2000" step="100" style="padding:10px 14px;font-size:14px;padding-right:36px;">
                     </div>
-                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">الحد الأدنى للإيداع: 2000 DZD</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="depositMinHint">الحد الأدنى للإيداع: 2000 DZD</div>
                 </div>
+
+                <!-- حقل رقم العملية -->
                 <div class="input-group" style="margin-bottom:10px;">
-                    <label style="font-size:13px;margin-bottom:4px;">رقم عملية التحويل <span class="required">*</span></label>
+                    <label style="font-size:13px;margin-bottom:4px;" id="depositTxLabel">رقم عملية التحويل <span class="required">*</span></label>
                     <div class="input-icon">
                         <i class="fas fa-receipt" style="font-size:14px;"></i>
                         <input type="text" id="depositTransactionId" placeholder="أدخل رقم العملية من وصل التحويل" style="padding:10px 14px;font-size:14px;padding-right:36px;">
                     </div>
-                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="depositTxHint">
                         <i class="fas fa-info-circle"></i> أدخل رقم العملية الموجود في وصل التحويل
                     </div>
                 </div>
+
                 <button class="btn btn-success" id="depositCreateBtn" onclick="submitDeposit()" style="padding:10px 16px;font-size:14px;margin-top:4px;">
                     <i class="fas fa-check-circle"></i> تأكيد الإيداع
                 </button>
             </div>
+
             <div class="card" style="padding:14px 16px;">
                 <div class="card-title" style="font-size:15px;margin-bottom:10px;"><i class="fas fa-clock-rotate-left"></i> طلبات الإيداع</div>
                 <div id="depositRequests">
@@ -2922,7 +3134,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: WITHDRAW ========== -->
+        <!-- ========== PAGE: WITHDRAW (مع قائمة منسدلة ونافذة تأكيد) ========== -->
         <div class="page" id="page-withdraw">
             <h2 style="font-size:20px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-up text-danger" style="font-size:18px;"></i> السحب
@@ -2930,6 +3142,17 @@
                     <i class="fas fa-arrow-right"></i> رجوع
                 </button>
             </h2>
+
+            <!-- قائمة منسدلة لطريقة السحب -->
+            <div class="input-group">
+                <label for="withdrawMethodSelect">طريقة السحب <span class="required">*</span></label>
+                <select id="withdrawMethodSelect" class="withdraw-method-select" onchange="updateWithdrawForm(this.value)">
+                    <option value="baridi">🏦 Baridi Mob (DZD)</option>
+                    <option value="binance">🟡 Binance (USDT)</option>
+                    <option value="redotpay">🟣 RedotPay (USDT)</option>
+                </select>
+            </div>
+
             <div class="card" style="border:2px solid var(--warning);padding:12px 16px;">
                 <div class="flex-between">
                     <div>
@@ -2941,39 +3164,47 @@
                         <div style="font-size:16px;font-weight:800;" id="withdrawMinAmount">1000 DZD</div>
                     </div>
                 </div>
-                <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">رسوم السحب: 10% من المبلغ</div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;" id="withdrawFeeLabel">رسوم السحب: 10% من المبلغ</div>
             </div>
+
             <div class="card" style="padding:14px 16px;">
-                <div class="input-group" id="withdrawBaridiGroup" style="margin-bottom:10px;">
-                    <label style="font-size:13px;margin-bottom:4px;">معرف Baridi Mob الخاص بك <span class="required">*</span></label>
+                <!-- حقل المعرف (يتغير حسب الطريقة) -->
+                <div class="input-group" id="withdrawAccountGroup" style="margin-bottom:10px;">
+                    <label style="font-size:13px;margin-bottom:4px;" id="withdrawAccountLabel">معرف Baridi Mob الخاص بك <span class="required">*</span></label>
                     <div class="input-icon">
-                        <i class="fas fa-mobile-screen-button" style="font-size:14px;"></i>
-                        <input type="text" id="withdrawBaridiId" placeholder="أدخل معرف Baridi Mob الخاص بك" style="padding:10px 14px;font-size:14px;padding-right:36px;">
+                        <i class="fas fa-mobile-screen-button" style="font-size:14px;" id="withdrawAccountIcon"></i>
+                        <input type="text" id="withdrawAccountInput" placeholder="أدخل معرف Baridi Mob الخاص بك" style="padding:10px 14px;font-size:14px;padding-right:36px;">
                     </div>
-                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="withdrawAccountHint">
                         <i class="fas fa-info-circle"></i> يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999
                     </div>
                 </div>
+
+                <!-- حقل المبلغ -->
                 <div class="input-group" style="margin-bottom:10px;">
-                    <label style="font-size:13px;margin-bottom:4px;">المبلغ <span class="required">*</span></label>
+                    <label style="font-size:13px;margin-bottom:4px;" id="withdrawAmountLabel">المبلغ (DZD) <span class="required">*</span></label>
                     <div class="input-icon">
-                        <i class="fas fa-dinar-sign" style="font-size:14px;"></i>
+                        <i class="fas fa-dinar-sign" style="font-size:14px;" id="withdrawAmountIcon"></i>
                         <input type="number" id="withdrawAmount" placeholder="أدخل المبلغ" min="1000" step="100" style="padding:10px 14px;font-size:14px;padding-right:36px;">
                     </div>
-                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">الحد الأدنى للسحب: 1000 DZD</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="withdrawMinHint">الحد الأدنى للسحب: 1000 DZD</div>
                 </div>
+
+                <!-- حقل الرسوم والإجمالي -->
                 <div class="flex-between fee-row" style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">
-                    <span style="color:var(--text-secondary);font-weight:600;">الرسوم (10%)</span>
+                    <span style="color:var(--text-secondary);font-weight:600;" id="feeLabel">الرسوم (10%)</span>
                     <span id="withdrawFee" style="font-weight:700;">0.00</span>
                 </div>
                 <div class="flex-between total-row" style="padding:8px 0;font-size:16px;font-weight:900;">
                     <span>المبلغ الإجمالي</span>
                     <span id="withdrawTotal" style="color:var(--accent);font-size:20px;">0.00</span>
                 </div>
-                <button class="btn btn-danger" onclick="requestWithdraw()" style="padding:10px 16px;font-size:14px;">
+
+                <button class="btn btn-danger" onclick="submitWithdraw()" style="padding:10px 16px;font-size:14px;">
                     <i class="fas fa-paper-plane"></i> طلب السحب
                 </button>
             </div>
+
             <div class="card" style="padding:14px 16px;">
                 <div class="card-title" style="font-size:15px;margin-bottom:10px;"><i class="fas fa-clock-rotate-left"></i> طلبات السحب</div>
                 <div id="withdrawRequests">
@@ -3315,6 +3546,62 @@
         </div>
     </div>
 
+    <!-- ===== DEPOSIT CONFIRMATION MODAL ===== -->
+    <div class="modal-overlay deposit-confirm-modal" id="depositConfirmModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fas fa-check-circle" style="color:var(--success);"></i> تأكيد الإيداع</h3>
+                <button class="close-modal" onclick="closeDepositConfirmModal()">&times;</button>
+            </div>
+
+            <div class="confirm-details" id="confirmDetails">
+                <!-- سيتم ملء البيانات بواسطة JavaScript -->
+            </div>
+
+            <div class="confirm-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>يرجى التأكد من صحة البيانات قبل تأكيد الإيداع</span>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeDepositConfirmModal()">
+                    <i class="fas fa-times"></i> إلغاء
+                </button>
+                <button class="btn btn-success" id="confirmDepositBtn" onclick="confirmDepositSubmit()">
+                    <i class="fas fa-check-circle"></i> تأكيد الإيداع
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== WITHDRAW CONFIRMATION MODAL ===== -->
+    <div class="modal-overlay withdraw-confirm-modal" id="withdrawConfirmModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i> تأكيد السحب</h3>
+                <button class="close-modal" onclick="closeWithdrawConfirmModal()">&times;</button>
+            </div>
+
+            <div class="confirm-details" id="withdrawConfirmDetails">
+                <!-- سيتم ملء البيانات بواسطة JavaScript -->
+            </div>
+
+            <div class="confirm-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>يرجى التأكد من صحة البيانات قبل تأكيد السحب</span>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeWithdrawConfirmModal()">
+                    <i class="fas fa-times"></i> إلغاء
+                </button>
+                <button class="btn btn-danger" id="confirmWithdrawBtn" onclick="confirmWithdrawSubmit()">
+                    <i class="fas fa-paper-plane"></i> تأكيد السحب
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== BOTTOM NAVIGATION ===== -->
     <nav class="bottom-nav" id="bottomNav">
         <button class="nav-item active" data-page="home" onclick="navigateTo('home')">
@@ -3374,9 +3661,17 @@
         let isModalOpen = false;
         let zakatUnsubscribe = null;
 
+        // متغيرات لتخزين بيانات الإيداع والسحب المؤقتة قبل التأكيد
+        let pendingDepositData = null;
+        let pendingWithdrawData = null;
+
         const POSTAL_ACCOUNT = '00799999002385412178';
+        const BINANCE_WALLET = '1143951718';
+        const REDOTPAY_WALLET = '1374908224';
         const MIN_WITHDRAW = 1000;
+        const MIN_WITHDRAW_USDT = 10;
         const MIN_DEPOSIT = 2000;
+        const MIN_DEPOSIT_USDT = 10;
         const FIRST_BONUS_PERCENT = 7;
 
         // سعر الصرف الثابت
@@ -4258,6 +4553,589 @@
         });
 
         // ============================================================
+        // DEPOSIT - مع نافذة تأكيد
+        // ============================================================
+        // تهيئة النموذج بالطريقة الافتراضية (baridi)
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDepositForm('baridi');
+            updateWithdrawForm('baridi');
+        });
+
+        function updateDepositForm(method) {
+            const accountInput = document.getElementById('depositAccountInput');
+            const accountLabel = document.getElementById('depositAccountLabel');
+            const accountHint = document.getElementById('depositAccountHint');
+            const amountLabel = document.getElementById('depositAmountLabel');
+            const amountIcon = document.getElementById('depositAmountIcon');
+            const amountInput = document.getElementById('depositAmount');
+            const minHint = document.getElementById('depositMinHint');
+            const txLabel = document.getElementById('depositTxLabel');
+            const txHint = document.getElementById('depositTxHint');
+
+            if (method === 'baridi') {
+                accountInput.value = POSTAL_ACCOUNT;
+                accountLabel.textContent = 'رقم حساب Baridi Mob';
+                accountHint.innerHTML = '<i class="fas fa-info-circle"></i> قم بالتحويل إلى حساب BaridiMob هذا';
+                amountLabel.textContent = 'المبلغ (DZD)';
+                amountIcon.className = 'fas fa-dinar-sign';
+                amountInput.min = MIN_DEPOSIT;
+                amountInput.step = 100;
+                amountInput.placeholder = 'أدخل المبلغ';
+                minHint.textContent = `الحد الأدنى للإيداع: ${MIN_DEPOSIT} DZD`;
+                txLabel.textContent = 'رقم عملية التحويل';
+                txHint.innerHTML = '<i class="fas fa-info-circle"></i> أدخل رقم العملية الموجود في وصل التحويل BaridiMob';
+            } else if (method === 'binance') {
+                accountInput.value = BINANCE_WALLET;
+                accountLabel.textContent = 'معرف محفظة Binance (USDT)';
+                accountHint.innerHTML = '<i class="fas fa-info-circle"></i> قم بالتحويل إلى محفظة Binance هذه (شبكة BEP20 أو ERC20)';
+                amountLabel.textContent = 'المبلغ (USDT)';
+                amountIcon.className = 'fas fa-coins';
+                amountInput.min = MIN_DEPOSIT_USDT;
+                amountInput.step = 1;
+                amountInput.placeholder = 'أدخل المبلغ';
+                minHint.textContent = `الحد الأدنى للإيداع: ${MIN_DEPOSIT_USDT} USDT`;
+                txLabel.textContent = 'رقم عملية التحويل (TXID)';
+                txHint.innerHTML = '<i class="fas fa-info-circle"></i> أدخل رقم العملية (TXID) من محفظتك';
+            } else if (method === 'redotpay') {
+                accountInput.value = REDOTPAY_WALLET;
+                accountLabel.textContent = 'معرف محفظة RedotPay (USDT)';
+                accountHint.innerHTML = '<i class="fas fa-info-circle"></i> قم بالتحويل إلى محفظة RedotPay هذه';
+                amountLabel.textContent = 'المبلغ (USDT)';
+                amountIcon.className = 'fas fa-coins';
+                amountInput.min = MIN_DEPOSIT_USDT;
+                amountInput.step = 1;
+                amountInput.placeholder = 'أدخل المبلغ';
+                minHint.textContent = `الحد الأدنى للإيداع: ${MIN_DEPOSIT_USDT} USDT`;
+                txLabel.textContent = 'رقم عملية التحويل (TXID)';
+                txHint.innerHTML = '<i class="fas fa-info-circle"></i> أدخل رقم العملية (TXID) من محفظتك';
+            }
+        }
+
+        // ===== دوال نافذة تأكيد الإيداع =====
+        function showDepositConfirmModal(data) {
+            const modal = document.getElementById('depositConfirmModal');
+            const detailsContainer = document.getElementById('confirmDetails');
+
+            const methodDisplay = {
+                'baridi': 'Baridi Mob (DZD)',
+                'binance': 'Binance (USDT)',
+                'redotpay': 'RedotPay (USDT)'
+            };
+
+            const methodClass = {
+                'baridi': 'method-baridi',
+                'binance': 'method-binance',
+                'redotpay': 'method-redotpay'
+            };
+
+            const currencyClass = data.currency === 'DZD' ? 'dzd-color' : 'usdt-color';
+
+            detailsContainer.innerHTML = `
+                <div class="detail-row">
+                    <span class="label">طريقة الإيداع</span>
+                    <span class="value ${methodClass[data.method]}">${methodDisplay[data.method] || data.method}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">${data.method === 'baridi' ? 'رقم الحساب' : 'معرف المحفظة'}</span>
+                    <span class="value">${data.account}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">المبلغ</span>
+                    <span class="value ${currencyClass}">${data.amount.toFixed(2)} ${data.currency}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">رقم العملية</span>
+                    <span class="value">${data.transactionId}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">الشبكة</span>
+                    <span class="value">${data.network}</span>
+                </div>
+            `;
+
+            pendingDepositData = data;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDepositConfirmModal() {
+            const modal = document.getElementById('depositConfirmModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            pendingDepositData = null;
+        }
+
+        async function submitDeposit() {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
+            const methodSelect = document.getElementById('depositMethodSelect');
+            const method = methodSelect.value;
+
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+            if (!amount || amount <= 0) { showToast('أدخل مبلغاً صحيحاً'); return; }
+
+            let minAmount, currency, account, network, methodDisplay;
+            if (method === 'baridi') {
+                minAmount = MIN_DEPOSIT;
+                currency = 'DZD';
+                account = POSTAL_ACCOUNT;
+                network = 'Baridi Mob';
+                methodDisplay = 'Baridi Mob';
+                if (amount < minAmount) { showToast(`الحد الأدنى للإيداع ${minAmount} DZD`); return; }
+            } else if (method === 'binance') {
+                minAmount = MIN_DEPOSIT_USDT;
+                currency = 'USDT';
+                account = BINANCE_WALLET;
+                network = 'Binance (BEP20/ERC20)';
+                methodDisplay = 'Binance';
+                if (amount < minAmount) { showToast(`الحد الأدنى للإيداع ${minAmount} USDT`); return; }
+            } else if (method === 'redotpay') {
+                minAmount = MIN_DEPOSIT_USDT;
+                currency = 'USDT';
+                account = REDOTPAY_WALLET;
+                network = 'RedotPay';
+                methodDisplay = 'RedotPay';
+                if (amount < minAmount) { showToast(`الحد الأدنى للإيداع ${minAmount} USDT`); return; }
+            } else {
+                showToast('طريقة إيداع غير معروفة');
+                return;
+            }
+
+            const txId = document.getElementById('depositTransactionId').value.trim();
+            if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
+
+            showDepositConfirmModal({
+                method: method,
+                methodDisplay: methodDisplay,
+                amount: amount,
+                currency: currency,
+                account: account,
+                network: network,
+                transactionId: txId,
+                minAmount: minAmount
+            });
+        }
+
+        async function confirmDepositSubmit() {
+            if (!pendingDepositData) {
+                showToast('حدث خطأ، حاول مرة أخرى');
+                return;
+            }
+
+            const data = pendingDepositData;
+            const { method, amount, currency, account, network, transactionId: txId } = data;
+
+            const existingDeposits = userData.deposits || [];
+            const duplicate = existingDeposits.find(d =>
+                d.transactionId === txId &&
+                Math.abs(d.amount - amount) < 0.01 &&
+                d.currency === currency
+            );
+
+            if (duplicate) {
+                showToast('⚠️ تم تسجيل هذا الإيداع مسبقاً بنفس رقم العملية والمبلغ!');
+                closeDepositConfirmModal();
+                return;
+            }
+
+            const now = new Date();
+            const recentDuplicate = existingDeposits.find(d =>
+                d.transactionId === txId &&
+                Math.abs(d.amount - amount) < 0.01 &&
+                d.currency === currency &&
+                (now - (d.createdAt?.toDate ? d.createdAt.toDate() : new Date(d.createdAt))) < 5 * 60 * 1000
+            );
+
+            if (recentDuplicate) {
+                showToast('⚠️ تم إرسال هذا الإيداع مؤخراً، يرجى الانتظار قليلاً');
+                closeDepositConfirmModal();
+                return;
+            }
+
+            try {
+                const depositId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+                const depositObj = {
+                    depositId: depositId,
+                    amount: amount,
+                    currency: currency,
+                    method: method,
+                    methodDisplay: data.methodDisplay || method,
+                    network: network,
+                    walletAddress: account,
+                    transactionId: txId,
+                    status: 'pending',
+                    createdAt: now
+                };
+
+                await db.collection('users').doc(userData.telegramId).update({
+                    'deposits': firebase.firestore.FieldValue.arrayUnion(depositObj),
+                    'transactions': firebase.firestore.FieldValue.arrayUnion({
+                        type: 'deposit',
+                        amount: amount,
+                        currency: currency,
+                        description: `إيداع ${amount} ${currency} عبر ${data.methodDisplay || method}`,
+                        timestamp: now,
+                        status: 'pending',
+                        depositId: depositId,
+                        method: method
+                    })
+                });
+
+                showToast('✅ تم إرسال طلب الإيداع، في انتظار المراجعة');
+                document.getElementById('depositAmount').value = '';
+                document.getElementById('depositTransactionId').value = '';
+                closeDepositConfirmModal();
+                await loadDeposits();
+                await loadTransactions();
+                updateUI();
+            } catch (e) {
+                console.error(e);
+                showToast('❌ حدث خطأ: ' + e.message);
+                closeDepositConfirmModal();
+            }
+        }
+
+        // ============================================================
+        // WITHDRAW - مع قائمة منسدلة ونافذة تأكيد
+        // ============================================================
+        function updateWithdrawForm(method) {
+            const accountInput = document.getElementById('withdrawAccountInput');
+            const accountLabel = document.getElementById('withdrawAccountLabel');
+            const accountIcon = document.getElementById('withdrawAccountIcon');
+            const accountHint = document.getElementById('withdrawAccountHint');
+            const amountLabel = document.getElementById('withdrawAmountLabel');
+            const amountIcon = document.getElementById('withdrawAmountIcon');
+            const amountInput = document.getElementById('withdrawAmount');
+            const minHint = document.getElementById('withdrawMinHint');
+            const feeLabel = document.getElementById('feeLabel');
+            const withdrawFeeLabel = document.getElementById('withdrawFeeLabel');
+
+            // تحديث الرصيد القابل للسحب حسب العملة
+            updateWithdrawableBalance(method);
+
+            if (method === 'baridi') {
+                accountLabel.textContent = 'معرف Baridi Mob الخاص بك';
+                accountIcon.className = 'fas fa-mobile-screen-button';
+                accountInput.placeholder = 'أدخل معرف Baridi Mob الخاص بك';
+                accountHint.innerHTML = '<i class="fas fa-info-circle"></i> يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999';
+                amountLabel.textContent = 'المبلغ (DZD)';
+                amountIcon.className = 'fas fa-dinar-sign';
+                amountInput.min = MIN_WITHDRAW;
+                amountInput.step = 100;
+                amountInput.placeholder = 'أدخل المبلغ';
+                minHint.textContent = `الحد الأدنى للسحب: ${MIN_WITHDRAW} DZD`;
+                feeLabel.textContent = 'الرسوم (10%)';
+                withdrawFeeLabel.textContent = 'رسوم السحب: 10% من المبلغ';
+                document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
+            } else if (method === 'binance') {
+                accountLabel.textContent = 'عنوان محفظة Binance (USDT)';
+                accountIcon.className = 'fab fa-bitcoin';
+                accountInput.placeholder = 'أدخل عنوان محفظتك على Binance';
+                accountHint.innerHTML = '<i class="fas fa-info-circle"></i> أدخل عنوان محفظة USDT (BEP20 أو ERC20)';
+                amountLabel.textContent = 'المبلغ (USDT)';
+                amountIcon.className = 'fas fa-coins';
+                amountInput.min = MIN_WITHDRAW_USDT;
+                amountInput.step = 1;
+                amountInput.placeholder = 'أدخل المبلغ';
+                minHint.textContent = `الحد الأدنى للسحب: ${MIN_WITHDRAW_USDT} USDT`;
+                feeLabel.textContent = 'الرسوم (0%)';
+                withdrawFeeLabel.textContent = 'رسوم السحب: 0%';
+                document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW_USDT} USDT`;
+            } else if (method === 'redotpay') {
+                accountLabel.textContent = 'معرف محفظة RedotPay (USDT)';
+                accountIcon.className = 'fas fa-wallet';
+                accountInput.placeholder = 'أدخل معرف محفظتك على RedotPay';
+                accountHint.innerHTML = '<i class="fas fa-info-circle"></i> أدخل معرف محفظة USDT على RedotPay';
+                amountLabel.textContent = 'المبلغ (USDT)';
+                amountIcon.className = 'fas fa-coins';
+                amountInput.min = MIN_WITHDRAW_USDT;
+                amountInput.step = 1;
+                amountInput.placeholder = 'أدخل المبلغ';
+                minHint.textContent = `الحد الأدنى للسحب: ${MIN_WITHDRAW_USDT} USDT`;
+                feeLabel.textContent = 'الرسوم (0%)';
+                withdrawFeeLabel.textContent = 'رسوم السحب: 0%';
+                document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW_USDT} USDT`;
+            }
+
+            // إعادة حساب الرسوم والإجمالي
+            calculateWithdrawFee();
+        }
+
+        function updateWithdrawableBalance(method) {
+            if (!userData) return;
+            const w = userData.wallets || {};
+            let balance = 0;
+            if (method === 'baridi') {
+                balance = (w.dzd || 0) + (w.dzdReward || 0) + (w.dzdReferral || 0);
+            } else {
+                balance = w.usdt || 0;
+            }
+            document.getElementById('withdrawableBalance').textContent = balance.toFixed(2);
+        }
+
+        function calculateWithdrawFee() {
+            const methodSelect = document.getElementById('withdrawMethodSelect');
+            const method = methodSelect.value;
+            const amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
+            let fee = 0;
+
+            if (method === 'baridi') {
+                fee = amount * 0.10;
+            } else {
+                fee = 0;
+            }
+
+            document.getElementById('withdrawFee').textContent = fee.toFixed(2);
+            document.getElementById('withdrawTotal').textContent = (amount + fee).toFixed(2);
+        }
+
+        // ربط حدث حساب الرسوم
+        document.addEventListener('DOMContentLoaded', function() {
+            const amt = document.getElementById('withdrawAmount');
+            if (amt) {
+                amt.addEventListener('input', calculateWithdrawFee);
+            }
+        });
+
+        // ===== دوال نافذة تأكيد السحب =====
+        function showWithdrawConfirmModal(data) {
+            const modal = document.getElementById('withdrawConfirmModal');
+            const detailsContainer = document.getElementById('withdrawConfirmDetails');
+
+            const methodDisplay = {
+                'baridi': 'Baridi Mob (DZD)',
+                'binance': 'Binance (USDT)',
+                'redotpay': 'RedotPay (USDT)'
+            };
+
+            const methodClass = {
+                'baridi': 'method-baridi',
+                'binance': 'method-binance',
+                'redotpay': 'method-redotpay'
+            };
+
+            const currencyClass = data.currency === 'DZD' ? 'dzd-color' : 'usdt-color';
+
+            detailsContainer.innerHTML = `
+                <div class="detail-row">
+                    <span class="label">طريقة السحب</span>
+                    <span class="value ${methodClass[data.method]}">${methodDisplay[data.method] || data.method}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">${data.method === 'baridi' ? 'معرف Baridi Mob' : 'عنوان المحفظة'}</span>
+                    <span class="value">${data.account}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">المبلغ</span>
+                    <span class="value ${currencyClass}">${data.amount.toFixed(2)} ${data.currency}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">الرسوم</span>
+                    <span class="value ${currencyClass}">${data.fee.toFixed(2)} ${data.currency}</span>
+                </div>
+                <div class="detail-row" style="font-weight:900;border-bottom:none;font-size:16px;">
+                    <span class="label">الإجمالي</span>
+                    <span class="value ${currencyClass}">${data.total.toFixed(2)} ${data.currency}</span>
+                </div>
+            `;
+
+            pendingWithdrawData = data;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeWithdrawConfirmModal() {
+            const modal = document.getElementById('withdrawConfirmModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            pendingWithdrawData = null;
+        }
+
+        async function submitWithdraw() {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
+            const methodSelect = document.getElementById('withdrawMethodSelect');
+            const method = methodSelect.value;
+
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            if (!amount || amount <= 0) { showToast('أدخل مبلغاً صحيحاً'); return; }
+
+            let minAmount, currency, account, network, methodDisplay, feePercent;
+            if (method === 'baridi') {
+                minAmount = MIN_WITHDRAW;
+                currency = 'DZD';
+                account = document.getElementById('withdrawAccountInput').value.trim();
+                network = 'Baridi Mob';
+                methodDisplay = 'Baridi Mob';
+                feePercent = 0.10;
+                if (amount < minAmount) { showToast(`الحد الأدنى للسحب ${minAmount} DZD`); return; }
+                if (!account) { showToast('أدخل معرف Baridi Mob الخاص بك'); return; }
+                if (!isValidBaridiId(account)) {
+                    showToast('⚠️ معرف Baridi Mob غير صحيح! يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999');
+                    return;
+                }
+                // التحقق من الرصيد
+                const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+                if (amount > balance) { showToast('الرصيد غير كافٍ'); return; }
+            } else if (method === 'binance') {
+                minAmount = MIN_WITHDRAW_USDT;
+                currency = 'USDT';
+                account = document.getElementById('withdrawAccountInput').value.trim();
+                network = 'Binance (BEP20/ERC20)';
+                methodDisplay = 'Binance';
+                feePercent = 0;
+                if (amount < minAmount) { showToast(`الحد الأدنى للسحب ${minAmount} USDT`); return; }
+                if (!account) { showToast('أدخل عنوان محفظتك على Binance'); return; }
+                if (account.length < 10) { showToast('⚠️ عنوان المحفظة غير صحيح'); return; }
+                // التحقق من الرصيد
+                const balance = userData.wallets?.usdt || 0;
+                if (amount > balance) { showToast('رصيد USDT غير كافٍ'); return; }
+            } else if (method === 'redotpay') {
+                minAmount = MIN_WITHDRAW_USDT;
+                currency = 'USDT';
+                account = document.getElementById('withdrawAccountInput').value.trim();
+                network = 'RedotPay';
+                methodDisplay = 'RedotPay';
+                feePercent = 0;
+                if (amount < minAmount) { showToast(`الحد الأدنى للسحب ${minAmount} USDT`); return; }
+                if (!account) { showToast('أدخل معرف محفظتك على RedotPay'); return; }
+                if (account.length < 5) { showToast('⚠️ معرف المحفظة غير صحيح'); return; }
+                // التحقق من الرصيد
+                const balance = userData.wallets?.usdt || 0;
+                if (amount > balance) { showToast('رصيد USDT غير كافٍ'); return; }
+            } else {
+                showToast('طريقة سحب غير معروفة');
+                return;
+            }
+
+            const fee = amount * feePercent;
+            const total = amount + fee;
+
+            // عرض نافذة التأكيد
+            showWithdrawConfirmModal({
+                method: method,
+                methodDisplay: methodDisplay,
+                amount: amount,
+                currency: currency,
+                account: account,
+                network: network,
+                fee: fee,
+                total: total,
+                minAmount: minAmount
+            });
+        }
+
+        async function confirmWithdrawSubmit() {
+            if (!pendingWithdrawData) {
+                showToast('حدث خطأ، حاول مرة أخرى');
+                return;
+            }
+
+            const data = pendingWithdrawData;
+            const { method, amount, currency, account, network, fee, total } = data;
+
+            try {
+                const now = new Date();
+                const withdrawalId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+                const withdrawObj = {
+                    withdrawalId: withdrawalId,
+                    amount: amount,
+                    currency: currency,
+                    recipientAddress: account,
+                    network: network,
+                    method: method,
+                    methodDisplay: data.methodDisplay || method,
+                    fee: fee,
+                    status: 'pending',
+                    createdAt: now
+                };
+
+                if (currency === 'DZD') {
+                    // سحب DZD من المحافظ المختلفة
+                    await db.runTransaction(async (t) => {
+                        const ref = db.collection('users').doc(userData.telegramId);
+                        const doc = await t.get(ref);
+                        if (!doc.exists) throw new Error('غير موجود');
+
+                        let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                            .wallets?.dzdReferral || 0);
+                        if (bal < total) throw new Error('رصيد غير كاف');
+
+                        let rem = total;
+                        const m = doc.data().wallets?.dzd || 0,
+                            r = doc.data().wallets?.dzdReward || 0,
+                            refr = doc.data().wallets?.dzdReferral || 0;
+                        const fm = Math.min(rem, m);
+                        rem -= fm;
+                        const fr = Math.min(rem, r);
+                        rem -= fr;
+                        const fref = Math.min(rem, refr);
+                        rem -= fref;
+                        const upd = {
+                            'wallets.dzd': m - fm,
+                            'wallets.dzdReward': r - fr,
+                            'wallets.dzdReferral': refr - fref,
+                            'transactions': firebase.firestore.FieldValue.arrayUnion({
+                                type: 'withdraw',
+                                amount: total,
+                                currency: currency,
+                                description: `سحب ${amount} ${currency} عبر ${data.methodDisplay} (رسوم ${fee.toFixed(2)})`,
+                                balanceAfter: bal - total,
+                                timestamp: now,
+                                withdrawalId: withdrawalId,
+                                status: 'pending',
+                                method: method
+                            }),
+                            'withdrawals': firebase.firestore.FieldValue.arrayUnion(withdrawObj)
+                        };
+                        t.update(ref, upd);
+                    });
+                } else {
+                    // سحب USDT من محفظة usdt
+                    await db.runTransaction(async (t) => {
+                        const ref = db.collection('users').doc(userData.telegramId);
+                        const doc = await t.get(ref);
+                        if (!doc.exists) throw new Error('غير موجود');
+
+                        const bal = doc.data().wallets?.usdt || 0;
+                        if (bal < amount) throw new Error('رصيد USDT غير كاف');
+
+                        const upd = {
+                            'wallets.usdt': bal - amount,
+                            'transactions': firebase.firestore.FieldValue.arrayUnion({
+                                type: 'withdraw',
+                                amount: amount,
+                                currency: currency,
+                                description: `سحب ${amount} ${currency} عبر ${data.methodDisplay}`,
+                                balanceAfter: bal - amount,
+                                timestamp: now,
+                                withdrawalId: withdrawalId,
+                                status: 'pending',
+                                method: method
+                            }),
+                            'withdrawals': firebase.firestore.FieldValue.arrayUnion(withdrawObj)
+                        };
+                        t.update(ref, upd);
+                    });
+                }
+
+                showToast('✅ تم طلب السحب بنجاح');
+                document.getElementById('withdrawAmount').value = '';
+                document.getElementById('withdrawAccountInput').value = '';
+                closeWithdrawConfirmModal();
+                await loadWithdrawals();
+                await loadTransactions();
+                updateUI();
+            } catch (e) {
+                showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e);
+                closeWithdrawConfirmModal();
+            }
+        }
+
+        // ============================================================
         // CHECK VERIFICATION EXPIRY (تفحص انتهاء صلاحية التوثيق)
         // ============================================================
         async function checkVerificationExpiry() {
@@ -4266,7 +5144,6 @@
 
             const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
             if (expiry <= new Date()) {
-                // انتهت صلاحية التوثيق
                 try {
                     await db.collection('users').doc(userData.telegramId).update({
                         verified: false,
@@ -4284,84 +5161,8 @@
         }
 
         // ============================================================
-        // DEPOSIT
+        // DEPOSIT LIST
         // ============================================================
-        async function submitDeposit() {
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-
-            const amount = parseFloat(document.getElementById('depositAmount').value);
-            if (!amount || amount < MIN_DEPOSIT) {
-                showToast(`الحد الأدنى للإيداع ${MIN_DEPOSIT} DZD`);
-                return;
-            }
-
-            const txId = document.getElementById('depositTransactionId').value.trim();
-            if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
-
-            const existingDeposits = userData.deposits || [];
-            const duplicate = existingDeposits.find(d =>
-                d.transactionId === txId &&
-                Math.abs(d.amount - amount) < 0.01
-            );
-
-            if (duplicate) {
-                showToast('⚠️ تم تسجيل هذا الإيداع مسبقاً بنفس رقم العملية والمبلغ!');
-                return;
-            }
-
-            const now = new Date();
-            const recentDuplicate = existingDeposits.find(d =>
-                d.transactionId === txId &&
-                Math.abs(d.amount - amount) < 0.01 &&
-                (now - (d.createdAt?.toDate ? d.createdAt.toDate() : new Date(d.createdAt))) < 5 * 60 * 1000
-            );
-
-            if (recentDuplicate) {
-                showToast('⚠️ تم إرسال هذا الإيداع مؤخراً، يرجى الانتظار قليلاً');
-                return;
-            }
-
-            const address = `Baridi Mob: ${POSTAL_ACCOUNT}`;
-
-            try {
-                const depositId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-
-                const depositObj = {
-                    depositId: depositId,
-                    amount: amount,
-                    currency: 'DZD',
-                    network: 'Baridi Mob',
-                    walletAddress: address,
-                    transactionId: txId,
-                    status: 'pending',
-                    createdAt: now
-                };
-
-                await db.collection('users').doc(userData.telegramId).update({
-                    'deposits': firebase.firestore.FieldValue.arrayUnion(depositObj),
-                    'transactions': firebase.firestore.FieldValue.arrayUnion({
-                        type: 'deposit',
-                        amount: amount,
-                        currency: 'DZD',
-                        description: `إيداع ${amount} DZD`,
-                        timestamp: now,
-                        status: 'pending',
-                        depositId: depositId
-                    })
-                });
-
-                showToast('✅ تم إرسال طلب الإيداع، في انتظار المراجعة');
-                document.getElementById('depositAmount').value = '';
-                document.getElementById('depositTransactionId').value = '';
-                await loadDeposits();
-                await loadTransactions();
-                updateUI();
-            } catch (e) {
-                console.error(e);
-                showToast('❌ حدث خطأ: ' + e.message);
-            }
-        }
-
         async function loadDeposits() {
             if (!userData) return;
             try {
@@ -4385,112 +5186,15 @@
                 return; }
             c.innerHTML = list.map(d => `
                 <div class="list-item" style="padding:10px 0;">
-                    <div class="left"><div><div class="title" style="font-size:14px;">${d.amount} DZD</div><div class="sub" style="font-size:12px;">رقم العملية: ${d.transactionId} • ${formatDateTime(d.createdAt)}</div></div></div>
+                    <div class="left"><div><div class="title" style="font-size:14px;">${d.amount} ${d.currency || 'DZD'}</div><div class="sub" style="font-size:12px;">${d.methodDisplay || d.method || 'طريقة غير معروفة'} • رقم العملية: ${d.transactionId} • ${formatDateTime(d.createdAt)}</div></div></div>
                     <div class="right"><span class="status ${getStatusBadge(d.status)}" style="font-size:11px;padding:2px 10px;">${getStatusText(d.status)}</span></div>
                 </div>
             `).join('');
         }
 
         // ============================================================
-        // WITHDRAW
+        // WITHDRAW LIST
         // ============================================================
-        function isValidBaridiId(id) {
-            if (!id || typeof id !== 'string') return false;
-            const cleaned = id.replace(/\s/g, '');
-            if (!/^\d{20}$/.test(cleaned)) return false;
-            if (!cleaned.startsWith('00799999')) return false;
-            return true;
-        }
-
-        async function requestWithdraw() {
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-            if (!amount || amount < MIN_WITHDRAW) {
-                showToast(`الحد الأدنى للسحب ${MIN_WITHDRAW} DZD`);
-                return;
-            }
-
-            const totalBal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
-            if (amount > totalBal) { showToast('الرصيد غير كافٍ'); return; }
-
-            const recipient = document.getElementById('withdrawBaridiId').value.trim();
-            if (!recipient) { showToast('أدخل معرف Baridi Mob الخاص بك'); return; }
-
-            if (!isValidBaridiId(recipient)) {
-                showToast('⚠️ معرف Baridi Mob غير صحيح! يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999');
-                return;
-            }
-
-            const fee = amount * 0.10;
-            const total = amount + fee;
-            if (!confirm(`تأكيد سحب ${amount} DZD? الرسوم: ${fee.toFixed(2)} DZD`)) return;
-
-            try {
-                const now = new Date();
-                const withdrawalId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-
-                const withdrawObj = {
-                    withdrawalId: withdrawalId,
-                    amount: amount,
-                    currency: 'DZD',
-                    recipientAddress: recipient,
-                    network: 'Baridi Mob',
-                    fee: fee,
-                    status: 'pending',
-                    createdAt: now
-                };
-
-                await db.runTransaction(async (t) => {
-                    const ref = db.collection('users').doc(userData.telegramId);
-                    const doc = await t.get(ref);
-                    if (!doc.exists) throw new Error('غير موجود');
-
-                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
-                        .wallets?.dzdReferral || 0);
-                    if (bal < total) throw new Error('رصيد غير كاف');
-
-                    let rem = total;
-                    const m = doc.data().wallets?.dzd || 0,
-                        r = doc.data().wallets?.dzdReward || 0,
-                        refr = doc.data().wallets?.dzdReferral || 0;
-                    const fm = Math.min(rem, m);
-                    rem -= fm;
-                    const fr = Math.min(rem, r);
-                    rem -= fr;
-                    const fref = Math.min(rem, refr);
-                    rem -= fref;
-                    const upd = {
-                        'wallets.dzd': m - fm,
-                        'wallets.dzdReward': r - fr,
-                        'wallets.dzdReferral': refr - fref,
-                        'transactions': firebase.firestore.FieldValue.arrayUnion({
-                            type: 'withdraw',
-                            amount: total,
-                            currency: 'DZD',
-                            description: `سحب ${amount} DZD (رسوم ${fee.toFixed(2)})`,
-                            balanceAfter: bal - total,
-                            timestamp: now,
-                            withdrawalId: withdrawalId,
-                            status: 'pending'
-                        }),
-                        'withdrawals': firebase.firestore.FieldValue.arrayUnion(withdrawObj)
-                    };
-                    t.update(ref, upd);
-                });
-
-                showToast('✅ تم طلب السحب بنجاح');
-                document.getElementById('withdrawBaridiId').value = '';
-                document.getElementById('withdrawAmount').value = '';
-
-                await loadWithdrawals();
-                await loadTransactions();
-                updateUI();
-            } catch (e) {
-                showToast('❌ ' + (e.message || 'حدث خطأ'));
-            }
-        }
-
         async function loadWithdrawals() {
             if (!userData) return;
             try {
@@ -4510,35 +5214,43 @@
         function renderWithdrawals(list) {
             const c = document.getElementById('withdrawRequests');
             if (!list || !list.length) { c.innerHTML =
-                    '<div class="text-muted text-center" style="padding:12px 0;font-size:13px;">لا توجد طلبات</div>';
+                    '<div class="text-muted text-center" style="padding:12px 0;font-size:13px;">لا توجد طلبات سحب</div>';
                 return; }
             c.innerHTML = list.map(w => `
                 <div class="list-item" style="padding:10px 0;">
-                    <div class="left"><div><div class="title" style="font-size:14px;">${w.amount} DZD</div><div class="sub" style="font-size:12px;">${formatDateTime(w.createdAt)}</div></div></div>
+                    <div class="left"><div><div class="title" style="font-size:14px;">${w.amount} ${w.currency || 'DZD'}</div><div class="sub" style="font-size:12px;">${w.methodDisplay || w.method || 'طريقة غير معروفة'} • ${formatDateTime(w.createdAt)}</div></div></div>
                     <div class="right"><span class="status ${getStatusBadge(w.status)}" style="font-size:11px;padding:2px 10px;">${getStatusText(w.status)}</span></div>
                 </div>
             `).join('');
         }
 
         // ============================================================
-        // PLANS & RENDER (لصفحة العوائد أصبحت فارغة، ونعرض الخطط فقط في تبويب استثماراتي)
+        // VALIDATION FUNCTIONS
+        // ============================================================
+        function isValidBaridiId(id) {
+            if (!id || typeof id !== 'string') return false;
+            const cleaned = id.replace(/\s/g, '');
+            if (!/^\d{20}$/.test(cleaned)) return false;
+            if (!cleaned.startsWith('00799999')) return false;
+            return true;
+        }
+
+        // ============================================================
+        // PLANS & RENDER
         // ============================================================
         async function loadPlans() {
             allInvestPlans = DEFAULT_INVEST_PLANS;
-            // لا نعرض أي شيء في صفحة العوائد (فارغة)
             renderPlans();
-            renderPlansInside(); // لتحديث التبويب الجديد في استثماراتي
+            renderPlansInside();
             console.log('📦 تم تحميل خطط العوائد الثابتة من الكود المحلي');
         }
 
-        // صفحة العوائد فارغة تماماً
         function renderPlans() {
             const container = document.getElementById('investPlansList');
             if (!container) return;
-            container.innerHTML = ''; // فارغة
+            container.innerHTML = '';
         }
 
-        // عرض الخطط داخل تبويب استثماراتي
         function renderPlansInside() {
             const container = document.getElementById('investPlansListInside');
             if (!container) return;
@@ -4575,38 +5287,31 @@
         }
 
         // ============================================================
-        // INVESTMENT TABS (داخل صفحة استثماراتي)
+        // INVESTMENT TABS
         // ============================================================
         function switchInvestTab(tabId) {
-            // إخفاء جميع اللوحات
             document.querySelectorAll('.invest-tab-panel').forEach(panel => {
                 panel.style.display = 'none';
                 panel.classList.remove('active');
             });
-
-            // إظهار اللوحة المطلوبة
             const targetPanel = document.getElementById('panel-' + tabId);
             if (targetPanel) {
                 targetPanel.style.display = 'block';
                 targetPanel.classList.add('active');
             }
-
-            // تحديث حالة الأزرار
             document.querySelectorAll('#page-investments .profile-tab-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.dataset.tab === tabId) {
                     btn.classList.add('active');
                 }
             });
-
-            // إذا كان التبويب هو خطط الاستثمار، قم بعرضها (تأكد من تحميلها)
             if (tabId === 'invest-plans') {
                 renderPlansInside();
             }
         }
 
         // ============================================================
-        // INVESTMENT MODAL FUNCTIONS (الموجودة سابقاً)
+        // INVESTMENT MODAL
         // ============================================================
         function openInvestmentModal(planId) {
             if (isModalOpen) return;
@@ -4909,7 +5614,7 @@
         }
 
         // ============================================================
-        // REFERRALS LIST
+        // REFERRALS
         // ============================================================
         async function loadReferrals() {
             if (!userData) return;
@@ -4985,21 +5690,6 @@
             });
             renderTransactions(allTransactions);
         }
-
-        // ============================================================
-        // WITHDRAW CALCULATION
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            const amt = document.getElementById('withdrawAmount');
-            if (amt) {
-                amt.addEventListener('input', function() {
-                    const a = parseFloat(this.value) || 0;
-                    const fee = a * 0.10;
-                    document.getElementById('withdrawFee').textContent = fee.toFixed(2);
-                    document.getElementById('withdrawTotal').textContent = (a + fee).toFixed(2);
-                });
-            }
-        });
 
         // ============================================================
         // INVESTMENT DAILY RETURNS
@@ -5131,7 +5821,7 @@
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
         // ============================================================
-        // PROFILE TABS SWITCH
+        // PROFILE TABS
         // ============================================================
         function switchProfileTab(tabId) {
             document.querySelectorAll('.profile-tab-panel').forEach(panel => {
@@ -5272,7 +5962,7 @@
         }
 
         // ============================================================
-        // VERIFICATION LOGIC - اشتراك شهري قابل للتجديد
+        // VERIFICATION
         // ============================================================
         function updateVerificationUI() {
             if (!userData) return;
@@ -5281,13 +5971,12 @@
             const btn = document.querySelector('.vc-btn');
             const priceSpan = document.querySelector('.vc-price');
 
-            if (!btn) return; // خروج آمن
+            if (!btn) return;
 
             if (verified && expiry) {
                 const expiryDate = expiry.toDate ? expiry.toDate() : new Date(expiry);
                 const now = new Date();
                 if (expiryDate > now) {
-                    // نشط
                     const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
                     btn.innerHTML = `<i class="fas fa-check-circle"></i> موثق (متبقي ${daysLeft} يوم)`;
                     btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
@@ -5298,7 +5987,6 @@
                         priceSpan.style.display = 'none';
                     }
                 } else {
-                    // منتهي
                     btn.innerHTML = '<i class="fas fa-clock"></i> انتهى التوثيق - جدد الآن';
                     btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
                     btn.disabled = false;
@@ -5312,7 +6000,6 @@
                     }
                 }
             } else {
-                // غير موثق
                 btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
                 btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
                 btn.disabled = false;
@@ -5331,7 +6018,6 @@
         async function requestVerification() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
-            // التحقق إذا كان التوثيق نشطاً ولم ينتهِ بعد
             if (userData.verified && userData.verificationExpiry) {
                 const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
                 if (expiry > new Date()) {
@@ -5358,7 +6044,7 @@
             try {
                 const now = new Date();
                 const expiryDate = new Date(now);
-                expiryDate.setMonth(expiryDate.getMonth() + 1); // شهر واحد
+                expiryDate.setMonth(expiryDate.getMonth() + 1);
 
                 await db.runTransaction(async (t) => {
                     const ref = db.collection('users').doc(userData.telegramId);
@@ -5422,12 +6108,11 @@
                     else tg.close();
                 });
             }
-            // تهيئة واجهة التبادل
             updateSwapUI();
             calculateSwapResult();
         });
 
-        console.log('🚀 Crynova - مع تبادل DZD/USDT وصفحة عوائد فارغة');
+        console.log('🚀 Crynova - مع تبادل DZD/USDT وصفحة عوائد فارغة وطرق إيداع وسحب متعددة مع نافذة تأكيد');
     </script>
 </body>
 </html>
