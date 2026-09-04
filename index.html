@@ -2986,13 +2986,25 @@
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-wallet text-accent"></i> المحفظة
             </h2>
-            <div class="card dzd-gradient" id="walletBalanceCard">
-                <div style="text-align:center;padding:4px 0;">
-                    <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">الرصيد الكلي (DZD)</div>
-                    <div style="font-size:44px;font-weight:900;color:white;" id="walletTotal">0.00</div>
-                    <div style="color:rgba(255,255,255,0.6);font-size:14px;" id="walletTotalCurrency">DZD</div>
+            <!-- شبكة 2×1 للرصيد الكلي DZD ورصيد USDT -->
+            <div class="grid-2" style="gap:12px;">
+                <div class="card dzd-gradient" id="walletBalanceCard" style="margin-bottom:0;">
+                    <div style="text-align:center;padding:4px 0;">
+                        <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">الرصيد الكلي (DZD)</div>
+                        <div style="font-size:44px;font-weight:900;color:white;" id="walletTotal">0.00</div>
+                        <div style="color:rgba(255,255,255,0.6);font-size:14px;" id="walletTotalCurrency">DZD</div>
+                    </div>
+                </div>
+                <div class="card usdt-gradient" id="walletUsdtCard" style="margin-bottom:0;">
+                    <div style="text-align:center;padding:4px 0;">
+                        <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">رصيد USDT</div>
+                        <div style="font-size:44px;font-weight:900;color:white;" id="walletUsdt">0.00</div>
+                        <div style="color:rgba(255,255,255,0.6);font-size:14px;">USDT</div>
+                    </div>
                 </div>
             </div>
+
+            <!-- باقي البطاقات (المحافظ الفرعية) -->
             <div class="grid-2">
                 <div class="card" style="border-right:4px solid var(--success);">
                     <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">الرئيسية</div>
@@ -3011,16 +3023,8 @@
                     <div style="font-size:24px;font-weight:800;" id="walletLocked">0.00</div>
                 </div>
             </div>
-            <!-- رصيد USDT -->
-            <div class="card usdt-gradient" style="margin-top:4px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <div>
-                        <div style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;">رصيد USDT</div>
-                        <div style="font-size:28px;font-weight:900;color:white;" id="walletUsdt">0.00</div>
-                    </div>
-                    <div><i class="fas fa-coins" style="font-size:32px;color:rgba(255,255,255,0.6);"></i></div>
-                </div>
-            </div>
+
+            <!-- الرصيد القابل للسحب -->
             <div class="card" style="background:var(--accent-glow);border-color:var(--accent-light);">
                 <div class="flex-between">
                     <div>
@@ -4047,7 +4051,7 @@
                             dzdReward: 0,
                             dzdReferral: 0,
                             dzdLocked: 0,
-                            usdt: 0 // إضافة محفظة USDT
+                            usdt: 0
                         },
                         investments: [],
                         totalInvested: 0,
@@ -4380,7 +4384,7 @@
             document.getElementById('walletWithdrawable').textContent = total.toFixed(2);
             document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
             document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
-            // USDT
+            // USDT - تحديث البطاقة الجانبية
             document.getElementById('walletUsdt').textContent = (w.usdt || 0).toFixed(2);
         }
 
