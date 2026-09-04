@@ -2773,6 +2773,66 @@
             color: var(--text-muted);
             margin-top: 4px;
         }
+
+        /* ===== بطاقة الرصيد الموحدة (DZD + USDT) - توسيط كامل ===== */
+        .balance-combined {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 16px 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            text-align: center;
+            flex-wrap: wrap;
+        }
+        .balance-combined .col {
+            flex: 0 1 auto;
+            padding: 4px 8px;
+        }
+        .balance-combined .col .label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .balance-combined .col .amount {
+            font-size: 26px;
+            font-weight: 900;
+            line-height: 1.3;
+        }
+        .balance-combined .col .amount.dzd {
+            color: var(--dzd-color);
+        }
+        .balance-combined .col .amount.usdt {
+            color: var(--usdt-color);
+        }
+        .balance-combined .col .currency {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+        .balance-combined .divider {
+            width: 1px;
+            background: var(--border);
+            height: 40px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 420px) {
+            .balance-combined .col .amount {
+                font-size: 22px;
+            }
+            .balance-combined {
+                padding: 12px 8px;
+                gap: 10px;
+            }
+            .balance-combined .divider {
+                height: 30px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2986,21 +3046,19 @@
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-wallet text-accent"></i> المحفظة
             </h2>
-            <!-- شبكة 2×1 للرصيد الكلي DZD ورصيد USDT -->
-            <div class="grid-2" style="gap:12px;">
-                <div class="card dzd-gradient" id="walletBalanceCard" style="margin-bottom:0;">
-                    <div style="text-align:center;padding:4px 0;">
-                        <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">الرصيد الكلي (DZD)</div>
-                        <div style="font-size:44px;font-weight:900;color:white;" id="walletTotal">0.00</div>
-                        <div style="color:rgba(255,255,255,0.6);font-size:14px;" id="walletTotalCurrency">DZD</div>
-                    </div>
+
+            <!-- بطاقة واحدة تجمع DZD و USDT في المنتصف -->
+            <div class="balance-combined" id="walletCombined">
+                <div class="col">
+                    <div class="label">الرصيد الكلي (DZD)</div>
+                    <div class="amount dzd" id="walletTotal">0.00</div>
+                    <div class="currency">DZD</div>
                 </div>
-                <div class="card usdt-gradient" id="walletUsdtCard" style="margin-bottom:0;">
-                    <div style="text-align:center;padding:4px 0;">
-                        <div style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">رصيد USDT</div>
-                        <div style="font-size:44px;font-weight:900;color:white;" id="walletUsdt">0.00</div>
-                        <div style="color:rgba(255,255,255,0.6);font-size:14px;">USDT</div>
-                    </div>
+                <div class="divider"></div>
+                <div class="col">
+                    <div class="label">رصيد USDT</div>
+                    <div class="amount usdt" id="walletUsdt">0.00</div>
+                    <div class="currency">USDT</div>
                 </div>
             </div>
 
@@ -4375,8 +4433,10 @@
             const referral = w.dzdReferral || 0;
             const locked = w.dzdLocked || 0;
             const total = main + reward + referral;
+            // تحديث البطاقة الموحدة
             document.getElementById('walletTotal').textContent = total.toFixed(2);
-            document.getElementById('walletTotalCurrency').textContent = 'DZD';
+            document.getElementById('walletUsdt').textContent = (w.usdt || 0).toFixed(2);
+            // باقي المحافظ
             document.getElementById('walletMain').textContent = main.toFixed(2);
             document.getElementById('walletReward').textContent = reward.toFixed(2);
             document.getElementById('walletReferral').textContent = referral.toFixed(2);
@@ -4384,8 +4444,6 @@
             document.getElementById('walletWithdrawable').textContent = total.toFixed(2);
             document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
             document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
-            // USDT - تحديث البطاقة الجانبية
-            document.getElementById('walletUsdt').textContent = (w.usdt || 0).toFixed(2);
         }
 
         function updateReferralUI() {
