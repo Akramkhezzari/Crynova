@@ -2845,6 +2845,55 @@
                 font-size: 9px;
             }
         }
+
+        /* ===== بطاقة رصيد الصفحة الرئيسية (مصغرة) ===== */
+        .home-balance-combined {
+            background: linear-gradient(135deg, #e17055, #d63031);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 12px 12px;
+            margin-bottom: 16px;
+            color: white;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            text-align: center;
+            gap: 4px;
+            box-shadow: var(--shadow-sm);
+        }
+        .home-balance-combined .col .label {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .home-balance-combined .col .amount {
+            font-size: 22px;
+            font-weight: 900;
+            line-height: 1.2;
+            color: white;
+        }
+        .home-balance-combined .col .currency {
+            font-size: 12px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .home-balance-combined .col .amount.dzd {
+            color: white;
+        }
+        .home-balance-combined .col .amount.usdt {
+            color: #a8e6cf;
+        }
+        @media (max-width: 420px) {
+            .home-balance-combined .col .amount {
+                font-size: 18px;
+            }
+            .home-balance-combined {
+                padding: 8px 6px;
+            }
+            .home-balance-combined .col .label {
+                font-size: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2873,29 +2922,28 @@
 
         <!-- ========== PAGE: HOME ========== -->
         <div class="page active" id="page-home">
-            <!-- بطاقة الرصيد الرئيسية -->
-            <div class="card dzd-gradient" id="homeBalanceCard">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                    <div>
-                        <div class="balance-label" style="color:rgba(255,255,255,0.8);">الرصيد الكلي</div>
-                        <div>
-                            <span class="balance-large white" id="homeBalance">0.00</span>
-                            <span class="balance-currency" style="color:rgba(255,255,255,0.8);" id="homeCurrency">DZD</span>
-                        </div>
-                    </div>
-                    <div style="text-align:left;">
-                        <div style="font-size:13px;color:rgba(255,255,255,0.7);">المستوى</div>
-                        <div style="font-size:20px;font-weight:900;" id="userLevelBadge">1</div>
-                    </div>
+            <!-- بطاقة الرصيد المدمجة (DZD + USDT) -->
+            <div class="home-balance-combined" id="homeBalanceCombined">
+                <div class="col">
+                    <div class="label">الرصيد الكلي (DZD)</div>
+                    <div class="amount dzd" id="homeBalanceDzd">0.00</div>
+                    <div class="currency">DZD</div>
                 </div>
-                <div style="display:flex;gap:12px;margin-top:16px;">
-                    <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white;width:auto;flex:1;" onclick="navigateTo('deposit')">
-                        <i class="fas fa-arrow-down"></i> إيداع
-                    </button>
-                    <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white;width:auto;flex:1;" onclick="navigateTo('withdraw')">
-                        <i class="fas fa-arrow-up"></i> سحب
-                    </button>
+                <div class="col">
+                    <div class="label">رصيد USDT</div>
+                    <div class="amount usdt" id="homeBalanceUsdt">0.00</div>
+                    <div class="currency">USDT</div>
                 </div>
+            </div>
+
+            <!-- أزرار الإيداع والسحب -->
+            <div style="display:flex;gap:12px;margin-bottom:16px;">
+                <button class="btn btn-sm" style="background:var(--success);color:white;width:auto;flex:1;" onclick="navigateTo('deposit')">
+                    <i class="fas fa-arrow-down"></i> إيداع
+                </button>
+                <button class="btn btn-sm" style="background:var(--danger);color:white;width:auto;flex:1;" onclick="navigateTo('withdraw')">
+                    <i class="fas fa-arrow-up"></i> سحب
+                </button>
             </div>
 
             <!-- ===== صندوق الزكاة والرصيد (مشترك لجميع المستخدمين) ===== -->
@@ -4421,10 +4469,12 @@
 
         function updateHomeUI() {
             if (!userData) return;
-            const u = userData;
-            const balance = (u.wallets?.dzd || 0) + (u.wallets?.dzdReward || 0) + (u.wallets?.dzdReferral || 0);
-            document.getElementById('homeBalance').textContent = balance.toFixed(2);
-            document.getElementById('homeCurrency').textContent = 'DZD';
+            const w = userData.wallets || {};
+            // الرصيد الكلي بالدينار = dzd + dzdReward + dzdReferral
+            const totalDzd = (w.dzd || 0) + (w.dzdReward || 0) + (w.dzdReferral || 0);
+            const usdt = w.usdt || 0;
+            document.getElementById('homeBalanceDzd').textContent = totalDzd.toFixed(2);
+            document.getElementById('homeBalanceUsdt').textContent = usdt.toFixed(2);
         }
 
         function updateWalletUI() {
@@ -4443,9 +4493,7 @@
             document.getElementById('walletReward').textContent = reward.toFixed(2);
             document.getElementById('walletReferral').textContent = referral.toFixed(2);
             document.getElementById('walletLocked').textContent = locked.toFixed(2);
-            // تم إزالة سطر walletWithdrawable لأنه لم يعد موجوداً في الصفحة
-            // document.getElementById('walletWithdrawable').textContent = total.toFixed(2);
-            // يتم تحديث withdrawableBalance في صفحة السحب، ويجب أن يبقى كما هو
+            // تحديث withdrawableBalance (في صفحة السحب)
             document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
             document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
         }
