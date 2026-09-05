@@ -2826,7 +2826,6 @@
             height: 30px;
             flex-shrink: 0;
             display: none;
-            /* لم نعد بحاجة إليها مع الـ grid */;
         }
 
         /* في الوضع المظلم */
@@ -3094,16 +3093,7 @@
                 </div>
             </div>
 
-            <!-- الرصيد القابل للسحب -->
-            <div class="card" style="background:var(--accent-glow);border-color:var(--accent-light);">
-                <div class="flex-between">
-                    <div>
-                        <div style="font-weight:700;font-size:16px;">💰 الرصيد القابل للسحب (DZD)</div>
-                        <div style="color:var(--text-secondary);font-size:14px;">يمكنك سحب هذا المبلغ</div>
-                    </div>
-                    <div style="font-size:24px;font-weight:900;color:var(--accent);" id="walletWithdrawable">0.00</div>
-                </div>
-            </div>
+            <!-- تم إزالة بطاقة الرصيد القابل للسحب بناءً على طلب المستخدم -->
         </div>
 
         <!-- ========== PAGE: REFERRALS ========== -->
@@ -4453,7 +4443,9 @@
             document.getElementById('walletReward').textContent = reward.toFixed(2);
             document.getElementById('walletReferral').textContent = referral.toFixed(2);
             document.getElementById('walletLocked').textContent = locked.toFixed(2);
-            document.getElementById('walletWithdrawable').textContent = total.toFixed(2);
+            // تم إزالة سطر walletWithdrawable لأنه لم يعد موجوداً في الصفحة
+            // document.getElementById('walletWithdrawable').textContent = total.toFixed(2);
+            // يتم تحديث withdrawableBalance في صفحة السحب، ويجب أن يبقى كما هو
             document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
             document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
         }
