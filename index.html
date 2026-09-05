@@ -2774,34 +2774,40 @@
             margin-top: 4px;
         }
 
-        /* ===== بطاقة الرصيد الموحدة (DZD + USDT) - توسيط كامل ===== */
+        /* ===== بطاقة الرصيد الموحدة (DZD + USDT) - مثبتة ومقسومة بالتساوي ===== */
         .balance-combined {
             background: var(--bg-card);
             border-radius: var(--radius-md);
-            padding: 16px 12px;
+            padding: 10px 12px;
             margin-bottom: 16px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
-            display: flex;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             align-items: center;
-            gap: 16px;
             text-align: center;
-            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.92);
+            transition: var(--transition);
+            gap: 0;
         }
         .balance-combined .col {
-            flex: 0 1 auto;
-            padding: 4px 8px;
+            padding: 4px 6px;
         }
         .balance-combined .col .label {
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 600;
             color: var(--text-secondary);
+            letter-spacing: 0.3px;
         }
         .balance-combined .col .amount {
-            font-size: 26px;
+            font-size: 20px;
             font-weight: 900;
-            line-height: 1.3;
+            line-height: 1.2;
         }
         .balance-combined .col .amount.dzd {
             color: var(--dzd-color);
@@ -2810,27 +2816,34 @@
             color: var(--usdt-color);
         }
         .balance-combined .col .currency {
-            font-size: 14px;
+            font-size: 11px;
             font-weight: 700;
             color: var(--text-secondary);
         }
         .balance-combined .divider {
             width: 1px;
             background: var(--border);
-            height: 40px;
+            height: 30px;
             flex-shrink: 0;
+            display: none;
+            /* لم نعد بحاجة إليها مع الـ grid */;
+        }
+
+        /* في الوضع المظلم */
+        .dark .balance-combined {
+            background: rgba(26, 26, 62, 0.92);
+            border-color: var(--border);
         }
 
         @media (max-width: 420px) {
             .balance-combined .col .amount {
-                font-size: 22px;
+                font-size: 18px;
             }
             .balance-combined {
-                padding: 12px 8px;
-                gap: 10px;
+                padding: 6px 6px;
             }
-            .balance-combined .divider {
-                height: 30px;
+            .balance-combined .col .label {
+                font-size: 9px;
             }
         }
     </style>
@@ -3047,14 +3060,13 @@
                 <i class="fas fa-wallet text-accent"></i> المحفظة
             </h2>
 
-            <!-- بطاقة واحدة تجمع DZD و USDT في المنتصف -->
+            <!-- بطاقة واحدة مثبتة ومقسومة بالتساوي تجمع DZD و USDT -->
             <div class="balance-combined" id="walletCombined">
                 <div class="col">
-                    <div class="label">الرصيد DZD</div>
+                    <div class="label">الرصيد الكلي (DZD)</div>
                     <div class="amount dzd" id="walletTotal">0.00</div>
                     <div class="currency">DZD</div>
                 </div>
-                <div class="divider"></div>
                 <div class="col">
                     <div class="label">رصيد USDT</div>
                     <div class="amount usdt" id="walletUsdt">0.00</div>
