@@ -4368,6 +4368,7 @@
             if (page === 'profile') updateProfileUI();
             if (page === 'investments') renderInvestments();
             if (page === 'packages') updateSwapBalances();
+            if (page === 'home') updateHomeUI(); // إضافة هذا السطر للتحديث عند العودة للصفحة الرئيسية
         }
 
         // ============================================================
@@ -4473,8 +4474,10 @@
             // الرصيد الكلي بالدينار = dzd + dzdReward + dzdReferral
             const totalDzd = (w.dzd || 0) + (w.dzdReward || 0) + (w.dzdReferral || 0);
             const usdt = w.usdt || 0;
-            document.getElementById('homeBalanceDzd').textContent = totalDzd.toFixed(2);
-            document.getElementById('homeBalanceUsdt').textContent = usdt.toFixed(2);
+            const dzdEl = document.getElementById('homeBalanceDzd');
+            const usdtEl = document.getElementById('homeBalanceUsdt');
+            if (dzdEl) dzdEl.textContent = totalDzd.toFixed(2);
+            if (usdtEl) usdtEl.textContent = usdt.toFixed(2);
         }
 
         function updateWalletUI() {
