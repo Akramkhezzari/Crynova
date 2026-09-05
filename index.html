@@ -4496,6 +4496,8 @@
             // تحديث withdrawableBalance (في صفحة السحب)
             document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
             document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
+            // تحديث الصفحة الرئيسية أيضاً
+            updateHomeUI();
         }
 
         function updateReferralUI() {
