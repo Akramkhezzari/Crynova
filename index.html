@@ -935,13 +935,6 @@
             padding: 2px 8px;
             border-radius: 10px;
         }
-        /* شارة التوثيق في الهيدر */
-        #headerVerificationBadge {
-            display: none;
-            margin-right: 4px;
-            font-size: 12px;
-            vertical-align: middle;
-        }
 
         /* ===== باقات الاشتراك (Pricing Widget) ===== */
         .pricing-widget {
@@ -2852,41 +2845,6 @@
                 font-size: 9px;
             }
         }
-
-        /* ===== اشتراكات: قسم الاشتراك الحالي ===== */
-        #currentSubscription {
-            background: var(--bg-card);
-            border-radius: var(--radius-md);
-            padding: 16px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border);
-        }
-        #currentSubscription .sub-detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 14px;
-        }
-        #currentSubscription .sub-detail-row .label {
-            color: var(--text-secondary);
-        }
-        #currentSubscription .sub-detail-row .value {
-            font-weight: 700;
-        }
-        #subProgress {
-            height: 6px;
-            background: var(--bg-input);
-            border-radius: 10px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-        #subProgress .bar {
-            height: 100%;
-            background: var(--accent-gradient);
-            border-radius: 10px;
-            transition: width 0.5s;
-            width: 0%;
-        }
     </style>
 </head>
 <body>
@@ -2904,9 +2862,6 @@
                     <div class="avatar-small" id="headerAvatar">?</div>
                     <div>
                         <div class="user-name" id="headerUserName">مستخدم</div>
-                        <span id="headerVerificationBadge" style="display:none; background:#22c55e; color:white; border-radius:50%; padding:2px 6px; font-size:10px; margin-right:4px;">
-                            <i class="fas fa-check-circle"></i>
-                        </span>
                         <div class="user-level" id="headerUserLevel">المستوى 1</div>
                     </div>
                 </div>
@@ -2918,25 +2873,26 @@
 
         <!-- ========== PAGE: HOME ========== -->
         <div class="page active" id="page-home">
-            <!-- بطاقة الرصيد الرئيسية (DZD + USDT) -->
-            <div class="balance-combined" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); border: none; border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 16px; box-shadow: var(--shadow-md);">
+            <!-- بطاقة الرصيد المدمجة - DZD و USDT -->
+            <div class="balance-combined" id="homeBalanceCombined">
                 <div class="col">
-                    <div class="label" style="color: rgba(255,255,255,0.8);">الرصيد (DZD)</div>
-                    <div class="amount" style="color: #fff; font-size: 22px;" id="homeDzdBalance">0.00</div>
-                    <div class="currency" style="color: rgba(255,255,255,0.7);">DZD</div>
+                    <div class="label">الرصيد الكلي (DZD)</div>
+                    <div class="amount dzd" id="homeBalance">0.00</div>
+                    <div class="currency">DZD</div>
                 </div>
-                <div class="col" style="border-right: 1px solid rgba(255,255,255,0.2);">
-                    <div class="label" style="color: rgba(255,255,255,0.8);">الرصيد (USDT)</div>
-                    <div class="amount" style="color: #fff; font-size: 22px;" id="homeUsdtBalance">0.00</div>
-                    <div class="currency" style="color: rgba(255,255,255,0.7);">USDT</div>
+                <div class="col">
+                    <div class="label">رصيد USDT</div>
+                    <div class="amount usdt" id="homeUsdt">0.00</div>
+                    <div class="currency">USDT</div>
                 </div>
             </div>
-            <!-- أزرار الإيداع والسحب أسفل البطاقة -->
+
+            <!-- أزرار الإيداع والسحب -->
             <div style="display:flex;gap:12px;margin-bottom:16px;">
-                <button class="btn btn-sm" style="background:rgba(108,92,231,0.2);color:var(--text-primary);border:1px solid var(--border);width:auto;flex:1;" onclick="navigateTo('deposit')">
+                <button class="btn btn-success" style="flex:1;" onclick="navigateTo('deposit')">
                     <i class="fas fa-arrow-down"></i> إيداع
                 </button>
-                <button class="btn btn-sm" style="background:rgba(108,92,231,0.2);color:var(--text-primary);border:1px solid var(--border);width:auto;flex:1;" onclick="navigateTo('withdraw')">
+                <button class="btn btn-warning" style="flex:1;" onclick="navigateTo('withdraw')">
                     <i class="fas fa-arrow-up"></i> سحب
                 </button>
             </div>
@@ -3431,36 +3387,6 @@
                 </div>
 
                 <div class="profile-tab-panel" id="panel-subscription">
-                    <!-- قسم الاشتراك الحالي -->
-                    <div id="currentSubscription">
-                        <div class="flex-between">
-                            <span style="font-weight: 800; font-size: 18px;">الاشتراك الحالي</span>
-                            <span id="subStatusBadge" class="status status-info">غير مشترك</span>
-                        </div>
-                        <div id="subDetails" style="margin-top: 8px;">
-                            <div class="sub-detail-row">
-                                <span class="label">الخطة:</span>
-                                <span class="value" id="subPlanName">--</span>
-                            </div>
-                            <div class="sub-detail-row">
-                                <span class="label">تاريخ البدء:</span>
-                                <span class="value" id="subStartDate">--</span>
-                            </div>
-                            <div class="sub-detail-row">
-                                <span class="label">تاريخ الانتهاء:</span>
-                                <span class="value" id="subEndDate">--</span>
-                            </div>
-                            <div class="sub-detail-row">
-                                <span class="label">الأيام المتبقية:</span>
-                                <span class="value" id="subDaysLeft">--</span>
-                            </div>
-                            <div id="subProgress">
-                                <div class="bar" id="subProgressBar" style="width: 0%;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- باقات الاشتراك -->
                     <div class="pricing-widget">
                         <div class="pc-card pc-starter">
                             <div class="pc-stripe"></div>
@@ -4430,11 +4356,8 @@
             updateWalletUI();
             updateReferralUI();
             renderInvestments();
-            updateVerificationStatus();      // تحديث حالة التوثيق (الشارة والنص)
-            updateVerificationUI();          // تحديث زر التوثيق
+            updateVerificationStatus();
             checkVerificationExpiry();
-            checkSubscriptionExpiry();       // التحقق من انتهاء الاشتراك
-            updateSubscriptionUI();          // تحديث واجهة الاشتراكات
             updateSwapBalances();
         }
 
@@ -4454,53 +4377,54 @@
             updateVerificationStatus();
         }
 
-        // ===== دالة تحديث حالة التوثيق - مع شارة في الهيدر =====
+        // ===== دالة تحديث حالة التوثيق - تظهر "✅ تم التحقق منه" فقط =====
         function updateVerificationStatus() {
             const el = document.getElementById('verificationStatus');
-            const badge = document.getElementById('headerVerificationBadge');
             if (!userData) {
-                if (el) { el.textContent = ''; el.style.display = 'none'; }
-                if (badge) badge.style.display = 'none';
+                el.textContent = '';
+                el.style.display = 'none';
                 return;
             }
             if (userData.verified && userData.verificationExpiry) {
                 const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
-                const now = new Date();
-                const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
-                if (daysLeft > 0) {
-                    el.textContent = `✅ تم التحقق منه (متبقي ${daysLeft} يوم)`;
+                if (expiry > new Date()) {
+                    el.textContent = '✅ تم التحقق منه';
                     el.style.color = '#22c55e';
                     el.style.backgroundColor = '#ecfdf5';
+                    el.style.padding = '2px 10px';
+                    el.style.borderRadius = '20px';
                     el.style.display = 'inline-block';
-                    badge.style.display = 'inline-block';
-                    badge.style.background = '#22c55e';
-                    badge.innerHTML = '<i class="fas fa-check-circle"></i>';
+                    el.style.fontSize = '13px';
+                    el.style.fontWeight = '700';
                 } else {
                     el.textContent = '⏳ انتهى التوثيق - جدد الآن';
                     el.style.color = '#b45309';
                     el.style.backgroundColor = '#fef3c7';
+                    el.style.padding = '2px 10px';
+                    el.style.borderRadius = '20px';
                     el.style.display = 'inline-block';
-                    badge.style.display = 'inline-block';
-                    badge.style.background = '#f59e0b';
-                    badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                    el.style.fontSize = '13px';
+                    el.style.fontWeight = '700';
                 }
             } else {
                 el.textContent = '❌ غير موثق';
                 el.style.color = '#e17055';
                 el.style.backgroundColor = '#fde8e8';
+                el.style.padding = '2px 10px';
+                el.style.borderRadius = '20px';
                 el.style.display = 'inline-block';
-                badge.style.display = 'none';
+                el.style.fontSize = '13px';
+                el.style.fontWeight = '700';
             }
         }
 
-        // ===== HOME UI (عرض DZD و USDT) =====
         function updateHomeUI() {
             if (!userData) return;
             const u = userData;
-            const dzdBalance = (u.wallets?.dzd || 0) + (u.wallets?.dzdReward || 0) + (u.wallets?.dzdReferral || 0);
-            const usdtBalance = u.wallets?.usdt || 0;
-            document.getElementById('homeDzdBalance').textContent = dzdBalance.toFixed(2);
-            document.getElementById('homeUsdtBalance').textContent = usdtBalance.toFixed(2);
+            const balance = (u.wallets?.dzd || 0) + (u.wallets?.dzdReward || 0) + (u.wallets?.dzdReferral || 0);
+            const usdt = u.wallets?.usdt || 0;
+            document.getElementById('homeBalance').textContent = balance.toFixed(2);
+            document.getElementById('homeUsdt').textContent = usdt.toFixed(2);
         }
 
         function updateWalletUI() {
@@ -4511,12 +4435,17 @@
             const referral = w.dzdReferral || 0;
             const locked = w.dzdLocked || 0;
             const total = main + reward + referral;
+            // تحديث البطاقة الموحدة
             document.getElementById('walletTotal').textContent = total.toFixed(2);
             document.getElementById('walletUsdt').textContent = (w.usdt || 0).toFixed(2);
+            // باقي المحافظ
             document.getElementById('walletMain').textContent = main.toFixed(2);
             document.getElementById('walletReward').textContent = reward.toFixed(2);
             document.getElementById('walletReferral').textContent = referral.toFixed(2);
             document.getElementById('walletLocked').textContent = locked.toFixed(2);
+            // تم إزالة سطر walletWithdrawable لأنه لم يعد موجوداً في الصفحة
+            // document.getElementById('walletWithdrawable').textContent = total.toFixed(2);
+            // يتم تحديث withdrawableBalance في صفحة السحب، ويجب أن يبقى كما هو
             document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
             document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
         }
@@ -4527,194 +4456,6 @@
             const totalRefs = userData.miningData?.totalReferrals || 0;
             document.getElementById('refEarnings').textContent = earnings.toFixed(2);
             document.getElementById('refTotalReferrals').textContent = totalRefs;
-        }
-
-        // ============================================================
-        // CHECK SUBSCRIPTION EXPIRY
-        // ============================================================
-        async function checkSubscriptionExpiry() {
-            if (!userData) return;
-            const sub = userData.subscription || {};
-            if (sub.status !== 'active') return;
-            if (!sub.endDate) return;
-            const endDate = sub.endDate.toDate ? sub.endDate.toDate() : new Date(sub.endDate);
-            if (endDate <= new Date()) {
-                try {
-                    await db.collection('users').doc(userData.telegramId).update({
-                        'subscription.status': 'expired'
-                    });
-                    userData.subscription.status = 'expired';
-                    showToast('⏳ انتهت صلاحية اشتراكك، يرجى التجديد');
-                    updateSubscriptionUI();
-                } catch (e) {
-                    console.error('فشل تحديث حالة الاشتراك:', e);
-                }
-            }
-        }
-
-        // ============================================================
-        // SUBSCRIPTION UI
-        // ============================================================
-        function updateSubscriptionUI() {
-            if (!userData) return;
-            const sub = userData.subscription || { plan: null, status: 'inactive' };
-            const plan = sub.plan;
-            const status = sub.status;
-
-            // تحديث قسم الاشتراك الحالي
-            const statusBadge = document.getElementById('subStatusBadge');
-            const planName = document.getElementById('subPlanName');
-            const startDate = document.getElementById('subStartDate');
-            const endDate = document.getElementById('subEndDate');
-            const daysLeft = document.getElementById('subDaysLeft');
-            const progressBar = document.getElementById('subProgressBar');
-
-            if (status === 'active' && plan) {
-                const start = sub.startDate?.toDate ? sub.startDate.toDate() : new Date(sub.startDate);
-                const end = sub.endDate?.toDate ? sub.endDate.toDate() : new Date(sub.endDate);
-                const now = new Date();
-                const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-                const remaining = Math.max(0, Math.ceil((end - now) / (1000 * 60 * 60 * 24)));
-                const percent = totalDays > 0 ? ((totalDays - remaining) / totalDays) * 100 : 0;
-
-                statusBadge.textContent = '✅ نشط';
-                statusBadge.className = 'status status-success';
-                planName.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
-                startDate.textContent = formatDate(sub.startDate);
-                endDate.textContent = formatDate(sub.endDate);
-                daysLeft.textContent = `${remaining} يوم`;
-                progressBar.style.width = `${Math.min(100, percent)}%`;
-            } else if (status === 'expired' && plan) {
-                statusBadge.textContent = '⏳ منتهي';
-                statusBadge.className = 'status status-danger';
-                planName.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
-                startDate.textContent = formatDate(sub.startDate);
-                endDate.textContent = formatDate(sub.endDate);
-                daysLeft.textContent = '0 يوم';
-                progressBar.style.width = '100%';
-            } else {
-                statusBadge.textContent = 'غير مشترك';
-                statusBadge.className = 'status status-info';
-                planName.textContent = '--';
-                startDate.textContent = '--';
-                endDate.textContent = '--';
-                daysLeft.textContent = '--';
-                progressBar.style.width = '0%';
-            }
-
-            // تحديث أزرار الباقات
-            document.querySelectorAll('.pc-btn').forEach(btn => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك';
-                btn.style.background = '';
-            });
-
-            if (status === 'active' && plan) {
-                document.querySelectorAll('.pc-btn').forEach(btn => {
-                    if (btn.dataset.plan === plan) {
-                        btn.disabled = true;
-                        btn.innerHTML = '<i class="fas fa-check-circle"></i> مفعّل';
-                        btn.style.background = '#22c55e';
-                    } else {
-                        btn.disabled = true;
-                        btn.innerHTML = '<i class="fas fa-lock"></i> غير متاح';
-                        btn.style.background = '#9ca3af';
-                    }
-                });
-            } else if (status === 'expired' && plan) {
-                document.querySelectorAll('.pc-btn').forEach(btn => {
-                    if (btn.dataset.plan === plan) {
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-clock"></i> تجديد';
-                        btn.style.background = '#f59e0b';
-                    } else {
-                        btn.disabled = true;
-                        btn.innerHTML = '<i class="fas fa-lock"></i> غير متاح';
-                        btn.style.background = '#9ca3af';
-                    }
-                });
-            }
-        }
-
-        // ============================================================
-        // SUBSCRIBE TO PLAN
-        // ============================================================
-        async function subscribeToPlan(planId) {
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-
-            const sub = userData.subscription || {};
-            if (sub.status === 'active') {
-                showToast(`⚠️ لديك اشتراك نشط في خطة ${sub.plan}. انتظر انتهاءه أو قم بتجديده.`);
-                return;
-            }
-
-            const isRenewal = (sub.status === 'expired' && sub.plan === planId);
-
-            const prices = { starter: 300, basic: 500, advanced: 750, premium: 1500, pro: 3500 };
-            const price = prices[planId];
-            if (!price) { showToast('خطة غير معروفة'); return; }
-
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
-            if (balance < price) {
-                showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
-                return;
-            }
-
-            const msg = isRenewal ? `تجديد الاشتراك في خطة ${planId} بمبلغ ${price} DZD؟` :
-                                     `تأكيد الاشتراك في خطة ${planId} بمبلغ ${price} DZD؟`;
-            if (!confirm(msg)) return;
-
-            try {
-                const now = new Date();
-                const endDate = new Date(now);
-                endDate.setMonth(endDate.getMonth() + 1);
-
-                await db.runTransaction(async (t) => {
-                    const ref = db.collection('users').doc(userData.telegramId);
-                    const doc = await t.get(ref);
-                    if (!doc.exists) throw new Error('غير موجود');
-
-                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
-                    if (bal < price) throw new Error('رصيد غير كاف');
-
-                    let rem = price;
-                    const m = doc.data().wallets?.dzd || 0,
-                          r = doc.data().wallets?.dzdReward || 0,
-                          refr = doc.data().wallets?.dzdReferral || 0;
-                    const fm = Math.min(rem, m); rem -= fm;
-                    const fr = Math.min(rem, r); rem -= fr;
-                    const fref = Math.min(rem, refr); rem -= fref;
-
-                    const updates = {
-                        'wallets.dzd': m - fm,
-                        'wallets.dzdReward': r - fr,
-                        'wallets.dzdReferral': refr - fref,
-                        'subscription': {
-                            plan: planId,
-                            startDate: now,
-                            endDate: endDate,
-                            status: 'active'
-                        },
-                        'transactions': firebase.firestore.FieldValue.arrayUnion({
-                            type: 'subscription',
-                            amount: price,
-                            currency: 'DZD',
-                            description: isRenewal ? `تجديد اشتراك ${planId} (${price} DZD)` : `اشتراك ${planId} (${price} DZD)`,
-                            timestamp: now,
-                            plan: planId,
-                            status: 'completed'
-                        })
-                    };
-                    t.update(ref, updates);
-                });
-
-                showToast(isRenewal ? '✅ تم تجديد الاشتراك بنجاح!' : '✅ تم تفعيل الاشتراك بنجاح!');
-                await updateUI();
-                updateSubscriptionUI();
-            } catch (e) {
-                showToast('❌ ' + (e.message || 'حدث خطأ'));
-                console.error(e);
-            }
         }
 
         // ============================================================
@@ -4733,16 +4474,19 @@
             const rateDisplay = document.getElementById('swapRateDisplay');
 
             if (swapDirection) {
+                // DZD -> USDT
                 fromLabel.textContent = 'DZD';
                 toLabel.textContent = 'USDT';
                 inputCurrency.textContent = 'DZD';
                 rateDisplay.textContent = `1 USDT = ${EXCHANGE_RATE} DZD`;
             } else {
+                // USDT -> DZD
                 fromLabel.textContent = 'USDT';
                 toLabel.textContent = 'DZD';
                 inputCurrency.textContent = 'USDT';
                 rateDisplay.textContent = `1 USDT = ${EXCHANGE_RATE} DZD`;
             }
+            // تحديث الألوان
             fromLabel.className = `dir-badge ${swapDirection ? 'dzd' : 'usdt'}`;
             toLabel.className = `dir-badge ${swapDirection ? 'usdt' : 'dzd'}`;
         }
@@ -4753,10 +4497,12 @@
             const resultSpan = document.getElementById('swapResultValue');
 
             if (swapDirection) {
+                // DZD -> USDT
                 const usdt = amount / EXCHANGE_RATE;
                 resultSpan.textContent = `${usdt.toFixed(4)} USDT`;
                 resultSpan.className = 'value usdt-color';
             } else {
+                // USDT -> DZD
                 const dzd = amount * EXCHANGE_RATE;
                 resultSpan.textContent = `${dzd.toFixed(2)} DZD`;
                 resultSpan.className = 'value dzd-color';
@@ -4772,15 +4518,22 @@
         }
 
         async function executeSwap() {
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+            if (!userData) {
+                showToast('يرجى تسجيل الدخول');
+                return;
+            }
 
             const input = document.getElementById('swapAmountInput');
             const amount = parseFloat(input.value) || 0;
-            if (amount <= 0) { showToast('أدخل مبلغاً صحيحاً'); return; }
+            if (amount <= 0) {
+                showToast('أدخل مبلغاً صحيحاً');
+                return;
+            }
 
             let fromCurrency, toCurrency, fromAmount, toAmount;
 
             if (swapDirection) {
+                // DZD -> USDT
                 fromCurrency = 'dzd';
                 toCurrency = 'usdt';
                 fromAmount = amount;
@@ -4790,6 +4543,7 @@
                     return;
                 }
             } else {
+                // USDT -> DZD
                 fromCurrency = 'usdt';
                 toCurrency = 'dzd';
                 fromAmount = amount;
@@ -4817,9 +4571,12 @@
                     if (fromCurrency === 'usdt' && (wallets.usdt || 0) < fromAmount) throw new Error('رصيد USDT غير كاف');
 
                     const updates = {};
+                    // خصم من العملة المصدر
                     updates[`wallets.${fromCurrency}`] = firebase.firestore.FieldValue.increment(-fromAmount);
+                    // إضافة إلى العملة الهدف
                     updates[`wallets.${toCurrency}`] = firebase.firestore.FieldValue.increment(toAmount);
 
+                    // تسجيل المعاملة
                     updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                         type: 'swap',
                         amount: fromAmount,
@@ -4842,7 +4599,8 @@
                 showToast(`✅ تم التبادل بنجاح!`);
                 await updateUI();
                 updateSwapBalances();
-                await loadTransactions();
+                await loadTransactions(); // لتحديث قائمة العمليات
+
             } catch (e) {
                 showToast('❌ ' + (e.message || 'حدث خطأ'));
                 console.error(e);
@@ -4855,6 +4613,7 @@
             if (input) {
                 input.addEventListener('input', calculateSwapResult);
             }
+            // تهيئة واجهة التبادل
             updateSwapUI();
             calculateSwapResult();
         });
@@ -4862,6 +4621,7 @@
         // ============================================================
         // DEPOSIT - مع نافذة تأكيد
         // ============================================================
+        // تهيئة النموذج بالطريقة الافتراضية (baridi)
         document.addEventListener('DOMContentLoaded', function() {
             updateDepositForm('baridi');
             updateWithdrawForm('baridi');
@@ -5117,6 +4877,7 @@
             const feeLabel = document.getElementById('feeLabel');
             const withdrawFeeLabel = document.getElementById('withdrawFeeLabel');
 
+            // تحديث الرصيد القابل للسحب حسب العملة
             updateWithdrawableBalance(method);
 
             if (method === 'baridi') {
@@ -5163,6 +4924,7 @@
                 document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW_USDT} USDT`;
             }
 
+            // إعادة حساب الرسوم والإجمالي
             calculateWithdrawFee();
         }
 
@@ -5194,6 +4956,7 @@
             document.getElementById('withdrawTotal').textContent = (amount + fee).toFixed(2);
         }
 
+        // ربط حدث حساب الرسوم
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
             if (amt) {
@@ -5278,6 +5041,7 @@
                     showToast('⚠️ معرف Baridi Mob غير صحيح! يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999');
                     return;
                 }
+                // التحقق من الرصيد
                 const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
                 if (amount > balance) { showToast('الرصيد غير كافٍ'); return; }
             } else if (method === 'binance') {
@@ -5290,6 +5054,7 @@
                 if (amount < minAmount) { showToast(`الحد الأدنى للسحب ${minAmount} USDT`); return; }
                 if (!account) { showToast('أدخل عنوان محفظتك على Binance'); return; }
                 if (account.length < 10) { showToast('⚠️ عنوان المحفظة غير صحيح'); return; }
+                // التحقق من الرصيد
                 const balance = userData.wallets?.usdt || 0;
                 if (amount > balance) { showToast('رصيد USDT غير كافٍ'); return; }
             } else if (method === 'redotpay') {
@@ -5302,6 +5067,7 @@
                 if (amount < minAmount) { showToast(`الحد الأدنى للسحب ${minAmount} USDT`); return; }
                 if (!account) { showToast('أدخل معرف محفظتك على RedotPay'); return; }
                 if (account.length < 5) { showToast('⚠️ معرف المحفظة غير صحيح'); return; }
+                // التحقق من الرصيد
                 const balance = userData.wallets?.usdt || 0;
                 if (amount > balance) { showToast('رصيد USDT غير كافٍ'); return; }
             } else {
@@ -5312,6 +5078,7 @@
             const fee = amount * feePercent;
             const total = amount + fee;
 
+            // عرض نافذة التأكيد
             showWithdrawConfirmModal({
                 method: method,
                 methodDisplay: methodDisplay,
@@ -5352,21 +5119,26 @@
                 };
 
                 if (currency === 'DZD') {
+                    // سحب DZD من المحافظ المختلفة
                     await db.runTransaction(async (t) => {
                         const ref = db.collection('users').doc(userData.telegramId);
                         const doc = await t.get(ref);
                         if (!doc.exists) throw new Error('غير موجود');
 
-                        let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
+                        let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                            .wallets?.dzdReferral || 0);
                         if (bal < total) throw new Error('رصيد غير كاف');
 
                         let rem = total;
                         const m = doc.data().wallets?.dzd || 0,
-                              r = doc.data().wallets?.dzdReward || 0,
-                              refr = doc.data().wallets?.dzdReferral || 0;
-                        const fm = Math.min(rem, m); rem -= fm;
-                        const fr = Math.min(rem, r); rem -= fr;
-                        const fref = Math.min(rem, refr); rem -= fref;
+                            r = doc.data().wallets?.dzdReward || 0,
+                            refr = doc.data().wallets?.dzdReferral || 0;
+                        const fm = Math.min(rem, m);
+                        rem -= fm;
+                        const fr = Math.min(rem, r);
+                        rem -= fr;
+                        const fref = Math.min(rem, refr);
+                        rem -= fref;
                         const upd = {
                             'wallets.dzd': m - fm,
                             'wallets.dzdReward': r - fr,
@@ -5387,6 +5159,7 @@
                         t.update(ref, upd);
                     });
                 } else {
+                    // سحب USDT من محفظة usdt
                     await db.runTransaction(async (t) => {
                         const ref = db.collection('users').doc(userData.telegramId);
                         const doc = await t.get(ref);
@@ -5429,7 +5202,7 @@
         }
 
         // ============================================================
-        // CHECK VERIFICATION EXPIRY
+        // CHECK VERIFICATION EXPIRY (تفحص انتهاء صلاحية التوثيق)
         // ============================================================
         async function checkVerificationExpiry() {
             if (!userData) return;
@@ -5640,7 +5413,8 @@
             slider.step = 100;
             slider.value = minAmount;
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                ?.dzdReferral || 0);
             document.getElementById('modalUserBalance').textContent = balance.toFixed(2);
 
             updateModalCalculations();
@@ -5699,7 +5473,8 @@
             document.getElementById('modalTotalReturn').textContent = totalProfit.toFixed(2);
             document.getElementById('modalFirstBonus').textContent = firstBonus.toFixed(2);
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                ?.dzdReferral || 0);
 
             const statusEl = document.getElementById('modalBalanceStatus');
             const balSpan = document.getElementById('modalUserBalance');
@@ -5742,7 +5517,8 @@
                 return;
             }
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                ?.dzdReferral || 0);
             if (balance < amount) {
                 showToast(`الرصيد غير كافٍ (${balance.toFixed(2)} DZD)`);
                 return;
@@ -5780,16 +5556,20 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    let b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
+                    let b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                        .wallets?.dzdReferral || 0);
                     if (b < amount) throw new Error('رصيد غير كاف');
 
                     let rem = amount;
                     const m = doc.data().wallets?.dzd || 0,
-                          r = doc.data().wallets?.dzdReward || 0,
-                          refr = doc.data().wallets?.dzdReferral || 0;
-                    const fm = Math.min(rem, m); rem -= fm;
-                    const fr = Math.min(rem, r); rem -= fr;
-                    const fref = Math.min(rem, refr); rem -= fref;
+                        r = doc.data().wallets?.dzdReward || 0,
+                        refr = doc.data().wallets?.dzdReferral || 0;
+                    const fm = Math.min(rem, m);
+                    rem -= fm;
+                    const fr = Math.min(rem, r);
+                    rem -= fr;
+                    const fref = Math.min(rem, refr);
+                    rem -= fref;
                     const updates = {
                         'wallets.dzd': m - fm,
                         'wallets.dzdReward': r - fr,
@@ -6125,6 +5905,129 @@
         }
 
         // ============================================================
+        // SUBSCRIPTION LOGIC
+        // ============================================================
+        function updateSubscriptionUI() {
+            if (!userData) return;
+            const sub = userData.subscription || { plan: null, status: 'inactive' };
+            const plan = sub.plan;
+            const status = sub.status;
+
+            document.querySelectorAll('.pc-btn').forEach(btn => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك';
+            });
+
+            if (status === 'active' && plan) {
+                const activeBtn = document.querySelector(`.pc-btn[data-plan="${plan}"]`);
+                if (activeBtn) {
+                    activeBtn.disabled = true;
+                    activeBtn.innerHTML = '<i class="fas fa-check-circle"></i> مفعّل';
+                }
+                document.querySelectorAll('.pc-btn').forEach(btn => {
+                    if (btn.dataset.plan !== plan) {
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fas fa-lock"></i> غير متاح';
+                    }
+                });
+            } else if (status === 'expired') {
+                if (plan) {
+                    const expiredBtn = document.querySelector(`.pc-btn[data-plan="${plan}"]`);
+                    if (expiredBtn) {
+                        expiredBtn.innerHTML = '<i class="fas fa-clock"></i> انتهى';
+                        expiredBtn.disabled = false;
+                    }
+                }
+            }
+        }
+
+        async function subscribeToPlan(planId) {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
+            const sub = userData.subscription || {};
+            if (sub.status === 'active') {
+                showToast(`⚠️ لديك اشتراك نشط في خطة ${sub.plan}. انتظر انتهاءه أو قم بتجديده.`);
+                return;
+            }
+
+            const prices = {
+                starter: 300,
+                basic: 500,
+                advanced: 750,
+                premium: 1500,
+                pro: 3500
+            };
+
+            const price = prices[planId];
+            if (!price) { showToast('خطة غير معروفة'); return; }
+
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                ?.dzdReferral || 0);
+            if (balance < price) {
+                showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
+                return;
+            }
+
+            if (!confirm(`تأكيد الاشتراك في خطة ${planId} بمبلغ ${price} DZD؟`)) return;
+
+            try {
+                const now = new Date();
+                const endDate = new Date(now);
+                endDate.setMonth(endDate.getMonth() + 1);
+
+                await db.runTransaction(async (t) => {
+                    const ref = db.collection('users').doc(userData.telegramId);
+                    const doc = await t.get(ref);
+                    if (!doc.exists) throw new Error('غير موجود');
+
+                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                        .wallets?.dzdReferral || 0);
+                    if (bal < price) throw new Error('رصيد غير كاف');
+
+                    let rem = price;
+                    const m = doc.data().wallets?.dzd || 0,
+                        r = doc.data().wallets?.dzdReward || 0,
+                        refr = doc.data().wallets?.dzdReferral || 0;
+                    const fm = Math.min(rem, m);
+                    rem -= fm;
+                    const fr = Math.min(rem, r);
+                    rem -= fr;
+                    const fref = Math.min(rem, refr);
+                    rem -= fref;
+
+                    const updates = {
+                        'wallets.dzd': m - fm,
+                        'wallets.dzdReward': r - fr,
+                        'wallets.dzdReferral': refr - fref,
+                        'subscription': {
+                            plan: planId,
+                            startDate: now,
+                            endDate: endDate,
+                            status: 'active'
+                        },
+                        'transactions': firebase.firestore.FieldValue.arrayUnion({
+                            type: 'subscription',
+                            amount: price,
+                            currency: 'DZD',
+                            description: `اشتراك خطة ${planId} (${price} DZD)`,
+                            timestamp: now,
+                            plan: planId,
+                            status: 'completed'
+                        })
+                    };
+                    t.update(ref, updates);
+                });
+
+                showToast(`✅ تم تفعيل اشتراك ${planId} بنجاح!`);
+                await updateUI();
+                updateSubscriptionUI();
+            } catch (e) {
+                showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e);
+            }
+        }
+
+        // ============================================================
         // VERIFICATION
         // ============================================================
         function updateVerificationUI() {
@@ -6192,7 +6095,8 @@
             }
 
             const price = 100;
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                ?.dzdReferral || 0);
             if (balance < price) {
                 showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
                 return;
@@ -6201,7 +6105,7 @@
             const isRenewal = userData.verified && userData.verificationExpiry;
 
             if (!confirm(isRenewal ? `تجديد التوثيق (شهر) بمبلغ ${price} DZD؟` :
-                                     `تأكيد توثيق الحساب (شهر) بمبلغ ${price} DZD؟`)) return;
+                    `تأكيد توثيق الحساب (شهر) بمبلغ ${price} DZD؟`)) return;
 
             try {
                 const now = new Date();
@@ -6213,16 +6117,20 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
+                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                        .wallets?.dzdReferral || 0);
                     if (bal < price) throw new Error('رصيد غير كاف');
 
                     let rem = price;
                     const m = doc.data().wallets?.dzd || 0,
-                          r = doc.data().wallets?.dzdReward || 0,
-                          refr = doc.data().wallets?.dzdReferral || 0;
-                    const fm = Math.min(rem, m); rem -= fm;
-                    const fr = Math.min(rem, r); rem -= fr;
-                    const fref = Math.min(rem, refr); rem -= fref;
+                        r = doc.data().wallets?.dzdReward || 0,
+                        refr = doc.data().wallets?.dzdReferral || 0;
+                    const fm = Math.min(rem, m);
+                    rem -= fm;
+                    const fr = Math.min(rem, r);
+                    rem -= fr;
+                    const fref = Math.min(rem, refr);
+                    rem -= fref;
 
                     const updates = {
                         'wallets.dzd': m - fm,
