@@ -3710,6 +3710,27 @@
         const db = firebase.firestore();
 
         // ============================================================
+        // SAFE DOM HELPERS
+        // تمنع أخطاء "Cannot set properties of null" عندما يتم استدعاء
+        // دالة تحديث واجهة قبل تحميل العنصر أو في شاشة لا يوجد بها هذا العنصر
+        // ============================================================
+        function setText(id, value) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+            return el;
+        }
+
+        function setHTML(id, value) {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = value;
+            return el;
+        }
+
+        function getEl(id) {
+            return document.getElementById(id);
+        }
+
+        // ============================================================
         // STATE
         // ============================================================
         let userData = null;
@@ -3843,21 +3864,19 @@
         }
 
         function updateZakatUI(data) {
-            document.getElementById('zakatTotalDonations').innerHTML =
-                `${data.totalDonations.toLocaleString()} <span class="small-text">دج</span>`;
-            document.getElementById('zakatDistributed').innerHTML =
-                `${data.distributed.toLocaleString()} <span class="small-text">دج</span>`;
-            document.getElementById('zakatRemaining').innerHTML =
-                `${data.remaining.toLocaleString()} <span class="small-text">دج</span>`;
+            setHTML('zakatTotalDonations', `${data.totalDonations.toLocaleString()} <span class="small-text">دج</span>`);
+            setHTML('zakatDistributed', `${data.distributed.toLocaleString()} <span class="small-text">دج</span>`);
+            setHTML('zakatRemaining', `${data.remaining.toLocaleString()} <span class="small-text">دج</span>`);
 
             const percentage = data.distributionPercentage || 0;
             const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
-            document.getElementById('zakatProgressBar').style.width = `${clampedPercentage}%`;
-            document.getElementById('zakatProgressPercent').textContent = `${clampedPercentage}%`;
-            document.getElementById('zakatRemainingPercent').textContent = `${100 - clampedPercentage}%`;
+            const progressBarEl = getEl('zakatProgressBar');
+            if (progressBarEl) progressBarEl.style.width = `${clampedPercentage}%`;
+            setText('zakatProgressPercent', `${clampedPercentage}%`);
+            setText('zakatRemainingPercent', `${100 - clampedPercentage}%`);
 
-            document.getElementById('zakatDonorsCount').textContent = data.donorsCount || 0;
-            document.getElementById('zakatBeneficiariesCount').textContent = data.beneficiariesCount || 0;
+            setText('zakatDonorsCount', data.donorsCount || 0);
+            setText('zakatBeneficiariesCount', data.beneficiariesCount || 0);
         }
 
         // ============================================================
@@ -3872,7 +3891,7 @@
             isModalOpen = true;
 
             const balance = userData.wallets?.dzd || 0;
-            document.getElementById('donationUserBalance').textContent = balance.toFixed(2);
+            setText('donationUserBalance', balance.toFixed(2));
 
             const input = document.getElementById('donationAmountInput');
             const slider = document.getElementById('donationRangeSlider');
@@ -3888,7 +3907,7 @@
             slider.step = 100;
             slider.value = Math.min(100, maxAmount);
 
-            document.getElementById('donationMaxDisplay').textContent = maxAmount.toLocaleString();
+            setText('donationMaxDisplay', maxAmount.toLocaleString());
 
             updateDonationUI();
 
@@ -4342,14 +4361,14 @@
                 }
             });
 
-            document.getElementById('profileName').textContent = name;
-            document.getElementById('headerUserName').textContent = name;
-            document.getElementById('userLevelBadge').textContent = userData.level || 1;
-            document.getElementById('profileLevel').textContent = userData.level || 1;
-            document.getElementById('headerUserLevel').textContent = `المستوى ${userData.level || 1}`;
+            setText('profileName', name);
+            setText('headerUserName', name);
+            setText('userLevelBadge', userData.level || 1);
+            setText('profileLevel', userData.level || 1);
+            setText('headerUserLevel', `المستوى ${userData.level || 1}`);
 
             const username = localInfo.username || userData.username || '';
-            document.getElementById('profileTelegram').textContent = username ? `@${username}` : 'غير متاح';
+            setText('profileTelegram', username ? `@${username}` : 'غير متاح');
 
             updateProfileUI();
             updateHomeUI();
@@ -4364,9 +4383,8 @@
         function updateProfileUI() {
             if (!userData) return;
             const localInfo = getLocalUserInfo();
-            document.getElementById('profileTelegram').textContent = localInfo.username ? `@${localInfo.username}` :
-                'غير متاح';
-            document.getElementById('profileJoinDate').textContent = formatDate(userData.joinDate);
+            setText('profileTelegram', localInfo.username ? `@${localInfo.username}` : 'غير متاح');
+            setText('profileJoinDate', formatDate(userData.joinDate));
 
             const refLink = document.getElementById('referralLink');
             if (userData.telegramId) {
@@ -4380,6 +4398,7 @@
         // ===== دالة تحديث حالة التوثيق - تظهر "✅ تم التحقق منه" فقط =====
         function updateVerificationStatus() {
             const el = document.getElementById('verificationStatus');
+            if (!el) return;
             if (!userData) {
                 el.textContent = '';
                 el.style.display = 'none';
@@ -4423,8 +4442,8 @@
             const u = userData;
             const balance = (u.wallets?.dzd || 0) + (u.wallets?.dzdReward || 0) + (u.wallets?.dzdReferral || 0);
             const usdt = u.wallets?.usdt || 0;
-            document.getElementById('homeBalance').textContent = balance.toFixed(2);
-            document.getElementById('homeUsdt').textContent = usdt.toFixed(2);
+            setText('homeBalance', balance.toFixed(2));
+            setText('homeUsdt', usdt.toFixed(2));
         }
 
         function updateWalletUI() {
@@ -4436,26 +4455,26 @@
             const locked = w.dzdLocked || 0;
             const total = main + reward + referral;
             // تحديث البطاقة الموحدة
-            document.getElementById('walletTotal').textContent = total.toFixed(2);
-            document.getElementById('walletUsdt').textContent = (w.usdt || 0).toFixed(2);
+            setText('walletTotal', total.toFixed(2));
+            setText('walletUsdt', (w.usdt || 0).toFixed(2));
             // باقي المحافظ
-            document.getElementById('walletMain').textContent = main.toFixed(2);
-            document.getElementById('walletReward').textContent = reward.toFixed(2);
-            document.getElementById('walletReferral').textContent = referral.toFixed(2);
-            document.getElementById('walletLocked').textContent = locked.toFixed(2);
+            setText('walletMain', main.toFixed(2));
+            setText('walletReward', reward.toFixed(2));
+            setText('walletReferral', referral.toFixed(2));
+            setText('walletLocked', locked.toFixed(2));
             // تم إزالة سطر walletWithdrawable لأنه لم يعد موجوداً في الصفحة
-            // document.getElementById('walletWithdrawable').textContent = total.toFixed(2);
+            // setText('walletWithdrawable', total.toFixed(2));
             // يتم تحديث withdrawableBalance في صفحة السحب، ويجب أن يبقى كما هو
-            document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
-            document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
+            setText('withdrawableBalance', total.toFixed(2));
+            setText('withdrawMinAmount', `${MIN_WITHDRAW} DZD`);
         }
 
         function updateReferralUI() {
             if (!userData) return;
             const earnings = userData.wallets?.dzdReferral || 0;
             const totalRefs = userData.miningData?.totalReferrals || 0;
-            document.getElementById('refEarnings').textContent = earnings.toFixed(2);
-            document.getElementById('refTotalReferrals').textContent = totalRefs;
+            setText('refEarnings', earnings.toFixed(2));
+            setText('refTotalReferrals', totalRefs);
         }
 
         // ============================================================
@@ -4472,6 +4491,7 @@
             const toLabel = document.getElementById('swapToLabel');
             const inputCurrency = document.getElementById('swapInputCurrency');
             const rateDisplay = document.getElementById('swapRateDisplay');
+            if (!fromLabel || !toLabel || !inputCurrency || !rateDisplay) return;
 
             if (swapDirection) {
                 // DZD -> USDT
@@ -4493,8 +4513,9 @@
 
         function calculateSwapResult() {
             const input = document.getElementById('swapAmountInput');
-            const amount = parseFloat(input.value) || 0;
             const resultSpan = document.getElementById('swapResultValue');
+            if (!input || !resultSpan) return;
+            const amount = parseFloat(input.value) || 0;
 
             if (swapDirection) {
                 // DZD -> USDT
@@ -4513,8 +4534,8 @@
             if (!userData) return;
             const dzd = userData.wallets?.dzd || 0;
             const usdt = userData.wallets?.usdt || 0;
-            document.getElementById('swapDzdBalance').textContent = dzd.toFixed(2);
-            document.getElementById('swapUsdtBalance').textContent = usdt.toFixed(2);
+            setText('swapDzdBalance', dzd.toFixed(2));
+            setText('swapUsdtBalance', usdt.toFixed(2));
         }
 
         async function executeSwap() {
@@ -4637,6 +4658,8 @@
             const minHint = document.getElementById('depositMinHint');
             const txLabel = document.getElementById('depositTxLabel');
             const txHint = document.getElementById('depositTxHint');
+            if (!accountInput || !accountLabel || !accountHint || !amountLabel || !amountIcon ||
+                !amountInput || !minHint || !txLabel || !txHint) return;
 
             if (method === 'baridi') {
                 accountInput.value = POSTAL_ACCOUNT;
@@ -4876,6 +4899,8 @@
             const minHint = document.getElementById('withdrawMinHint');
             const feeLabel = document.getElementById('feeLabel');
             const withdrawFeeLabel = document.getElementById('withdrawFeeLabel');
+            if (!accountInput || !accountLabel || !accountIcon || !accountHint || !amountLabel ||
+                !amountIcon || !amountInput || !minHint || !feeLabel || !withdrawFeeLabel) return;
 
             // تحديث الرصيد القابل للسحب حسب العملة
             updateWithdrawableBalance(method);
@@ -4893,7 +4918,7 @@
                 minHint.textContent = `الحد الأدنى للسحب: ${MIN_WITHDRAW} DZD`;
                 feeLabel.textContent = 'الرسوم (10%)';
                 withdrawFeeLabel.textContent = 'رسوم السحب: 10% من المبلغ';
-                document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
+                setText('withdrawMinAmount', `${MIN_WITHDRAW} DZD`);
             } else if (method === 'binance') {
                 accountLabel.textContent = 'عنوان محفظة Binance (USDT)';
                 accountIcon.className = 'fab fa-bitcoin';
@@ -4907,7 +4932,7 @@
                 minHint.textContent = `الحد الأدنى للسحب: ${MIN_WITHDRAW_USDT} USDT`;
                 feeLabel.textContent = 'الرسوم (0%)';
                 withdrawFeeLabel.textContent = 'رسوم السحب: 0%';
-                document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW_USDT} USDT`;
+                setText('withdrawMinAmount', `${MIN_WITHDRAW_USDT} USDT`);
             } else if (method === 'redotpay') {
                 accountLabel.textContent = 'معرف محفظة RedotPay (USDT)';
                 accountIcon.className = 'fas fa-wallet';
@@ -4921,7 +4946,7 @@
                 minHint.textContent = `الحد الأدنى للسحب: ${MIN_WITHDRAW_USDT} USDT`;
                 feeLabel.textContent = 'الرسوم (0%)';
                 withdrawFeeLabel.textContent = 'رسوم السحب: 0%';
-                document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW_USDT} USDT`;
+                setText('withdrawMinAmount', `${MIN_WITHDRAW_USDT} USDT`);
             }
 
             // إعادة حساب الرسوم والإجمالي
@@ -4937,7 +4962,7 @@
             } else {
                 balance = w.usdt || 0;
             }
-            document.getElementById('withdrawableBalance').textContent = balance.toFixed(2);
+            setText('withdrawableBalance', balance.toFixed(2));
         }
 
         function calculateWithdrawFee() {
@@ -4952,8 +4977,8 @@
                 fee = 0;
             }
 
-            document.getElementById('withdrawFee').textContent = fee.toFixed(2);
-            document.getElementById('withdrawTotal').textContent = (amount + fee).toFixed(2);
+            setText('withdrawFee', fee.toFixed(2));
+            setText('withdrawTotal', (amount + fee).toFixed(2));
         }
 
         // ربط حدث حساب الرسوم
@@ -5392,13 +5417,13 @@
             const minAmount = plan.minAmount;
             const maxAmount = plan.maxAmount;
 
-            document.getElementById('modalPlanName').textContent = plan.name;
-            document.getElementById('modalPlanReturn').textContent = `${plan.dailyReturnPercent}% يومياً`;
-            document.getElementById('modalCurrencyLabel').textContent = '(DZD)';
-            document.getElementById('modalBalanceCurrency').textContent = 'DZD';
+            setText('modalPlanName', plan.name);
+            setText('modalPlanReturn', `${plan.dailyReturnPercent}% يومياً`);
+            setText('modalCurrencyLabel', '(DZD)');
+            setText('modalBalanceCurrency', 'DZD');
 
-            document.getElementById('modalMinDisplay').textContent = minAmount.toFixed(0);
-            document.getElementById('modalMaxDisplay').textContent = maxAmount.toFixed(0);
+            setText('modalMinDisplay', minAmount.toFixed(0));
+            setText('modalMaxDisplay', maxAmount.toFixed(0));
 
             const input = document.getElementById('modalAmountInput');
             const slider = document.getElementById('modalRangeSlider');
@@ -5415,7 +5440,7 @@
 
             const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
                 ?.dzdReferral || 0);
-            document.getElementById('modalUserBalance').textContent = balance.toFixed(2);
+            setText('modalUserBalance', balance.toFixed(2));
 
             updateModalCalculations();
 
@@ -5469,15 +5494,16 @@
             const totalProfit = dailyProfit * 30;
             const firstBonus = (amount * FIRST_BONUS_PERCENT) / 100;
 
-            document.getElementById('modalDailyProfit').textContent = dailyProfit.toFixed(2);
-            document.getElementById('modalTotalReturn').textContent = totalProfit.toFixed(2);
-            document.getElementById('modalFirstBonus').textContent = firstBonus.toFixed(2);
+            setText('modalDailyProfit', dailyProfit.toFixed(2));
+            setText('modalTotalReturn', totalProfit.toFixed(2));
+            setText('modalFirstBonus', firstBonus.toFixed(2));
 
             const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
                 ?.dzdReferral || 0);
 
             const statusEl = document.getElementById('modalBalanceStatus');
             const balSpan = document.getElementById('modalUserBalance');
+            if (!statusEl || !balSpan) return;
             balSpan.textContent = balance.toFixed(2);
 
             if (amount > balance) {
@@ -5628,15 +5654,15 @@
             if (!userData || !userData.investments || userData.investments.length === 0) {
                 container.innerHTML =
                     '<div class="text-muted text-center" style="padding:30px 0;font-size:15px;">ليس لديك استثمارات نشطة</div>';
-                document.getElementById('investTotalInvested').textContent = '0.00';
-                document.getElementById('investTotalReturn').textContent = '0.00';
+                setText('investTotalInvested', '0.00');
+                setText('investTotalReturn', '0.00');
                 return;
             }
 
             const totalInvested = userData.totalInvested || 0;
             const totalReturn = userData.totalInvestmentReturns || 0;
-            document.getElementById('investTotalInvested').textContent = totalInvested.toFixed(2);
-            document.getElementById('investTotalReturn').textContent = totalReturn.toFixed(2);
+            setText('investTotalInvested', totalInvested.toFixed(2));
+            setText('investTotalReturn', totalReturn.toFixed(2));
 
             const list = userData.investments.filter(inv => inv.status === 'active');
             if (list.length === 0) {
