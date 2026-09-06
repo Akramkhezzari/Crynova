@@ -2873,8 +2873,8 @@
 
         <!-- ========== PAGE: HOME ========== -->
         <div class="page active" id="page-home">
-            <!-- بطاقة الرصيد الموحدة (مثل المحفظة) -->
-            <div class="balance-combined" id="homeBalanceCombined">
+            <!-- بطاقة الرصيد المدمجة (مثل المحفظة) -->
+            <div class="balance-combined" id="homeCombined">
                 <div class="col">
                     <div class="label">الرصيد الكلي (DZD)</div>
                     <div class="amount dzd" id="homeTotalDzd">0.00</div>
@@ -2882,17 +2882,17 @@
                 </div>
                 <div class="col">
                     <div class="label">رصيد USDT</div>
-                    <div class="amount usdt" id="homeTotalUsdt">0.00</div>
+                    <div class="amount usdt" id="homeUsdt">0.00</div>
                     <div class="currency">USDT</div>
                 </div>
             </div>
 
-            <!-- أزرار الإيداع والسحب -->
-            <div style="display:flex;gap:12px;margin-top:16px;margin-bottom:16px;">
-                <button class="btn btn-primary" style="flex:1;" onclick="navigateTo('deposit')">
+            <!-- أزرار الإيداع والسحب (اختياري) -->
+            <div style="display:flex;gap:12px;margin-bottom:16px;">
+                <button class="btn btn-sm" style="background:var(--accent-gradient);color:white;flex:1;" onclick="navigateTo('deposit')">
                     <i class="fas fa-arrow-down"></i> إيداع
                 </button>
-                <button class="btn btn-primary" style="flex:1;" onclick="navigateTo('withdraw')">
+                <button class="btn btn-sm" style="background:var(--danger);color:white;flex:1;" onclick="navigateTo('withdraw')">
                     <i class="fas fa-arrow-up"></i> سحب
                 </button>
             </div>
@@ -3091,8 +3091,6 @@
                     <div style="font-size:24px;font-weight:800;" id="walletLocked">0.00</div>
                 </div>
             </div>
-
-            <!-- تم إزالة بطاقة الرصيد القابل للسحب بناءً على طلب المستخدم -->
         </div>
 
         <!-- ========== PAGE: REFERRALS ========== -->
@@ -4418,14 +4416,12 @@
             }
         }
 
-        // ===== دالة تحديث الرصيد في الصفحة الرئيسية (البطاقة الجديدة) =====
         function updateHomeUI() {
             if (!userData) return;
-            const u = userData;
-            const totalDzd = (u.wallets?.dzd || 0) + (u.wallets?.dzdReward || 0) + (u.wallets?.dzdReferral || 0);
-            const totalUsdt = u.wallets?.usdt || 0;
-            document.getElementById('homeTotalDzd').textContent = totalDzd.toFixed(2);
-            document.getElementById('homeTotalUsdt').textContent = totalUsdt.toFixed(2);
+            const w = userData.wallets || {};
+            const dzdTotal = (w.dzd || 0) + (w.dzdReward || 0) + (w.dzdReferral || 0);
+            document.getElementById('homeTotalDzd').textContent = dzdTotal.toFixed(2);
+            document.getElementById('homeUsdt').textContent = (w.usdt || 0).toFixed(2);
         }
 
         function updateWalletUI() {
@@ -4436,15 +4432,12 @@
             const referral = w.dzdReferral || 0;
             const locked = w.dzdLocked || 0;
             const total = main + reward + referral;
-            // تحديث البطاقة الموحدة
             document.getElementById('walletTotal').textContent = total.toFixed(2);
             document.getElementById('walletUsdt').textContent = (w.usdt || 0).toFixed(2);
-            // باقي المحافظ
             document.getElementById('walletMain').textContent = main.toFixed(2);
             document.getElementById('walletReward').textContent = reward.toFixed(2);
             document.getElementById('walletReferral').textContent = referral.toFixed(2);
             document.getElementById('walletLocked').textContent = locked.toFixed(2);
-            // يتم تحديث withdrawableBalance في صفحة السحب
             document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
             document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
         }
@@ -4473,19 +4466,16 @@
             const rateDisplay = document.getElementById('swapRateDisplay');
 
             if (swapDirection) {
-                // DZD -> USDT
                 fromLabel.textContent = 'DZD';
                 toLabel.textContent = 'USDT';
                 inputCurrency.textContent = 'DZD';
                 rateDisplay.textContent = `1 USDT = ${EXCHANGE_RATE} DZD`;
             } else {
-                // USDT -> DZD
                 fromLabel.textContent = 'USDT';
                 toLabel.textContent = 'DZD';
                 inputCurrency.textContent = 'USDT';
                 rateDisplay.textContent = `1 USDT = ${EXCHANGE_RATE} DZD`;
             }
-            // تحديث الألوان
             fromLabel.className = `dir-badge ${swapDirection ? 'dzd' : 'usdt'}`;
             toLabel.className = `dir-badge ${swapDirection ? 'usdt' : 'dzd'}`;
         }
@@ -4496,12 +4486,10 @@
             const resultSpan = document.getElementById('swapResultValue');
 
             if (swapDirection) {
-                // DZD -> USDT
                 const usdt = amount / EXCHANGE_RATE;
                 resultSpan.textContent = `${usdt.toFixed(4)} USDT`;
                 resultSpan.className = 'value usdt-color';
             } else {
-                // USDT -> DZD
                 const dzd = amount * EXCHANGE_RATE;
                 resultSpan.textContent = `${dzd.toFixed(2)} DZD`;
                 resultSpan.className = 'value dzd-color';
@@ -4532,7 +4520,6 @@
             let fromCurrency, toCurrency, fromAmount, toAmount;
 
             if (swapDirection) {
-                // DZD -> USDT
                 fromCurrency = 'dzd';
                 toCurrency = 'usdt';
                 fromAmount = amount;
@@ -4542,7 +4529,6 @@
                     return;
                 }
             } else {
-                // USDT -> DZD
                 fromCurrency = 'usdt';
                 toCurrency = 'dzd';
                 fromAmount = amount;
@@ -4570,12 +4556,9 @@
                     if (fromCurrency === 'usdt' && (wallets.usdt || 0) < fromAmount) throw new Error('رصيد USDT غير كاف');
 
                     const updates = {};
-                    // خصم من العملة المصدر
                     updates[`wallets.${fromCurrency}`] = firebase.firestore.FieldValue.increment(-fromAmount);
-                    // إضافة إلى العملة الهدف
                     updates[`wallets.${toCurrency}`] = firebase.firestore.FieldValue.increment(toAmount);
 
-                    // تسجيل المعاملة
                     updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                         type: 'swap',
                         amount: fromAmount,
@@ -4598,7 +4581,7 @@
                 showToast(`✅ تم التبادل بنجاح!`);
                 await updateUI();
                 updateSwapBalances();
-                await loadTransactions(); // لتحديث قائمة العمليات
+                await loadTransactions();
 
             } catch (e) {
                 showToast('❌ ' + (e.message || 'حدث خطأ'));
@@ -4606,13 +4589,11 @@
             }
         }
 
-        // ربط حدث إدخال المبلغ بحساب النتيجة
         document.addEventListener('DOMContentLoaded', function() {
             const input = document.getElementById('swapAmountInput');
             if (input) {
                 input.addEventListener('input', calculateSwapResult);
             }
-            // تهيئة واجهة التبادل
             updateSwapUI();
             calculateSwapResult();
         });
@@ -4620,7 +4601,6 @@
         // ============================================================
         // DEPOSIT - مع نافذة تأكيد
         // ============================================================
-        // تهيئة النموذج بالطريقة الافتراضية (baridi)
         document.addEventListener('DOMContentLoaded', function() {
             updateDepositForm('baridi');
             updateWithdrawForm('baridi');
@@ -4676,7 +4656,6 @@
             }
         }
 
-        // ===== دوال نافذة تأكيد الإيداع =====
         function showDepositConfirmModal(data) {
             const modal = document.getElementById('depositConfirmModal');
             const detailsContainer = document.getElementById('confirmDetails');
@@ -4876,7 +4855,6 @@
             const feeLabel = document.getElementById('feeLabel');
             const withdrawFeeLabel = document.getElementById('withdrawFeeLabel');
 
-            // تحديث الرصيد القابل للسحب حسب العملة
             updateWithdrawableBalance(method);
 
             if (method === 'baridi') {
@@ -4923,7 +4901,6 @@
                 document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW_USDT} USDT`;
             }
 
-            // إعادة حساب الرسوم والإجمالي
             calculateWithdrawFee();
         }
 
@@ -4955,7 +4932,6 @@
             document.getElementById('withdrawTotal').textContent = (amount + fee).toFixed(2);
         }
 
-        // ربط حدث حساب الرسوم
         document.addEventListener('DOMContentLoaded', function() {
             const amt = document.getElementById('withdrawAmount');
             if (amt) {
@@ -4963,7 +4939,6 @@
             }
         });
 
-        // ===== دوال نافذة تأكيد السحب =====
         function showWithdrawConfirmModal(data) {
             const modal = document.getElementById('withdrawConfirmModal');
             const detailsContainer = document.getElementById('withdrawConfirmDetails');
@@ -5040,7 +5015,6 @@
                     showToast('⚠️ معرف Baridi Mob غير صحيح! يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999');
                     return;
                 }
-                // التحقق من الرصيد
                 const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
                 if (amount > balance) { showToast('الرصيد غير كافٍ'); return; }
             } else if (method === 'binance') {
@@ -5053,7 +5027,6 @@
                 if (amount < minAmount) { showToast(`الحد الأدنى للسحب ${minAmount} USDT`); return; }
                 if (!account) { showToast('أدخل عنوان محفظتك على Binance'); return; }
                 if (account.length < 10) { showToast('⚠️ عنوان المحفظة غير صحيح'); return; }
-                // التحقق من الرصيد
                 const balance = userData.wallets?.usdt || 0;
                 if (amount > balance) { showToast('رصيد USDT غير كافٍ'); return; }
             } else if (method === 'redotpay') {
@@ -5066,7 +5039,6 @@
                 if (amount < minAmount) { showToast(`الحد الأدنى للسحب ${minAmount} USDT`); return; }
                 if (!account) { showToast('أدخل معرف محفظتك على RedotPay'); return; }
                 if (account.length < 5) { showToast('⚠️ معرف المحفظة غير صحيح'); return; }
-                // التحقق من الرصيد
                 const balance = userData.wallets?.usdt || 0;
                 if (amount > balance) { showToast('رصيد USDT غير كافٍ'); return; }
             } else {
@@ -5077,7 +5049,6 @@
             const fee = amount * feePercent;
             const total = amount + fee;
 
-            // عرض نافذة التأكيد
             showWithdrawConfirmModal({
                 method: method,
                 methodDisplay: methodDisplay,
@@ -5118,14 +5089,12 @@
                 };
 
                 if (currency === 'DZD') {
-                    // سحب DZD من المحافظ المختلفة
                     await db.runTransaction(async (t) => {
                         const ref = db.collection('users').doc(userData.telegramId);
                         const doc = await t.get(ref);
                         if (!doc.exists) throw new Error('غير موجود');
 
-                        let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
-                            .wallets?.dzdReferral || 0);
+                        let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
                         if (bal < total) throw new Error('رصيد غير كاف');
 
                         let rem = total;
@@ -5158,7 +5127,6 @@
                         t.update(ref, upd);
                     });
                 } else {
-                    // سحب USDT من محفظة usdt
                     await db.runTransaction(async (t) => {
                         const ref = db.collection('users').doc(userData.telegramId);
                         const doc = await t.get(ref);
@@ -5201,7 +5169,7 @@
         }
 
         // ============================================================
-        // CHECK VERIFICATION EXPIRY (تفحص انتهاء صلاحية التوثيق)
+        // CHECK VERIFICATION EXPIRY
         // ============================================================
         async function checkVerificationExpiry() {
             if (!userData) return;
@@ -5412,8 +5380,7 @@
             slider.step = 100;
             slider.value = minAmount;
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
             document.getElementById('modalUserBalance').textContent = balance.toFixed(2);
 
             updateModalCalculations();
@@ -5472,8 +5439,7 @@
             document.getElementById('modalTotalReturn').textContent = totalProfit.toFixed(2);
             document.getElementById('modalFirstBonus').textContent = firstBonus.toFixed(2);
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
 
             const statusEl = document.getElementById('modalBalanceStatus');
             const balSpan = document.getElementById('modalUserBalance');
@@ -5516,8 +5482,7 @@
                 return;
             }
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
             if (balance < amount) {
                 showToast(`الرصيد غير كافٍ (${balance.toFixed(2)} DZD)`);
                 return;
@@ -5555,8 +5520,7 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    let b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
-                        .wallets?.dzdReferral || 0);
+                    let b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
                     if (b < amount) throw new Error('رصيد غير كاف');
 
                     let rem = amount;
@@ -5960,8 +5924,7 @@
             const price = prices[planId];
             if (!price) { showToast('خطة غير معروفة'); return; }
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
             if (balance < price) {
                 showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
                 return;
@@ -5979,8 +5942,7 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
-                        .wallets?.dzdReferral || 0);
+                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
                     if (bal < price) throw new Error('رصيد غير كاف');
 
                     let rem = price;
@@ -6094,8 +6056,7 @@
             }
 
             const price = 100;
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
             if (balance < price) {
                 showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
                 return;
@@ -6116,8 +6077,7 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
-                        .wallets?.dzdReferral || 0);
+                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
                     if (bal < price) throw new Error('رصيد غير كاف');
 
                     let rem = price;
