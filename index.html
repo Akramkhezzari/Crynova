@@ -2873,29 +2873,27 @@
 
         <!-- ========== PAGE: HOME ========== -->
         <div class="page active" id="page-home">
-            <!-- بطاقة الرصيد الرئيسية -->
-            <div class="card dzd-gradient" id="homeBalanceCard">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                    <div>
-                        <div class="balance-label" style="color:rgba(255,255,255,0.8);">الرصيد الكلي</div>
-                        <div>
-                            <span class="balance-large white" id="homeBalance">0.00</span>
-                            <span class="balance-currency" style="color:rgba(255,255,255,0.8);" id="homeCurrency">DZD</span>
-                        </div>
-                    </div>
-                    <div style="text-align:left;">
-                        <div style="font-size:13px;color:rgba(255,255,255,0.7);">المستوى</div>
-                        <div style="font-size:20px;font-weight:900;" id="userLevelBadge">1</div>
-                    </div>
+            <!-- بطاقة الرصيد الرئيسية (DZD + USDT) -->
+            <div class="balance-combined" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); border: none; border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 16px; box-shadow: var(--shadow-md);">
+                <div class="col">
+                    <div class="label" style="color: rgba(255,255,255,0.8);">الرصيد (DZD)</div>
+                    <div class="amount" style="color: #fff; font-size: 22px;" id="homeDzdBalance">0.00</div>
+                    <div class="currency" style="color: rgba(255,255,255,0.7);">DZD</div>
                 </div>
-                <div style="display:flex;gap:12px;margin-top:16px;">
-                    <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white;width:auto;flex:1;" onclick="navigateTo('deposit')">
-                        <i class="fas fa-arrow-down"></i> إيداع
-                    </button>
-                    <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white;width:auto;flex:1;" onclick="navigateTo('withdraw')">
-                        <i class="fas fa-arrow-up"></i> سحب
-                    </button>
+                <div class="col" style="border-right: 1px solid rgba(255,255,255,0.2);">
+                    <div class="label" style="color: rgba(255,255,255,0.8);">الرصيد (USDT)</div>
+                    <div class="amount" style="color: #fff; font-size: 22px;" id="homeUsdtBalance">0.00</div>
+                    <div class="currency" style="color: rgba(255,255,255,0.7);">USDT</div>
                 </div>
+            </div>
+            <!-- أزرار الإيداع والسحب أسفل البطاقة -->
+            <div style="display:flex;gap:12px;margin-bottom:16px;">
+                <button class="btn btn-sm" style="background:rgba(108,92,231,0.2);color:var(--text-primary);border:1px solid var(--border);width:auto;flex:1;" onclick="navigateTo('deposit')">
+                    <i class="fas fa-arrow-down"></i> إيداع
+                </button>
+                <button class="btn btn-sm" style="background:rgba(108,92,231,0.2);color:var(--text-primary);border:1px solid var(--border);width:auto;flex:1;" onclick="navigateTo('withdraw')">
+                    <i class="fas fa-arrow-up"></i> سحب
+                </button>
             </div>
 
             <!-- ===== صندوق الزكاة والرصيد (مشترك لجميع المستخدمين) ===== -->
@@ -4419,12 +4417,17 @@
             }
         }
 
+        // ===== HOME UI (تم التعديل لعرض DZD و USDT) =====
         function updateHomeUI() {
             if (!userData) return;
             const u = userData;
-            const balance = (u.wallets?.dzd || 0) + (u.wallets?.dzdReward || 0) + (u.wallets?.dzdReferral || 0);
-            document.getElementById('homeBalance').textContent = balance.toFixed(2);
-            document.getElementById('homeCurrency').textContent = 'DZD';
+            // رصيد DZD الكلي (جميع المحافظ)
+            const dzdBalance = (u.wallets?.dzd || 0) + (u.wallets?.dzdReward || 0) + (u.wallets?.dzdReferral || 0);
+            // رصيد USDT
+            const usdtBalance = u.wallets?.usdt || 0;
+            
+            document.getElementById('homeDzdBalance').textContent = dzdBalance.toFixed(2);
+            document.getElementById('homeUsdtBalance').textContent = usdtBalance.toFixed(2);
         }
 
         function updateWalletUI() {
@@ -4443,9 +4446,6 @@
             document.getElementById('walletReward').textContent = reward.toFixed(2);
             document.getElementById('walletReferral').textContent = referral.toFixed(2);
             document.getElementById('walletLocked').textContent = locked.toFixed(2);
-            // تم إزالة سطر walletWithdrawable لأنه لم يعد موجوداً في الصفحة
-            // document.getElementById('walletWithdrawable').textContent = total.toFixed(2);
-            // يتم تحديث withdrawableBalance في صفحة السحب، ويجب أن يبقى كما هو
             document.getElementById('withdrawableBalance').textContent = total.toFixed(2);
             document.getElementById('withdrawMinAmount').textContent = `${MIN_WITHDRAW} DZD`;
         }
