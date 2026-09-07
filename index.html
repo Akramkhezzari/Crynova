@@ -1911,6 +1911,14 @@
             color: var(--dzd-color);
         }
 
+        /* ===== نافذة تأكيد التوثيق ===== */
+        .verification-confirm-modal .modal-card {
+            border-top: 6px solid #2563eb;
+        }
+        .verification-confirm-modal .confirm-details .detail-row .value.dzd-color {
+            color: var(--dzd-color);
+        }
+
         /* RESPONSIVE */
         @media (max-width: 420px) {
             .app-container {
@@ -3709,6 +3717,31 @@
         </div>
     </div>
 
+    <!-- ===== VERIFICATION CONFIRMATION MODAL ===== -->
+    <div class="modal-overlay verification-confirm-modal" id="verificationConfirmModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fas fa-shield-alt" style="color:#2563eb;"></i> تأكيد التوثيق</h3>
+                <button class="close-modal" onclick="closeVerificationConfirmModal()">&times;</button>
+            </div>
+            <div class="confirm-details" id="verificationConfirmDetails">
+                <!-- سيتم ملء البيانات بواسطة JavaScript -->
+            </div>
+            <div class="confirm-warning">
+                <i class="fas fa-info-circle"></i>
+                <span>سيتم خصم المبلغ من رصيدك المتاح</span>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeVerificationConfirmModal()">
+                    <i class="fas fa-times"></i> إلغاء
+                </button>
+                <button class="btn btn-primary" id="confirmVerificationBtn" onclick="confirmVerificationSubmit()">
+                    <i class="fas fa-check-circle"></i> تأكيد التوثيق
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== BOTTOM NAVIGATION ===== -->
     <nav class="bottom-nav" id="bottomNav">
         <button class="nav-item active" data-page="home" onclick="navigateTo('home')">
@@ -3791,7 +3824,8 @@
         // متغيرات لتخزين بيانات الإيداع والسحب المؤقتة قبل التأكيد
         let pendingDepositData = null;
         let pendingWithdrawData = null;
-        let pendingSubscriptionData = null; // للاشتراك
+        let pendingSubscriptionData = null;
+        let pendingVerificationData = null; // للتوثيق
 
         const POSTAL_ACCOUNT = '00799999002385412178';
         const BINANCE_WALLET = '1143951718';
@@ -5958,6 +5992,9 @@
             if (tabId === 'subscription') {
                 updateSubscriptionUI();
             }
+            if (tabId === 'verification') {
+                updateVerificationUI();
+            }
         }
 
         // ============================================================
@@ -6255,7 +6292,7 @@
         }
 
         // ============================================================
-        // VERIFICATION
+        // VERIFICATION (مع نافذة تأكيد مخصصة)
         // ============================================================
         function updateVerificationUI() {
             if (!userData) return;
@@ -6308,30 +6345,53 @@
             updateVerificationStatus();
         }
 
-        async function requestVerification() {
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-
-            if (userData.verified && userData.verificationExpiry) {
-                const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
-                if (expiry > new Date()) {
-                    const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24));
-                    if (!confirm(`التوثيق لا يزال نشطاً (متبقي ${daysLeft} يوم). هل تريد التجديد مبكراً؟`)) {
-                        return;
-                    }
-                }
-            }
-
+        // ===== دوال نافذة تأكيد التوثيق =====
+        function showVerificationConfirmModal(isRenewal) {
+            const modal = document.getElementById('verificationConfirmModal');
+            const detailsContainer = document.getElementById('verificationConfirmDetails');
             const price = 100;
+
             const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
-            if (balance < price) {
-                showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
+
+            detailsContainer.innerHTML = `
+                <div class="detail-row">
+                    <span class="label">النوع</span>
+                    <span class="value">${isRenewal ? 'تجديد التوثيق' : 'توثيق الحساب'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">المبلغ</span>
+                    <span class="value dzd-color">${price.toFixed(2)} DZD</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">المدة</span>
+                    <span class="value">شهر واحد</span>
+                </div>
+                <div class="detail-row" style="border-bottom:none;">
+                    <span class="label">رصيدك المتاح</span>
+                    <span class="value">${balance.toFixed(2)} DZD</span>
+                </div>
+            `;
+
+            pendingVerificationData = { isRenewal };
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVerificationConfirmModal() {
+            const modal = document.getElementById('verificationConfirmModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            pendingVerificationData = null;
+        }
+
+        async function confirmVerificationSubmit() {
+            if (!pendingVerificationData) {
+                showToast('حدث خطأ، حاول مرة أخرى');
                 return;
             }
 
-            const isRenewal = userData.verified && userData.verificationExpiry;
-
-            if (!confirm(isRenewal ? `تجديد التوثيق (شهر) بمبلغ ${price} DZD؟` :
-                    `تأكيد توثيق الحساب (شهر) بمبلغ ${price} DZD؟`)) return;
+            const { isRenewal } = pendingVerificationData;
+            const price = 100;
 
             try {
                 const now = new Date();
@@ -6377,13 +6437,42 @@
                 });
 
                 showToast(isRenewal ? '✅ تم تجديد التوثيق بنجاح!' : '✅ تم توثيق حسابك بنجاح!');
+                closeVerificationConfirmModal();
                 await updateUI();
                 updateVerificationUI();
                 updateVerificationStatus();
             } catch (e) {
                 showToast('❌ ' + (e.message || 'حدث خطأ'));
                 console.error(e);
+                closeVerificationConfirmModal();
             }
+        }
+
+        // ===== تعديل دالة requestVerification لاستخدام النافذة المخصصة =====
+        async function requestVerification() {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
+            if (userData.verified && userData.verificationExpiry) {
+                const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
+                if (expiry > new Date()) {
+                    const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24));
+                    if (!confirm(`التوثيق لا يزال نشطاً (متبقي ${daysLeft} يوم). هل تريد التجديد مبكراً؟`)) {
+                        return;
+                    }
+                }
+            }
+
+            const price = 100;
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            if (balance < price) {
+                showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
+                return;
+            }
+
+            const isRenewal = userData.verified && userData.verificationExpiry;
+
+            // عرض نافذة التأكيد بدلاً من confirm
+            showVerificationConfirmModal(isRenewal);
         }
 
         // ============================================================
