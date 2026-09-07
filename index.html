@@ -1727,16 +1727,9 @@
             color: var(--text-secondary);
             font-size: 16px;
         }
+        /* إخفاء سعر الصرف نهائياً */
         .swap-rate {
-            text-align: center;
-            font-size: 14px;
-            color: var(--text-secondary);
-            padding: 6px 0 12px;
-            border-bottom: 1px solid var(--border-light);
-            margin-bottom: 12px;
-        }
-        .swap-rate strong {
-            color: var(--text-primary);
+            display: none !important;
         }
         .swap-result {
             background: var(--bg-input);
@@ -2977,9 +2970,9 @@
                     <span class="currency-label" id="swapInputCurrency">DZD</span>
                 </div>
 
-                <!-- سعر الصرف -->
-                <div class="swap-rate">
-                    سعر الصرف: <strong id="swapRateDisplay">263 DZD = 1 USDT</strong>
+                <!-- سعر الصرف مخفي نهائياً -->
+                <div class="swap-rate" style="display:none !important;">
+                    سعر الصرف: <strong id="swapRateDisplay"></strong>
                 </div>
 
                 <!-- النتيجة -->
@@ -4510,7 +4503,7 @@
         }
 
         // ============================================================
-        // SWAP FUNCTIONS (مع أسعار الصرف الجديدة)
+        // SWAP FUNCTIONS (مع أسعار الصرف الجديدة - مع إخفاء سعر الصرف)
         // ============================================================
         function toggleSwapDirection() {
             swapDirection = !swapDirection;
@@ -4522,21 +4515,18 @@
             const fromLabel = document.getElementById('swapFromLabel');
             const toLabel = document.getElementById('swapToLabel');
             const inputCurrency = document.getElementById('swapInputCurrency');
-            const rateDisplay = document.getElementById('swapRateDisplay');
-            if (!fromLabel || !toLabel || !inputCurrency || !rateDisplay) return;
+            // لا نقوم بتحديث عنصر سعر الصرف لأنه مخفي
+            // فقط نحدد الاتجاهات والعملات
+            if (!fromLabel || !toLabel || !inputCurrency) return;
 
             if (swapDirection) {
-                // DZD -> USDT
                 fromLabel.textContent = 'DZD';
                 toLabel.textContent = 'USDT';
                 inputCurrency.textContent = 'DZD';
-                rateDisplay.textContent = `${RATE_DZD_TO_USDT} DZD = 1 USDT`;   // عرض سعر واحد
             } else {
-                // USDT -> DZD
                 fromLabel.textContent = 'USDT';
                 toLabel.textContent = 'DZD';
                 inputCurrency.textContent = 'USDT';
-                rateDisplay.textContent = `1 USDT = ${RATE_USDT_TO_DZD} DZD`;   // عرض سعر واحد
             }
             fromLabel.className = `dir-badge ${swapDirection ? 'dzd' : 'usdt'}`;
             toLabel.className = `dir-badge ${swapDirection ? 'usdt' : 'dzd'}`;
@@ -6325,7 +6315,7 @@
         });
 
         console.log('🚀 Crynova - باقة استثمار دائمة (0.2% يومياً، 5,000 - 200,000 دج) - تم تبديل ترتيب التبويبات');
-        console.log('💱 أسعار الصرف: 1 USDT = 243 DZD  |  263 DZD = 1 USDT');
+        console.log('💱 أسعار الصرف: 1 USDT = 243 DZD  |  263 DZD = 1 USDT (مخفية عن المستخدم)');
     </script>
 </body>
 </html>
