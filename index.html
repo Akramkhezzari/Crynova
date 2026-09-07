@@ -3385,6 +3385,25 @@
                 </div>
 
                 <div class="profile-tab-panel" id="panel-subscription">
+                    <!-- ===== بطاقة الاشتراك الحالي ===== -->
+                    <div id="currentSubscriptionCard" style="display:none;" class="card" style="border:2px solid var(--accent);">
+                        <div class="flex-between">
+                            <div>
+                                <div style="font-weight:800;font-size:18px;">اشتراكك الحالي: <span id="currentPlanName">-</span></div>
+                                <div style="font-size:14px;color:var(--text-secondary);">ينتهي في: <span id="subscriptionEndDate">-</span></div>
+                                <div style="font-size:14px;color:var(--text-secondary);">المتبقي: <span id="subscriptionRemaining">-</span></div>
+                            </div>
+                            <div>
+                                <button class="btn btn-danger btn-sm" onclick="cancelSubscription()" style="width:auto;padding:6px 14px;">
+                                    <i class="fas fa-times"></i> إلغاء
+                                </button>
+                            </div>
+                        </div>
+                        <div style="margin-top:8px;font-size:13px;color:var(--text-secondary);">
+                            <i class="fas fa-info-circle"></i> يمكنك إلغاء الاشتراك في أي وقت، ولن يتم تجديده تلقائياً.
+                        </div>
+                    </div>
+
                     <div class="pricing-widget">
                         <div class="pc-card pc-starter">
                             <div class="pc-stripe"></div>
@@ -3709,8 +3728,6 @@
 
         // ============================================================
         // SAFE DOM HELPERS
-        // تمنع أخطاء "Cannot set properties of null" عندما يتم استدعاء
-        // دالة تحديث واجهة قبل تحميل العنصر أو في شاشة لا يوجد بها هذا العنصر
         // ============================================================
         function setText(id, value) {
             const el = document.getElementById(id);
@@ -3742,6 +3759,7 @@
         let currentSelectedPlanId = null;
         let isModalOpen = false;
         let zakatUnsubscribe = null;
+        let subscriptionRemainingInterval = null;
 
         // متغيرات لتخزين بيانات الإيداع والسحب المؤقتة قبل التأكيد
         let pendingDepositData = null;
@@ -3878,7 +3896,7 @@
         }
 
         // ============================================================
-        // DONATION MODAL FUNCTIONS (النافذة المنبثقة الجديدة)
+        // DONATION MODAL FUNCTIONS
         // ============================================================
         function openDonationModal() {
             if (!userData) {
@@ -3944,7 +3962,6 @@
 
         function updateDonationUI() {
             const input = document.getElementById('donationAmountInput');
-            const slider = document.getElementById('donationRangeSlider');
             const amount = parseFloat(input.value) || 0;
             const balance = userData.wallets?.dzd || 0;
             const statusEl = document.getElementById('donationBalanceStatus');
@@ -3999,7 +4016,7 @@
         });
 
         // ============================================================
-        // CONFIRM DONATION (تأكيد التبرع من النافذة المنبثقة)
+        // CONFIRM DONATION
         // ============================================================
         async function confirmDonation() {
             if (!userData) {
@@ -4376,6 +4393,7 @@
             updateVerificationStatus();
             checkVerificationExpiry();
             updateSwapBalances();
+            updateSubscriptionUI();
         }
 
         function updateProfileUI() {
@@ -4393,7 +4411,7 @@
             updateVerificationStatus();
         }
 
-        // ===== دالة تحديث حالة التوثيق - تظهر "✅ تم التحقق منه" فقط =====
+        // ===== دالة تحديث حالة التوثيق =====
         function updateVerificationStatus() {
             const el = document.getElementById('verificationStatus');
             if (!el) return;
@@ -4458,8 +4476,6 @@
             setText('walletReward', reward.toFixed(2));
             setText('walletReferral', referral.toFixed(2));
             setText('walletLocked', locked.toFixed(2));
-            // تحديث الرصيد القابل للسحب في صفحة السحب يعتمد على الطريقة المختارة
-            // سيتم تحديثه عبر updateWithdrawableBalance عند تغيير الطريقة
         }
 
         function updateReferralUI() {
@@ -4476,15 +4492,12 @@
             const w = userData.wallets || {};
             let balance = 0;
             if (method === 'baridi') {
-                // سحب بالدينار الجزائري (من المحافظ المختلفة)
                 balance = (w.dzd || 0) + (w.dzdReward || 0) + (w.dzdReferral || 0);
             } else {
-                // سحب بـ USDT (Binance أو RedotPay)
                 balance = w.usdt || 0;
             }
             setText('withdrawableBalance', balance.toFixed(2));
 
-            // تحديث الحد الأدنى حسب العملة
             if (method === 'baridi') {
                 setText('withdrawMinAmount', `${MIN_WITHDRAW} DZD`);
             } else {
@@ -4509,19 +4522,16 @@
             if (!fromLabel || !toLabel || !inputCurrency || !rateDisplay) return;
 
             if (swapDirection) {
-                // DZD -> USDT
                 fromLabel.textContent = 'DZD';
                 toLabel.textContent = 'USDT';
                 inputCurrency.textContent = 'DZD';
                 rateDisplay.textContent = `1 USDT = ${EXCHANGE_RATE} DZD`;
             } else {
-                // USDT -> DZD
                 fromLabel.textContent = 'USDT';
                 toLabel.textContent = 'DZD';
                 inputCurrency.textContent = 'USDT';
                 rateDisplay.textContent = `1 USDT = ${EXCHANGE_RATE} DZD`;
             }
-            // تحديث الألوان
             fromLabel.className = `dir-badge ${swapDirection ? 'dzd' : 'usdt'}`;
             toLabel.className = `dir-badge ${swapDirection ? 'usdt' : 'dzd'}`;
         }
@@ -4533,12 +4543,10 @@
             const amount = parseFloat(input.value) || 0;
 
             if (swapDirection) {
-                // DZD -> USDT
                 const usdt = amount / EXCHANGE_RATE;
                 resultSpan.textContent = `${usdt.toFixed(4)} USDT`;
                 resultSpan.className = 'value usdt-color';
             } else {
-                // USDT -> DZD
                 const dzd = amount * EXCHANGE_RATE;
                 resultSpan.textContent = `${dzd.toFixed(2)} DZD`;
                 resultSpan.className = 'value dzd-color';
@@ -4569,7 +4577,6 @@
             let fromCurrency, toCurrency, fromAmount, toAmount;
 
             if (swapDirection) {
-                // DZD -> USDT
                 fromCurrency = 'dzd';
                 toCurrency = 'usdt';
                 fromAmount = amount;
@@ -4579,7 +4586,6 @@
                     return;
                 }
             } else {
-                // USDT -> DZD
                 fromCurrency = 'usdt';
                 toCurrency = 'dzd';
                 fromAmount = amount;
@@ -4607,12 +4613,9 @@
                     if (fromCurrency === 'usdt' && (wallets.usdt || 0) < fromAmount) throw new Error('رصيد USDT غير كاف');
 
                     const updates = {};
-                    // خصم من العملة المصدر
                     updates[`wallets.${fromCurrency}`] = firebase.firestore.FieldValue.increment(-fromAmount);
-                    // إضافة إلى العملة الهدف
                     updates[`wallets.${toCurrency}`] = firebase.firestore.FieldValue.increment(toAmount);
 
-                    // تسجيل المعاملة
                     updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                         type: 'swap',
                         amount: fromAmount,
@@ -4915,7 +4918,6 @@
             if (!accountInput || !accountLabel || !accountIcon || !accountHint || !amountLabel ||
                 !amountIcon || !amountInput || !minHint || !feeLabel || !withdrawFeeLabel) return;
 
-            // تحديث الرصيد القابل للسحب حسب الطريقة المختارة
             updateWithdrawableBalance(method);
 
             if (method === 'baridi') {
@@ -4962,7 +4964,6 @@
                 setText('withdrawMinAmount', `${MIN_WITHDRAW_USDT} USDT`);
             }
 
-            // إعادة حساب الرسوم والإجمالي
             calculateWithdrawFee();
         }
 
@@ -5067,7 +5068,6 @@
                     showToast('⚠️ معرف Baridi Mob غير صحيح! يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999');
                     return;
                 }
-                // التحقق من الرصيد
                 const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
                 if (amount > balance) { showToast('الرصيد غير كافٍ'); return; }
             } else if (method === 'binance') {
@@ -5080,7 +5080,6 @@
                 if (amount < minAmount) { showToast(`الحد الأدنى للسحب ${minAmount} USDT`); return; }
                 if (!account) { showToast('أدخل عنوان محفظتك على Binance'); return; }
                 if (account.length < 10) { showToast('⚠️ عنوان المحفظة غير صحيح'); return; }
-                // التحقق من الرصيد
                 const balance = userData.wallets?.usdt || 0;
                 if (amount > balance) { showToast('رصيد USDT غير كافٍ'); return; }
             } else if (method === 'redotpay') {
@@ -5093,7 +5092,6 @@
                 if (amount < minAmount) { showToast(`الحد الأدنى للسحب ${minAmount} USDT`); return; }
                 if (!account) { showToast('أدخل معرف محفظتك على RedotPay'); return; }
                 if (account.length < 5) { showToast('⚠️ معرف المحفظة غير صحيح'); return; }
-                // التحقق من الرصيد
                 const balance = userData.wallets?.usdt || 0;
                 if (amount > balance) { showToast('رصيد USDT غير كافٍ'); return; }
             } else {
@@ -5104,7 +5102,6 @@
             const fee = amount * feePercent;
             const total = amount + fee;
 
-            // عرض نافذة التأكيد
             showWithdrawConfirmModal({
                 method: method,
                 methodDisplay: methodDisplay,
@@ -5145,7 +5142,6 @@
                 };
 
                 if (currency === 'DZD') {
-                    // سحب DZD من المحافظ المختلفة
                     await db.runTransaction(async (t) => {
                         const ref = db.collection('users').doc(userData.telegramId);
                         const doc = await t.get(ref);
@@ -5184,7 +5180,6 @@
                         t.update(ref, upd);
                     });
                 } else {
-                    // سحب USDT من محفظة usdt
                     await db.runTransaction(async (t) => {
                         const ref = db.collection('users').doc(userData.telegramId);
                         const doc = await t.get(ref);
@@ -5227,7 +5222,7 @@
         }
 
         // ============================================================
-        // CHECK VERIFICATION EXPIRY (تفحص انتهاء صلاحية التوثيق)
+        // CHECK VERIFICATION EXPIRY
         // ============================================================
         async function checkVerificationExpiry() {
             if (!userData) return;
@@ -5924,51 +5919,157 @@
                     btn.classList.add('active');
                 }
             });
+            if (tabId === 'subscription') {
+                updateSubscriptionUI();
+            }
         }
 
         // ============================================================
-        // SUBSCRIPTION LOGIC
+        // SUBSCRIPTION LOGIC (مع عرض الوقت المتبقي وإلغاء الاشتراك)
         // ============================================================
         function updateSubscriptionUI() {
-            if (!userData) return;
+            const card = document.getElementById('currentSubscriptionCard');
+            if (!userData || !card) return;
+
             const sub = userData.subscription || { plan: null, status: 'inactive' };
             const plan = sub.plan;
             const status = sub.status;
 
+            // تحديث أزرار الباقات
             document.querySelectorAll('.pc-btn').forEach(btn => {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك';
             });
 
             if (status === 'active' && plan) {
-                const activeBtn = document.querySelector(`.pc-btn[data-plan="${plan}"]`);
-                if (activeBtn) {
-                    activeBtn.disabled = true;
-                    activeBtn.innerHTML = '<i class="fas fa-check-circle"></i> مفعّل';
-                }
+                // إظهار بطاقة الاشتراك الحالي
+                card.style.display = 'block';
+                setText('currentPlanName', plan.charAt(0).toUpperCase() + plan.slice(1));
+
+                const endDate = sub.endDate?.toDate ? sub.endDate.toDate() : new Date(sub.endDate);
+                setText('subscriptionEndDate', formatDate(endDate));
+
+                // تحديث الوقت المتبقي
+                updateSubscriptionRemaining();
+
+                // تعطيل أزرار الباقات الأخرى أو جعلها غير قابلة للنقر
                 document.querySelectorAll('.pc-btn').forEach(btn => {
                     if (btn.dataset.plan !== plan) {
                         btn.disabled = true;
                         btn.innerHTML = '<i class="fas fa-lock"></i> غير متاح';
+                    } else {
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fas fa-check-circle"></i> مفعّل';
                     }
                 });
+
+                // بدء تحديث الوقت المتبقي كل دقيقة
+                if (subscriptionRemainingInterval) clearInterval(subscriptionRemainingInterval);
+                subscriptionRemainingInterval = setInterval(() => {
+                    updateSubscriptionRemaining();
+                }, 60000);
+
             } else if (status === 'expired') {
-                if (plan) {
-                    const expiredBtn = document.querySelector(`.pc-btn[data-plan="${plan}"]`);
-                    if (expiredBtn) {
-                        expiredBtn.innerHTML = '<i class="fas fa-clock"></i> انتهى';
-                        expiredBtn.disabled = false;
-                    }
+                card.style.display = 'block';
+                setText('currentPlanName', plan ? (plan.charAt(0).toUpperCase() + plan.slice(1)) : '--');
+                setText('subscriptionEndDate', 'انتهى');
+                setText('subscriptionRemaining', 'منتهي');
+                // إظهار زر الإلغاء مع نص "تم الإلغاء"
+                const cancelBtn = card.querySelector('.btn-danger');
+                if (cancelBtn) {
+                    cancelBtn.textContent = 'تم الإلغاء';
+                    cancelBtn.disabled = true;
+                    cancelBtn.style.opacity = '0.6';
+                    cancelBtn.style.cursor = 'not-allowed';
+                }
+                // تفعيل أزرار الباقات
+                document.querySelectorAll('.pc-btn').forEach(btn => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك';
+                });
+            } else {
+                // غير مشترك
+                card.style.display = 'none';
+                document.querySelectorAll('.pc-btn').forEach(btn => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك';
+                });
+                if (subscriptionRemainingInterval) {
+                    clearInterval(subscriptionRemainingInterval);
+                    subscriptionRemainingInterval = null;
                 }
             }
         }
 
+        function updateSubscriptionRemaining() {
+            const sub = userData?.subscription;
+            if (!sub || sub.status !== 'active') {
+                setText('subscriptionRemaining', '--');
+                return;
+            }
+            const endDate = sub.endDate?.toDate ? sub.endDate.toDate() : new Date(sub.endDate);
+            const now = new Date();
+            const diff = endDate - now;
+            if (diff <= 0) {
+                setText('subscriptionRemaining', 'انتهى');
+                // يمكن تحديث حالة الاشتراك تلقائياً إلى expired
+                // لكننا سنترك ذلك لإعادة التحميل أو التحديث اللاحق
+                return;
+            }
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            setText('subscriptionRemaining', `${days} يوم و ${hours} ساعة`);
+        }
+
+        // ===== إلغاء الاشتراك =====
+        async function cancelSubscription() {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+            const sub = userData.subscription || {};
+            if (sub.status !== 'active') {
+                showToast('ليس لديك اشتراك نشط لإلغائه');
+                return;
+            }
+
+            if (!confirm(`هل أنت متأكد من إلغاء اشتراكك الحالي (${sub.plan})؟`)) return;
+
+            try {
+                await db.collection('users').doc(userData.telegramId).update({
+                    'subscription.status': 'inactive',
+                    'subscription.plan': null,
+                    'subscription.startDate': null,
+                    'subscription.endDate': null
+                });
+                showToast('✅ تم إلغاء الاشتراك بنجاح');
+                // تحديث البيانات محلياً
+                if (userData.subscription) {
+                    userData.subscription.status = 'inactive';
+                    userData.subscription.plan = null;
+                    userData.subscription.startDate = null;
+                    userData.subscription.endDate = null;
+                }
+                updateSubscriptionUI();
+            } catch (e) {
+                showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e);
+            }
+        }
+
+        // ===== الاشتراك في خطة جديدة (مع إمكانية تغيير الاشتراك) =====
         async function subscribeToPlan(planId) {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
             const sub = userData.subscription || {};
             if (sub.status === 'active') {
-                showToast(`⚠️ لديك اشتراك نشط في خطة ${sub.plan}. انتظر انتهاءه أو قم بتجديده.`);
+                // إذا كان الاشتراك نشطاً، نطلب إلغاءه أولاً
+                const confirmChange = confirm(`لديك اشتراك نشط في خطة ${sub.plan}. هل تريد إلغاءه والاشتراك في ${planId}؟`);
+                if (!confirmChange) return;
+                // نلغي الاشتراك الحالي أولاً
+                await cancelSubscription();
+                // ثم نواصل للاشتراك الجديد
+                // لكن بعد الإلغاء، ننتظر قليلاً لتحديث البيانات
+                await new Promise(resolve => setTimeout(resolve, 500));
+                // نستدعي نفس الدالة مرة أخرى بعد الإلغاء
+                await subscribeToPlan(planId);
                 return;
             }
 
@@ -6196,7 +6297,7 @@
             calculateSwapResult();
         });
 
-        console.log('🚀 Crynova - مع تبادل DZD/USDT وصفحة عوائد فارغة وطرق إيداع وسحب متعددة مع نافذة تأكيد');
+        console.log('🚀 Crynova - مع إدارة الاشتراكات الشهرية وعرض الوقت المتبقي وإلغاء الاشتراك');
     </script>
 </body>
 </html>
