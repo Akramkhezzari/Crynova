@@ -3539,33 +3539,33 @@
             </div>
             <div class="modal-plan-detail">
                 <span class="label">العائد اليومي</span>
-                <span class="value" id="modalPlanReturn">5%</span>
+                <span class="value" id="modalPlanReturn">0.2%</span>
             </div>
             <div class="modal-amount-section">
                 <label>المبلغ المستثمر <span id="modalCurrencyLabel">(DZD)</span></label>
                 <div class="amount-input-wrapper">
                     <button onclick="adjustAmount(-100, event)">−</button>
-                    <input type="number" id="modalAmountInput" min="0" step="100" value="2000">
+                    <input type="number" id="modalAmountInput" min="0" step="100" value="5000">
                     <button onclick="adjustAmount(100, event)">+</button>
                 </div>
-                <input type="range" id="modalRangeSlider" class="range-slider" min="0" max="50000" step="100" value="2000">
+                <input type="range" id="modalRangeSlider" class="range-slider" min="0" max="200000" step="100" value="5000">
                 <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);padding:0 4px;">
-                    <span id="modalMinDisplay">0</span>
-                    <span id="modalMaxDisplay">50,000</span>
+                    <span id="modalMinDisplay">5,000</span>
+                    <span id="modalMaxDisplay">200,000</span>
                 </div>
             </div>
             <div class="modal-info-grid">
                 <div class="modal-info-item">
-                    <div class="number gold-color" id="modalDailyProfit">100.00</div>
+                    <div class="number gold-color" id="modalDailyProfit">10.00</div>
                     <div class="label">الربح اليومي</div>
                 </div>
                 <div class="modal-info-item">
-                    <div class="number" id="modalTotalReturn">3,000.00</div>
-                    <div class="label">إجمالي الأرباح (30 يوم)</div>
+                    <div class="number" id="modalTotalReturn">300.00</div>
+                    <div class="label">إجمالي الأرباح (شهرياً)</div>
                 </div>
                 <div class="modal-info-item" style="grid-column: span 2; background: var(--accent-glow); border: 1px solid var(--accent-light);">
-                    <div class="number" style="color: var(--gold);" id="modalFirstBonus">140.00</div>
-                    <div class="label">مكافأة أول استثمار</div>
+                    <div class="number" style="color: var(--gold);" id="modalFirstBonus">350.00</div>
+                    <div class="label">مكافأة أول استثمار (7%)</div>
                 </div>
             </div>
             <div class="modal-balance-warning" id="modalBalanceStatus">
@@ -3781,16 +3781,16 @@
         let swapDirection = true;
 
         // ============================================================
-        // DEFAULT INVESTMENT PLANS
+        // DEFAULT INVESTMENT PLANS (تم التعديل حسب المواصفات الجديدة)
         // ============================================================
         const DEFAULT_INVEST_PLANS = [{
             id: 'plan_basic',
             type: 'investment',
-            name: 'المستوى الأساسي',
-            description: 'فئة الاستثمار: 2,000 – 4,999 دج',
-            minAmount: 2000,
-            maxAmount: 4999,
-            dailyReturnPercent: 5,
+            name: 'الباقة الأساسية (دائمة)',
+            description: 'فئة الاستثمار: 5,000 – 200,000 دج',
+            minAmount: 5000,
+            maxAmount: 200000,
+            dailyReturnPercent: 0.2,  // 0.2% يومياً
             currency: 'DZD',
             isActive: true,
             displayOrder: 1
@@ -5362,6 +5362,7 @@
                         <ul class="features">
                             <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} DZD</li>
                             <li><i class="fas fa-chart-line"></i> الربح اليومي: ${minDailyProfit.toFixed(2)} - ${maxDailyProfit.toFixed(2)} DZD</li>
+                            <li><i class="fas fa-infinity" style="color:#10b981;"></i> المدة: دائمة (بدون انتهاء)</li>
                             <li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: ${minBonus.toFixed(2)} - ${maxBonus.toFixed(2)} DZD</li>
                         </ul>
                         <button class="btn ${i===1?'btn-dzd':'btn-outline'}" onclick="openInvestmentModal('${p.id}')">
@@ -5485,7 +5486,7 @@
             const amount = parseFloat(input.value) || 0;
 
             const dailyProfit = (amount * plan.dailyReturnPercent) / 100;
-            const totalProfit = dailyProfit * 30;
+            const totalProfit = dailyProfit * 30; // عرض شهري
             const firstBonus = (amount * FIRST_BONUS_PERCENT) / 100;
 
             setText('modalDailyProfit', dailyProfit.toFixed(2));
@@ -5546,7 +5547,8 @@
 
             try {
                 const now = new Date();
-                const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                // مدة دائمة: حتى 31 ديسمبر 2099
+                const endDate = new Date(2099, 11, 31);
                 const investmentId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
                 const investmentObj = {
@@ -5556,7 +5558,7 @@
                     amount: amount,
                     currency: 'DZD',
                     dailyReturnPercent: plan.dailyReturnPercent,
-                    durationDays: 30,
+                    durationDays: 36500, // حوالي 100 سنة
                     startDate: now,
                     endDate: endDate,
                     status: 'active',
@@ -5665,8 +5667,8 @@
             container.innerHTML = list.map(inv => {
                 const amount = inv.amount;
                 const daily = (inv.amount * inv.dailyReturnPercent) / 100;
-                const endDate = inv.endDate?.toDate ? inv.endDate.toDate() : new Date(inv.endDate);
-                const remaining = Math.max(0, Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24)));
+                // بما أن المدة دائمة، نعرض "دائمة" بدلاً من الأيام المتبقية
+                const remainingText = "دائمة";
                 return `
                     <div class="card" style="border-right:4px solid var(--gold);">
                         <div class="flex-between">
@@ -5687,8 +5689,8 @@
                                 <div class="label">إجمالي الأرباح</div>
                             </div>
                             <div class="invest-stat">
-                                <div class="number">${remaining} يوم</div>
-                                <div class="label">متبقي</div>
+                                <div class="number">${remainingText}</div>
+                                <div class="label">المدة المتبقية</div>
                             </div>
                         </div>
                     </div>
@@ -5807,8 +5809,9 @@
                 for (let inv of investments) {
                     if (inv.status !== 'active') continue;
 
-                    const endDate = inv.endDate?.toDate ? inv.endDate.toDate() : new Date(inv.endDate);
-                    if (now > endDate) {
+                    // بما أن المدة دائمة، نتحقق من التاريخ فقط إذا كان موجوداً
+                    const endDate = inv.endDate?.toDate ? inv.endDate.toDate() : null;
+                    if (endDate && now > endDate) {
                         inv.status = 'completed';
                         updated = true;
                         continue;
@@ -6295,7 +6298,7 @@
             calculateSwapResult();
         });
 
-        console.log('🚀 Crynova - مع إدارة الاشتراكات الشهرية وعرض الوقت المتبقي وإلغاء الاشتراك (تم إزالة التأكيد الإضافي للتبرع)');
+        console.log('🚀 Crynova - باقة استثمار دائمة (0.2% يومياً، 5,000 - 200,000 دج)');
     </script>
 </body>
 </html>
