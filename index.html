@@ -5467,11 +5467,23 @@
         }
 
         // ============================================================
-        // INVESTMENT MODAL (يدعم العملتين)
+        // INVESTMENT MODAL (يدعم العملتين + تحديث الرصيد من Firestore)
         // ============================================================
-        function openInvestmentModal(planId) {
+        async function openInvestmentModal(planId) {
             if (isModalOpen) return;
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
+            // 🔥 تحديث بيانات المستخدم من Firestore للحصول على أحدث رصيد
+            try {
+                const doc = await db.collection('users').doc(userData.telegramId).get();
+                if (doc.exists) {
+                    userData = { telegramId: userData.telegramId, ...doc.data() };
+                    // تحديث الواجهات الأخرى
+                    updateUI();
+                }
+            } catch (e) {
+                console.error('❌ فشل تحديث بيانات المستخدم:', e);
+            }
 
             const plan = allInvestPlans.find(p => p.id === planId);
             if (!plan) { showToast('الخطة غير موجودة'); return; }
@@ -5501,7 +5513,7 @@
             slider.step = isUSDT ? 1 : 100;
             slider.value = minAmount;
 
-            // الرصيد حسب العملة
+            // الرصيد حسب العملة (بعد التحديث)
             const balance = isUSDT ? (userData.wallets?.usdt || 0) : ((userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0));
             setText('modalUserBalance', balance.toFixed(isUSDT ? 4 : 2));
 
@@ -5586,7 +5598,7 @@
         }
 
         // ============================================================
-        // CONFIRM INVESTMENT (يدعم العملتين)
+        // CONFIRM INVESTMENT (يدعم العملتين مع تحقق إضافي)
         // ============================================================
         async function confirmInvestment() {
             if (!currentSelectedPlanId) {
@@ -5609,9 +5621,22 @@
                 return;
             }
 
-            const balance = isUSDT ? (userData.wallets?.usdt || 0) : ((userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0));
-            if (balance < amount) {
-                showToast(`الرصيد غير كافٍ (${balance.toFixed(isUSDT ? 4 : 2)} ${plan.currency})`);
+            // التحقق من الرصيد من قاعدة البيانات بشكل مباشر (لتجنب أي تباين)
+            let freshBalance = 0;
+            try {
+                const doc = await db.collection('users').doc(userData.telegramId).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    freshBalance = isUSDT ? (data.wallets?.usdt || 0) : ((data.wallets?.dzd || 0) + (data.wallets?.dzdReward || 0) + (data.wallets?.dzdReferral || 0));
+                }
+            } catch (e) {
+                showToast('حدث خطأ في التحقق من الرصيد');
+                console.error(e);
+                return;
+            }
+
+            if (freshBalance < amount) {
+                showToast(`⚠️ الرصيد غير كافٍ! المتاح: ${freshBalance.toFixed(isUSDT ? 4 : 2)} ${plan.currency}`);
                 return;
             }
 
@@ -5712,7 +5737,7 @@
 
                 showToast(`✅ تم الاستثمار في "${plan.name}" بنجاح!`);
                 await loadTransactions();
-                updateUI();
+                await updateUI();
                 renderInvestments();
             } catch (e) {
                 showToast('❌ ' + (e.message || 'حدث خطأ'));
@@ -6514,6 +6539,8 @@
 
         console.log('🚀 Crynova - باقة استثمار دائمة (0.2% يومياً، 5,000 - 200,000 دج) + باقة USDT (0.05%، 10 - 5,000 USDT)');
         console.log('💱 أسعار الصرف: 1 USDT = 243 DZD  |  263 DZD = 1 USDT (مخفية عن المستخدم)');
+        console.log('✅ تم تحديث دالة openInvestmentModal لجلب الرصيد من Firestore قبل الفتح');
+        console.log('✅ تم إضافة تحقق إضافي من الرصيد في confirmInvestment');
     </script>
 </body>
 </html>
