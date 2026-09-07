@@ -2979,13 +2979,13 @@
 
                 <!-- سعر الصرف -->
                 <div class="swap-rate">
-                    سعر الصرف: <strong id="swapRateDisplay">1 USDT = 250 DZD</strong>
+                    سعر الصرف: <strong id="swapRateDisplay">263 DZD = 1 USDT</strong>
                 </div>
 
                 <!-- النتيجة -->
                 <div class="swap-result">
                     <span class="label">ستحصل على:</span>
-                    <span class="value dzd-color" id="swapResultValue">0.40 USDT</span>
+                    <span class="value usdt-color" id="swapResultValue">0.3802 USDT</span>
                 </div>
 
                 <!-- زر التبادل -->
@@ -3775,8 +3775,11 @@
         const MIN_DEPOSIT_USDT = 10;
         const FIRST_BONUS_PERCENT = 7;
 
-        // سعر الصرف الثابت
-        const EXCHANGE_RATE = 250; // 1 USDT = 250 DZD
+        // ============================================================
+        // أسعار الصرف الجديدة
+        // ============================================================
+        const RATE_USDT_TO_DZD = 243;   // 1 USDT = 243 DZD
+        const RATE_DZD_TO_USDT = 263;   // 263 DZD = 1 USDT
 
         // اتجاه التبادل: true = DZD -> USDT, false = USDT -> DZD
         let swapDirection = true;
@@ -4507,7 +4510,7 @@
         }
 
         // ============================================================
-        // SWAP FUNCTIONS
+        // SWAP FUNCTIONS (مع أسعار الصرف الجديدة)
         // ============================================================
         function toggleSwapDirection() {
             swapDirection = !swapDirection;
@@ -4523,15 +4526,17 @@
             if (!fromLabel || !toLabel || !inputCurrency || !rateDisplay) return;
 
             if (swapDirection) {
+                // DZD -> USDT
                 fromLabel.textContent = 'DZD';
                 toLabel.textContent = 'USDT';
                 inputCurrency.textContent = 'DZD';
-                rateDisplay.textContent = `1 USDT = ${EXCHANGE_RATE} DZD`;
+                rateDisplay.textContent = `${RATE_DZD_TO_USDT} DZD = 1 USDT`;   // عرض سعر واحد
             } else {
+                // USDT -> DZD
                 fromLabel.textContent = 'USDT';
                 toLabel.textContent = 'DZD';
                 inputCurrency.textContent = 'USDT';
-                rateDisplay.textContent = `1 USDT = ${EXCHANGE_RATE} DZD`;
+                rateDisplay.textContent = `1 USDT = ${RATE_USDT_TO_DZD} DZD`;   // عرض سعر واحد
             }
             fromLabel.className = `dir-badge ${swapDirection ? 'dzd' : 'usdt'}`;
             toLabel.className = `dir-badge ${swapDirection ? 'usdt' : 'dzd'}`;
@@ -4544,11 +4549,13 @@
             const amount = parseFloat(input.value) || 0;
 
             if (swapDirection) {
-                const usdt = amount / EXCHANGE_RATE;
+                // DZD -> USDT : نقسم على 263
+                const usdt = amount / RATE_DZD_TO_USDT;
                 resultSpan.textContent = `${usdt.toFixed(4)} USDT`;
                 resultSpan.className = 'value usdt-color';
             } else {
-                const dzd = amount * EXCHANGE_RATE;
+                // USDT -> DZD : نضرب في 243
+                const dzd = amount * RATE_USDT_TO_DZD;
                 resultSpan.textContent = `${dzd.toFixed(2)} DZD`;
                 resultSpan.className = 'value dzd-color';
             }
@@ -4581,7 +4588,7 @@
                 fromCurrency = 'dzd';
                 toCurrency = 'usdt';
                 fromAmount = amount;
-                toAmount = amount / EXCHANGE_RATE;
+                toAmount = amount / RATE_DZD_TO_USDT;   // 263 DZD -> 1 USDT
                 if (fromAmount > (userData.wallets?.dzd || 0)) {
                     showToast('رصيد DZD غير كافٍ');
                     return;
@@ -4590,7 +4597,7 @@
                 fromCurrency = 'usdt';
                 toCurrency = 'dzd';
                 fromAmount = amount;
-                toAmount = amount * EXCHANGE_RATE;
+                toAmount = amount * RATE_USDT_TO_DZD;   // 1 USDT -> 243 DZD
                 if (fromAmount > (userData.wallets?.usdt || 0)) {
                     showToast('رصيد USDT غير كافٍ');
                     return;
@@ -4629,7 +4636,8 @@
                             to: toCurrency,
                             fromAmount: fromAmount,
                             toAmount: toAmount,
-                            rate: EXCHANGE_RATE
+                            rateUsdtToDzd: RATE_USDT_TO_DZD,
+                            rateDzdToUsdt: RATE_DZD_TO_USDT
                         }
                     });
 
@@ -6060,17 +6068,34 @@
         async function subscribeToPlan(planId) {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
-            const sub = userData.subscription || {};
+            // تحديث userData من Firestore أولاً
+            const freshDoc = await db.collection('users').doc(userData.telegramId).get();
+            if (!freshDoc.exists) { showToast('حدث خطأ'); return; }
+            const freshData = freshDoc.data();
+            const sub = freshData.subscription || {};
+
+            if (sub.status === 'active' && sub.plan === planId) {
+                showToast(`أنت مشترك بالفعل في خطة ${planId}`);
+                return;
+            }
+
             if (sub.status === 'active') {
-                // إذا كان الاشتراك نشطاً، نطلب إلغاءه أولاً
-                const confirmChange = confirm(`لديك اشتراك نشط في خطة ${sub.plan}. هل تريد إلغاءه والاشتراك في ${planId}؟`);
-                if (!confirmChange) return;
-                // نلغي الاشتراك الحالي أولاً
-                await cancelSubscription();
-                // ثم نواصل للاشتراك الجديد
-                // لكن بعد الإلغاء، ننتظر قليلاً لتحديث البيانات
-                await new Promise(resolve => setTimeout(resolve, 500));
-                // نستدعي نفس الدالة مرة أخرى بعد الإلغاء
+                if (!confirm(`لديك اشتراك نشط في خطة ${sub.plan}. هل تريد التبديل إلى ${planId}؟`)) return;
+                // إلغاء الاشتراك الحالي
+                await db.collection('users').doc(userData.telegramId).update({
+                    'subscription.status': 'inactive',
+                    'subscription.plan': null,
+                    'subscription.startDate': null,
+                    'subscription.endDate': null
+                });
+                // تحديث userData محلياً
+                if (userData.subscription) {
+                    userData.subscription.status = 'inactive';
+                    userData.subscription.plan = null;
+                }
+                // انتظار ثانية لتحديث البيانات
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                // إعادة استدعاء الدالة (ستجد الاشتراك غير نشط الآن)
                 await subscribeToPlan(planId);
                 return;
             }
@@ -6300,6 +6325,7 @@
         });
 
         console.log('🚀 Crynova - باقة استثمار دائمة (0.2% يومياً، 5,000 - 200,000 دج) - تم تبديل ترتيب التبويبات');
+        console.log('💱 أسعار الصرف: 1 USDT = 243 DZD  |  263 DZD = 1 USDT');
     </script>
 </body>
 </html>
