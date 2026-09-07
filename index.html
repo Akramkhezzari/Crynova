@@ -3855,10 +3855,22 @@
             description: 'فئة الاستثمار: 5,000 – 200,000 دج',
             minAmount: 5000,
             maxAmount: 200000,
-            dailyReturnPercent: 0.2,  // 0.2% يومياً
+            dailyReturnPercent: 0.2,
             currency: 'DZD',
             isActive: true,
             displayOrder: 1
+        },
+        {
+            id: 'plan_usdt',
+            type: 'investment',
+            name: 'الباقة الرقمية (USDT)',
+            description: 'فئة الاستثمار: 10 – 5,000 USDT',
+            minAmount: 10,
+            maxAmount: 5000,
+            dailyReturnPercent: 0.05,
+            currency: 'USDT',
+            isActive: true,
+            displayOrder: 2
         }];
 
         // ============================================================
@@ -4097,8 +4109,6 @@
                 showToast('المبلغ غير صحيح أو يتجاوز الرصيد');
                 return;
             }
-
-            // تم إزالة التأكيد الإضافي (confirm) هنا
 
             try {
                 // 1. خصم من المستخدم
@@ -4583,8 +4593,6 @@
             const fromLabel = document.getElementById('swapFromLabel');
             const toLabel = document.getElementById('swapToLabel');
             const inputCurrency = document.getElementById('swapInputCurrency');
-            // لا نقوم بتحديث عنصر سعر الصرف لأنه مخفي
-            // فقط نحدد الاتجاهات والعملات
             if (!fromLabel || !toLabel || !inputCurrency) return;
 
             if (swapDirection) {
@@ -4607,12 +4615,10 @@
             const amount = parseFloat(input.value) || 0;
 
             if (swapDirection) {
-                // DZD -> USDT : نقسم على 263
                 const usdt = amount / RATE_DZD_TO_USDT;
                 resultSpan.textContent = `${usdt.toFixed(4)} USDT`;
                 resultSpan.className = 'value usdt-color';
             } else {
-                // USDT -> DZD : نضرب في 243
                 const dzd = amount * RATE_USDT_TO_DZD;
                 resultSpan.textContent = `${dzd.toFixed(2)} DZD`;
                 resultSpan.className = 'value dzd-color';
@@ -4646,7 +4652,7 @@
                 fromCurrency = 'dzd';
                 toCurrency = 'usdt';
                 fromAmount = amount;
-                toAmount = amount / RATE_DZD_TO_USDT;   // 263 DZD -> 1 USDT
+                toAmount = amount / RATE_DZD_TO_USDT;
                 if (fromAmount > (userData.wallets?.dzd || 0)) {
                     showToast('رصيد DZD غير كافٍ');
                     return;
@@ -4655,7 +4661,7 @@
                 fromCurrency = 'usdt';
                 toCurrency = 'dzd';
                 fromAmount = amount;
-                toAmount = amount * RATE_USDT_TO_DZD;   // 1 USDT -> 243 DZD
+                toAmount = amount * RATE_USDT_TO_DZD;
                 if (fromAmount > (userData.wallets?.usdt || 0)) {
                     showToast('رصيد USDT غير كافٍ');
                     return;
@@ -5389,19 +5395,12 @@
         }
 
         // ============================================================
-        // PLANS & RENDER
+        // PLANS & RENDER (يدعم العملتين)
         // ============================================================
         async function loadPlans() {
             allInvestPlans = DEFAULT_INVEST_PLANS;
-            renderPlans();
             renderPlansInside();
             console.log('📦 تم تحميل خطط العوائد الثابتة من الكود المحلي');
-        }
-
-        function renderPlans() {
-            const container = document.getElementById('investPlansList');
-            if (!container) return;
-            container.innerHTML = '';
         }
 
         function renderPlansInside() {
@@ -5414,25 +5413,28 @@
             }
 
             container.innerHTML = allInvestPlans.map((p, i) => {
-                const minAmount = p.minAmount;
-                const maxAmount = p.maxAmount;
-                const minDailyProfit = (minAmount * p.dailyReturnPercent) / 100;
-                const maxDailyProfit = (maxAmount * p.dailyReturnPercent) / 100;
-                const minBonus = (minAmount * FIRST_BONUS_PERCENT) / 100;
-                const maxBonus = (maxAmount * FIRST_BONUS_PERCENT) / 100;
+                const isUSDT = p.currency === 'USDT';
+                const currencySymbol = isUSDT ? 'USDT' : 'DZD';
+                const returnColor = isUSDT ? 'usdt-color' : 'dzd-return';
+                const btnClass = isUSDT ? 'btn-usdt' : 'btn-dzd';
+                const minDailyProfit = (p.minAmount * p.dailyReturnPercent) / 100;
+                const maxDailyProfit = (p.maxAmount * p.dailyReturnPercent) / 100;
+                const minBonus = (p.minAmount * FIRST_BONUS_PERCENT) / 100;
+                const maxBonus = (p.maxAmount * FIRST_BONUS_PERCENT) / 100;
+                const decimalPlaces = isUSDT ? 4 : 2;
 
                 return `
                     <div class="plan-card ${i===1?'popular':''}">
                         ${i===1?'<div class="badge-popular">⭐ الأفضل</div>':''}
                         <div class="name">${p.name}</div>
-                        <div class="return dzd-return">${p.dailyReturnPercent}% <small>يومياً</small></div>
+                        <div class="return ${returnColor}">${p.dailyReturnPercent}% <small>يومياً</small></div>
                         <ul class="features">
-                            <li><i class="fas fa-coins"></i> المبلغ: ${minAmount.toFixed(0)} - ${maxAmount.toFixed(0)} DZD</li>
-                            <li><i class="fas fa-chart-line"></i> الربح اليومي: ${minDailyProfit.toFixed(2)} - ${maxDailyProfit.toFixed(2)} DZD</li>
+                            <li><i class="fas fa-coins"></i> المبلغ: ${p.minAmount.toFixed(0)} - ${p.maxAmount.toFixed(0)} ${currencySymbol}</li>
+                            <li><i class="fas fa-chart-line"></i> الربح اليومي: ${minDailyProfit.toFixed(decimalPlaces)} - ${maxDailyProfit.toFixed(decimalPlaces)} ${currencySymbol}</li>
                             <li><i class="fas fa-infinity" style="color:#10b981;"></i> المدة: دائمة (بدون انتهاء)</li>
-                            <li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: ${minBonus.toFixed(2)} - ${maxBonus.toFixed(2)} DZD</li>
+                            <li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: ${minBonus.toFixed(decimalPlaces)} - ${maxBonus.toFixed(decimalPlaces)} ${currencySymbol}</li>
                         </ul>
-                        <button class="btn ${i===1?'btn-dzd':'btn-outline'}" onclick="openInvestmentModal('${p.id}')">
+                        <button class="btn ${btnClass}" onclick="openInvestmentModal('${p.id}')">
                             <i class="fas fa-plus-circle"></i> استثمر الآن
                         </button>
                     </div>
@@ -5465,7 +5467,7 @@
         }
 
         // ============================================================
-        // INVESTMENT MODAL
+        // INVESTMENT MODAL (يدعم العملتين)
         // ============================================================
         function openInvestmentModal(planId) {
             if (isModalOpen) return;
@@ -5476,33 +5478,32 @@
 
             currentSelectedPlanId = planId;
             isModalOpen = true;
-
-            const minAmount = plan.minAmount;
-            const maxAmount = plan.maxAmount;
+            const isUSDT = plan.currency === 'USDT';
 
             setText('modalPlanName', plan.name);
             setText('modalPlanReturn', `${plan.dailyReturnPercent}% يومياً`);
-            setText('modalCurrencyLabel', '(DZD)');
-            setText('modalBalanceCurrency', 'DZD');
+            setText('modalCurrencyLabel', `(${plan.currency})`);
+            setText('modalBalanceCurrency', plan.currency);
 
-            setText('modalMinDisplay', minAmount.toFixed(0));
-            setText('modalMaxDisplay', maxAmount.toFixed(0));
+            const minAmount = plan.minAmount;
+            const maxAmount = plan.maxAmount;
+            setText('modalMinDisplay', minAmount.toFixed(isUSDT ? 4 : 0));
+            setText('modalMaxDisplay', maxAmount.toFixed(isUSDT ? 4 : 0));
 
             const input = document.getElementById('modalAmountInput');
             const slider = document.getElementById('modalRangeSlider');
-
             input.min = minAmount;
             input.max = maxAmount;
-            input.step = 100;
+            input.step = isUSDT ? 1 : 100;
             input.value = minAmount;
-
             slider.min = minAmount;
             slider.max = maxAmount;
-            slider.step = 100;
+            slider.step = isUSDT ? 1 : 100;
             slider.value = minAmount;
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
-            setText('modalUserBalance', balance.toFixed(2));
+            // الرصيد حسب العملة
+            const balance = isUSDT ? (userData.wallets?.usdt || 0) : ((userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0));
+            setText('modalUserBalance', balance.toFixed(isUSDT ? 4 : 2));
 
             updateModalCalculations();
 
@@ -5548,42 +5549,45 @@
         function updateModalCalculations() {
             const plan = allInvestPlans.find(p => p.id === currentSelectedPlanId);
             if (!plan) return;
+            const isUSDT = plan.currency === 'USDT';
 
             const input = document.getElementById('modalAmountInput');
             const amount = parseFloat(input.value) || 0;
 
             const dailyProfit = (amount * plan.dailyReturnPercent) / 100;
-            const totalProfit = dailyProfit * 30; // عرض شهري
+            const totalProfit = dailyProfit * 30;
             const firstBonus = (amount * FIRST_BONUS_PERCENT) / 100;
 
-            setText('modalDailyProfit', dailyProfit.toFixed(2));
-            setText('modalTotalReturn', totalProfit.toFixed(2));
-            setText('modalFirstBonus', firstBonus.toFixed(2));
+            setText('modalDailyProfit', dailyProfit.toFixed(isUSDT ? 4 : 2));
+            setText('modalTotalReturn', totalProfit.toFixed(isUSDT ? 4 : 2));
+            setText('modalFirstBonus', firstBonus.toFixed(isUSDT ? 4 : 2));
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
-
+            const balance = isUSDT ? (userData.wallets?.usdt || 0) : ((userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0));
             const statusEl = document.getElementById('modalBalanceStatus');
             const balSpan = document.getElementById('modalUserBalance');
             if (!statusEl || !balSpan) return;
-            balSpan.textContent = balance.toFixed(2);
+            balSpan.textContent = balance.toFixed(isUSDT ? 4 : 2);
 
             if (amount > balance) {
                 statusEl.className = 'modal-balance-warning insufficient';
                 statusEl.innerHTML =
-                    `<i class="fas fa-exclamation-triangle"></i> <span>رصيد غير كافٍ! المتاح: <strong>${balance.toFixed(2)}</strong> DZD</span>`;
+                    `<i class="fas fa-exclamation-triangle"></i> <span>رصيد غير كافٍ! المتاح: <strong>${balance.toFixed(isUSDT ? 4 : 2)}</strong> ${plan.currency}</span>`;
                 document.getElementById('modalConfirmBtn').disabled = true;
                 document.getElementById('modalConfirmBtn').style.opacity = '0.5';
                 document.getElementById('modalConfirmBtn').style.cursor = 'not-allowed';
             } else {
                 statusEl.className = 'modal-balance-warning';
                 statusEl.innerHTML =
-                    `<i class="fas fa-wallet"></i> <span>رصيدك المتاح: <strong>${balance.toFixed(2)}</strong> DZD</span>`;
+                    `<i class="fas fa-wallet"></i> <span>رصيدك المتاح: <strong>${balance.toFixed(isUSDT ? 4 : 2)}</strong> ${plan.currency}</span>`;
                 document.getElementById('modalConfirmBtn').disabled = false;
                 document.getElementById('modalConfirmBtn').style.opacity = '1';
                 document.getElementById('modalConfirmBtn').style.cursor = 'pointer';
             }
         }
 
+        // ============================================================
+        // CONFIRM INVESTMENT (يدعم العملتين)
+        // ============================================================
         async function confirmInvestment() {
             if (!currentSelectedPlanId) {
                 showToast('حدث خطأ، حاول مرة أخرى');
@@ -5598,15 +5602,16 @@
 
             const input = document.getElementById('modalAmountInput');
             const amount = parseFloat(input.value) || 0;
+            const isUSDT = plan.currency === 'USDT';
 
             if (amount < plan.minAmount || amount > plan.maxAmount) {
-                showToast(`المبلغ يجب أن يكون بين ${plan.minAmount} و ${plan.maxAmount} DZD`);
+                showToast(`المبلغ يجب أن يكون بين ${plan.minAmount} و ${plan.maxAmount} ${plan.currency}`);
                 return;
             }
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            const balance = isUSDT ? (userData.wallets?.usdt || 0) : ((userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0));
             if (balance < amount) {
-                showToast(`الرصيد غير كافٍ (${balance.toFixed(2)} DZD)`);
+                showToast(`الرصيد غير كافٍ (${balance.toFixed(isUSDT ? 4 : 2)} ${plan.currency})`);
                 return;
             }
 
@@ -5614,7 +5619,6 @@
 
             try {
                 const now = new Date();
-                // مدة دائمة: حتى 31 ديسمبر 2099
                 const endDate = new Date(2099, 11, 31);
                 const investmentId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
@@ -5623,16 +5627,16 @@
                     planId: plan.id,
                     planName: plan.name,
                     amount: amount,
-                    currency: 'DZD',
+                    currency: plan.currency,
                     dailyReturnPercent: plan.dailyReturnPercent,
-                    durationDays: 36500, // حوالي 100 سنة
+                    durationDays: 36500,
                     startDate: now,
                     endDate: endDate,
                     status: 'active',
                     totalReturn: 0,
                     lastReturnDate: null,
                     capitalReturnable: true,
-                    amountInDZD: amount
+                    amountInDZD: isUSDT ? (amount * RATE_USDT_TO_DZD) : amount
                 };
 
                 let bonusAdded = false;
@@ -5643,57 +5647,67 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    let b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
-                    if (b < amount) throw new Error('رصيد غير كاف');
+                    const updates = {};
+                    let currentBal = 0;
 
-                    let rem = amount;
-                    const m = doc.data().wallets?.dzd || 0,
-                        r = doc.data().wallets?.dzdReward || 0,
-                        refr = doc.data().wallets?.dzdReferral || 0;
-                    const fm = Math.min(rem, m);
-                    rem -= fm;
-                    const fr = Math.min(rem, r);
-                    rem -= fr;
-                    const fref = Math.min(rem, refr);
-                    rem -= fref;
-                    const updates = {
-                        'wallets.dzd': m - fm,
-                        'wallets.dzdReward': r - fr,
-                        'wallets.dzdReferral': refr - fref,
-                        'investments': firebase.firestore.FieldValue.arrayUnion(investmentObj),
-                        'totalInvested': firebase.firestore.FieldValue.increment(amount),
-                        'transactions': firebase.firestore.FieldValue.arrayUnion({
-                            type: 'investment',
-                            amount: amount,
-                            currency: 'DZD',
-                            description: `استثمار في ${plan.name} (${amount.toFixed(2)} DZD)`,
-                            timestamp: now,
-                            investmentId: investmentId,
-                            status: 'completed'
-                        })
-                    };
+                    if (isUSDT) {
+                        currentBal = doc.data().wallets?.usdt || 0;
+                        if (currentBal < amount) throw new Error('رصيد USDT غير كاف');
+                        updates['wallets.usdt'] = currentBal - amount;
+                    } else {
+                        let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
+                        if (bal < amount) throw new Error('رصيد غير كاف');
+                        let rem = amount;
+                        const m = doc.data().wallets?.dzd || 0,
+                            r = doc.data().wallets?.dzdReward || 0,
+                            refr = doc.data().wallets?.dzdReferral || 0;
+                        const fm = Math.min(rem, m);
+                        rem -= fm;
+                        const fr = Math.min(rem, r);
+                        rem -= fr;
+                        const fref = Math.min(rem, refr);
+                        rem -= fref;
+                        updates['wallets.dzd'] = m - fm;
+                        updates['wallets.dzdReward'] = r - fr;
+                        updates['wallets.dzdReferral'] = refr - fref;
+                    }
+
+                    updates['investments'] = firebase.firestore.FieldValue.arrayUnion(investmentObj);
+                    updates['totalInvested'] = firebase.firestore.FieldValue.increment(amount);
+                    updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
+                        type: 'investment',
+                        amount: amount,
+                        currency: plan.currency,
+                        description: `استثمار في ${plan.name} (${amount.toFixed(isUSDT ? 4 : 2)} ${plan.currency})`,
+                        timestamp: now,
+                        investmentId: investmentId,
+                        status: 'completed'
+                    });
 
                     const existingInvestments = doc.data().investments || [];
                     if (existingInvestments.length === 0) {
                         bonusAmount = (amount * FIRST_BONUS_PERCENT) / 100;
-                        updates['wallets.dzdReward'] = firebase.firestore.FieldValue.increment(bonusAmount);
+                        if (isUSDT) {
+                            updates['wallets.usdt'] = firebase.firestore.FieldValue.increment(bonusAmount);
+                        } else {
+                            updates['wallets.dzdReward'] = firebase.firestore.FieldValue.increment(bonusAmount);
+                        }
                         updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                             type: 'first_investment_bonus',
                             amount: bonusAmount,
-                            currency: 'DZD',
-                            description: `مكافأة أول استثمار (${bonusAmount.toFixed(2)} DZD)`,
+                            currency: plan.currency,
+                            description: `مكافأة أول استثمار (${bonusAmount.toFixed(isUSDT ? 4 : 2)} ${plan.currency})`,
                             timestamp: now,
                             investmentId: investmentId
                         });
                         bonusAdded = true;
-                        console.log(`🎁 تم إضافة مكافأة أول استثمار: ${bonusAmount} DZD`);
                     }
 
                     t.update(ref, updates);
                 });
 
                 if (bonusAdded) {
-                    showToast(`🎁 مكافأة أول استثمار: ${bonusAmount.toFixed(2)} DZD أضيفت إلى محفظتك!`);
+                    showToast(`🎁 مكافأة أول استثمار: ${bonusAmount.toFixed(isUSDT ? 4 : 2)} ${plan.currency} أضيفت إلى محفظتك!`);
                 }
 
                 showToast(`✅ تم الاستثمار في "${plan.name}" بنجاح!`);
@@ -5707,7 +5721,7 @@
         }
 
         // ============================================================
-        // RENDER INVESTMENTS
+        // RENDER INVESTMENTS (يدعم العملتين)
         // ============================================================
         function renderInvestments() {
             const container = document.getElementById('activeInvestments');
@@ -5732,27 +5746,28 @@
             }
 
             container.innerHTML = list.map(inv => {
-                const amount = inv.amount;
+                const isUSDT = inv.currency === 'USDT';
                 const daily = (inv.amount * inv.dailyReturnPercent) / 100;
-                // بما أن المدة دائمة، نعرض "دائمة" بدلاً من الأيام المتبقية
                 const remainingText = "دائمة";
+                const colorClass = isUSDT ? 'usdt-color' : 'gold';
+                const decimalPlaces = isUSDT ? 4 : 2;
                 return `
-                    <div class="card" style="border-right:4px solid var(--gold);">
+                    <div class="card" style="border-right:4px solid var(--${isUSDT ? 'usdt' : 'gold'});">
                         <div class="flex-between">
                             <div><span style="font-weight:800;font-size:18px;">${inv.planName}</span></div>
                             <span class="status status-gold">نشط</span>
                         </div>
                         <div class="grid-2" style="margin-top:8px;">
                             <div class="invest-stat">
-                                <div class="number">${amount.toFixed(2)} DZD</div>
+                                <div class="number ${colorClass}">${inv.amount.toFixed(decimalPlaces)} ${inv.currency}</div>
                                 <div class="label">المبلغ المستثمر</div>
                             </div>
                             <div class="invest-stat">
-                                <div class="number">${daily.toFixed(2)} DZD</div>
+                                <div class="number ${colorClass}">${daily.toFixed(decimalPlaces)} ${inv.currency}</div>
                                 <div class="label">العائد اليومي</div>
                             </div>
                             <div class="invest-stat">
-                                <div class="number">${(inv.totalReturn||0).toFixed(2)} DZD</div>
+                                <div class="number ${colorClass}">${(inv.totalReturn||0).toFixed(decimalPlaces)} ${inv.currency}</div>
                                 <div class="label">إجمالي الأرباح</div>
                             </div>
                             <div class="invest-stat">
@@ -5844,7 +5859,7 @@
         }
 
         // ============================================================
-        // INVESTMENT DAILY RETURNS
+        // INVESTMENT DAILY RETURNS (يدعم العملتين)
         // ============================================================
         function startInvestmentReturns() {
             if (investmentInterval) clearInterval(investmentInterval);
@@ -5860,38 +5875,37 @@
                 const doc = await ref.get();
                 if (!doc.exists) return;
                 const data = doc.data();
-
                 const today = new Date();
                 const todayStr = today.toISOString().split('T')[0];
-
-                if (data.lastDailyDistribution === todayStr) {
-                    return;
-                }
+                if (data.lastDailyDistribution === todayStr) return;
 
                 const investments = data.investments || [];
                 let updated = false;
                 let totalDZD = 0;
+                let totalUSDT = 0;
                 const now = new Date();
 
                 for (let inv of investments) {
                     if (inv.status !== 'active') continue;
-
-                    // بما أن المدة دائمة، نتحقق من التاريخ فقط إذا كان موجوداً
                     const endDate = inv.endDate?.toDate ? inv.endDate.toDate() : null;
                     if (endDate && now > endDate) {
                         inv.status = 'completed';
                         updated = true;
                         continue;
                     }
-
                     const dailyReturn = (inv.amount * inv.dailyReturnPercent) / 100;
                     inv.totalReturn = (inv.totalReturn || 0) + dailyReturn;
                     inv.lastReturnDate = now;
                     updated = true;
-                    totalDZD += dailyReturn;
+
+                    if (inv.currency === 'USDT') {
+                        totalUSDT += dailyReturn;
+                    } else {
+                        totalDZD += dailyReturn;
+                    }
                 }
 
-                if (!updated && totalDZD === 0) {
+                if (!updated && totalDZD === 0 && totalUSDT === 0) {
                     await ref.update({ lastDailyDistribution: todayStr });
                     return;
                 }
@@ -5911,16 +5925,24 @@
                         timestamp: now,
                     });
                 }
+                if (totalUSDT > 0) {
+                    updates['wallets.usdt'] = firebase.firestore.FieldValue.increment(totalUSDT);
+                    updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
+                        type: 'investment_return',
+                        amount: totalUSDT,
+                        currency: 'USDT',
+                        description: `أرباح يومية (${totalUSDT.toFixed(4)} USDT)`,
+                        timestamp: now,
+                    });
+                }
 
                 await ref.update(updates);
-                console.log(`✅ تم توزيع الأرباح اليومية: ${totalDZD} DZD`);
-
+                console.log(`✅ تم توزيع الأرباح اليومية: ${totalDZD} DZD و ${totalUSDT} USDT`);
                 if (userData) {
                     userData.investments = investments;
                     renderInvestments();
                     updateUI();
                 }
-
             } catch (e) {
                 console.error('❌ فشل توزيع الأرباح اليومية:', e);
             }
@@ -6015,17 +6037,14 @@
             });
 
             if (status === 'active' && plan) {
-                // إظهار بطاقة الاشتراك الحالي
                 card.style.display = 'block';
                 setText('currentPlanName', plan.charAt(0).toUpperCase() + plan.slice(1));
 
                 const endDate = sub.endDate?.toDate ? sub.endDate.toDate() : new Date(sub.endDate);
                 setText('subscriptionEndDate', formatDate(endDate));
 
-                // تحديث الوقت المتبقي
                 updateSubscriptionRemaining();
 
-                // تعطيل أزرار الباقات الأخرى أو جعلها غير قابلة للنقر
                 document.querySelectorAll('.pc-btn').forEach(btn => {
                     if (btn.dataset.plan !== plan) {
                         btn.disabled = true;
@@ -6036,32 +6055,37 @@
                     }
                 });
 
-                // بدء تحديث الوقت المتبقي كل دقيقة
                 if (subscriptionRemainingInterval) clearInterval(subscriptionRemainingInterval);
                 subscriptionRemainingInterval = setInterval(() => {
                     updateSubscriptionRemaining();
                 }, 60000);
+
+                // إعادة تمكين زر الإلغاء في حالة العودة من expired
+                const cancelBtn = card.querySelector('.btn-danger');
+                if (cancelBtn) {
+                    cancelBtn.textContent = '<i class="fas fa-times"></i> إلغاء';
+                    cancelBtn.disabled = false;
+                    cancelBtn.style.opacity = '1';
+                    cancelBtn.style.cursor = 'pointer';
+                }
 
             } else if (status === 'expired') {
                 card.style.display = 'block';
                 setText('currentPlanName', plan ? (plan.charAt(0).toUpperCase() + plan.slice(1)) : '--');
                 setText('subscriptionEndDate', 'انتهى');
                 setText('subscriptionRemaining', 'منتهي');
-                // إظهار زر الإلغاء مع نص "تم الإلغاء"
                 const cancelBtn = card.querySelector('.btn-danger');
                 if (cancelBtn) {
-                    cancelBtn.textContent = 'تم الإلغاء';
+                    cancelBtn.innerHTML = 'تم الإلغاء';
                     cancelBtn.disabled = true;
                     cancelBtn.style.opacity = '0.6';
                     cancelBtn.style.cursor = 'not-allowed';
                 }
-                // تفعيل أزرار الباقات
                 document.querySelectorAll('.pc-btn').forEach(btn => {
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك';
                 });
             } else {
-                // غير مشترك
                 card.style.display = 'none';
                 document.querySelectorAll('.pc-btn').forEach(btn => {
                     btn.disabled = false;
@@ -6111,7 +6135,6 @@
                     'subscription.endDate': null
                 });
                 showToast('✅ تم إلغاء الاشتراك بنجاح');
-                // تحديث البيانات محلياً
                 if (userData.subscription) {
                     userData.subscription.status = 'inactive';
                     userData.subscription.plan = null;
@@ -6159,7 +6182,6 @@
                 </div>
             `;
 
-            // تخزين البيانات مؤقتاً
             pendingSubscriptionData = { planId, price };
 
             modal.classList.add('active');
@@ -6287,7 +6309,6 @@
                 return;
             }
 
-            // عرض نافذة التأكيد بدلاً من confirm
             showSubscriptionConfirmModal(planId, price);
         }
 
@@ -6471,7 +6492,6 @@
 
             const isRenewal = userData.verified && userData.verificationExpiry;
 
-            // عرض نافذة التأكيد بدلاً من confirm
             showVerificationConfirmModal(isRenewal);
         }
 
@@ -6492,7 +6512,7 @@
             calculateSwapResult();
         });
 
-        console.log('🚀 Crynova - باقة استثمار دائمة (0.2% يومياً، 5,000 - 200,000 دج) - تم تبديل ترتيب التبويبات');
+        console.log('🚀 Crynova - باقة استثمار دائمة (0.2% يومياً، 5,000 - 200,000 دج) + باقة USDT (0.05%، 10 - 5,000 USDT)');
         console.log('💱 أسعار الصرف: 1 USDT = 243 DZD  |  263 DZD = 1 USDT (مخفية عن المستخدم)');
     </script>
 </body>
