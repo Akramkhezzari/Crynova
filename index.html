@@ -1903,6 +1903,14 @@
             color: var(--redotpay-color);
         }
 
+        /* ===== نافذة تأكيد الاشتراك ===== */
+        .subscription-confirm-modal .modal-card {
+            border-top: 6px solid var(--gold);
+        }
+        .subscription-confirm-modal .confirm-details .detail-row .value.dzd-color {
+            color: var(--dzd-color);
+        }
+
         /* RESPONSIVE */
         @media (max-width: 420px) {
             .app-container {
@@ -3676,6 +3684,31 @@
         </div>
     </div>
 
+    <!-- ===== SUBSCRIPTION CONFIRMATION MODAL ===== -->
+    <div class="modal-overlay subscription-confirm-modal" id="subscriptionConfirmModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fas fa-crown" style="color:var(--gold);"></i> تأكيد الاشتراك</h3>
+                <button class="close-modal" onclick="closeSubscriptionConfirmModal()">&times;</button>
+            </div>
+            <div class="confirm-details" id="subscriptionConfirmDetails">
+                <!-- سيتم ملء البيانات بواسطة JavaScript -->
+            </div>
+            <div class="confirm-warning">
+                <i class="fas fa-info-circle"></i>
+                <span>سيتم خصم المبلغ من رصيدك المتاح</span>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeSubscriptionConfirmModal()">
+                    <i class="fas fa-times"></i> إلغاء
+                </button>
+                <button class="btn btn-gold" id="confirmSubscriptionBtn" onclick="confirmSubscriptionSubmit()">
+                    <i class="fas fa-check-circle"></i> تأكيد الاشتراك
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== BOTTOM NAVIGATION ===== -->
     <nav class="bottom-nav" id="bottomNav">
         <button class="nav-item active" data-page="home" onclick="navigateTo('home')">
@@ -3758,6 +3791,7 @@
         // متغيرات لتخزين بيانات الإيداع والسحب المؤقتة قبل التأكيد
         let pendingDepositData = null;
         let pendingWithdrawData = null;
+        let pendingSubscriptionData = null; // للاشتراك
 
         const POSTAL_ACCOUNT = '00799999002385412178';
         const BINANCE_WALLET = '1143951718';
@@ -6054,60 +6088,61 @@
             }
         }
 
-        // ===== الاشتراك في خطة جديدة (مع إمكانية تغيير الاشتراك) =====
-        async function subscribeToPlan(planId) {
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+        // ===== دوال نافذة تأكيد الاشتراك =====
+        function showSubscriptionConfirmModal(planId, price) {
+            const modal = document.getElementById('subscriptionConfirmModal');
+            const detailsContainer = document.getElementById('subscriptionConfirmDetails');
 
-            // تحديث userData من Firestore أولاً
-            const freshDoc = await db.collection('users').doc(userData.telegramId).get();
-            if (!freshDoc.exists) { showToast('حدث خطأ'); return; }
-            const freshData = freshDoc.data();
-            const sub = freshData.subscription || {};
-
-            if (sub.status === 'active' && sub.plan === planId) {
-                showToast(`أنت مشترك بالفعل في خطة ${planId}`);
-                return;
-            }
-
-            if (sub.status === 'active') {
-                if (!confirm(`لديك اشتراك نشط في خطة ${sub.plan}. هل تريد التبديل إلى ${planId}؟`)) return;
-                // إلغاء الاشتراك الحالي
-                await db.collection('users').doc(userData.telegramId).update({
-                    'subscription.status': 'inactive',
-                    'subscription.plan': null,
-                    'subscription.startDate': null,
-                    'subscription.endDate': null
-                });
-                // تحديث userData محلياً
-                if (userData.subscription) {
-                    userData.subscription.status = 'inactive';
-                    userData.subscription.plan = null;
-                }
-                // انتظار ثانية لتحديث البيانات
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                // إعادة استدعاء الدالة (ستجد الاشتراك غير نشط الآن)
-                await subscribeToPlan(planId);
-                return;
-            }
-
-            const prices = {
-                starter: 300,
-                basic: 500,
-                advanced: 750,
-                premium: 1500,
-                pro: 3500
+            const planNames = {
+                starter: 'Starter',
+                basic: 'Basic',
+                advanced: 'Advanced',
+                premium: 'Premium',
+                pro: 'Pro'
             };
 
-            const price = prices[planId];
-            if (!price) { showToast('خطة غير معروفة'); return; }
+            const planDisplay = planNames[planId] || planId;
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
-            if (balance < price) {
-                showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
+            detailsContainer.innerHTML = `
+                <div class="detail-row">
+                    <span class="label">الخطة</span>
+                    <span class="value">${planDisplay}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">المبلغ</span>
+                    <span class="value dzd-color">${price.toFixed(2)} DZD</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">المدة</span>
+                    <span class="value">شهر واحد</span>
+                </div>
+                <div class="detail-row" style="border-bottom:none;">
+                    <span class="label">رصيدك المتاح</span>
+                    <span class="value">${((userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0)).toFixed(2)} DZD</span>
+                </div>
+            `;
+
+            // تخزين البيانات مؤقتاً
+            pendingSubscriptionData = { planId, price };
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSubscriptionConfirmModal() {
+            const modal = document.getElementById('subscriptionConfirmModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            pendingSubscriptionData = null;
+        }
+
+        async function confirmSubscriptionSubmit() {
+            if (!pendingSubscriptionData) {
+                showToast('حدث خطأ، حاول مرة أخرى');
                 return;
             }
 
-            if (!confirm(`تأكيد الاشتراك في خطة ${planId} بمبلغ ${price} DZD (شهرياً)؟`)) return;
+            const { planId, price } = pendingSubscriptionData;
 
             try {
                 const now = new Date();
@@ -6157,12 +6192,66 @@
                 });
 
                 showToast(`✅ تم تفعيل اشتراك ${planId} (شهرياً) بنجاح!`);
+                closeSubscriptionConfirmModal();
                 await updateUI();
                 updateSubscriptionUI();
             } catch (e) {
                 showToast('❌ ' + (e.message || 'حدث خطأ'));
                 console.error(e);
+                closeSubscriptionConfirmModal();
             }
+        }
+
+        // ===== تعديل دالة subscribeToPlan لاستخدام النافذة المخصصة بدلاً من confirm =====
+        async function subscribeToPlan(planId) {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
+            const freshDoc = await db.collection('users').doc(userData.telegramId).get();
+            if (!freshDoc.exists) { showToast('حدث خطأ'); return; }
+            const freshData = freshDoc.data();
+            const sub = freshData.subscription || {};
+
+            if (sub.status === 'active' && sub.plan === planId) {
+                showToast(`أنت مشترك بالفعل في خطة ${planId}`);
+                return;
+            }
+
+            if (sub.status === 'active') {
+                if (!confirm(`لديك اشتراك نشط في خطة ${sub.plan}. هل تريد التبديل إلى ${planId}؟`)) return;
+                await db.collection('users').doc(userData.telegramId).update({
+                    'subscription.status': 'inactive',
+                    'subscription.plan': null,
+                    'subscription.startDate': null,
+                    'subscription.endDate': null
+                });
+                if (userData.subscription) {
+                    userData.subscription.status = 'inactive';
+                    userData.subscription.plan = null;
+                }
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await subscribeToPlan(planId);
+                return;
+            }
+
+            const prices = {
+                starter: 300,
+                basic: 500,
+                advanced: 750,
+                premium: 1500,
+                pro: 3500
+            };
+
+            const price = prices[planId];
+            if (!price) { showToast('خطة غير معروفة'); return; }
+
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
+            if (balance < price) {
+                showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
+                return;
+            }
+
+            // عرض نافذة التأكيد بدلاً من confirm
+            showSubscriptionConfirmModal(planId, price);
         }
 
         // ============================================================
