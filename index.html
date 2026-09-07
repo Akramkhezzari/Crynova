@@ -1191,7 +1191,7 @@
         }
 
         /* ============================================================
-           بطاقة توثيق الحساب (Verification Card)
+           بطاقة توثيق الحساب (Verification Card) - تطوير متقدم
            ============================================================ */
         .verify-card {
             max-width: 450px;
@@ -1202,8 +1202,9 @@
             overflow: hidden;
             box-shadow: 0 12px 40px rgba(59, 130, 246, 0.12);
             border: 1px solid rgba(59, 130, 246, 0.15);
-            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             font-family: 'Tajawal', 'Cairo', sans-serif;
+            position: relative;
         }
         .verify-card:hover {
             transform: translateY(-6px);
@@ -1239,6 +1240,7 @@
             border-radius: 50%;
             margin-bottom: 0.8rem;
             box-shadow: 0 8px 24px rgba(37, 99, 235, 0.20);
+            transition: transform 0.3s ease;
         }
         .verify-card .vc-icon .fa-shield-alt {
             font-size: 3.2rem;
@@ -1257,6 +1259,13 @@
             border-radius: 50%;
             border: 3px solid var(--bg-card);
             box-shadow: 0 4px 10px rgba(34, 197, 94, 0.4);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .verify-card .vc-check.show {
+            opacity: 1;
+            transform: scale(1);
         }
         .verify-card .vc-check i {
             font-size: 0.7rem;
@@ -1276,6 +1285,13 @@
             font-weight: 800;
             color: var(--text-primary);
             margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .verify-card .vc-header h3 i {
+            color: #2563eb;
+            font-size: 1.4rem;
         }
         .verify-card .vc-price {
             font-size: 2.2rem;
@@ -1285,42 +1301,95 @@
             padding: 0.1rem 1.2rem;
             border-radius: 60px;
             line-height: 1.4;
+            transition: all 0.3s ease;
         }
         .verify-card .vc-price small {
             font-size: 0.9rem;
             font-weight: 500;
             color: #4a6a9f;
         }
+        .verify-card .vc-price.verified {
+            background: #ecfdf5;
+            color: #10b981;
+        }
+        .verify-card .vc-price.verified small {
+            color: #059669;
+        }
 
-        .verify-card .vc-features {
-            list-style: none;
-            padding: 0;
-            margin: 1.2rem 0 1.6rem;
-            text-align: right;
+        /* شريط التقدم */
+        .verify-card .vc-progress {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-input);
+            border-radius: 10px;
+            margin: 1rem 0 0.8rem;
+            overflow: hidden;
+            position: relative;
+        }
+        .verify-card .vc-progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            width: 0%;
+            transition: width 1.5s ease;
+        }
+        .verify-card .vc-progress-bar.verified {
+            width: 100% !important;
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+        .verify-card .vc-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.2rem;
+        }
+        .verify-card .vc-progress-label span:last-child {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* المميزات بأسلوب بطاقات */
+        .verify-card .vc-features-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.4rem 0.8rem;
-            background: var(--bg-input);
-            padding: 0.8rem 1.2rem;
-            border-radius: 16px;
+            gap: 0.6rem;
+            margin: 1.2rem 0 1.6rem;
         }
-        .verify-card .vc-features li {
-            font-size: 0.85rem;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .verify-card .vc-feature-item {
+            background: var(--bg-input);
+            padding: 0.7rem 0.5rem;
+            border-radius: 14px;
+            text-align: center;
+            border: 1px solid transparent;
+            transition: all 0.25s ease;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
             font-weight: 500;
         }
-        .verify-card .vc-features li i {
+        .verify-card .vc-feature-item i {
+            display: block;
+            font-size: 1.4rem;
             color: #2563eb;
-            font-size: 0.85rem;
-            width: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+        .verify-card .vc-feature-item:hover {
+            border-color: #2563eb;
+            background: #eff6ff;
+            transform: translateY(-2px);
+        }
+        .verify-card .vc-feature-item.verified {
+            background: #ecfdf5;
+            border-color: #10b981;
+        }
+        .verify-card .vc-feature-item.verified i {
+            color: #10b981;
         }
 
+        /* زر التوثيق التفاعلي */
         .verify-card .vc-btn {
             width: 100%;
-            padding: 0.8rem 0;
+            padding: 0.85rem 0;
             border: none;
             border-radius: 60px;
             font-family: inherit;
@@ -1329,19 +1398,60 @@
             color: #fff;
             background: linear-gradient(135deg, #2563eb, #7c3aed);
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: all 0.3s ease;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 0.6rem;
             box-shadow: 0 6px 20px rgba(37, 99, 235, 0.30);
+            position: relative;
+            overflow: hidden;
         }
-        .verify-card .vc-btn:hover {
+        .verify-card .vc-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.6s ease;
+        }
+        .verify-card .vc-btn:hover:not(:disabled)::before {
+            left: 100%;
+        }
+        .verify-card .vc-btn:hover:not(:disabled) {
             transform: scale(1.02);
             box-shadow: 0 10px 32px rgba(37, 99, 235, 0.40);
         }
+        .verify-card .vc-btn:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+        .verify-card .vc-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
         .verify-card .vc-btn i {
             font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+        .verify-card .vc-btn:hover:not(:disabled) i {
+            transform: translateY(-2px);
+        }
+        .verify-card .vc-btn.verified-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.30);
+        }
+        .verify-card .vc-btn.verified-btn:hover:not(:disabled) {
+            box-shadow: 0 10px 32px rgba(16, 185, 129, 0.40);
+        }
+        .verify-card .vc-btn.expired-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.30);
+        }
+        .verify-card .vc-btn.expired-btn:hover:not(:disabled) {
+            box-shadow: 0 10px 32px rgba(245, 158, 11, 0.40);
         }
 
         .verify-card .vc-note {
@@ -1377,12 +1487,16 @@
                 line-height: 24px;
                 font-size: 0.7rem;
             }
-            .verify-card .vc-features {
-                grid-template-columns: 1fr;
-                gap: 0.2rem;
+            .verify-card .vc-features-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.4rem;
             }
-            .verify-card .vc-features li {
-                font-size: 0.8rem;
+            .verify-card .vc-feature-item {
+                font-size: 0.7rem;
+                padding: 0.5rem 0.3rem;
+            }
+            .verify-card .vc-feature-item i {
+                font-size: 1.2rem;
             }
             .verify-card .vc-btn {
                 font-size: 0.95rem;
@@ -3358,28 +3472,54 @@
                 </div>
 
                 <div class="profile-tab-panel" id="panel-verification">
-                    <div class="verify-card">
+                    <!-- بطاقة التوثيق المطورة -->
+                    <div class="verify-card" id="verifyCard">
                         <div class="vc-stripe"></div>
                         <div class="vc-body">
-                            <div class="vc-icon">
+                            <div class="vc-icon" id="verifyIcon">
                                 <i class="fas fa-shield-alt"></i>
-                                <span class="vc-check"><i class="fas fa-check"></i></span>
+                                <span class="vc-check" id="verifyCheck"><i class="fas fa-check"></i></span>
                             </div>
                             <div class="vc-header">
-                                <h3>توثيق الحساب</h3>
-                                <span class="vc-price">100 <small>دج</small></span>
+                                <h3><i class="fas fa-badge-check"></i> توثيق الحساب</h3>
+                                <span class="vc-price" id="verifyPrice">100 <small>دج</small></span>
                             </div>
-                            <ul class="vc-features">
-                                <li><i class="fas fa-check-circle"></i> شارة موثّقة زرقاء</li>
-                                <li><i class="fas fa-check-circle"></i> زيادة الثقة والمصداقية</li>
-                                <li><i class="fas fa-check-circle"></i> أولوية في نتائج البحث</li>
-                                <li><i class="fas fa-check-circle"></i> حماية إضافية للحساب</li>
-                                <li><i class="fas fa-check-circle"></i> ظهور مميز للملف الشخصي</li>
-                            </ul>
-                            <button class="vc-btn" onclick="requestVerification()">
-                                <i class="fas fa-badge-check"></i> وثّق حسابي الآن
+
+                            <!-- شريط التقدم -->
+                            <div class="vc-progress">
+                                <div class="vc-progress-bar" id="verifyProgressBar"></div>
+                            </div>
+                            <div class="vc-progress-label">
+                                <span id="verifyStatusText">غير موثق</span>
+                                <span id="verifyProgressPercent">0%</span>
+                            </div>
+
+                            <!-- قائمة المميزات -->
+                            <div class="vc-features-grid">
+                                <div class="vc-feature-item" id="feature1">
+                                    <i class="fas fa-check-circle"></i>
+                                    شارة موثّقة زرقاء
+                                </div>
+                                <div class="vc-feature-item" id="feature2">
+                                    <i class="fas fa-rocket"></i>
+                                    أولوية في البحث
+                                </div>
+                                <div class="vc-feature-item" id="feature3">
+                                    <i class="fas fa-shield-halved"></i>
+                                    حماية إضافية
+                                </div>
+                                <div class="vc-feature-item" id="feature4">
+                                    <i class="fas fa-star"></i>
+                                    ظهور مميز
+                                </div>
+                            </div>
+
+                            <!-- زر التوثيق -->
+                            <button class="vc-btn" id="verifyBtn" onclick="requestVerification()">
+                                <i class="fas fa-badge-check"></i>
+                                <span>وثّق حسابي الآن</span>
                             </button>
-                            <p class="vc-note">* اشتراك شهري قابل للتجديد</p>
+                            <p class="vc-note">* اشتراك شهري قابل للتجديد • الدفع مرة واحدة</p>
                         </div>
                     </div>
                 </div>
@@ -3760,6 +3900,7 @@
         let isModalOpen = false;
         let zakatUnsubscribe = null;
         let subscriptionRemainingInterval = null;
+        let verificationCountdownInterval = null;
 
         // متغيرات لتخزين بيانات الإيداع والسحب المؤقتة قبل التأكيد
         let pendingDepositData = null;
@@ -4033,10 +4174,7 @@
                 return;
             }
 
-            // تم إزالة التأكيد الإضافي (confirm) هنا
-
             try {
-                // 1. خصم من المستخدم
                 await db.runTransaction(async (t) => {
                     const userRef = db.collection('users').doc(userData.telegramId);
                     const doc = await t.get(userRef);
@@ -4056,7 +4194,6 @@
                     });
                 });
 
-                // 2. تحديث الصندوق المشترك
                 const zakatRef = db.collection('zakat').doc('statistics');
                 await db.runTransaction(async (t) => {
                     const doc = await t.get(zakatRef);
@@ -5922,6 +6059,155 @@
             if (tabId === 'subscription') {
                 updateSubscriptionUI();
             }
+            if (tabId === 'verification') {
+                updateVerificationUI();
+            }
+        }
+
+        // ============================================================
+        // VERIFICATION UI المتطورة
+        // ============================================================
+        function updateVerificationUI() {
+            if (!userData) return;
+
+            const verified = userData.verified || false;
+            const expiry = userData.verificationExpiry;
+            const btn = document.getElementById('verifyBtn');
+            const priceSpan = document.getElementById('verifyPrice');
+            const progressBar = document.getElementById('verifyProgressBar');
+            const progressPercent = document.getElementById('verifyProgressPercent');
+            const statusText = document.getElementById('verifyStatusText');
+            const checkIcon = document.getElementById('verifyCheck');
+            const icon = document.getElementById('verifyIcon');
+            const features = document.querySelectorAll('.vc-feature-item');
+
+            if (!btn) return;
+
+            // تحديث الشريط والمميزات
+            const updateProgress = (percent, status) => {
+                if (progressBar) {
+                    progressBar.style.width = `${percent}%`;
+                    if (status === 'verified') {
+                        progressBar.classList.add('verified');
+                    } else {
+                        progressBar.classList.remove('verified');
+                    }
+                }
+                if (progressPercent) progressPercent.textContent = `${percent}%`;
+                if (statusText) statusText.textContent = status;
+            };
+
+            const updateFeatures = (status) => {
+                features.forEach(f => {
+                    if (status === 'verified') {
+                        f.classList.add('verified');
+                    } else {
+                        f.classList.remove('verified');
+                    }
+                });
+            };
+
+            if (verified && expiry) {
+                const expiryDate = expiry.toDate ? expiry.toDate() : new Date(expiry);
+                const now = new Date();
+                if (expiryDate > now) {
+                    // موثق
+                    const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+                    btn.innerHTML = `<i class="fas fa-check-circle"></i> <span>موثق (متبقي ${daysLeft} يوم)</span>`;
+                    btn.className = 'vc-btn verified-btn';
+                    btn.disabled = false;
+                    btn.style.cursor = 'pointer';
+                    btn.onclick = function() { requestVerification(); };
+
+                    if (priceSpan) {
+                        priceSpan.className = 'vc-price verified';
+                        priceSpan.innerHTML = `✅ مفعّل <small>${daysLeft} يوم</small>`;
+                    }
+
+                    checkIcon.classList.add('show');
+                    updateProgress(100, 'verified');
+                    updateFeatures('verified');
+
+                    // بدء العد التنازلي
+                    startVerificationCountdown(expiryDate);
+
+                } else {
+                    // منتهي
+                    btn.innerHTML = `<i class="fas fa-clock"></i> <span>انتهى التوثيق - جدد الآن</span>`;
+                    btn.className = 'vc-btn expired-btn';
+                    btn.disabled = false;
+                    btn.style.cursor = 'pointer';
+                    btn.onclick = function() { requestVerification(); };
+
+                    if (priceSpan) {
+                        priceSpan.className = 'vc-price';
+                        priceSpan.innerHTML = '100 <small>دج</small>';
+                        priceSpan.style.background = '#fef3c7';
+                        priceSpan.style.color = '#b45309';
+                    }
+
+                    checkIcon.classList.remove('show');
+                    updateProgress(70, 'منتهي');
+                    updateFeatures('expired');
+                }
+            } else {
+                // غير موثق
+                btn.innerHTML = `<i class="fas fa-badge-check"></i> <span>وثّق حسابي الآن</span>`;
+                btn.className = 'vc-btn';
+                btn.disabled = false;
+                btn.style.cursor = 'pointer';
+                btn.onclick = function() { requestVerification(); };
+
+                if (priceSpan) {
+                    priceSpan.className = 'vc-price';
+                    priceSpan.innerHTML = '100 <small>دج</small>';
+                    priceSpan.style.background = '#eff6ff';
+                    priceSpan.style.color = '#2563eb';
+                }
+
+                checkIcon.classList.remove('show');
+                updateProgress(20, 'غير موثق');
+                updateFeatures('unverified');
+
+                if (verificationCountdownInterval) {
+                    clearInterval(verificationCountdownInterval);
+                    verificationCountdownInterval = null;
+                }
+            }
+            updateVerificationStatus();
+        }
+
+        // ===== العد التنازلي للتوثيق =====
+        function startVerificationCountdown(expiryDate) {
+            if (verificationCountdownInterval) {
+                clearInterval(verificationCountdownInterval);
+                verificationCountdownInterval = null;
+            }
+
+            verificationCountdownInterval = setInterval(() => {
+                const now = new Date();
+                const diff = expiryDate - now;
+                if (diff <= 0) {
+                    clearInterval(verificationCountdownInterval);
+                    verificationCountdownInterval = null;
+                    // تحديث الحالة
+                    checkVerificationExpiry();
+                    updateVerificationUI();
+                    return;
+                }
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const priceSpan = document.getElementById('verifyPrice');
+                if (priceSpan) {
+                    priceSpan.innerHTML = `✅ مفعّل <small>${days}ي ${hours}س ${minutes}د</small>`;
+                }
+                const btn = document.getElementById('verifyBtn');
+                if (btn) {
+                    btn.innerHTML =
+                        `<i class="fas fa-check-circle"></i> <span>موثق (متبقي ${days}ي ${hours}س ${minutes}د)</span>`;
+                }
+            }, 60000);
         }
 
         // ============================================================
@@ -5942,17 +6228,14 @@
             });
 
             if (status === 'active' && plan) {
-                // إظهار بطاقة الاشتراك الحالي
                 card.style.display = 'block';
                 setText('currentPlanName', plan.charAt(0).toUpperCase() + plan.slice(1));
 
                 const endDate = sub.endDate?.toDate ? sub.endDate.toDate() : new Date(sub.endDate);
                 setText('subscriptionEndDate', formatDate(endDate));
 
-                // تحديث الوقت المتبقي
                 updateSubscriptionRemaining();
 
-                // تعطيل أزرار الباقات الأخرى أو جعلها غير قابلة للنقر
                 document.querySelectorAll('.pc-btn').forEach(btn => {
                     if (btn.dataset.plan !== plan) {
                         btn.disabled = true;
@@ -5963,7 +6246,6 @@
                     }
                 });
 
-                // بدء تحديث الوقت المتبقي كل دقيقة
                 if (subscriptionRemainingInterval) clearInterval(subscriptionRemainingInterval);
                 subscriptionRemainingInterval = setInterval(() => {
                     updateSubscriptionRemaining();
@@ -5974,7 +6256,6 @@
                 setText('currentPlanName', plan ? (plan.charAt(0).toUpperCase() + plan.slice(1)) : '--');
                 setText('subscriptionEndDate', 'انتهى');
                 setText('subscriptionRemaining', 'منتهي');
-                // إظهار زر الإلغاء مع نص "تم الإلغاء"
                 const cancelBtn = card.querySelector('.btn-danger');
                 if (cancelBtn) {
                     cancelBtn.textContent = 'تم الإلغاء';
@@ -5982,13 +6263,11 @@
                     cancelBtn.style.opacity = '0.6';
                     cancelBtn.style.cursor = 'not-allowed';
                 }
-                // تفعيل أزرار الباقات
                 document.querySelectorAll('.pc-btn').forEach(btn => {
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك';
                 });
             } else {
-                // غير مشترك
                 card.style.display = 'none';
                 document.querySelectorAll('.pc-btn').forEach(btn => {
                     btn.disabled = false;
@@ -6038,7 +6317,6 @@
                     'subscription.endDate': null
                 });
                 showToast('✅ تم إلغاء الاشتراك بنجاح');
-                // تحديث البيانات محلياً
                 if (userData.subscription) {
                     userData.subscription.status = 'inactive';
                     userData.subscription.plan = null;
@@ -6058,15 +6336,10 @@
 
             const sub = userData.subscription || {};
             if (sub.status === 'active') {
-                // إذا كان الاشتراك نشطاً، نطلب إلغاءه أولاً
                 const confirmChange = confirm(`لديك اشتراك نشط في خطة ${sub.plan}. هل تريد إلغاءه والاشتراك في ${planId}؟`);
                 if (!confirmChange) return;
-                // نلغي الاشتراك الحالي أولاً
                 await cancelSubscription();
-                // ثم نواصل للاشتراك الجديد
-                // لكن بعد الإلغاء، ننتظر قليلاً لتحديث البيانات
                 await new Promise(resolve => setTimeout(resolve, 500));
-                // نستدعي نفس الدالة مرة أخرى بعد الإلغاء
                 await subscribeToPlan(planId);
                 return;
             }
@@ -6147,59 +6420,8 @@
         }
 
         // ============================================================
-        // VERIFICATION
+        // VERIFICATION (تحديث ليعمل مع الواجهة الجديدة)
         // ============================================================
-        function updateVerificationUI() {
-            if (!userData) return;
-            const verified = userData.verified || false;
-            const expiry = userData.verificationExpiry;
-            const btn = document.querySelector('.vc-btn');
-            const priceSpan = document.querySelector('.vc-price');
-
-            if (!btn) return;
-
-            if (verified && expiry) {
-                const expiryDate = expiry.toDate ? expiry.toDate() : new Date(expiry);
-                const now = new Date();
-                if (expiryDate > now) {
-                    const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
-                    btn.innerHTML = `<i class="fas fa-check-circle"></i> موثق (متبقي ${daysLeft} يوم)`;
-                    btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
-                    btn.disabled = false;
-                    btn.style.cursor = 'pointer';
-                    btn.onclick = function() { requestVerification(); };
-                    if (priceSpan) {
-                        priceSpan.style.display = 'none';
-                    }
-                } else {
-                    btn.innerHTML = '<i class="fas fa-clock"></i> انتهى التوثيق - جدد الآن';
-                    btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-                    btn.disabled = false;
-                    btn.style.cursor = 'pointer';
-                    btn.onclick = function() { requestVerification(); };
-                    if (priceSpan) {
-                        priceSpan.style.display = 'inline-block';
-                        priceSpan.innerHTML = '100 <small>دج</small>';
-                        priceSpan.style.background = '#fef3c7';
-                        priceSpan.style.color = '#b45309';
-                    }
-                }
-            } else {
-                btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
-                btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
-                btn.disabled = false;
-                btn.style.cursor = 'pointer';
-                btn.onclick = function() { requestVerification(); };
-                if (priceSpan) {
-                    priceSpan.style.display = 'inline-block';
-                    priceSpan.innerHTML = '100 <small>دج</small>';
-                    priceSpan.style.background = '#eff6ff';
-                    priceSpan.style.color = '#2563eb';
-                }
-            }
-            updateVerificationStatus();
-        }
-
         async function requestVerification() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
@@ -6295,7 +6517,7 @@
             calculateSwapResult();
         });
 
-        console.log('🚀 Crynova - مع إدارة الاشتراكات الشهرية وعرض الوقت المتبقي وإلغاء الاشتراك (تم إزالة التأكيد الإضافي للتبرع)');
+        console.log('🚀 Crynova - مع واجهة توثيق متطورة وعد تنازلي');
     </script>
 </body>
 </html>
