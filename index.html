@@ -3091,8 +3091,6 @@
                     <div style="font-size:24px;font-weight:800;" id="walletLocked">0.00</div>
                 </div>
             </div>
-
-            <!-- تم إزالة بطاقة الرصيد القابل للسحب بناءً على طلب المستخدم -->
         </div>
 
         <!-- ========== PAGE: REFERRALS ========== -->
@@ -3396,7 +3394,7 @@
                                         <i class="fas fa-seedling"></i>
                                         <h3>Starter</h3>
                                     </div>
-                                    <span class="pc-price">350 <small>دج</small></span>
+                                    <span class="pc-price">350 <small>دج</small> <span style="font-size:0.6rem;color:var(--text-muted);">/ شهرياً</span></span>
                                 </div>
                                 <div class="pc-features">
                                     <span><i class="fas fa-arrow-up"></i> حد السحب 20000 دج</span>
@@ -3418,7 +3416,7 @@
                                         <i class="fas fa-layer-group"></i>
                                         <h3>Basic</h3>
                                     </div>
-                                    <span class="pc-price">500 <small>دج</small></span>
+                                    <span class="pc-price">500 <small>دج</small> <span style="font-size:0.6rem;color:var(--text-muted);">/ شهرياً</span></span>
                                 </div>
                                 <div class="pc-features">
                                     <span><i class="fas fa-arrow-up"></i> حد السحب 30000 دج</span>
@@ -3441,7 +3439,7 @@
                                         <i class="fas fa-rocket"></i>
                                         <h3>Advanced</h3>
                                     </div>
-                                    <span class="pc-price">800 <small>دج</small></span>
+                                    <span class="pc-price">800 <small>دج</small> <span style="font-size:0.6rem;color:var(--text-muted);">/ شهرياً</span></span>
                                 </div>
                                 <div class="pc-features">
                                     <span><i class="fas fa-arrow-up"></i> حد السحب 45000 دج</span>
@@ -3465,7 +3463,7 @@
                                         <h3>Premium</h3>
                                         <span class="pc-sticker"><i class="fas fa-star"></i> الأفضل</span>
                                     </div>
-                                    <span class="pc-price">1,500 <small>دج</small></span>
+                                    <span class="pc-price">1,500 <small>دج</small> <span style="font-size:0.6rem;color:var(--text-muted);">/ شهرياً</span></span>
                                 </div>
                                 <div class="pc-features">
                                     <span><i class="fas fa-arrow-up"></i> حد السحب 90000 دج</span>
@@ -3490,7 +3488,7 @@
                                         <h3>Pro</h3>
                                         <span class="pc-sticker pc-sticker-pro"><i class="fas fa-bolt"></i> الأعلى</span>
                                     </div>
-                                    <span class="pc-price">3,500 <small>دج</small></span>
+                                    <span class="pc-price">3,500 <small>دج</small> <span style="font-size:0.6rem;color:var(--text-muted);">/ شهرياً</span></span>
                                 </div>
                                 <div class="pc-features">
                                     <span><i class="fas fa-infinity"></i>حد السحب 200000 دج</span>
@@ -4454,19 +4452,14 @@
             const referral = w.dzdReferral || 0;
             const locked = w.dzdLocked || 0;
             const total = main + reward + referral;
-            // تحديث البطاقة الموحدة
             setText('walletTotal', total.toFixed(2));
             setText('walletUsdt', (w.usdt || 0).toFixed(2));
-            // باقي المحافظ
             setText('walletMain', main.toFixed(2));
             setText('walletReward', reward.toFixed(2));
             setText('walletReferral', referral.toFixed(2));
             setText('walletLocked', locked.toFixed(2));
-            // تم إزالة سطر walletWithdrawable لأنه لم يعد موجوداً في الصفحة
-            // setText('walletWithdrawable', total.toFixed(2));
-            // يتم تحديث withdrawableBalance في صفحة السحب، ويجب أن يبقى كما هو
-            setText('withdrawableBalance', total.toFixed(2));
-            setText('withdrawMinAmount', `${MIN_WITHDRAW} DZD`);
+            // تحديث الرصيد القابل للسحب في صفحة السحب يعتمد على الطريقة المختارة
+            // سيتم تحديثه عبر updateWithdrawableBalance عند تغيير الطريقة
         }
 
         function updateReferralUI() {
@@ -4475,6 +4468,28 @@
             const totalRefs = userData.miningData?.totalReferrals || 0;
             setText('refEarnings', earnings.toFixed(2));
             setText('refTotalReferrals', totalRefs);
+        }
+
+        // ===== تحديث الرصيد القابل للسحب حسب طريقة السحب =====
+        function updateWithdrawableBalance(method) {
+            if (!userData) return;
+            const w = userData.wallets || {};
+            let balance = 0;
+            if (method === 'baridi') {
+                // سحب بالدينار الجزائري (من المحافظ المختلفة)
+                balance = (w.dzd || 0) + (w.dzdReward || 0) + (w.dzdReferral || 0);
+            } else {
+                // سحب بـ USDT (Binance أو RedotPay)
+                balance = w.usdt || 0;
+            }
+            setText('withdrawableBalance', balance.toFixed(2));
+
+            // تحديث الحد الأدنى حسب العملة
+            if (method === 'baridi') {
+                setText('withdrawMinAmount', `${MIN_WITHDRAW} DZD`);
+            } else {
+                setText('withdrawMinAmount', `${MIN_WITHDRAW_USDT} USDT`);
+            }
         }
 
         // ============================================================
@@ -4620,7 +4635,7 @@
                 showToast(`✅ تم التبادل بنجاح!`);
                 await updateUI();
                 updateSwapBalances();
-                await loadTransactions(); // لتحديث قائمة العمليات
+                await loadTransactions();
 
             } catch (e) {
                 showToast('❌ ' + (e.message || 'حدث خطأ'));
@@ -4634,7 +4649,6 @@
             if (input) {
                 input.addEventListener('input', calculateSwapResult);
             }
-            // تهيئة واجهة التبادل
             updateSwapUI();
             calculateSwapResult();
         });
@@ -4642,7 +4656,6 @@
         // ============================================================
         // DEPOSIT - مع نافذة تأكيد
         // ============================================================
-        // تهيئة النموذج بالطريقة الافتراضية (baridi)
         document.addEventListener('DOMContentLoaded', function() {
             updateDepositForm('baridi');
             updateWithdrawForm('baridi');
@@ -4902,7 +4915,7 @@
             if (!accountInput || !accountLabel || !accountIcon || !accountHint || !amountLabel ||
                 !amountIcon || !amountInput || !minHint || !feeLabel || !withdrawFeeLabel) return;
 
-            // تحديث الرصيد القابل للسحب حسب العملة
+            // تحديث الرصيد القابل للسحب حسب الطريقة المختارة
             updateWithdrawableBalance(method);
 
             if (method === 'baridi') {
@@ -4951,18 +4964,6 @@
 
             // إعادة حساب الرسوم والإجمالي
             calculateWithdrawFee();
-        }
-
-        function updateWithdrawableBalance(method) {
-            if (!userData) return;
-            const w = userData.wallets || {};
-            let balance = 0;
-            if (method === 'baridi') {
-                balance = (w.dzd || 0) + (w.dzdReward || 0) + (w.dzdReferral || 0);
-            } else {
-                balance = w.usdt || 0;
-            }
-            setText('withdrawableBalance', balance.toFixed(2));
         }
 
         function calculateWithdrawFee() {
@@ -5150,8 +5151,7 @@
                         const doc = await t.get(ref);
                         if (!doc.exists) throw new Error('غير موجود');
 
-                        let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
-                            .wallets?.dzdReferral || 0);
+                        let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
                         if (bal < total) throw new Error('رصيد غير كاف');
 
                         let rem = total;
@@ -5438,8 +5438,7 @@
             slider.step = 100;
             slider.value = minAmount;
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
             setText('modalUserBalance', balance.toFixed(2));
 
             updateModalCalculations();
@@ -5498,8 +5497,7 @@
             setText('modalTotalReturn', totalProfit.toFixed(2));
             setText('modalFirstBonus', firstBonus.toFixed(2));
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
 
             const statusEl = document.getElementById('modalBalanceStatus');
             const balSpan = document.getElementById('modalUserBalance');
@@ -5543,8 +5541,7 @@
                 return;
             }
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
             if (balance < amount) {
                 showToast(`الرصيد غير كافٍ (${balance.toFixed(2)} DZD)`);
                 return;
@@ -5582,8 +5579,7 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    let b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
-                        .wallets?.dzdReferral || 0);
+                    let b = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
                     if (b < amount) throw new Error('رصيد غير كاف');
 
                     let rem = amount;
@@ -5987,14 +5983,13 @@
             const price = prices[planId];
             if (!price) { showToast('خطة غير معروفة'); return; }
 
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
             if (balance < price) {
                 showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
                 return;
             }
 
-            if (!confirm(`تأكيد الاشتراك في خطة ${planId} بمبلغ ${price} DZD؟`)) return;
+            if (!confirm(`تأكيد الاشتراك في خطة ${planId} بمبلغ ${price} DZD (شهرياً)؟`)) return;
 
             try {
                 const now = new Date();
@@ -6006,8 +6001,7 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
-                        .wallets?.dzdReferral || 0);
+                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
                     if (bal < price) throw new Error('رصيد غير كاف');
 
                     let rem = price;
@@ -6035,7 +6029,7 @@
                             type: 'subscription',
                             amount: price,
                             currency: 'DZD',
-                            description: `اشتراك خطة ${planId} (${price} DZD)`,
+                            description: `اشتراك خطة ${planId} (شهرياً - ${price} DZD)`,
                             timestamp: now,
                             plan: planId,
                             status: 'completed'
@@ -6044,7 +6038,7 @@
                     t.update(ref, updates);
                 });
 
-                showToast(`✅ تم تفعيل اشتراك ${planId} بنجاح!`);
+                showToast(`✅ تم تفعيل اشتراك ${planId} (شهرياً) بنجاح!`);
                 await updateUI();
                 updateSubscriptionUI();
             } catch (e) {
@@ -6121,8 +6115,7 @@
             }
 
             const price = 100;
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
-                ?.dzdReferral || 0);
+            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
             if (balance < price) {
                 showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
                 return;
@@ -6143,8 +6136,7 @@
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
-                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
-                        .wallets?.dzdReferral || 0);
+                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
                     if (bal < price) throw new Error('رصيد غير كاف');
 
                     let rem = price;
