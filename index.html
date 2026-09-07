@@ -4016,7 +4016,7 @@
         });
 
         // ============================================================
-        // CONFIRM DONATION
+        // CONFIRM DONATION (تم إزالة التأكيد الإضافي)
         // ============================================================
         async function confirmDonation() {
             if (!userData) {
@@ -4033,7 +4033,7 @@
                 return;
             }
 
-            if (!confirm(`تأكيد التبرع بمبلغ ${amount.toFixed(2)} DZD من رصيدك؟`)) return;
+            // تم إزالة التأكيد الإضافي (confirm) هنا
 
             try {
                 // 1. خصم من المستخدم
@@ -6012,8 +6012,6 @@
             const diff = endDate - now;
             if (diff <= 0) {
                 setText('subscriptionRemaining', 'انتهى');
-                // يمكن تحديث حالة الاشتراك تلقائياً إلى expired
-                // لكننا سنترك ذلك لإعادة التحميل أو التحديث اللاحق
                 return;
             }
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -6297,7 +6295,7 @@
             calculateSwapResult();
         });
 
-        console.log('🚀 Crynova - مع إدارة الاشتراكات الشهرية وعرض الوقت المتبقي وإلغاء الاشتراك');
+        console.log('🚀 Crynova - مع إدارة الاشتراكات الشهرية وعرض الوقت المتبقي وإلغاء الاشتراك (تم إزالة التأكيد الإضافي للتبرع)');
     </script>
 </body>
 </html>
