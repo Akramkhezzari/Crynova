@@ -2406,7 +2406,7 @@
             display: block;
         }
 
-        /* ===== تبويبات استثماراتي ===== */
+        /* ===== تبويبات استثماراتي (تم تبديل الترتيب) ===== */
         #page-investments .profile-tab-btn {
             background: transparent;
             border: none;
@@ -3015,19 +3015,25 @@
                 <i class="fas fa-chart-line text-gold"></i> استثماراتي
             </h2>
 
-            <!-- أزرار التبويب -->
+            <!-- أزرار التبويب - تم تبديل الترتيب -->
             <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:8px;">
-                <button class="profile-tab-btn active" data-tab="my-investments" onclick="switchInvestTab('my-investments')">
-                    <i class="fas fa-folder-open"></i> استثماراتي
-                </button>
-                <button class="profile-tab-btn" data-tab="invest-plans" onclick="switchInvestTab('invest-plans')">
+                <button class="profile-tab-btn active" data-tab="invest-plans" onclick="switchInvestTab('invest-plans')">
                     <i class="fas fa-cubes"></i> باقات العائد الثابت
+                </button>
+                <button class="profile-tab-btn" data-tab="my-investments" onclick="switchInvestTab('my-investments')">
+                    <i class="fas fa-folder-open"></i> استثماراتي
                 </button>
             </div>
 
-            <!-- محتوى التبويب الأول: استثماراتي -->
+            <!-- محتوى التبويبات - تم تبديل الترتيب -->
             <div id="investTabContent">
-                <div class="invest-tab-panel active" id="panel-my-investments">
+                <!-- أولاً: باقات العائد الثابت (نشط) -->
+                <div class="invest-tab-panel active" id="panel-invest-plans">
+                    <div id="investPlansListInside"></div>
+                </div>
+
+                <!-- ثانياً: استثماراتي (مخفي) -->
+                <div class="invest-tab-panel" id="panel-my-investments" style="display:none;">
                     <div class="card gold-gradient">
                         <div class="flex-between">
                             <div>
@@ -3043,11 +3049,6 @@
                     <div id="activeInvestments">
                         <div class="text-muted text-center" style="padding:30px 0;font-size:15px;">ليس لديك استثمارات نشطة</div>
                     </div>
-                </div>
-
-                <!-- محتوى التبويب الثاني: باقات العائد الثابت -->
-                <div class="invest-tab-panel" id="panel-invest-plans" style="display:none;">
-                    <div id="investPlansListInside"></div>
                 </div>
             </div>
         </div>
@@ -6298,7 +6299,7 @@
             calculateSwapResult();
         });
 
-        console.log('🚀 Crynova - باقة استثمار دائمة (0.2% يومياً، 5,000 - 200,000 دج)');
+        console.log('🚀 Crynova - باقة استثمار دائمة (0.2% يومياً، 5,000 - 200,000 دج) - تم تبديل ترتيب التبويبات');
     </script>
 </body>
 </html>
