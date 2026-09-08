@@ -3573,10 +3573,7 @@
                     <div class="number" id="modalTotalReturn">300.00</div>
                     <div class="label">إجمالي الأرباح (شهرياً)</div>
                 </div>
-                <div class="modal-info-item" style="grid-column: span 2; background: var(--accent-glow); border: 1px solid var(--accent-light);">
-                    <div class="number" style="color: var(--gold);" id="modalFirstBonus">350.00</div>
-                    <div class="label">مكافأة أول استثمار (7%)</div>
-                </div>
+                <!-- تم إزالة مكافأة أول استثمار -->
             </div>
             <div class="modal-balance-warning" id="modalBalanceStatus">
                 <i class="fas fa-wallet"></i>
@@ -3834,7 +3831,7 @@
         const MIN_WITHDRAW_USDT = 10;
         const MIN_DEPOSIT = 2000;
         const MIN_DEPOSIT_USDT = 10;
-        const FIRST_BONUS_PERCENT = 7;
+        const FIRST_BONUS_PERCENT = 7; // لم يعد مستخدماً ولكن تركته للتوافق
 
         // ============================================================
         // أسعار الصرف الجديدة
@@ -5395,7 +5392,7 @@
         }
 
         // ============================================================
-        // PLANS & RENDER (يدعم العملتين)
+        // PLANS & RENDER (يدعم العملتين - تم إزالة مكافأة أول استثمار)
         // ============================================================
         async function loadPlans() {
             allInvestPlans = DEFAULT_INVEST_PLANS;
@@ -5419,8 +5416,6 @@
                 const btnClass = isUSDT ? 'btn-usdt' : 'btn-dzd';
                 const minDailyProfit = (p.minAmount * p.dailyReturnPercent) / 100;
                 const maxDailyProfit = (p.maxAmount * p.dailyReturnPercent) / 100;
-                const minBonus = (p.minAmount * FIRST_BONUS_PERCENT) / 100;
-                const maxBonus = (p.maxAmount * FIRST_BONUS_PERCENT) / 100;
                 const decimalPlaces = isUSDT ? 4 : 2;
 
                 return `
@@ -5432,7 +5427,6 @@
                             <li><i class="fas fa-coins"></i> المبلغ: ${p.minAmount.toFixed(0)} - ${p.maxAmount.toFixed(0)} ${currencySymbol}</li>
                             <li><i class="fas fa-chart-line"></i> الربح اليومي: ${minDailyProfit.toFixed(decimalPlaces)} - ${maxDailyProfit.toFixed(decimalPlaces)} ${currencySymbol}</li>
                             <li><i class="fas fa-infinity" style="color:#10b981;"></i> المدة: دائمة (بدون انتهاء)</li>
-                            <li><i class="fas fa-gift" style="color:var(--gold);"></i> مكافأة أول استثمار: ${minBonus.toFixed(decimalPlaces)} - ${maxBonus.toFixed(decimalPlaces)} ${currencySymbol}</li>
                         </ul>
                         <button class="btn ${btnClass}" onclick="openInvestmentModal('${p.id}')">
                             <i class="fas fa-plus-circle"></i> استثمر الآن
@@ -5568,11 +5562,9 @@
 
             const dailyProfit = (amount * plan.dailyReturnPercent) / 100;
             const totalProfit = dailyProfit * 30;
-            const firstBonus = (amount * FIRST_BONUS_PERCENT) / 100;
 
             setText('modalDailyProfit', dailyProfit.toFixed(isUSDT ? 4 : 2));
             setText('modalTotalReturn', totalProfit.toFixed(isUSDT ? 4 : 2));
-            setText('modalFirstBonus', firstBonus.toFixed(isUSDT ? 4 : 2));
 
             const balance = isUSDT ? (userData.wallets?.usdt || 0) : ((userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0));
             const statusEl = document.getElementById('modalBalanceStatus');
@@ -5598,7 +5590,7 @@
         }
 
         // ============================================================
-        // CONFIRM INVESTMENT (يدعم العملتين مع تحقق إضافي)
+        // CONFIRM INVESTMENT (يدعم العملتين - تم إزالة مكافأة أول استثمار)
         // ============================================================
         async function confirmInvestment() {
             if (!currentSelectedPlanId) {
@@ -5664,19 +5656,15 @@
                     amountInDZD: isUSDT ? (amount * RATE_USDT_TO_DZD) : amount
                 };
 
-                let bonusAdded = false;
-                let bonusAmount = 0;
-
                 await db.runTransaction(async (t) => {
                     const ref = db.collection('users').doc(userData.telegramId);
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('غير موجود');
 
                     const updates = {};
-                    let currentBal = 0;
 
                     if (isUSDT) {
-                        currentBal = doc.data().wallets?.usdt || 0;
+                        const currentBal = doc.data().wallets?.usdt || 0;
                         if (currentBal < amount) throw new Error('رصيد USDT غير كاف');
                         updates['wallets.usdt'] = currentBal - amount;
                     } else {
@@ -5709,31 +5697,10 @@
                         status: 'completed'
                     });
 
-                    const existingInvestments = doc.data().investments || [];
-                    if (existingInvestments.length === 0) {
-                        bonusAmount = (amount * FIRST_BONUS_PERCENT) / 100;
-                        if (isUSDT) {
-                            updates['wallets.usdt'] = firebase.firestore.FieldValue.increment(bonusAmount);
-                        } else {
-                            updates['wallets.dzdReward'] = firebase.firestore.FieldValue.increment(bonusAmount);
-                        }
-                        updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
-                            type: 'first_investment_bonus',
-                            amount: bonusAmount,
-                            currency: plan.currency,
-                            description: `مكافأة أول استثمار (${bonusAmount.toFixed(isUSDT ? 4 : 2)} ${plan.currency})`,
-                            timestamp: now,
-                            investmentId: investmentId
-                        });
-                        bonusAdded = true;
-                    }
+                    // تم إزالة مكافأة أول استثمار بالكامل
 
                     t.update(ref, updates);
                 });
-
-                if (bonusAdded) {
-                    showToast(`🎁 مكافأة أول استثمار: ${bonusAmount.toFixed(isUSDT ? 4 : 2)} ${plan.currency} أضيفت إلى محفظتك!`);
-                }
 
                 showToast(`✅ تم الاستثمار في "${plan.name}" بنجاح!`);
                 await loadTransactions();
@@ -6539,8 +6506,7 @@
 
         console.log('🚀 Crynova - باقة استثمار دائمة (0.2% يومياً، 5,000 - 200,000 دج) + باقة USDT (0.05%، 10 - 5,000 USDT)');
         console.log('💱 أسعار الصرف: 1 USDT = 243 DZD  |  263 DZD = 1 USDT (مخفية عن المستخدم)');
-        console.log('✅ تم تحديث دالة openInvestmentModal لجلب الرصيد من Firestore قبل الفتح');
-        console.log('✅ تم إضافة تحقق إضافي من الرصيد في confirmInvestment');
+        console.log('✅ تم إزالة مكافأة أول استثمار من البطاقتين والمودال والمنطق');
     </script>
 </body>
 </html>
