@@ -3043,15 +3043,24 @@
 
                 <!-- ثانياً: استثماراتي (مخفي) -->
                 <div class="invest-tab-panel" id="panel-my-investments" style="display:none;">
-                    <div class="card gold-gradient">
-                        <div class="flex-between">
+                    <!-- بطاقة الإجماليات المعدلة لتعرض DZD و USDT -->
+                    <div class="card gold-gradient" id="investSummaryCard">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                             <div>
-                                <div style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;">إجمالي المستثمر</div>
-                                <div style="font-size:32px;font-weight:900;color:white;" id="investTotalInvested">0.00</div>
+                                <div style="color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;">إجمالي المستثمر (DZD)</div>
+                                <div style="font-size:24px;font-weight:900;color:white;" id="investTotalInvestedDZD">0.00</div>
                             </div>
-                            <div style="text-align:left;">
-                                <div style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;">إجمالي الأرباح</div>
-                                <div style="font-size:24px;font-weight:900;color:white;" id="investTotalReturn">0.00</div>
+                            <div>
+                                <div style="color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;">إجمالي المستثمر (USDT)</div>
+                                <div style="font-size:24px;font-weight:900;color:white;" id="investTotalInvestedUSDT">0.00</div>
+                            </div>
+                            <div>
+                                <div style="color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;">إجمالي الأرباح (DZD)</div>
+                                <div style="font-size:24px;font-weight:900;color:white;" id="investTotalReturnDZD">0.00</div>
+                            </div>
+                            <div>
+                                <div style="color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;">إجمالي الأرباح (USDT)</div>
+                                <div style="font-size:24px;font-weight:900;color:white;" id="investTotalReturnUSDT">0.00</div>
                             </div>
                         </div>
                     </div>
@@ -5713,31 +5722,44 @@
         }
 
         // ============================================================
-        // RENDER INVESTMENTS (يدعم العملتين)
+        // RENDER INVESTMENTS (يدعم العملتين - مع إجماليات منفصلة)
         // ============================================================
         function renderInvestments() {
             const container = document.getElementById('activeInvestments');
+            
+            // حساب الإجماليات من جميع الاستثمارات (النشطة والمكتملة)
+            let totalInvestedDZD = 0, totalInvestedUSDT = 0;
+            let totalReturnDZD = 0, totalReturnUSDT = 0;
+            
+            if (userData && userData.investments && userData.investments.length > 0) {
+                for (let inv of userData.investments) {
+                    if (inv.currency === 'USDT') {
+                        totalInvestedUSDT += inv.amount;
+                        totalReturnUSDT += (inv.totalReturn || 0);
+                    } else {
+                        totalInvestedDZD += inv.amount;
+                        totalReturnDZD += (inv.totalReturn || 0);
+                    }
+                }
+            }
+            
+            setText('investTotalInvestedDZD', totalInvestedDZD.toFixed(2));
+            setText('investTotalInvestedUSDT', totalInvestedUSDT.toFixed(4));
+            setText('investTotalReturnDZD', totalReturnDZD.toFixed(2));
+            setText('investTotalReturnUSDT', totalReturnUSDT.toFixed(4));
+
             if (!userData || !userData.investments || userData.investments.length === 0) {
-                container.innerHTML =
-                    '<div class="text-muted text-center" style="padding:30px 0;font-size:15px;">ليس لديك استثمارات نشطة</div>';
-                setText('investTotalInvested', '0.00');
-                setText('investTotalReturn', '0.00');
+                container.innerHTML = '<div class="text-muted text-center" style="padding:30px 0;font-size:15px;">ليس لديك استثمارات نشطة</div>';
                 return;
             }
 
-            const totalInvested = userData.totalInvested || 0;
-            const totalReturn = userData.totalInvestmentReturns || 0;
-            setText('investTotalInvested', totalInvested.toFixed(2));
-            setText('investTotalReturn', totalReturn.toFixed(2));
-
-            const list = userData.investments.filter(inv => inv.status === 'active');
-            if (list.length === 0) {
-                container.innerHTML =
-                    '<div class="text-muted text-center" style="padding:30px 0;font-size:15px;">لا توجد استثمارات نشطة حالياً</div>';
+            const activeInvestments = userData.investments.filter(inv => inv.status === 'active');
+            if (activeInvestments.length === 0) {
+                container.innerHTML = '<div class="text-muted text-center" style="padding:30px 0;font-size:15px;">لا توجد استثمارات نشطة حالياً</div>';
                 return;
             }
 
-            container.innerHTML = list.map(inv => {
+            container.innerHTML = activeInvestments.map(inv => {
                 const isUSDT = inv.currency === 'USDT';
                 const daily = (inv.amount * inv.dailyReturnPercent) / 100;
                 const remainingText = "دائمة";
@@ -6507,6 +6529,7 @@
         console.log('🚀 Crynova - باقة استثمار دائمة (0.2% يومياً، 5,000 - 200,000 دج) + باقة USDT (0.05%، 10 - 5,000 USDT)');
         console.log('💱 أسعار الصرف: 1 USDT = 243 DZD  |  263 DZD = 1 USDT (مخفية عن المستخدم)');
         console.log('✅ تم إزالة مكافأة أول استثمار من البطاقتين والمودال والمنطق');
+        console.log('✅ تم تعديل عرض إجمالي المستثمر والأرباح ليشمل DZD و USDT بشكل منفصل');
     </script>
 </body>
 </html>
