@@ -2856,9 +2856,9 @@
         }
 
         /* ============================================================
-           DISABLED ACCOUNT OVERLAY
+           BANNED ACCOUNT OVERLAY
            ============================================================ */
-        #disabledOverlay {
+        #bannedOverlay {
             display: none;
             position: fixed;
             top: 0;
@@ -2874,7 +2874,7 @@
             direction: rtl;
         }
 
-        #disabledOverlay .disabled-card {
+        #bannedOverlay .banned-card {
             max-width: 420px;
             width: 100%;
             background: var(--bg-card);
@@ -2886,20 +2886,20 @@
             animation: fadeSlideIn 0.5s ease;
         }
 
-        #disabledOverlay .disabled-icon {
+        #bannedOverlay .banned-icon {
             font-size: 64px;
             color: var(--danger);
             margin-bottom: 16px;
         }
 
-        #disabledOverlay h2 {
+        #bannedOverlay h2 {
             font-size: 24px;
             font-weight: 900;
             color: var(--text-primary);
             margin-bottom: 8px;
         }
 
-        #disabledOverlay .disabled-reason {
+        #bannedOverlay .banned-reason {
             font-size: 16px;
             font-weight: 600;
             color: var(--danger);
@@ -2910,14 +2910,14 @@
             margin-bottom: 16px;
         }
 
-        #disabledOverlay p {
+        #bannedOverlay p {
             font-size: 15px;
             color: var(--text-secondary);
             line-height: 1.7;
             margin-bottom: 24px;
         }
 
-        #disabledOverlay .btn-support {
+        #bannedOverlay .btn-support {
             background: var(--accent-gradient);
             color: white;
             border: none;
@@ -2932,23 +2932,23 @@
             width: 100%;
         }
 
-        #disabledOverlay .btn-support:hover {
+        #bannedOverlay .btn-support:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 32px rgba(108, 92, 231, 0.4);
         }
 
-        #disabledOverlay .btn-support:active {
+        #bannedOverlay .btn-support:active {
             transform: scale(0.96);
         }
 
         @media (max-width: 480px) {
-            #disabledOverlay .disabled-card {
+            #bannedOverlay .banned-card {
                 padding: 30px 20px 24px;
             }
-            #disabledOverlay h2 {
+            #bannedOverlay h2 {
                 font-size: 20px;
             }
-            #disabledOverlay .disabled-icon {
+            #bannedOverlay .banned-icon {
                 font-size: 48px;
             }
         }
@@ -2956,14 +2956,14 @@
 </head>
 <body>
 
-    <!-- ===== DISABLED ACCOUNT OVERLAY ===== -->
-    <div id="disabledOverlay">
-        <div class="disabled-card">
-            <div class="disabled-icon"><i class="fas fa-lock"></i></div>
-            <h2>🔒 تم تعطيل حسابك</h2>
-            <div class="disabled-reason" id="disabledReasonText">مخالفة قوانين وشروط استخدام المنصة</div>
+    <!-- ===== BANNED ACCOUNT OVERLAY ===== -->
+    <div id="bannedOverlay">
+        <div class="banned-card">
+            <div class="banned-icon"><i class="fas fa-ban"></i></div>
+            <h2>🔒 تم حظر حسابك</h2>
+            <div class="banned-reason" id="bannedReasonText">مخالفة قوانين وشروط استخدام المنصة</div>
             <p>
-                تم تعطيل حسابك من طرف الإدارة بسبب مخالفتك لقوانين وشروط استخدام منصة Crynova.
+                تم حظر حسابك من طرف الإدارة بسبب مخالفتك لقوانين وشروط استخدام منصة Crynova.
                 <br><br>
                 لا يمكنك الوصول إلى حسابك حاليًا. إذا كنت تعتقد أن هذا الإجراء تم عن طريق الخطأ، يرجى التواصل مع فريق الدعم لمراجعة حالة حسابك.
             </p>
@@ -4319,9 +4319,9 @@
                     setLocalUserInfo(displayName, username, photoURL);
                     console.log('✅ مرحباً بعودتك,', displayName);
 
-                    // التحقق من حالة التعطيل
-                    if (userData.status === 'disabled') {
-                        showDisabledScreen(userData.disabledReason || 'مخالفة قوانين وشروط استخدام المنصة');
+                    // التحقق من حالة الحظر (banned أو disabled للتوافق)
+                    if (userData.status === 'banned' || userData.status === 'disabled') {
+                        showBannedScreen(userData.bannedReason || userData.disabledReason || 'مخالفة قوانين وشروط استخدام المنصة');
                         return true;
                     }
                 } else {
@@ -4369,7 +4369,7 @@
                         verified: false,
                         verificationExpiry: null,
                         hasDonated: false,
-                        disabledReason: null // إضافة حقل سبب التعطيل
+                        bannedReason: null // سبب الحظر
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -4381,13 +4381,13 @@
                 unsubscribeUser = db.collection('users').doc(telegramId).onSnapshot((doc) => {
                     if (doc.exists) {
                         userData = { telegramId: doc.id, ...doc.data() };
-                        // التحقق من حالة التعطيل في كل تحديث
-                        if (userData.status === 'disabled') {
-                            showDisabledScreen(userData.disabledReason || 'مخالفة قوانين وشروط استخدام المنصة');
+                        // التحقق من حالة الحظر في كل تحديث
+                        if (userData.status === 'banned' || userData.status === 'disabled') {
+                            showBannedScreen(userData.bannedReason || userData.disabledReason || 'مخالفة قوانين وشروط استخدام المنصة');
                             return;
                         } else {
-                            // إذا تم إعادة تفعيل الحساب، نخفي واجهة التعطيل
-                            hideDisabledScreen();
+                            // إذا تم إلغاء الحظر، نخفي واجهة الحظر
+                            hideBannedScreen();
                         }
                         updateUI();
                         renderTransactions(userData.transactions || []);
@@ -4425,11 +4425,11 @@
         }
 
         // ============================================================
-        // DISABLED ACCOUNT FUNCTIONS
+        // BANNED ACCOUNT FUNCTIONS
         // ============================================================
-        function showDisabledScreen(reason) {
-            const overlay = document.getElementById('disabledOverlay');
-            const reasonEl = document.getElementById('disabledReasonText');
+        function showBannedScreen(reason) {
+            const overlay = document.getElementById('bannedOverlay');
+            const reasonEl = document.getElementById('bannedReasonText');
             if (reasonEl) reasonEl.textContent = reason || 'مخالفة قوانين وشروط استخدام المنصة';
             if (overlay) {
                 overlay.style.display = 'flex';
@@ -4441,8 +4441,8 @@
             }
         }
 
-        function hideDisabledScreen() {
-            const overlay = document.getElementById('disabledOverlay');
+        function hideBannedScreen() {
+            const overlay = document.getElementById('bannedOverlay');
             if (overlay) overlay.style.display = 'none';
             document.querySelector('.app-container').style.display = 'block';
             document.querySelector('.bottom-nav').style.display = 'flex';
@@ -6691,7 +6691,7 @@
         console.log('💱 أسعار الصرف: 1 USDT = 243 DZD  |  263 DZD = 1 USDT (مخفية عن المستخدم)');
         console.log('✅ تم إزالة مكافأة أول استثمار من البطاقتين والمودال والمنطق');
         console.log('✅ تم تعديل عرض إجمالي المستثمر والأرباح ليشمل DZD و USDT بشكل منفصل');
-        console.log('✅ تم تفعيل واجهة تعطيل الحساب عند تغيير status إلى disabled');
+        console.log('✅ تم تفعيل واجهة حظر الحساب عند تغيير status إلى banned أو disabled');
     </script>
 </body>
 </html>
