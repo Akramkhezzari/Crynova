@@ -2173,6 +2173,25 @@
             word-break: break-all;
         }
 
+        /* تحذير التقييد (Restricted) */
+        .restricted-warning {
+            display: none;
+            background: var(--danger-light);
+            border: 2px solid var(--danger);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            color: var(--danger);
+            font-weight: 700;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        .restricted-warning i {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
         #page-withdraw .card {
             padding: 14px 16px;
             margin-bottom: 12px;
@@ -3269,6 +3288,12 @@
                 </button>
             </h2>
 
+            <!-- تحذير التقييد -->
+            <div id="depositRestrictedWarning" class="restricted-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>⚠️ حسابك مقيد. لا يمكنك تنفيذ عمليات الإيداع حالياً. يرجى التواصل مع الدعم.</span>
+            </div>
+
             <!-- قائمة منسدلة لطريقة الإيداع -->
             <div class="input-group">
                 <label for="depositMethodSelect">طريقة الإيداع <span class="required">*</span></label>
@@ -3337,6 +3362,12 @@
                     <i class="fas fa-arrow-right"></i> رجوع
                 </button>
             </h2>
+
+            <!-- تحذير التقييد -->
+            <div id="withdrawRestrictedWarning" class="restricted-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>⚠️ حسابك مقيد. لا يمكنك تنفيذ عمليات السحب حالياً. يرجى التواصل مع الدعم.</span>
+            </div>
 
             <!-- قائمة منسدلة لطريقة السحب -->
             <div class="input-group">
@@ -4319,10 +4350,14 @@
                     setLocalUserInfo(displayName, username, photoURL);
                     console.log('✅ مرحباً بعودتك,', displayName);
 
-                    // التحقق من حالة الحظر (banned أو disabled للتوافق)
+                    // التحقق من حالة الحظر (banned أو disabled)
                     if (userData.status === 'banned' || userData.status === 'disabled') {
                         showBannedScreen(userData.bannedReason || userData.disabledReason || 'مخالفة قوانين وشروط استخدام المنصة');
                         return true;
+                    }
+                    // إذا كان restricted، نتحقق في الواجهة لكن لا نمنع الوصول الكامل
+                    if (userData.status === 'restricted') {
+                        console.log('⚠️ الحساب مقيد (restricted) - تقييد الإيداع والسحب');
                     }
                 } else {
                     const displayName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
@@ -4369,7 +4404,8 @@
                         verified: false,
                         verificationExpiry: null,
                         hasDonated: false,
-                        bannedReason: null // سبب الحظر
+                        bannedReason: null,
+                        restrictedReason: null // سبب التقييد
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -4381,14 +4417,15 @@
                 unsubscribeUser = db.collection('users').doc(telegramId).onSnapshot((doc) => {
                     if (doc.exists) {
                         userData = { telegramId: doc.id, ...doc.data() };
-                        // التحقق من حالة الحظر في كل تحديث
+                        // التحقق من الحظر الكامل
                         if (userData.status === 'banned' || userData.status === 'disabled') {
                             showBannedScreen(userData.bannedReason || userData.disabledReason || 'مخالفة قوانين وشروط استخدام المنصة');
                             return;
                         } else {
-                            // إذا تم إلغاء الحظر، نخفي واجهة الحظر
                             hideBannedScreen();
                         }
+                        // تحديث واجهة التقييد
+                        updateRestrictedUI();
                         updateUI();
                         renderTransactions(userData.transactions || []);
                         renderReferrals(userData.referrals || []);
@@ -4425,6 +4462,25 @@
         }
 
         // ============================================================
+        // RESTRICTED UI FUNCTIONS
+        // ============================================================
+        function updateRestrictedUI() {
+            const isRestricted = userData && userData.status === 'restricted';
+            const depositWarning = document.getElementById('depositRestrictedWarning');
+            const withdrawWarning = document.getElementById('withdrawRestrictedWarning');
+
+            if (depositWarning) {
+                depositWarning.style.display = isRestricted ? 'flex' : 'none';
+            }
+            if (withdrawWarning) {
+                withdrawWarning.style.display = isRestricted ? 'flex' : 'none';
+            }
+
+            // تعطيل/تفعيل أزرار الإيداع والسحب (اختياري - لكن الأفضل تركها لكن نمنع التنفيذ)
+            // سنمنع التنفيذ في الدوال نفسها.
+        }
+
+        // ============================================================
         // BANNED ACCOUNT FUNCTIONS
         // ============================================================
         function showBannedScreen(reason) {
@@ -4433,10 +4489,8 @@
             if (reasonEl) reasonEl.textContent = reason || 'مخالفة قوانين وشروط استخدام المنصة';
             if (overlay) {
                 overlay.style.display = 'flex';
-                // إخفاء جميع المحتويات الأخرى
                 document.querySelector('.app-container').style.display = 'none';
                 document.querySelector('.bottom-nav').style.display = 'none';
-                // إخفاء أي مودالات مفتوحة
                 document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
             }
         }
@@ -4449,10 +4503,7 @@
         }
 
         function contactSupport() {
-            // يمكنك تخصيص الرابط هنا (مثل رابط تيليجرام للدعم)
             window.open('https://t.me/Crynova_support', '_blank');
-            // أو استخدام showToast إذا أردت
-            // showToast('جاري التوجيه إلى صفحة الدعم...');
         }
 
         // ============================================================
@@ -4595,6 +4646,9 @@
             if (page === 'profile') updateProfileUI();
             if (page === 'investments') renderInvestments();
             if (page === 'packages') updateSwapBalances();
+            if (page === 'deposit' || page === 'withdraw') {
+                updateRestrictedUI();
+            }
         }
 
         // ============================================================
@@ -4636,6 +4690,7 @@
             checkVerificationExpiry();
             updateSwapBalances();
             updateSubscriptionUI();
+            updateRestrictedUI(); // تحديث واجهة التقييد
         }
 
         function updateProfileUI() {
@@ -5013,6 +5068,12 @@
         async function submitDeposit() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
+            // التحقق من حالة التقييد
+            if (userData.status === 'restricted') {
+                showToast('⚠️ حسابك مقيد، لا يمكنك تنفيذ عمليات الإيداع حالياً. يرجى التواصل مع الدعم.');
+                return;
+            }
+
             const methodSelect = document.getElementById('depositMethodSelect');
             const method = methodSelect.value;
 
@@ -5287,6 +5348,12 @@
 
         async function submitWithdraw() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
+            // التحقق من حالة التقييد
+            if (userData.status === 'restricted') {
+                showToast('⚠️ حسابك مقيد، لا يمكنك تنفيذ عمليات السحب حالياً. يرجى التواصل مع الدعم.');
+                return;
+            }
 
             const methodSelect = document.getElementById('withdrawMethodSelect');
             const method = methodSelect.value;
@@ -6691,7 +6758,8 @@
         console.log('💱 أسعار الصرف: 1 USDT = 243 DZD  |  263 DZD = 1 USDT (مخفية عن المستخدم)');
         console.log('✅ تم إزالة مكافأة أول استثمار من البطاقتين والمودال والمنطق');
         console.log('✅ تم تعديل عرض إجمالي المستثمر والأرباح ليشمل DZD و USDT بشكل منفصل');
-        console.log('✅ تم تفعيل واجهة حظر الحساب عند تغيير status إلى banned أو disabled');
+        console.log('✅ تم تفعيل واجهة حظر الحساب (banned/disabled)');
+        console.log('✅ تم تفعيل تقييد الإيداع والسحب (restricted) مع عرض تحذير مرئي');
     </script>
 </body>
 </html>
