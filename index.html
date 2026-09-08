@@ -2854,9 +2854,124 @@
                 font-size: 9px;
             }
         }
+
+        /* ============================================================
+           DISABLED ACCOUNT OVERLAY
+           ============================================================ */
+        #disabledOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            direction: rtl;
+        }
+
+        #disabledOverlay .disabled-card {
+            max-width: 420px;
+            width: 100%;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 40px 28px 32px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            text-align: center;
+            animation: fadeSlideIn 0.5s ease;
+        }
+
+        #disabledOverlay .disabled-icon {
+            font-size: 64px;
+            color: var(--danger);
+            margin-bottom: 16px;
+        }
+
+        #disabledOverlay h2 {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        #disabledOverlay .disabled-reason {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--danger);
+            background: var(--danger-light);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+
+        #disabledOverlay p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        #disabledOverlay .btn-support {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+            box-shadow: var(--shadow-glow);
+            width: 100%;
+        }
+
+        #disabledOverlay .btn-support:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(108, 92, 231, 0.4);
+        }
+
+        #disabledOverlay .btn-support:active {
+            transform: scale(0.96);
+        }
+
+        @media (max-width: 480px) {
+            #disabledOverlay .disabled-card {
+                padding: 30px 20px 24px;
+            }
+            #disabledOverlay h2 {
+                font-size: 20px;
+            }
+            #disabledOverlay .disabled-icon {
+                font-size: 48px;
+            }
+        }
     </style>
 </head>
 <body>
+
+    <!-- ===== DISABLED ACCOUNT OVERLAY ===== -->
+    <div id="disabledOverlay">
+        <div class="disabled-card">
+            <div class="disabled-icon"><i class="fas fa-lock"></i></div>
+            <h2>🔒 تم تعطيل حسابك</h2>
+            <div class="disabled-reason" id="disabledReasonText">مخالفة قوانين وشروط استخدام المنصة</div>
+            <p>
+                تم تعطيل حسابك من طرف الإدارة بسبب مخالفتك لقوانين وشروط استخدام منصة Crynova.
+                <br><br>
+                لا يمكنك الوصول إلى حسابك حاليًا. إذا كنت تعتقد أن هذا الإجراء تم عن طريق الخطأ، يرجى التواصل مع فريق الدعم لمراجعة حالة حسابك.
+            </p>
+            <button class="btn-support" onclick="contactSupport()">
+                <i class="fas fa-headset"></i> تواصل مع الدعم
+            </button>
+        </div>
+    </div>
 
     <div class="app-container">
 
@@ -4203,6 +4318,12 @@
                     const photoURL = userData.photoURL || tgUser.photo_url || '';
                     setLocalUserInfo(displayName, username, photoURL);
                     console.log('✅ مرحباً بعودتك,', displayName);
+
+                    // التحقق من حالة التعطيل
+                    if (userData.status === 'disabled') {
+                        showDisabledScreen(userData.disabledReason || 'مخالفة قوانين وشروط استخدام المنصة');
+                        return true;
+                    }
                 } else {
                     const displayName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
                     const username = tgUser.username || '';
@@ -4247,7 +4368,8 @@
                         },
                         verified: false,
                         verificationExpiry: null,
-                        hasDonated: false
+                        hasDonated: false,
+                        disabledReason: null // إضافة حقل سبب التعطيل
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -4259,6 +4381,14 @@
                 unsubscribeUser = db.collection('users').doc(telegramId).onSnapshot((doc) => {
                     if (doc.exists) {
                         userData = { telegramId: doc.id, ...doc.data() };
+                        // التحقق من حالة التعطيل في كل تحديث
+                        if (userData.status === 'disabled') {
+                            showDisabledScreen(userData.disabledReason || 'مخالفة قوانين وشروط استخدام المنصة');
+                            return;
+                        } else {
+                            // إذا تم إعادة تفعيل الحساب، نخفي واجهة التعطيل
+                            hideDisabledScreen();
+                        }
                         updateUI();
                         renderTransactions(userData.transactions || []);
                         renderReferrals(userData.referrals || []);
@@ -4292,6 +4422,37 @@
                 console.error('❌ خطأ في المصادقة:', e);
                 return false;
             }
+        }
+
+        // ============================================================
+        // DISABLED ACCOUNT FUNCTIONS
+        // ============================================================
+        function showDisabledScreen(reason) {
+            const overlay = document.getElementById('disabledOverlay');
+            const reasonEl = document.getElementById('disabledReasonText');
+            if (reasonEl) reasonEl.textContent = reason || 'مخالفة قوانين وشروط استخدام المنصة';
+            if (overlay) {
+                overlay.style.display = 'flex';
+                // إخفاء جميع المحتويات الأخرى
+                document.querySelector('.app-container').style.display = 'none';
+                document.querySelector('.bottom-nav').style.display = 'none';
+                // إخفاء أي مودالات مفتوحة
+                document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+            }
+        }
+
+        function hideDisabledScreen() {
+            const overlay = document.getElementById('disabledOverlay');
+            if (overlay) overlay.style.display = 'none';
+            document.querySelector('.app-container').style.display = 'block';
+            document.querySelector('.bottom-nav').style.display = 'flex';
+        }
+
+        function contactSupport() {
+            // يمكنك تخصيص الرابط هنا (مثل رابط تيليجرام للدعم)
+            window.open('https://t.me/Crynova_support', '_blank');
+            // أو استخدام showToast إذا أردت
+            // showToast('جاري التوجيه إلى صفحة الدعم...');
         }
 
         // ============================================================
@@ -6530,6 +6691,7 @@
         console.log('💱 أسعار الصرف: 1 USDT = 243 DZD  |  263 DZD = 1 USDT (مخفية عن المستخدم)');
         console.log('✅ تم إزالة مكافأة أول استثمار من البطاقتين والمودال والمنطق');
         console.log('✅ تم تعديل عرض إجمالي المستثمر والأرباح ليشمل DZD و USDT بشكل منفصل');
+        console.log('✅ تم تفعيل واجهة تعطيل الحساب عند تغيير status إلى disabled');
     </script>
 </body>
 </html>
