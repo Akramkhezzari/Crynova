@@ -922,6 +922,7 @@
             color: white;
             font-weight: 700;
             font-size: 14px;
+            position: relative;
         }
         .user-mini .user-name {
             font-size: 13px;
@@ -1191,7 +1192,7 @@
         }
 
         /* ============================================================
-           بطاقة توثيق الحساب (Verification Card) - تم التعديل
+           بطاقة توثيق الحساب (Verification Card)
            ============================================================ */
         .verify-card {
             max-width: 450px;
@@ -1318,10 +1319,9 @@
             width: 1.2rem;
         }
 
-        /* ===== NEW: Auto-Renew Toggle Row ===== */
+        /* ===== Auto-Renew Toggle Row ===== */
         .auto-renew-row {
             display: none;
-            /* hidden by default, shown via JS */
             align-items: center;
             justify-content: space-between;
             background: var(--bg-input);
@@ -3031,7 +3031,13 @@
             </div>
             <div class="header-actions">
                 <div class="user-mini" onclick="navigateTo('profile')">
-                    <div class="avatar-small" id="headerAvatar">?</div>
+                    <div style="position:relative;">
+                        <div class="avatar-small" id="headerAvatar">?</div>
+                        <!-- شارة التوثيق في الهيدر -->
+                        <div id="headerVerifiedBadge" style="display:none; position:absolute; bottom:-2px; right:-2px; background:#1d9bf0; border:2px solid var(--bg-nav); border-radius:50%; width:16px; height:16px; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(29,155,240,0.3);">
+                            <i class="fas fa-check" style="color:white; font-size:8px;"></i>
+                        </div>
+                    </div>
                     <div>
                         <div class="user-name" id="headerUserName">مستخدم</div>
                         <div class="user-level" id="headerUserLevel">المستوى 1</div>
@@ -3504,9 +3510,17 @@
             </h2>
 
             <div class="card text-center" style="padding:24px;">
-                <div style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:white;margin:0 auto 12px;box-shadow:var(--shadow-glow);" id="profileAvatar">
-                    ?
+                <!-- صورة الملف الشخصي مع شارة التوثيق -->
+                <div style="position:relative; width:80px; height:80px; margin:0 auto 12px;">
+                    <div id="profileAvatar" style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:white;box-shadow:var(--shadow-glow);">
+                        ?
+                    </div>
+                    <!-- شارة التوثيق الزرقاء -->
+                    <div id="profileVerifiedBadge" style="display:none; position:absolute; bottom:0; right:-4px; background:#1d9bf0; border:2px solid var(--bg-card); border-radius:50%; width:26px; height:26px; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(29,155,240,0.4);">
+                        <i class="fas fa-check" style="color:white; font-size:14px;"></i>
+                    </div>
                 </div>
+
                 <div style="font-size:22px;font-weight:900;" id="profileName">المستخدم</div>
                 <div style="color:var(--text-secondary);font-size:14px;" id="profileTelegram">@username</div>
                 <div style="margin-top:8px;">
@@ -3551,7 +3565,7 @@
                     </div>
                 </div>
 
-                <!-- ===== VERIFICATION TAB (تم التعديل) ===== -->
+                <!-- ===== VERIFICATION TAB ===== -->
                 <div class="profile-tab-panel" id="panel-verification">
                     <div class="verify-card">
                         <div class="vc-stripe"></div>
@@ -3572,7 +3586,7 @@
                                 <li><i class="fas fa-check-circle"></i> ظهور مميز للملف الشخصي</li>
                             </ul>
 
-                            <!-- ===== NEW: Auto-Renew Toggle (مخفي افتراضياً) ===== -->
+                            <!-- ===== Auto-Renew Toggle ===== -->
                             <div class="auto-renew-row" id="autoRenewContainer">
                                 <span class="label">
                                     <i class="fas fa-sync-alt"></i> تفعيل التجديد التلقائي
@@ -4286,7 +4300,6 @@
                         hasDonated: false,
                         bannedReason: null,
                         restrictedReason: null,
-                        // ===== NEW: Auto-Renew Setting =====
                         autoRenewVerification: false
                     };
                     await userRef.set(newUser);
@@ -4312,7 +4325,6 @@
                         updateSubscriptionUI();
                         updateVerificationUI();
                         updateSwapBalances();
-                        // ===== NEW: Check auto-renewal on any update =====
                         checkAndRenewVerification();
                     }
                 });
@@ -4328,7 +4340,6 @@
                 updateVerificationUI();
                 updateSwapBalances();
                 loadZakatData();
-                // ===== NEW: Check auto-renewal on load =====
                 await checkAndRenewVerification();
                 return true;
             } catch (e) { console.error('❌ خطأ في المصادقة:', e); return false; }
@@ -4475,7 +4486,7 @@
         }
 
         // ============================================================
-        // UI UPDATES
+        // UI UPDATES (including verification badges)
         // ============================================================
         function updateUI() {
             if (!userData) return;
@@ -4507,6 +4518,8 @@
             updateSwapBalances();
             updateSubscriptionUI();
             updateRestrictedUI();
+            // تحديث شارات التوثيق
+            updateVerificationBadges();
         }
 
         function updateProfileUI() {
@@ -4518,6 +4531,25 @@
             if (userData.telegramId) { refLink.value = `https://t.me/Crynova_bot?start=${userData.telegramId}`; } else {
                 refLink.value = 'جاري التحميل...'; }
             updateVerificationStatus();
+            updateVerificationBadges();
+        }
+
+        // ===== NEW: Update verification badges =====
+        function updateVerificationBadges() {
+            const isVerified = userData && userData.verified && userData.verificationExpiry;
+            let isValid = false;
+            if (isVerified) {
+                const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData
+                    .verificationExpiry);
+                isValid = expiry > new Date();
+            }
+            const badges = ['profileVerifiedBadge', 'headerVerifiedBadge'];
+            badges.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.display = isValid ? 'flex' : 'none';
+                }
+            });
         }
 
         function updateVerificationStatus() {
@@ -5624,9 +5656,8 @@
         }
 
         // ============================================================
-        // VERIFICATION (مع دعم التجديد التلقائي)
+        // VERIFICATION (مع دعم التجديد التلقائي والشارات)
         // ============================================================
-        // ===== NEW: Toggle Auto-Renew =====
         async function toggleAutoRenew() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
             const toggle = document.getElementById('autoRenewToggle');
@@ -5646,7 +5677,6 @@
             }
         }
 
-        // ===== NEW: Check and Renew Verification Automatically =====
         async function checkAndRenewVerification() {
             if (!userData) return;
             if (!userData.autoRenewVerification) return;
@@ -5656,7 +5686,6 @@
             if (!expiry) return;
             const now = new Date();
             const diff = expiry - now;
-            // إذا تبقى أقل من يوم واحد، قم بالتجديد
             if (diff < 24 * 60 * 60 * 1000 && diff > 0) {
                 try {
                     const price = 100;
@@ -5708,7 +5737,6 @@
                     updateVerificationUI();
                 } catch (e) {
                     console.error('❌ فشل التجديد التلقائي:', e);
-                    // إذا فشل، نوقف التبديل لتجنب المحاولات المتكررة
                     if (userData.autoRenewVerification) {
                         await db.collection('users').doc(userData.telegramId).update({
                             autoRenewVerification: false
@@ -5740,7 +5768,6 @@
                 const expiryDate = expiry.toDate ? expiry.toDate() : new Date(expiry);
                 const now = new Date();
                 if (expiryDate > now) {
-                    // Active
                     const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
                     if (container) container.style.display = 'flex';
                     btn.innerHTML = `<i class="fas fa-sync-alt"></i> تجديد يدوي (متبقي ${daysLeft} يوم)`;
@@ -5763,7 +5790,6 @@
                         priceSpan.style.color = '#2563eb';
                     }
                 } else {
-                    // Expired
                     if (container) container.style.display = 'none';
                     btn.innerHTML = '<i class="fas fa-clock"></i> انتهى - جدد الآن';
                     btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
@@ -5778,7 +5804,6 @@
                     }
                 }
             } else {
-                // Not verified
                 if (container) container.style.display = 'none';
                 btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
                 btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
@@ -5793,6 +5818,7 @@
                 }
             }
             updateVerificationStatus();
+            updateVerificationBadges();
         }
 
         async function checkVerificationExpiry() {
@@ -5809,6 +5835,7 @@
                     showToast('⏳ انتهت صلاحية التوثيق، يرجى التجديد');
                     updateVerificationUI();
                     updateVerificationStatus();
+                    updateVerificationBadges();
                 } catch (e) { console.error(e); }
             }
         }
@@ -5883,6 +5910,7 @@
                 await updateUI();
                 updateVerificationUI();
                 updateVerificationStatus();
+                updateVerificationBadges();
             } catch (e) { showToast('❌ ' + (e.message || 'حدث خطأ'));
                 console.error(e);
                 closeVerificationConfirmModal(); }
@@ -6045,10 +6073,8 @@
             }
             updateSwapUI();
             calculateSwapResult();
-            // ربط حدث حساب الرسوم
             const wd = document.getElementById('withdrawAmount');
             if (wd) wd.addEventListener('input', calculateWithdrawFee);
-            // ربط حدث التبرع
             const donationInput = document.getElementById('donationAmountInput');
             const donationSlider = document.getElementById('donationRangeSlider');
             if (donationInput && donationSlider) {
@@ -6064,7 +6090,6 @@
                     updateDonationUI();
                 });
             }
-            // ربط أحداث المودال الاستثماري
             const modalInput = document.getElementById('modalAmountInput');
             const modalSlider = document.getElementById('modalRangeSlider');
             if (modalInput && modalSlider) {
@@ -6082,9 +6107,8 @@
             }
         });
 
-        console.log('🚀 Crynova - تم التحديث مع ميزة التجديد التلقائي للتوثيق');
-        console.log('✅ يمكن للمستخدم تفعيل/إلغاء التجديد التلقائي من صفحة التوثيق');
-        console.log('🔄 سيتم التجديد التلقائي قبل انتهاء الصلاحية بيوم واحد (إذا كان الرصيد كافياً)');
+        console.log('🚀 Crynova - تم إضافة شارة التوثيق الزرقاء على صورة الملف الشخصي وفي الهيدر');
+        console.log('✅ تظهر الشارة فقط عند تفعيل التوثيق وصلاحية سارية');
     </script>
 
 </body>
