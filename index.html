@@ -1191,7 +1191,7 @@
         }
 
         /* ============================================================
-           بطاقة توثيق الحساب (Verification Card)
+           بطاقة توثيق الحساب (Verification Card) - تم التعديل
            ============================================================ */
         .verify-card {
             max-width: 450px;
@@ -1318,6 +1318,31 @@
             width: 1.2rem;
         }
 
+        /* ===== NEW: Auto-Renew Toggle Row ===== */
+        .auto-renew-row {
+            display: none;
+            /* hidden by default, shown via JS */
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-input);
+            padding: 10px 14px;
+            border-radius: 14px;
+            margin: 0 0 16px 0;
+            border: 1px solid var(--border);
+        }
+        .auto-renew-row .label {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .auto-renew-row .label i {
+            color: var(--accent);
+            font-size: 16px;
+        }
+
         .verify-card .vc-btn {
             width: 100%;
             padding: 0.8rem 0;
@@ -1387,6 +1412,10 @@
             .verify-card .vc-btn {
                 font-size: 0.95rem;
                 padding: 0.7rem 0;
+            }
+            .auto-renew-row {
+                padding: 8px 12px;
+                font-size: 13px;
             }
         }
 
@@ -3522,6 +3551,7 @@
                     </div>
                 </div>
 
+                <!-- ===== VERIFICATION TAB (تم التعديل) ===== -->
                 <div class="profile-tab-panel" id="panel-verification">
                     <div class="verify-card">
                         <div class="vc-stripe"></div>
@@ -3541,10 +3571,23 @@
                                 <li><i class="fas fa-check-circle"></i> حماية إضافية للحساب</li>
                                 <li><i class="fas fa-check-circle"></i> ظهور مميز للملف الشخصي</li>
                             </ul>
-                            <button class="vc-btn" onclick="requestVerification()">
+
+                            <!-- ===== NEW: Auto-Renew Toggle (مخفي افتراضياً) ===== -->
+                            <div class="auto-renew-row" id="autoRenewContainer">
+                                <span class="label">
+                                    <i class="fas fa-sync-alt"></i> تفعيل التجديد التلقائي
+                                </span>
+                                <label style="position:relative; display:inline-block; width:44px; height:24px;">
+                                    <input type="checkbox" id="autoRenewToggle" onchange="toggleAutoRenew()" style="opacity:0; width:0; height:0;">
+                                    <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:var(--border); border-radius:24px; transition:0.3s;"></span>
+                                    <span style="position:absolute; content:''; height:18px; width:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.3s; box-shadow:var(--shadow-sm);" id="autoRenewSlider"></span>
+                                </label>
+                            </div>
+
+                            <button class="vc-btn" id="verificationActionBtn" onclick="requestVerification()">
                                 <i class="fas fa-badge-check"></i> وثّق حسابي الآن
                             </button>
-                            <p class="vc-note">* اشتراك شهري قابل للتجديد</p>
+                            <p class="vc-note">* اشتراك شهري قابل للتجديد (يدوياً أو تلقائياً)</p>
                         </div>
                     </div>
                 </div>
@@ -3728,7 +3771,6 @@
                     <div class="number" id="modalTotalReturn">300.00</div>
                     <div class="label">إجمالي الأرباح (شهرياً)</div>
                 </div>
-                <!-- تم إزالة مكافأة أول استثمار -->
             </div>
             <div class="modal-balance-warning" id="modalBalanceStatus">
                 <i class="fas fa-wallet"></i>
@@ -3743,21 +3785,17 @@
         </div>
     </div>
 
-    <!-- ===== DONATION MODAL (نافذة التبرع المخصصة) ===== -->
+    <!-- ===== DONATION MODAL ===== -->
     <div class="modal-overlay donation-modal" id="donationModal">
         <div class="modal-card">
             <div class="modal-header">
                 <h3 style="color:#10b981;"><i class="fas fa-hand-holding-heart"></i> تبرع للزكاة</h3>
                 <button class="close-modal" onclick="closeDonationModal()">&times;</button>
             </div>
-
-            <!-- عرض الرصيد المتاح -->
             <div class="donation-balance">
                 <span class="label"><i class="fas fa-wallet"></i> رصيدك المتاح</span>
                 <span class="value" id="donationUserBalance">0.00 <span style="font-size:14px;font-weight:600;">DZD</span></span>
             </div>
-
-            <!-- حقل إدخال المبلغ -->
             <div class="modal-amount-section">
                 <label>المبلغ الذي تريد التبرع به</label>
                 <div class="amount-input-wrapper">
@@ -3771,14 +3809,10 @@
                     <span id="donationMaxDisplay">100,000</span>
                 </div>
             </div>
-
-            <!-- تحذير الرصيد غير الكافي -->
             <div class="modal-balance-warning" id="donationBalanceStatus">
                 <i class="fas fa-info-circle"></i>
                 <span>أدخل المبلغ المناسب</span>
             </div>
-
-            <!-- الأزرار -->
             <div class="modal-actions">
                 <button class="btn btn-outline" onclick="closeDonationModal()">إلغاء</button>
                 <button class="btn btn-success" id="donationConfirmBtn" onclick="confirmDonation()" style="background:linear-gradient(135deg,#10b981,#059669);">
@@ -3795,16 +3829,13 @@
                 <h3><i class="fas fa-check-circle" style="color:var(--success);"></i> تأكيد الإيداع</h3>
                 <button class="close-modal" onclick="closeDepositConfirmModal()">&times;</button>
             </div>
-
             <div class="confirm-details" id="confirmDetails">
                 <!-- سيتم ملء البيانات بواسطة JavaScript -->
             </div>
-
             <div class="confirm-warning">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>يرجى التأكد من صحة البيانات قبل تأكيد الإيداع</span>
             </div>
-
             <div class="modal-actions">
                 <button class="btn btn-outline" onclick="closeDepositConfirmModal()">
                     <i class="fas fa-times"></i> إلغاء
@@ -3823,16 +3854,13 @@
                 <h3><i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i> تأكيد السحب</h3>
                 <button class="close-modal" onclick="closeWithdrawConfirmModal()">&times;</button>
             </div>
-
             <div class="confirm-details" id="withdrawConfirmDetails">
                 <!-- سيتم ملء البيانات بواسطة JavaScript -->
             </div>
-
             <div class="confirm-warning">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>يرجى التأكد من صحة البيانات قبل تأكيد السحب</span>
             </div>
-
             <div class="modal-actions">
                 <button class="btn btn-outline" onclick="closeWithdrawConfirmModal()">
                     <i class="fas fa-times"></i> إلغاء
@@ -3973,11 +4001,10 @@
         let zakatUnsubscribe = null;
         let subscriptionRemainingInterval = null;
 
-        // متغيرات لتخزين بيانات الإيداع والسحب المؤقتة قبل التأكيد
         let pendingDepositData = null;
         let pendingWithdrawData = null;
         let pendingSubscriptionData = null;
-        let pendingVerificationData = null; // للتوثيق
+        let pendingVerificationData = null;
 
         const POSTAL_ACCOUNT = '00799999002385412178';
         const BINANCE_WALLET = '1143951718';
@@ -3986,20 +4013,11 @@
         const MIN_WITHDRAW_USDT = 10;
         const MIN_DEPOSIT = 2000;
         const MIN_DEPOSIT_USDT = 10;
-        const FIRST_BONUS_PERCENT = 7; // لم يعد مستخدماً ولكن تركته للتوافق
 
-        // ============================================================
-        // أسعار الصرف الجديدة
-        // ============================================================
-        const RATE_USDT_TO_DZD = 243;   // 1 USDT = 243 DZD
-        const RATE_DZD_TO_USDT = 263;   // 263 DZD = 1 USDT
-
-        // اتجاه التبادل: true = DZD -> USDT, false = USDT -> DZD
+        const RATE_USDT_TO_DZD = 243;
+        const RATE_DZD_TO_USDT = 263;
         let swapDirection = true;
 
-        // ============================================================
-        // DEFAULT INVESTMENT PLANS (تم التعديل حسب المواصفات الجديدة)
-        // ============================================================
         const DEFAULT_INVEST_PLANS = [{
             id: 'plan_basic',
             type: 'investment',
@@ -4062,49 +4080,23 @@
         }
 
         // ============================================================
-        // ZAKAT - ربط صندوق الزكاة بقاعدة البيانات (مشترك واحد)
+        // ZAKAT
         // ============================================================
         function loadZakatData() {
             const zakatRef = db.collection('zakat').doc('statistics');
-
-            if (zakatUnsubscribe) {
-                zakatUnsubscribe();
-                zakatUnsubscribe = null;
-            }
-
+            if (zakatUnsubscribe) { zakatUnsubscribe();
+                zakatUnsubscribe = null; }
             zakatUnsubscribe = zakatRef.onSnapshot((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    updateZakatUI(data);
-                    console.log('✅ تحديث بيانات الزكاة:', data);
-                } else {
-                    const defaultData = {
-                        totalDonations: 0,
-                        distributed: 0,
-                        remaining: 0,
-                        distributionPercentage: 0,
-                        donorsCount: 0,
-                        beneficiariesCount: 0,
-                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-                    zakatRef.set(defaultData)
-                        .then(() => {
-                            console.log('✅ تم إنشاء مستند الزكاة بالقيم الافتراضية');
-                            updateZakatUI(defaultData);
-                        })
-                        .catch((err) => console.error('❌ خطأ في إنشاء مستند الزكاة:', err));
+                if (doc.exists) { updateZakatUI(doc.data()); } else {
+                    const defaultData = { totalDonations: 0, distributed: 0, remaining: 0, distributionPercentage: 0,
+                        donorsCount: 0, beneficiariesCount: 0 };
+                    zakatRef.set(defaultData).catch(e => console.error(e));
+                    updateZakatUI(defaultData);
                 }
             }, (error) => {
-                console.error('❌ خطأ في الاستماع لبيانات الزكاة:', error);
-                const fallbackData = {
-                    totalDonations: 0,
-                    distributed: 0,
-                    remaining: 0,
-                    distributionPercentage: 0,
-                    donorsCount: 0,
-                    beneficiariesCount: 0
-                };
-                updateZakatUI(fallbackData);
+                console.error(error);
+                updateZakatUI({ totalDonations: 0, distributed: 0, remaining: 0, distributionPercentage: 0,
+                    donorsCount: 0, beneficiariesCount: 0 });
             });
         }
 
@@ -4112,76 +4104,55 @@
             setHTML('zakatTotalDonations', `${data.totalDonations.toLocaleString()} <span class="small-text">دج</span>`);
             setHTML('zakatDistributed', `${data.distributed.toLocaleString()} <span class="small-text">دج</span>`);
             setHTML('zakatRemaining', `${data.remaining.toLocaleString()} <span class="small-text">دج</span>`);
-
-            const percentage = data.distributionPercentage || 0;
-            const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
-            const progressBarEl = getEl('zakatProgressBar');
-            if (progressBarEl) progressBarEl.style.width = `${clampedPercentage}%`;
-            setText('zakatProgressPercent', `${clampedPercentage}%`);
-            setText('zakatRemainingPercent', `${100 - clampedPercentage}%`);
-
+            const p = Math.min(Math.max(data.distributionPercentage || 0, 0), 100);
+            const bar = getEl('zakatProgressBar');
+            if (bar) bar.style.width = `${p}%`;
+            setText('zakatProgressPercent', `${p}%`);
+            setText('zakatRemainingPercent', `${100 - p}%`);
             setText('zakatDonorsCount', data.donorsCount || 0);
             setText('zakatBeneficiariesCount', data.beneficiariesCount || 0);
         }
 
         // ============================================================
-        // DONATION MODAL FUNCTIONS
+        // DONATION MODAL
         // ============================================================
         function openDonationModal() {
-            if (!userData) {
-                showToast('يرجى تسجيل الدخول');
-                return;
-            }
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
             if (isModalOpen) return;
             isModalOpen = true;
-
             const balance = userData.wallets?.dzd || 0;
             setText('donationUserBalance', balance.toFixed(2));
-
             const input = document.getElementById('donationAmountInput');
             const slider = document.getElementById('donationRangeSlider');
             const maxAmount = Math.max(balance, 1000);
-
             input.min = 1;
             input.max = maxAmount;
             input.step = 100;
             input.value = Math.min(100, maxAmount);
-
             slider.min = 1;
             slider.max = maxAmount;
             slider.step = 100;
             slider.value = Math.min(100, maxAmount);
-
             setText('donationMaxDisplay', maxAmount.toLocaleString());
-
             updateDonationUI();
-
             const modal = document.getElementById('donationModal');
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
-
-            modal.onclick = function(e) {
-                if (e.target === this) closeDonationModal();
-            };
+            modal.onclick = function(e) { if (e.target === this) closeDonationModal(); };
         }
 
         function closeDonationModal() {
-            const modal = document.getElementById('donationModal');
-            modal.classList.remove('active');
+            document.getElementById('donationModal').classList.remove('active');
             document.body.style.overflow = '';
             isModalOpen = false;
         }
 
         function adjustDonationAmount(change, event) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
+            if (event) { event.preventDefault();
+                event.stopPropagation(); }
             const input = document.getElementById('donationAmountInput');
             let val = parseFloat(input.value) || 0;
-            const min = parseFloat(input.min) || 0;
-            const max = parseFloat(input.max) || 0;
-            val = Math.max(min, Math.min(max, val + change));
+            val = Math.max(parseFloat(input.min) || 0, Math.min(parseFloat(input.max) || 0, val + change));
             const step = parseFloat(input.step) || 1;
             val = Math.round(val / step) * step;
             input.value = val;
@@ -4195,82 +4166,40 @@
             const balance = userData.wallets?.dzd || 0;
             const statusEl = document.getElementById('donationBalanceStatus');
             const confirmBtn = document.getElementById('donationConfirmBtn');
-
             if (amount > balance) {
                 statusEl.className = 'modal-balance-warning insufficient';
                 statusEl.innerHTML =
                     `<i class="fas fa-exclamation-triangle"></i> <span>رصيد غير كافٍ! المتاح: <strong>${balance.toFixed(2)}</strong> DZD</span>`;
                 confirmBtn.disabled = true;
                 confirmBtn.style.opacity = '0.5';
-                confirmBtn.style.cursor = 'not-allowed';
             } else if (amount <= 0) {
                 statusEl.className = 'modal-balance-warning';
-                statusEl.innerHTML =
-                    `<i class="fas fa-info-circle"></i> <span>أدخل مبلغاً صحيحاً للتبرع</span>`;
+                statusEl.innerHTML = `<i class="fas fa-info-circle"></i> <span>أدخل مبلغاً صحيحاً للتبرع</span>`;
                 confirmBtn.disabled = true;
                 confirmBtn.style.opacity = '0.5';
-                confirmBtn.style.cursor = 'not-allowed';
             } else {
                 statusEl.className = 'modal-balance-warning';
                 statusEl.innerHTML =
                     `<i class="fas fa-check-circle" style="color:#10b981;"></i> <span>ستتبرع بـ <strong>${amount.toFixed(2)}</strong> DZD من رصيدك</span>`;
                 confirmBtn.disabled = false;
                 confirmBtn.style.opacity = '1';
-                confirmBtn.style.cursor = 'pointer';
             }
         }
 
-        // ربط أحداث الإدخال
-        document.addEventListener('DOMContentLoaded', function() {
-            const input = document.getElementById('donationAmountInput');
-            const slider = document.getElementById('donationRangeSlider');
-
-            if (input && slider) {
-                input.addEventListener('input', function() {
-                    let val = parseFloat(this.value) || 0;
-                    const min = parseFloat(this.min);
-                    const max = parseFloat(this.max);
-                    if (val < min) val = min;
-                    if (val > max) val = max;
-                    slider.value = val;
-                    updateDonationUI();
-                });
-
-                slider.addEventListener('input', function() {
-                    const val = parseFloat(this.value);
-                    input.value = val;
-                    updateDonationUI();
-                });
-            }
-        });
-
-        // ============================================================
-        // CONFIRM DONATION (تم إزالة التأكيد الإضافي)
-        // ============================================================
         async function confirmDonation() {
-            if (!userData) {
-                showToast('يرجى تسجيل الدخول');
-                return;
-            }
-
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
             const input = document.getElementById('donationAmountInput');
             const amount = parseFloat(input.value) || 0;
             const balance = userData.wallets?.dzd || 0;
-
-            if (amount <= 0 || amount > balance) {
-                showToast('المبلغ غير صحيح أو يتجاوز الرصيد');
-                return;
-            }
-
+            if (amount <= 0 || amount > balance) { showToast('المبلغ غير صحيح أو يتجاوز الرصيد'); return; }
             try {
-                // 1. خصم من المستخدم
                 await db.runTransaction(async (t) => {
-                    const userRef = db.collection('users').doc(userData.telegramId);
-                    const doc = await t.get(userRef);
-                    if (!doc.exists) throw new Error('مستخدم غير موجود');
-                    const currentBalance = doc.data().wallets?.dzd || 0;
-                    if (currentBalance < amount) throw new Error('رصيد غير كاف');
-                    t.update(userRef, {
+                    const ref = db.collection('users').doc(userData.telegramId);
+                    const doc = await t.get(ref);
+                    if (!doc.exists) throw new Error('غير موجود');
+                    const curr = doc.data().wallets?.dzd || 0;
+                    if (curr < amount) throw new Error('رصيد غير كاف');
+                    t.update(ref, {
                         'wallets.dzd': firebase.firestore.FieldValue.increment(-amount),
                         'transactions': firebase.firestore.FieldValue.arrayUnion({
                             type: 'donation',
@@ -4282,48 +4211,29 @@
                         })
                     });
                 });
-
-                // 2. تحديث الصندوق المشترك
-                const zakatRef = db.collection('zakat').doc('statistics');
+                const zRef = db.collection('zakat').doc('statistics');
                 await db.runTransaction(async (t) => {
-                    const doc = await t.get(zakatRef);
+                    const doc = await t.get(zRef);
                     if (!doc.exists) {
-                        t.set(zakatRef, {
-                            totalDonations: amount,
-                            distributed: 0,
-                            remaining: amount,
-                            distributionPercentage: 0,
-                            donorsCount: 1,
-                            beneficiariesCount: 0,
-                            lastUpdated: new Date()
-                        });
+                        t.set(zRef, { totalDonations: amount, distributed: 0, remaining: amount,
+                            distributionPercentage: 0, donorsCount: 1, beneficiariesCount: 0,
+                            lastUpdated: new Date() });
                     } else {
-                        const data = doc.data();
-                        const newTotal = (data.totalDonations || 0) + amount;
-                        const newRemaining = (data.remaining || 0) + amount;
-                        let newDonorsCount = data.donorsCount || 0;
-                        if (!userData.hasDonated) {
-                            newDonorsCount += 1;
-                            await db.collection('users').doc(userData.telegramId).update({ hasDonated: true });
-                        }
-                        const newPercentage = data.distributed > 0 ? (data.distributed / newTotal) * 100 : 0;
-                        t.update(zakatRef, {
-                            totalDonations: newTotal,
-                            remaining: newRemaining,
-                            distributionPercentage: newPercentage,
-                            donorsCount: newDonorsCount,
-                            lastUpdated: new Date()
-                        });
+                        const d = doc.data();
+                        const newTotal = (d.totalDonations || 0) + amount;
+                        let donors = d.donorsCount || 0;
+                        if (!userData.hasDonated) { donors += 1;
+                            await db.collection('users').doc(userData.telegramId).update({ hasDonated: true }); }
+                        const p = d.distributed > 0 ? (d.distributed / newTotal) * 100 : 0;
+                        t.update(zRef, { totalDonations: newTotal, remaining: (d.remaining || 0) + amount,
+                            distributionPercentage: p, donorsCount: donors, lastUpdated: new Date() });
                     }
                 });
-
                 showToast(`✅ تم التبرع بمبلغ ${amount.toFixed(2)} DZD بنجاح!`);
                 closeDonationModal();
                 await updateUI();
-            } catch (e) {
-                showToast('❌ ' + (e.message || 'حدث خطأ'));
-                console.error(e);
-            }
+            } catch (e) { showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e); }
         }
 
         // ============================================================
@@ -4331,40 +4241,27 @@
         // ============================================================
         async function authUser() {
             const tgUser = getTelegramUser();
-            if (!tgUser) {
-                console.error('❌ لا يمكن العثور على مستخدم Telegram');
-                return false;
-            }
-
+            if (!tgUser) { console.error('❌ لا يمكن العثور على مستخدم Telegram'); return false; }
             const telegramId = tgUser.id.toString();
-
             try {
                 const userRef = db.collection('users').doc(telegramId);
                 const docSnap = await userRef.get();
-
                 if (docSnap.exists) {
                     userData = { telegramId: telegramId, ...docSnap.data() };
                     const displayName = userData.displayName || tgUser.first_name || 'مستخدم';
                     const username = userData.username || tgUser.username || '';
                     const photoURL = userData.photoURL || tgUser.photo_url || '';
                     setLocalUserInfo(displayName, username, photoURL);
-                    console.log('✅ مرحباً بعودتك,', displayName);
-
-                    // التحقق من حالة الحظر (banned أو disabled)
                     if (userData.status === 'banned' || userData.status === 'disabled') {
-                        showBannedScreen(userData.bannedReason || userData.disabledReason || 'مخالفة قوانين وشروط استخدام المنصة');
+                        showBannedScreen(userData.bannedReason || userData.disabledReason ||
+                            'مخالفة قوانين وشروط استخدام المنصة');
                         return true;
-                    }
-                    // إذا كان restricted، نتحقق في الواجهة لكن لا نمنع الوصول الكامل
-                    if (userData.status === 'restricted') {
-                        console.log('⚠️ الحساب مقيد (restricted) - تقييد الإيداع والسحب');
                     }
                 } else {
                     const displayName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
                     const username = tgUser.username || '';
                     const photoURL = tgUser.photo_url ||
                         `https://ui-avatars.com/api/?name=${displayName || 'U'}&background=6c5ce7&color=fff&size=128`;
-
                     const newUser = {
                         telegramId: telegramId,
                         joinDate: firebase.firestore.FieldValue.serverTimestamp(),
@@ -4372,17 +4269,8 @@
                         status: 'active',
                         referrer: null,
                         referrerLevel2: null,
-                        wallets: {
-                            main: 0,
-                            reward: 0,
-                            referral: 0,
-                            locked: 0,
-                            dzd: 0,
-                            dzdReward: 0,
-                            dzdReferral: 0,
-                            dzdLocked: 0,
-                            usdt: 0
-                        },
+                        wallets: { main: 0, reward: 0, referral: 0, locked: 0, dzd: 0, dzdReward: 0, dzdReferral: 0,
+                            dzdLocked: 0, usdt: 0 },
                         investments: [],
                         totalInvested: 0,
                         totalInvestmentReturns: 0,
@@ -4390,41 +4278,30 @@
                         referrals: [],
                         deposits: [],
                         withdrawals: [],
-                        miningData: {
-                            totalReferrals: 0,
-                            totalReferralsLevel2: 0
-                        },
+                        miningData: { totalReferrals: 0, totalReferralsLevel2: 0 },
                         lastDailyDistribution: null,
-                        subscription: {
-                            plan: null,
-                            startDate: null,
-                            endDate: null,
-                            status: 'inactive'
-                        },
+                        subscription: { plan: null, startDate: null, endDate: null, status: 'inactive' },
                         verified: false,
                         verificationExpiry: null,
                         hasDonated: false,
                         bannedReason: null,
-                        restrictedReason: null // سبب التقييد
+                        restrictedReason: null,
+                        // ===== NEW: Auto-Renew Setting =====
+                        autoRenewVerification: false
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
                     setLocalUserInfo(displayName, username, photoURL);
-                    console.log('✅ تم إنشاء حساب جديد:', displayName);
                 }
-
                 if (unsubscribeUser) unsubscribeUser();
                 unsubscribeUser = db.collection('users').doc(telegramId).onSnapshot((doc) => {
                     if (doc.exists) {
                         userData = { telegramId: doc.id, ...doc.data() };
-                        // التحقق من الحظر الكامل
                         if (userData.status === 'banned' || userData.status === 'disabled') {
-                            showBannedScreen(userData.bannedReason || userData.disabledReason || 'مخالفة قوانين وشروط استخدام المنصة');
+                            showBannedScreen(userData.bannedReason || userData.disabledReason ||
+                                'مخالفة قوانين وشروط استخدام المنصة');
                             return;
-                        } else {
-                            hideBannedScreen();
-                        }
-                        // تحديث واجهة التقييد
+                        } else { hideBannedScreen(); }
                         updateRestrictedUI();
                         updateUI();
                         renderTransactions(userData.transactions || []);
@@ -4435,10 +4312,10 @@
                         updateSubscriptionUI();
                         updateVerificationUI();
                         updateSwapBalances();
-                        console.log('✅ تحديث لحظي للبيانات');
+                        // ===== NEW: Check auto-renewal on any update =====
+                        checkAndRenewVerification();
                     }
                 });
-
                 await loadPlans();
                 updateUI();
                 startInvestmentReturns();
@@ -4450,49 +4327,24 @@
                 updateSubscriptionUI();
                 updateVerificationUI();
                 updateSwapBalances();
-
                 loadZakatData();
-
+                // ===== NEW: Check auto-renewal on load =====
+                await checkAndRenewVerification();
                 return true;
-
-            } catch (e) {
-                console.error('❌ خطأ في المصادقة:', e);
-                return false;
-            }
+            } catch (e) { console.error('❌ خطأ في المصادقة:', e); return false; }
         }
 
         // ============================================================
-        // RESTRICTED UI FUNCTIONS
-        // ============================================================
-        function updateRestrictedUI() {
-            const isRestricted = userData && userData.status === 'restricted';
-            const depositWarning = document.getElementById('depositRestrictedWarning');
-            const withdrawWarning = document.getElementById('withdrawRestrictedWarning');
-
-            if (depositWarning) {
-                depositWarning.style.display = isRestricted ? 'flex' : 'none';
-            }
-            if (withdrawWarning) {
-                withdrawWarning.style.display = isRestricted ? 'flex' : 'none';
-            }
-
-            // تعطيل/تفعيل أزرار الإيداع والسحب (اختياري - لكن الأفضل تركها لكن نمنع التنفيذ)
-            // سنمنع التنفيذ في الدوال نفسها.
-        }
-
-        // ============================================================
-        // BANNED ACCOUNT FUNCTIONS
+        // BANNED SCREEN
         // ============================================================
         function showBannedScreen(reason) {
             const overlay = document.getElementById('bannedOverlay');
             const reasonEl = document.getElementById('bannedReasonText');
             if (reasonEl) reasonEl.textContent = reason || 'مخالفة قوانين وشروط استخدام المنصة';
-            if (overlay) {
-                overlay.style.display = 'flex';
+            if (overlay) { overlay.style.display = 'flex';
                 document.querySelector('.app-container').style.display = 'none';
                 document.querySelector('.bottom-nav').style.display = 'none';
-                document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-            }
+                document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
         }
 
         function hideBannedScreen() {
@@ -4502,12 +4354,21 @@
             document.querySelector('.bottom-nav').style.display = 'flex';
         }
 
-        function contactSupport() {
-            window.open('https://t.me/Crynova_support', '_blank');
+        function contactSupport() { window.open('https://t.me/Crynova_support', '_blank'); }
+
+        // ============================================================
+        // RESTRICTED UI
+        // ============================================================
+        function updateRestrictedUI() {
+            const isRestricted = userData && userData.status === 'restricted';
+            const dw = document.getElementById('depositRestrictedWarning');
+            const ww = document.getElementById('withdrawRestrictedWarning');
+            if (dw) dw.style.display = isRestricted ? 'flex' : 'none';
+            if (ww) ww.style.display = isRestricted ? 'flex' : 'none';
         }
 
         // ============================================================
-        // HELPERS (formatDate, formatDateTime, etc.)
+        // HELPERS
         // ============================================================
         function formatDate(timestamp) {
             if (!timestamp) return '--';
@@ -4524,71 +4385,37 @@
         }
 
         function getStatusBadge(status) {
-            const map = {
-                'active': 'status-success',
-                'pending': 'status-pending',
-                'completed': 'status-success',
-                'confirmed': 'status-success',
-                'rejected': 'status-danger',
-                'failed': 'status-danger',
-                'processing': 'status-pending',
-                'inactive': 'status-danger'
-            };
+            const map = { 'active': 'status-success', 'pending': 'status-pending', 'completed': 'status-success',
+                'confirmed': 'status-success', 'rejected': 'status-danger', 'failed': 'status-danger',
+                'processing': 'status-pending', 'inactive': 'status-danger' };
             return map[status] || 'status-info';
         }
 
         function getStatusText(status) {
-            const map = {
-                'active': 'نشط',
-                'pending': 'قيد الانتظار',
-                'completed': 'مكتمل',
-                'confirmed': 'مؤكد',
-                'rejected': 'مرفوض',
-                'failed': 'فشل',
-                'processing': 'قيد المعالجة',
-                'inactive': 'غير نشط'
-            };
+            const map = { 'active': 'نشط', 'pending': 'قيد الانتظار', 'completed': 'مكتمل', 'confirmed': 'مؤكد',
+                'rejected': 'مرفوض', 'failed': 'فشل', 'processing': 'قيد المعالجة', 'inactive': 'غير نشط' };
             return map[status] || status;
         }
 
         function getTransactionIcon(type) {
-            const map = {
-                'deposit': 'fa-arrow-down text-success',
-                'withdraw': 'fa-arrow-up text-danger',
-                'investment': 'fa-chart-line text-gold',
-                'investment_return': 'fa-coins text-gold',
-                'referral_bonus': 'fa-users text-accent',
-                'reward': 'fa-gift text-warning',
-                'first_investment_bonus': 'fa-gift text-gold',
-                'donation': 'fa-hand-holding-heart text-success',
-                'swap': 'fa-exchange-alt text-usdt'
-            };
+            const map = { 'deposit': 'fa-arrow-down text-success', 'withdraw': 'fa-arrow-up text-danger',
+                'investment': 'fa-chart-line text-gold', 'investment_return': 'fa-coins text-gold',
+                'referral_bonus': 'fa-users text-accent', 'reward': 'fa-gift text-warning',
+                'first_investment_bonus': 'fa-gift text-gold', 'donation': 'fa-hand-holding-heart text-success',
+                'swap': 'fa-exchange-alt text-usdt' };
             return map[type] || 'fa-circle text-muted';
         }
 
         function getTransactionLabel(type) {
-            const map = {
-                'deposit': 'إيداع',
-                'withdraw': 'سحب',
-                'investment': 'استثمار',
-                'investment_return': 'أرباح استثمار',
-                'referral_bonus': 'عمولة إحالة',
-                'reward': 'مكافأة',
-                'first_investment_bonus': 'مكافأة أول استثمار',
-                'donation': 'تبرع',
-                'swap': 'تبادل عملات'
-            };
+            const map = { 'deposit': 'إيداع', 'withdraw': 'سحب', 'investment': 'استثمار',
+                'investment_return': 'أرباح استثمار', 'referral_bonus': 'عمولة إحالة', 'reward': 'مكافأة',
+                'first_investment_bonus': 'مكافأة أول استثمار', 'donation': 'تبرع', 'swap': 'تبادل عملات' };
             return map[type] || type;
         }
 
         function copyText(text) {
-            if (!text || text === 'جاري التحميل...') {
-                showToast('لا يوجد نص للنسخ');
-                return;
-            }
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => showToast('تم النسخ'));
-            } else {
+            if (!text || text === 'جاري التحميل...') { showToast('لا يوجد نص للنسخ'); return; }
+            if (navigator.clipboard) { navigator.clipboard.writeText(text).then(() => showToast('تم النسخ')); } else {
                 const ta = document.createElement('textarea');
                 ta.value = text;
                 document.body.appendChild(ta);
@@ -4605,10 +4432,8 @@
             copyText(input.value);
             btn.classList.add('copied');
             btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
-            setTimeout(() => {
-                btn.classList.remove('copied');
-                btn.innerHTML = '<i class="fas fa-copy"></i> نسخ';
-            }, 2000);
+            setTimeout(() => { btn.classList.remove('copied');
+                btn.innerHTML = '<i class="fas fa-copy"></i> نسخ'; }, 2000);
         }
 
         function showToast(msg) {
@@ -4646,9 +4471,7 @@
             if (page === 'profile') updateProfileUI();
             if (page === 'investments') renderInvestments();
             if (page === 'packages') updateSwapBalances();
-            if (page === 'deposit' || page === 'withdraw') {
-                updateRestrictedUI();
-            }
+            if (page === 'deposit' || page === 'withdraw') updateRestrictedUI();
         }
 
         // ============================================================
@@ -4660,27 +4483,20 @@
             const name = localInfo.displayName || 'مستخدم';
             const initial = name.charAt(0).toUpperCase() || '?';
             const photoURL = localInfo.photoURL || '';
-
             document.querySelectorAll('#profileAvatar, #headerAvatar').forEach(el => {
                 if (photoURL && photoURL.startsWith('http')) {
                     el.style.backgroundImage = `url(${photoURL})`;
                     el.style.backgroundSize = 'cover';
                     el.textContent = '';
-                } else {
-                    el.textContent = initial;
-                    el.style.backgroundImage = '';
-                }
+                } else { el.textContent = initial;
+                    el.style.backgroundImage = ''; }
             });
-
             setText('profileName', name);
             setText('headerUserName', name);
-            setText('userLevelBadge', userData.level || 1);
             setText('profileLevel', userData.level || 1);
             setText('headerUserLevel', `المستوى ${userData.level || 1}`);
-
             const username = localInfo.username || userData.username || '';
             setText('profileTelegram', username ? `@${username}` : 'غير متاح');
-
             updateProfileUI();
             updateHomeUI();
             updateWalletUI();
@@ -4690,7 +4506,7 @@
             checkVerificationExpiry();
             updateSwapBalances();
             updateSubscriptionUI();
-            updateRestrictedUI(); // تحديث واجهة التقييد
+            updateRestrictedUI();
         }
 
         function updateProfileUI() {
@@ -4698,55 +4514,33 @@
             const localInfo = getLocalUserInfo();
             setText('profileTelegram', localInfo.username ? `@${localInfo.username}` : 'غير متاح');
             setText('profileJoinDate', formatDate(userData.joinDate));
-
             const refLink = document.getElementById('referralLink');
-            if (userData.telegramId) {
-                refLink.value = `https://t.me/Crynova_bot?start=${userData.telegramId}`;
-            } else {
-                refLink.value = 'جاري التحميل...';
-            }
+            if (userData.telegramId) { refLink.value = `https://t.me/Crynova_bot?start=${userData.telegramId}`; } else {
+                refLink.value = 'جاري التحميل...'; }
             updateVerificationStatus();
         }
 
-        // ===== دالة تحديث حالة التوثيق =====
         function updateVerificationStatus() {
             const el = document.getElementById('verificationStatus');
             if (!el) return;
-            if (!userData) {
-                el.textContent = '';
-                el.style.display = 'none';
-                return;
-            }
+            if (!userData) { el.textContent = '';
+                el.style.display = 'none'; return; }
             if (userData.verified && userData.verificationExpiry) {
-                const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
+                const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(
+                userData.verificationExpiry);
                 if (expiry > new Date()) {
                     el.textContent = '✅ تم التحقق منه';
-                    el.style.color = '#22c55e';
-                    el.style.backgroundColor = '#ecfdf5';
-                    el.style.padding = '2px 10px';
-                    el.style.borderRadius = '20px';
-                    el.style.display = 'inline-block';
-                    el.style.fontSize = '13px';
-                    el.style.fontWeight = '700';
+                    el.style.cssText =
+                        'color:#22c55e;background:#ecfdf5;padding:2px 10px;border-radius:20px;display:inline-block;font-size:13px;font-weight:700;';
                 } else {
                     el.textContent = '⏳ انتهى التوثيق - جدد الآن';
-                    el.style.color = '#b45309';
-                    el.style.backgroundColor = '#fef3c7';
-                    el.style.padding = '2px 10px';
-                    el.style.borderRadius = '20px';
-                    el.style.display = 'inline-block';
-                    el.style.fontSize = '13px';
-                    el.style.fontWeight = '700';
+                    el.style.cssText =
+                        'color:#b45309;background:#fef3c7;padding:2px 10px;border-radius:20px;display:inline-block;font-size:13px;font-weight:700;';
                 }
             } else {
                 el.textContent = '❌ غير موثق';
-                el.style.color = '#e17055';
-                el.style.backgroundColor = '#fde8e8';
-                el.style.padding = '2px 10px';
-                el.style.borderRadius = '20px';
-                el.style.display = 'inline-block';
-                el.style.fontSize = '13px';
-                el.style.fontWeight = '700';
+                el.style.cssText =
+                    'color:#e17055;background:#fde8e8;padding:2px 10px;border-radius:20px;display:inline-block;font-size:13px;font-weight:700;';
             }
         }
 
@@ -4762,10 +4556,10 @@
         function updateWalletUI() {
             if (!userData) return;
             const w = userData.wallets || {};
-            const main = w.dzd || 0;
-            const reward = w.dzdReward || 0;
-            const referral = w.dzdReferral || 0;
-            const locked = w.dzdLocked || 0;
+            const main = w.dzd || 0,
+                reward = w.dzdReward || 0,
+                referral = w.dzdReferral || 0,
+                locked = w.dzdLocked || 0;
             const total = main + reward + referral;
             setText('walletTotal', total.toFixed(2));
             setText('walletUsdt', (w.usdt || 0).toFixed(2));
@@ -4777,46 +4571,22 @@
 
         function updateReferralUI() {
             if (!userData) return;
-            const earnings = userData.wallets?.dzdReferral || 0;
-            const totalRefs = userData.miningData?.totalReferrals || 0;
-            setText('refEarnings', earnings.toFixed(2));
-            setText('refTotalReferrals', totalRefs);
-        }
-
-        // ===== تحديث الرصيد القابل للسحب حسب طريقة السحب =====
-        function updateWithdrawableBalance(method) {
-            if (!userData) return;
-            const w = userData.wallets || {};
-            let balance = 0;
-            if (method === 'baridi') {
-                balance = (w.dzd || 0) + (w.dzdReward || 0) + (w.dzdReferral || 0);
-            } else {
-                balance = w.usdt || 0;
-            }
-            setText('withdrawableBalance', balance.toFixed(2));
-
-            if (method === 'baridi') {
-                setText('withdrawMinAmount', `${MIN_WITHDRAW} DZD`);
-            } else {
-                setText('withdrawMinAmount', `${MIN_WITHDRAW_USDT} USDT`);
-            }
+            setText('refEarnings', (userData.wallets?.dzdReferral || 0).toFixed(2));
+            setText('refTotalReferrals', userData.miningData?.totalReferrals || 0);
         }
 
         // ============================================================
-        // SWAP FUNCTIONS (مع أسعار الصرف الجديدة - مع إخفاء سعر الصرف)
+        // SWAP
         // ============================================================
-        function toggleSwapDirection() {
-            swapDirection = !swapDirection;
+        function toggleSwapDirection() { swapDirection = !swapDirection;
             updateSwapUI();
-            calculateSwapResult();
-        }
+            calculateSwapResult(); }
 
         function updateSwapUI() {
             const fromLabel = document.getElementById('swapFromLabel');
             const toLabel = document.getElementById('swapToLabel');
             const inputCurrency = document.getElementById('swapInputCurrency');
             if (!fromLabel || !toLabel || !inputCurrency) return;
-
             if (swapDirection) {
                 fromLabel.textContent = 'DZD';
                 toLabel.textContent = 'USDT';
@@ -4835,7 +4605,6 @@
             const resultSpan = document.getElementById('swapResultValue');
             if (!input || !resultSpan) return;
             const amount = parseFloat(input.value) || 0;
-
             if (swapDirection) {
                 const usdt = amount / RATE_DZD_TO_USDT;
                 resultSpan.textContent = `${usdt.toFixed(4)} USDT`;
@@ -4849,67 +4618,44 @@
 
         function updateSwapBalances() {
             if (!userData) return;
-            const dzd = userData.wallets?.dzd || 0;
-            const usdt = userData.wallets?.usdt || 0;
-            setText('swapDzdBalance', dzd.toFixed(2));
-            setText('swapUsdtBalance', usdt.toFixed(2));
+            setText('swapDzdBalance', (userData.wallets?.dzd || 0).toFixed(2));
+            setText('swapUsdtBalance', (userData.wallets?.usdt || 0).toFixed(2));
         }
 
         async function executeSwap() {
-            if (!userData) {
-                showToast('يرجى تسجيل الدخول');
-                return;
-            }
-
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
             const input = document.getElementById('swapAmountInput');
             const amount = parseFloat(input.value) || 0;
-            if (amount <= 0) {
-                showToast('أدخل مبلغاً صحيحاً');
-                return;
-            }
-
+            if (amount <= 0) { showToast('أدخل مبلغاً صحيحاً'); return; }
             let fromCurrency, toCurrency, fromAmount, toAmount;
-
             if (swapDirection) {
                 fromCurrency = 'dzd';
                 toCurrency = 'usdt';
                 fromAmount = amount;
                 toAmount = amount / RATE_DZD_TO_USDT;
-                if (fromAmount > (userData.wallets?.dzd || 0)) {
-                    showToast('رصيد DZD غير كافٍ');
-                    return;
-                }
+                if (fromAmount > (userData.wallets?.dzd || 0)) { showToast('رصيد DZD غير كافٍ'); return; }
             } else {
                 fromCurrency = 'usdt';
                 toCurrency = 'dzd';
                 fromAmount = amount;
                 toAmount = amount * RATE_USDT_TO_DZD;
-                if (fromAmount > (userData.wallets?.usdt || 0)) {
-                    showToast('رصيد USDT غير كافٍ');
-                    return;
-                }
+                if (fromAmount > (userData.wallets?.usdt || 0)) { showToast('رصيد USDT غير كافٍ'); return; }
             }
-
-            if (!confirm(`تأكيد تبادل ${fromAmount.toFixed(2)} ${fromCurrency.toUpperCase()} إلى ${toAmount.toFixed(4)} ${toCurrency.toUpperCase()}؟`)) {
-                return;
-            }
-
+            if (!confirm(
+                    `تأكيد تبادل ${fromAmount.toFixed(2)} ${fromCurrency.toUpperCase()} إلى ${toAmount.toFixed(4)} ${toCurrency.toUpperCase()}؟`
+                    )) return;
             try {
                 const now = new Date();
                 const ref = db.collection('users').doc(userData.telegramId);
-
                 await db.runTransaction(async (t) => {
                     const doc = await t.get(ref);
                     if (!doc.exists) throw new Error('مستخدم غير موجود');
-
                     const wallets = doc.data().wallets || {};
                     if (fromCurrency === 'dzd' && (wallets.dzd || 0) < fromAmount) throw new Error('رصيد DZD غير كاف');
                     if (fromCurrency === 'usdt' && (wallets.usdt || 0) < fromAmount) throw new Error('رصيد USDT غير كاف');
-
                     const updates = {};
                     updates[`wallets.${fromCurrency}`] = firebase.firestore.FieldValue.increment(-fromAmount);
                     updates[`wallets.${toCurrency}`] = firebase.firestore.FieldValue.increment(toAmount);
-
                     updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
                         type: 'swap',
                         amount: fromAmount,
@@ -4917,48 +4663,23 @@
                         description: `تبادل ${fromAmount} ${fromCurrency.toUpperCase()} → ${toAmount.toFixed(4)} ${toCurrency.toUpperCase()}`,
                         timestamp: now,
                         status: 'completed',
-                        swapDetails: {
-                            from: fromCurrency,
-                            to: toCurrency,
-                            fromAmount: fromAmount,
-                            toAmount: toAmount,
-                            rateUsdtToDzd: RATE_USDT_TO_DZD,
-                            rateDzdToUsdt: RATE_DZD_TO_USDT
-                        }
+                        swapDetails: { from: fromCurrency, to: toCurrency, fromAmount: fromAmount,
+                            toAmount: toAmount, rateUsdtToDzd: RATE_USDT_TO_DZD,
+                        rateDzdToUsdt: RATE_DZD_TO_USDT }
                     });
-
                     t.update(ref, updates);
                 });
-
                 showToast(`✅ تم التبادل بنجاح!`);
                 await updateUI();
                 updateSwapBalances();
                 await loadTransactions();
-
-            } catch (e) {
-                showToast('❌ ' + (e.message || 'حدث خطأ'));
-                console.error(e);
-            }
+            } catch (e) { showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e); }
         }
 
-        // ربط حدث إدخال المبلغ بحساب النتيجة
-        document.addEventListener('DOMContentLoaded', function() {
-            const input = document.getElementById('swapAmountInput');
-            if (input) {
-                input.addEventListener('input', calculateSwapResult);
-            }
-            updateSwapUI();
-            calculateSwapResult();
-        });
-
         // ============================================================
-        // DEPOSIT - مع نافذة تأكيد
+        // DEPOSIT
         // ============================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            updateDepositForm('baridi');
-            updateWithdrawForm('baridi');
-        });
-
         function updateDepositForm(method) {
             const accountInput = document.getElementById('depositAccountInput');
             const accountLabel = document.getElementById('depositAccountLabel');
@@ -4971,7 +4692,6 @@
             const txHint = document.getElementById('depositTxHint');
             if (!accountInput || !accountLabel || !accountHint || !amountLabel || !amountIcon ||
                 !amountInput || !minHint || !txLabel || !txHint) return;
-
             if (method === 'baridi') {
                 accountInput.value = POSTAL_ACCOUNT;
                 accountLabel.textContent = 'رقم حساب Baridi Mob';
@@ -5011,183 +4731,86 @@
             }
         }
 
-        // ===== دوال نافذة تأكيد الإيداع =====
         function showDepositConfirmModal(data) {
             const modal = document.getElementById('depositConfirmModal');
             const detailsContainer = document.getElementById('confirmDetails');
-
-            const methodDisplay = {
-                'baridi': 'Baridi Mob (DZD)',
-                'binance': 'Binance (USDT)',
-                'redotpay': 'RedotPay (USDT)'
-            };
-
-            const methodClass = {
-                'baridi': 'method-baridi',
-                'binance': 'method-binance',
-                'redotpay': 'method-redotpay'
-            };
-
+            const methodDisplay = { 'baridi': 'Baridi Mob (DZD)', 'binance': 'Binance (USDT)', 'redotpay': 'RedotPay (USDT)' };
+            const methodClass = { 'baridi': 'method-baridi', 'binance': 'method-binance', 'redotpay': 'method-redotpay' };
             const currencyClass = data.currency === 'DZD' ? 'dzd-color' : 'usdt-color';
-
             detailsContainer.innerHTML = `
-                <div class="detail-row">
-                    <span class="label">طريقة الإيداع</span>
-                    <span class="value ${methodClass[data.method]}">${methodDisplay[data.method] || data.method}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">${data.method === 'baridi' ? 'رقم الحساب' : 'معرف المحفظة'}</span>
-                    <span class="value">${data.account}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">المبلغ</span>
-                    <span class="value ${currencyClass}">${data.amount.toFixed(2)} ${data.currency}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">رقم العملية</span>
-                    <span class="value">${data.transactionId}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">الشبكة</span>
-                    <span class="value">${data.network}</span>
-                </div>
+                <div class="detail-row"><span class="label">طريقة الإيداع</span><span class="value ${methodClass[data.method]}">${methodDisplay[data.method] || data.method}</span></div>
+                <div class="detail-row"><span class="label">${data.method === 'baridi' ? 'رقم الحساب' : 'معرف المحفظة'}</span><span class="value">${data.account}</span></div>
+                <div class="detail-row"><span class="label">المبلغ</span><span class="value ${currencyClass}">${data.amount.toFixed(2)} ${data.currency}</span></div>
+                <div class="detail-row"><span class="label">رقم العملية</span><span class="value">${data.transactionId}</span></div>
+                <div class="detail-row"><span class="label">الشبكة</span><span class="value">${data.network}</span></div>
             `;
-
             pendingDepositData = data;
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
         function closeDepositConfirmModal() {
-            const modal = document.getElementById('depositConfirmModal');
-            modal.classList.remove('active');
+            document.getElementById('depositConfirmModal').classList.remove('active');
             document.body.style.overflow = '';
             pendingDepositData = null;
         }
 
         async function submitDeposit() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-
-            // التحقق من حالة التقييد
-            if (userData.status === 'restricted') {
-                showToast('⚠️ حسابك مقيد، لا يمكنك تنفيذ عمليات الإيداع حالياً. يرجى التواصل مع الدعم.');
-                return;
-            }
-
-            const methodSelect = document.getElementById('depositMethodSelect');
-            const method = methodSelect.value;
-
+            if (userData.status === 'restricted') { showToast('⚠️ حسابك مقيد، لا يمكنك الإيداع'); return; }
+            const method = document.getElementById('depositMethodSelect').value;
             const amount = parseFloat(document.getElementById('depositAmount').value);
             if (!amount || amount <= 0) { showToast('أدخل مبلغاً صحيحاً'); return; }
-
             let minAmount, currency, account, network, methodDisplay;
-            if (method === 'baridi') {
-                minAmount = MIN_DEPOSIT;
+            if (method === 'baridi') { minAmount = MIN_DEPOSIT;
                 currency = 'DZD';
                 account = POSTAL_ACCOUNT;
                 network = 'Baridi Mob';
-                methodDisplay = 'Baridi Mob';
-                if (amount < minAmount) { showToast(`الحد الأدنى للإيداع ${minAmount} DZD`); return; }
-            } else if (method === 'binance') {
-                minAmount = MIN_DEPOSIT_USDT;
+                methodDisplay = 'Baridi Mob'; if (amount < minAmount) { showToast(`الحد الأدنى ${minAmount} DZD`); return; } } else if (
+                method === 'binance') { minAmount = MIN_DEPOSIT_USDT;
                 currency = 'USDT';
                 account = BINANCE_WALLET;
                 network = 'Binance (BEP20/ERC20)';
-                methodDisplay = 'Binance';
-                if (amount < minAmount) { showToast(`الحد الأدنى للإيداع ${minAmount} USDT`); return; }
-            } else if (method === 'redotpay') {
-                minAmount = MIN_DEPOSIT_USDT;
+                methodDisplay = 'Binance'; if (amount < minAmount) { showToast(`الحد الأدنى ${minAmount} USDT`); return; } } else if (
+                method === 'redotpay') { minAmount = MIN_DEPOSIT_USDT;
                 currency = 'USDT';
                 account = REDOTPAY_WALLET;
                 network = 'RedotPay';
-                methodDisplay = 'RedotPay';
-                if (amount < minAmount) { showToast(`الحد الأدنى للإيداع ${minAmount} USDT`); return; }
-            } else {
-                showToast('طريقة إيداع غير معروفة');
-                return;
-            }
-
+                methodDisplay = 'RedotPay'; if (amount < minAmount) { showToast(`الحد الأدنى ${minAmount} USDT`); return; } } else {
+                showToast('طريقة غير معروفة'); return; }
             const txId = document.getElementById('depositTransactionId').value.trim();
-            if (!txId) { showToast('أدخل رقم عملية التحويل'); return; }
-
-            showDepositConfirmModal({
-                method: method,
-                methodDisplay: methodDisplay,
-                amount: amount,
-                currency: currency,
-                account: account,
-                network: network,
-                transactionId: txId,
-                minAmount: minAmount
-            });
+            if (!txId) { showToast('أدخل رقم العملية'); return; }
+            showDepositConfirmModal({ method, methodDisplay, amount, currency, account, network, transactionId: txId,
+                minAmount });
         }
 
         async function confirmDepositSubmit() {
-            if (!pendingDepositData) {
-                showToast('حدث خطأ، حاول مرة أخرى');
-                return;
-            }
-
+            if (!pendingDepositData) { showToast('حدث خطأ'); return; }
             const data = pendingDepositData;
             const { method, amount, currency, account, network, transactionId: txId } = data;
-
-            const existingDeposits = userData.deposits || [];
-            const duplicate = existingDeposits.find(d =>
-                d.transactionId === txId &&
-                Math.abs(d.amount - amount) < 0.01 &&
-                d.currency === currency
-            );
-
-            if (duplicate) {
-                showToast('⚠️ تم تسجيل هذا الإيداع مسبقاً بنفس رقم العملية والمبلغ!');
-                closeDepositConfirmModal();
-                return;
-            }
-
-            const now = new Date();
-            const recentDuplicate = existingDeposits.find(d =>
-                d.transactionId === txId &&
-                Math.abs(d.amount - amount) < 0.01 &&
-                d.currency === currency &&
-                (now - (d.createdAt?.toDate ? d.createdAt.toDate() : new Date(d.createdAt))) < 5 * 60 * 1000
-            );
-
-            if (recentDuplicate) {
-                showToast('⚠️ تم إرسال هذا الإيداع مؤخراً، يرجى الانتظار قليلاً');
-                closeDepositConfirmModal();
-                return;
-            }
-
+            const existing = userData.deposits || [];
+            const dup = existing.find(d => d.transactionId === txId && Math.abs(d.amount - amount) < 0.01 && d.currency ===
+                currency);
+            if (dup) { showToast('⚠️ تم تسجيل هذا الإيداع مسبقاً');
+                closeDepositConfirmModal(); return; }
             try {
-                const depositId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-
-                const depositObj = {
-                    depositId: depositId,
-                    amount: amount,
-                    currency: currency,
-                    method: method,
-                    methodDisplay: data.methodDisplay || method,
-                    network: network,
-                    walletAddress: account,
-                    transactionId: txId,
-                    status: 'pending',
-                    createdAt: now
-                };
-
+                const now = new Date();
+                const depositId = `${Date.now()}_${Math.random().toString(36).substring(2,8)}`;
+                const depositObj = { depositId, amount, currency, method, methodDisplay: data.methodDisplay || method,
+                    network, walletAddress: account, transactionId: txId, status: 'pending', createdAt: now };
                 await db.collection('users').doc(userData.telegramId).update({
                     'deposits': firebase.firestore.FieldValue.arrayUnion(depositObj),
                     'transactions': firebase.firestore.FieldValue.arrayUnion({
                         type: 'deposit',
-                        amount: amount,
-                        currency: currency,
+                        amount,
+                        currency,
                         description: `إيداع ${amount} ${currency} عبر ${data.methodDisplay || method}`,
                         timestamp: now,
                         status: 'pending',
-                        depositId: depositId,
-                        method: method
+                        depositId,
+                        method
                     })
                 });
-
                 showToast('✅ تم إرسال طلب الإيداع، في انتظار المراجعة');
                 document.getElementById('depositAmount').value = '';
                 document.getElementById('depositTransactionId').value = '';
@@ -5195,15 +4818,13 @@
                 await loadDeposits();
                 await loadTransactions();
                 updateUI();
-            } catch (e) {
+            } catch (e) { showToast('❌ ' + e.message);
                 console.error(e);
-                showToast('❌ حدث خطأ: ' + e.message);
-                closeDepositConfirmModal();
-            }
+                closeDepositConfirmModal(); }
         }
 
         // ============================================================
-        // WITHDRAW - مع قائمة منسدلة ونافذة تأكيد
+        // WITHDRAW
         // ============================================================
         function updateWithdrawForm(method) {
             const accountInput = document.getElementById('withdrawAccountInput');
@@ -5218,9 +4839,7 @@
             const withdrawFeeLabel = document.getElementById('withdrawFeeLabel');
             if (!accountInput || !accountLabel || !accountIcon || !accountHint || !amountLabel ||
                 !amountIcon || !amountInput || !minHint || !feeLabel || !withdrawFeeLabel) return;
-
             updateWithdrawableBalance(method);
-
             if (method === 'baridi') {
                 accountLabel.textContent = 'معرف Baridi Mob الخاص بك';
                 accountIcon.className = 'fas fa-mobile-screen-button';
@@ -5264,103 +4883,56 @@
                 withdrawFeeLabel.textContent = 'رسوم السحب: 0%';
                 setText('withdrawMinAmount', `${MIN_WITHDRAW_USDT} USDT`);
             }
-
             calculateWithdrawFee();
         }
 
+        function updateWithdrawableBalance(method) {
+            if (!userData) return;
+            const w = userData.wallets || {};
+            let balance = 0;
+            if (method === 'baridi') { balance = (w.dzd || 0) + (w.dzdReward || 0) + (w.dzdReferral || 0); } else {
+                balance = w.usdt || 0; }
+            setText('withdrawableBalance', balance.toFixed(2));
+        }
+
         function calculateWithdrawFee() {
-            const methodSelect = document.getElementById('withdrawMethodSelect');
-            const method = methodSelect.value;
+            const method = document.getElementById('withdrawMethodSelect').value;
             const amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
-            let fee = 0;
-
-            if (method === 'baridi') {
-                fee = amount * 0.10;
-            } else {
-                fee = 0;
-            }
-
+            let fee = (method === 'baridi') ? amount * 0.10 : 0;
             setText('withdrawFee', fee.toFixed(2));
             setText('withdrawTotal', (amount + fee).toFixed(2));
         }
 
-        // ربط حدث حساب الرسوم
-        document.addEventListener('DOMContentLoaded', function() {
-            const amt = document.getElementById('withdrawAmount');
-            if (amt) {
-                amt.addEventListener('input', calculateWithdrawFee);
-            }
-        });
-
-        // ===== دوال نافذة تأكيد السحب =====
         function showWithdrawConfirmModal(data) {
             const modal = document.getElementById('withdrawConfirmModal');
             const detailsContainer = document.getElementById('withdrawConfirmDetails');
-
-            const methodDisplay = {
-                'baridi': 'Baridi Mob (DZD)',
-                'binance': 'Binance (USDT)',
-                'redotpay': 'RedotPay (USDT)'
-            };
-
-            const methodClass = {
-                'baridi': 'method-baridi',
-                'binance': 'method-binance',
-                'redotpay': 'method-redotpay'
-            };
-
+            const methodDisplay = { 'baridi': 'Baridi Mob (DZD)', 'binance': 'Binance (USDT)', 'redotpay': 'RedotPay (USDT)' };
+            const methodClass = { 'baridi': 'method-baridi', 'binance': 'method-binance', 'redotpay': 'method-redotpay' };
             const currencyClass = data.currency === 'DZD' ? 'dzd-color' : 'usdt-color';
-
             detailsContainer.innerHTML = `
-                <div class="detail-row">
-                    <span class="label">طريقة السحب</span>
-                    <span class="value ${methodClass[data.method]}">${methodDisplay[data.method] || data.method}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">${data.method === 'baridi' ? 'معرف Baridi Mob' : 'عنوان المحفظة'}</span>
-                    <span class="value">${data.account}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">المبلغ</span>
-                    <span class="value ${currencyClass}">${data.amount.toFixed(2)} ${data.currency}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">الرسوم</span>
-                    <span class="value ${currencyClass}">${data.fee.toFixed(2)} ${data.currency}</span>
-                </div>
-                <div class="detail-row" style="font-weight:900;border-bottom:none;font-size:16px;">
-                    <span class="label">الإجمالي</span>
-                    <span class="value ${currencyClass}">${data.total.toFixed(2)} ${data.currency}</span>
-                </div>
+                <div class="detail-row"><span class="label">طريقة السحب</span><span class="value ${methodClass[data.method]}">${methodDisplay[data.method] || data.method}</span></div>
+                <div class="detail-row"><span class="label">${data.method === 'baridi' ? 'معرف Baridi Mob' : 'عنوان المحفظة'}</span><span class="value">${data.account}</span></div>
+                <div class="detail-row"><span class="label">المبلغ</span><span class="value ${currencyClass}">${data.amount.toFixed(2)} ${data.currency}</span></div>
+                <div class="detail-row"><span class="label">الرسوم</span><span class="value ${currencyClass}">${data.fee.toFixed(2)} ${data.currency}</span></div>
+                <div class="detail-row" style="font-weight:900;border-bottom:none;font-size:16px;"><span class="label">الإجمالي</span><span class="value ${currencyClass}">${data.total.toFixed(2)} ${data.currency}</span></div>
             `;
-
             pendingWithdrawData = data;
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
         function closeWithdrawConfirmModal() {
-            const modal = document.getElementById('withdrawConfirmModal');
-            modal.classList.remove('active');
+            document.getElementById('withdrawConfirmModal').classList.remove('active');
             document.body.style.overflow = '';
             pendingWithdrawData = null;
         }
 
         async function submitWithdraw() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-
-            // التحقق من حالة التقييد
-            if (userData.status === 'restricted') {
-                showToast('⚠️ حسابك مقيد، لا يمكنك تنفيذ عمليات السحب حالياً. يرجى التواصل مع الدعم.');
-                return;
-            }
-
-            const methodSelect = document.getElementById('withdrawMethodSelect');
-            const method = methodSelect.value;
-
+            if (userData.status === 'restricted') { showToast('⚠️ حسابك مقيد، لا يمكنك السحب'); return; }
+            const method = document.getElementById('withdrawMethodSelect').value;
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             if (!amount || amount <= 0) { showToast('أدخل مبلغاً صحيحاً'); return; }
-
             let minAmount, currency, account, network, methodDisplay, feePercent;
             if (method === 'baridi') {
                 minAmount = MIN_WITHDRAW;
@@ -5369,14 +4941,13 @@
                 network = 'Baridi Mob';
                 methodDisplay = 'Baridi Mob';
                 feePercent = 0.10;
-                if (amount < minAmount) { showToast(`الحد الأدنى للسحب ${minAmount} DZD`); return; }
-                if (!account) { showToast('أدخل معرف Baridi Mob الخاص بك'); return; }
-                if (!isValidBaridiId(account)) {
-                    showToast('⚠️ معرف Baridi Mob غير صحيح! يجب أن يتكون من 20 رقمًا ويبدأ بـ 00799999');
-                    return;
-                }
-                const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
-                if (amount > balance) { showToast('الرصيد غير كافٍ'); return; }
+                if (amount < minAmount) { showToast(`الحد الأدنى ${minAmount} DZD`); return; }
+                if (!account) { showToast('أدخل معرف Baridi Mob'); return; }
+                if (!/^\d{20}$/.test(account.replace(/\s/g, '')) || !account.replace(/\s/g, '').startsWith('00799999')) {
+                    showToast('معرف غير صحيح'); return; }
+                const bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral ||
+                    0);
+                if (amount > bal) { showToast('الرصيد غير كافٍ'); return; }
             } else if (method === 'binance') {
                 minAmount = MIN_WITHDRAW_USDT;
                 currency = 'USDT';
@@ -5384,11 +4955,9 @@
                 network = 'Binance (BEP20/ERC20)';
                 methodDisplay = 'Binance';
                 feePercent = 0;
-                if (amount < minAmount) { showToast(`الحد الأدنى للسحب ${minAmount} USDT`); return; }
-                if (!account) { showToast('أدخل عنوان محفظتك على Binance'); return; }
-                if (account.length < 10) { showToast('⚠️ عنوان المحفظة غير صحيح'); return; }
-                const balance = userData.wallets?.usdt || 0;
-                if (amount > balance) { showToast('رصيد USDT غير كافٍ'); return; }
+                if (amount < minAmount) { showToast(`الحد الأدنى ${minAmount} USDT`); return; }
+                if (!account || account.length < 10) { showToast('عنوان محفظة غير صحيح'); return; }
+                if (amount > (userData.wallets?.usdt || 0)) { showToast('رصيد USDT غير كافٍ'); return; }
             } else if (method === 'redotpay') {
                 minAmount = MIN_WITHDRAW_USDT;
                 currency = 'USDT';
@@ -5396,67 +4965,32 @@
                 network = 'RedotPay';
                 methodDisplay = 'RedotPay';
                 feePercent = 0;
-                if (amount < minAmount) { showToast(`الحد الأدنى للسحب ${minAmount} USDT`); return; }
-                if (!account) { showToast('أدخل معرف محفظتك على RedotPay'); return; }
-                if (account.length < 5) { showToast('⚠️ معرف المحفظة غير صحيح'); return; }
-                const balance = userData.wallets?.usdt || 0;
-                if (amount > balance) { showToast('رصيد USDT غير كافٍ'); return; }
-            } else {
-                showToast('طريقة سحب غير معروفة');
-                return;
-            }
-
+                if (amount < minAmount) { showToast(`الحد الأدنى ${minAmount} USDT`); return; }
+                if (!account || account.length < 5) { showToast('معرف محفظة غير صحيح'); return; }
+                if (amount > (userData.wallets?.usdt || 0)) { showToast('رصيد USDT غير كافٍ'); return; }
+            } else { showToast('طريقة غير معروفة'); return; }
             const fee = amount * feePercent;
             const total = amount + fee;
-
-            showWithdrawConfirmModal({
-                method: method,
-                methodDisplay: methodDisplay,
-                amount: amount,
-                currency: currency,
-                account: account,
-                network: network,
-                fee: fee,
-                total: total,
-                minAmount: minAmount
-            });
+            showWithdrawConfirmModal({ method, methodDisplay, amount, currency, account, network, fee, total, minAmount });
         }
 
         async function confirmWithdrawSubmit() {
-            if (!pendingWithdrawData) {
-                showToast('حدث خطأ، حاول مرة أخرى');
-                return;
-            }
-
+            if (!pendingWithdrawData) { showToast('حدث خطأ'); return; }
             const data = pendingWithdrawData;
             const { method, amount, currency, account, network, fee, total } = data;
-
             try {
                 const now = new Date();
-                const withdrawalId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-
-                const withdrawObj = {
-                    withdrawalId: withdrawalId,
-                    amount: amount,
-                    currency: currency,
-                    recipientAddress: account,
-                    network: network,
-                    method: method,
-                    methodDisplay: data.methodDisplay || method,
-                    fee: fee,
-                    status: 'pending',
-                    createdAt: now
-                };
-
+                const withdrawalId = `${Date.now()}_${Math.random().toString(36).substring(2,8)}`;
+                const withdrawObj = { withdrawalId, amount, currency, recipientAddress: account, network, method,
+                    methodDisplay: data.methodDisplay || method, fee, status: 'pending', createdAt: now };
                 if (currency === 'DZD') {
                     await db.runTransaction(async (t) => {
                         const ref = db.collection('users').doc(userData.telegramId);
                         const doc = await t.get(ref);
                         if (!doc.exists) throw new Error('غير موجود');
-
-                        let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
+                        let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                            .wallets?.dzdReferral || 0);
                         if (bal < total) throw new Error('رصيد غير كاف');
-
                         let rem = total;
                         const m = doc.data().wallets?.dzd || 0,
                             r = doc.data().wallets?.dzdReward || 0,
@@ -5467,53 +5001,48 @@
                         rem -= fr;
                         const fref = Math.min(rem, refr);
                         rem -= fref;
-                        const upd = {
+                        t.update(ref, {
                             'wallets.dzd': m - fm,
                             'wallets.dzdReward': r - fr,
                             'wallets.dzdReferral': refr - fref,
                             'transactions': firebase.firestore.FieldValue.arrayUnion({
                                 type: 'withdraw',
                                 amount: total,
-                                currency: currency,
+                                currency,
                                 description: `سحب ${amount} ${currency} عبر ${data.methodDisplay} (رسوم ${fee.toFixed(2)})`,
                                 balanceAfter: bal - total,
                                 timestamp: now,
-                                withdrawalId: withdrawalId,
+                                withdrawalId,
                                 status: 'pending',
-                                method: method
+                                method
                             }),
                             'withdrawals': firebase.firestore.FieldValue.arrayUnion(withdrawObj)
-                        };
-                        t.update(ref, upd);
+                        });
                     });
                 } else {
                     await db.runTransaction(async (t) => {
                         const ref = db.collection('users').doc(userData.telegramId);
                         const doc = await t.get(ref);
                         if (!doc.exists) throw new Error('غير موجود');
-
                         const bal = doc.data().wallets?.usdt || 0;
                         if (bal < amount) throw new Error('رصيد USDT غير كاف');
-
-                        const upd = {
+                        t.update(ref, {
                             'wallets.usdt': bal - amount,
                             'transactions': firebase.firestore.FieldValue.arrayUnion({
                                 type: 'withdraw',
-                                amount: amount,
-                                currency: currency,
+                                amount,
+                                currency,
                                 description: `سحب ${amount} ${currency} عبر ${data.methodDisplay}`,
                                 balanceAfter: bal - amount,
                                 timestamp: now,
-                                withdrawalId: withdrawalId,
+                                withdrawalId,
                                 status: 'pending',
-                                method: method
+                                method
                             }),
                             'withdrawals': firebase.firestore.FieldValue.arrayUnion(withdrawObj)
-                        };
-                        t.update(ref, upd);
+                        });
                     });
                 }
-
                 showToast('✅ تم طلب السحب بنجاح');
                 document.getElementById('withdrawAmount').value = '';
                 document.getElementById('withdrawAccountInput').value = '';
@@ -5521,567 +5050,33 @@
                 await loadWithdrawals();
                 await loadTransactions();
                 updateUI();
-            } catch (e) {
-                showToast('❌ ' + (e.message || 'حدث خطأ'));
+            } catch (e) { showToast('❌ ' + (e.message || 'حدث خطأ'));
                 console.error(e);
-                closeWithdrawConfirmModal();
-            }
+                closeWithdrawConfirmModal(); }
         }
 
         // ============================================================
-        // CHECK VERIFICATION EXPIRY
-        // ============================================================
-        async function checkVerificationExpiry() {
-            if (!userData) return;
-            if (!userData.verified || !userData.verificationExpiry) return;
-
-            const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
-            if (expiry <= new Date()) {
-                try {
-                    await db.collection('users').doc(userData.telegramId).update({
-                        verified: false,
-                        verificationExpiry: null
-                    });
-                    userData.verified = false;
-                    userData.verificationExpiry = null;
-                    showToast('⏳ انتهت صلاحية التوثيق، يرجى التجديد');
-                    updateVerificationUI();
-                    updateVerificationStatus();
-                } catch (e) {
-                    console.error('❌ فشل تحديث حالة التوثيق:', e);
-                }
-            }
-        }
-
-        // ============================================================
-        // DEPOSIT LIST
-        // ============================================================
-        async function loadDeposits() {
-            if (!userData) return;
-            try {
-                const list = userData.deposits || [];
-                list.sort((a, b) => {
-                    const timeA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-                    const timeB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
-                    return timeB - timeA;
-                });
-                renderDeposits(list);
-            } catch (e) {
-                console.error(e);
-                renderDeposits([]);
-            }
-        }
-
-        function renderDeposits(list) {
-            const c = document.getElementById('depositRequests');
-            if (!list || !list.length) { c.innerHTML =
-                    '<div class="text-muted text-center" style="padding:12px 0;font-size:13px;">لا توجد طلبات إيداع</div>';
-                return; }
-            c.innerHTML = list.map(d => `
-                <div class="list-item" style="padding:10px 0;">
-                    <div class="left"><div><div class="title" style="font-size:14px;">${d.amount} ${d.currency || 'DZD'}</div><div class="sub" style="font-size:12px;">${d.methodDisplay || d.method || 'طريقة غير معروفة'} • رقم العملية: ${d.transactionId} • ${formatDateTime(d.createdAt)}</div></div></div>
-                    <div class="right"><span class="status ${getStatusBadge(d.status)}" style="font-size:11px;padding:2px 10px;">${getStatusText(d.status)}</span></div>
-                </div>
-            `).join('');
-        }
-
-        // ============================================================
-        // WITHDRAW LIST
-        // ============================================================
-        async function loadWithdrawals() {
-            if (!userData) return;
-            try {
-                const list = userData.withdrawals || [];
-                list.sort((a, b) => {
-                    const timeA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-                    const timeB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
-                    return timeB - timeA;
-                });
-                renderWithdrawals(list);
-            } catch (e) {
-                console.error(e);
-                renderWithdrawals([]);
-            }
-        }
-
-        function renderWithdrawals(list) {
-            const c = document.getElementById('withdrawRequests');
-            if (!list || !list.length) { c.innerHTML =
-                    '<div class="text-muted text-center" style="padding:12px 0;font-size:13px;">لا توجد طلبات سحب</div>';
-                return; }
-            c.innerHTML = list.map(w => `
-                <div class="list-item" style="padding:10px 0;">
-                    <div class="left"><div><div class="title" style="font-size:14px;">${w.amount} ${w.currency || 'DZD'}</div><div class="sub" style="font-size:12px;">${w.methodDisplay || w.method || 'طريقة غير معروفة'} • ${formatDateTime(w.createdAt)}</div></div></div>
-                    <div class="right"><span class="status ${getStatusBadge(w.status)}" style="font-size:11px;padding:2px 10px;">${getStatusText(w.status)}</span></div>
-                </div>
-            `).join('');
-        }
-
-        // ============================================================
-        // VALIDATION FUNCTIONS
-        // ============================================================
-        function isValidBaridiId(id) {
-            if (!id || typeof id !== 'string') return false;
-            const cleaned = id.replace(/\s/g, '');
-            if (!/^\d{20}$/.test(cleaned)) return false;
-            if (!cleaned.startsWith('00799999')) return false;
-            return true;
-        }
-
-        // ============================================================
-        // PLANS & RENDER (يدعم العملتين - تم إزالة مكافأة أول استثمار)
-        // ============================================================
-        async function loadPlans() {
-            allInvestPlans = DEFAULT_INVEST_PLANS;
-            renderPlansInside();
-            console.log('📦 تم تحميل خطط العوائد الثابتة من الكود المحلي');
-        }
-
-        function renderPlansInside() {
-            const container = document.getElementById('investPlansListInside');
-            if (!container) return;
-            if (!allInvestPlans.length) {
-                container.innerHTML =
-                    `<div class="card text-center" style="padding:32px 0;"><div style="font-size:48px;">📊</div><div style="font-size:18px;font-weight:700;">لا توجد خطط</div></div>`;
-                return;
-            }
-
-            container.innerHTML = allInvestPlans.map((p, i) => {
-                const isUSDT = p.currency === 'USDT';
-                const currencySymbol = isUSDT ? 'USDT' : 'DZD';
-                const returnColor = isUSDT ? 'usdt-color' : 'dzd-return';
-                const btnClass = isUSDT ? 'btn-usdt' : 'btn-dzd';
-                const minDailyProfit = (p.minAmount * p.dailyReturnPercent) / 100;
-                const maxDailyProfit = (p.maxAmount * p.dailyReturnPercent) / 100;
-                const decimalPlaces = isUSDT ? 4 : 2;
-
-                return `
-                    <div class="plan-card ${i===1?'popular':''}">
-                        ${i===1?'<div class="badge-popular">⭐ الأفضل</div>':''}
-                        <div class="name">${p.name}</div>
-                        <div class="return ${returnColor}">${p.dailyReturnPercent}% <small>يومياً</small></div>
-                        <ul class="features">
-                            <li><i class="fas fa-coins"></i> المبلغ: ${p.minAmount.toFixed(0)} - ${p.maxAmount.toFixed(0)} ${currencySymbol}</li>
-                            <li><i class="fas fa-chart-line"></i> الربح اليومي: ${minDailyProfit.toFixed(decimalPlaces)} - ${maxDailyProfit.toFixed(decimalPlaces)} ${currencySymbol}</li>
-                            <li><i class="fas fa-infinity" style="color:#10b981;"></i> المدة: دائمة (بدون انتهاء)</li>
-                        </ul>
-                        <button class="btn ${btnClass}" onclick="openInvestmentModal('${p.id}')">
-                            <i class="fas fa-plus-circle"></i> استثمر الآن
-                        </button>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ============================================================
-        // INVESTMENT TABS
-        // ============================================================
-        function switchInvestTab(tabId) {
-            document.querySelectorAll('.invest-tab-panel').forEach(panel => {
-                panel.style.display = 'none';
-                panel.classList.remove('active');
-            });
-            const targetPanel = document.getElementById('panel-' + tabId);
-            if (targetPanel) {
-                targetPanel.style.display = 'block';
-                targetPanel.classList.add('active');
-            }
-            document.querySelectorAll('#page-investments .profile-tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.tab === tabId) {
-                    btn.classList.add('active');
-                }
-            });
-            if (tabId === 'invest-plans') {
-                renderPlansInside();
-            }
-        }
-
-        // ============================================================
-        // INVESTMENT MODAL (يدعم العملتين + تحديث الرصيد من Firestore)
-        // ============================================================
-        async function openInvestmentModal(planId) {
-            if (isModalOpen) return;
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-
-            // 🔥 تحديث بيانات المستخدم من Firestore للحصول على أحدث رصيد
-            try {
-                const doc = await db.collection('users').doc(userData.telegramId).get();
-                if (doc.exists) {
-                    userData = { telegramId: userData.telegramId, ...doc.data() };
-                    // تحديث الواجهات الأخرى
-                    updateUI();
-                }
-            } catch (e) {
-                console.error('❌ فشل تحديث بيانات المستخدم:', e);
-            }
-
-            const plan = allInvestPlans.find(p => p.id === planId);
-            if (!plan) { showToast('الخطة غير موجودة'); return; }
-
-            currentSelectedPlanId = planId;
-            isModalOpen = true;
-            const isUSDT = plan.currency === 'USDT';
-
-            setText('modalPlanName', plan.name);
-            setText('modalPlanReturn', `${plan.dailyReturnPercent}% يومياً`);
-            setText('modalCurrencyLabel', `(${plan.currency})`);
-            setText('modalBalanceCurrency', plan.currency);
-
-            const minAmount = plan.minAmount;
-            const maxAmount = plan.maxAmount;
-            setText('modalMinDisplay', minAmount.toFixed(isUSDT ? 4 : 0));
-            setText('modalMaxDisplay', maxAmount.toFixed(isUSDT ? 4 : 0));
-
-            const input = document.getElementById('modalAmountInput');
-            const slider = document.getElementById('modalRangeSlider');
-            input.min = minAmount;
-            input.max = maxAmount;
-            input.step = isUSDT ? 1 : 100;
-            input.value = minAmount;
-            slider.min = minAmount;
-            slider.max = maxAmount;
-            slider.step = isUSDT ? 1 : 100;
-            slider.value = minAmount;
-
-            // الرصيد حسب العملة (بعد التحديث)
-            const balance = isUSDT ? (userData.wallets?.usdt || 0) : ((userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0));
-            setText('modalUserBalance', balance.toFixed(isUSDT ? 4 : 2));
-
-            updateModalCalculations();
-
-            const modal = document.getElementById('investmentModal');
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-
-            modal.onclick = null;
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeInvestmentModal();
-                }
-            });
-        }
-
-        function closeInvestmentModal() {
-            const modal = document.getElementById('investmentModal');
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            isModalOpen = false;
-            currentSelectedPlanId = null;
-            document.getElementById('modalAmountInput').value = 0;
-            document.getElementById('modalRangeSlider').value = 0;
-        }
-
-        function adjustAmount(change, event) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            const input = document.getElementById('modalAmountInput');
-            let val = parseFloat(input.value) || 0;
-            const min = parseFloat(input.min) || 0;
-            const max = parseFloat(input.max) || 0;
-            val = Math.max(min, Math.min(max, val + change));
-            const step = parseFloat(input.step) || 1;
-            val = Math.round(val / step) * step;
-            input.value = val;
-            document.getElementById('modalRangeSlider').value = val;
-            updateModalCalculations();
-        }
-
-        function updateModalCalculations() {
-            const plan = allInvestPlans.find(p => p.id === currentSelectedPlanId);
-            if (!plan) return;
-            const isUSDT = plan.currency === 'USDT';
-
-            const input = document.getElementById('modalAmountInput');
-            const amount = parseFloat(input.value) || 0;
-
-            const dailyProfit = (amount * plan.dailyReturnPercent) / 100;
-            const totalProfit = dailyProfit * 30;
-
-            setText('modalDailyProfit', dailyProfit.toFixed(isUSDT ? 4 : 2));
-            setText('modalTotalReturn', totalProfit.toFixed(isUSDT ? 4 : 2));
-
-            const balance = isUSDT ? (userData.wallets?.usdt || 0) : ((userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0));
-            const statusEl = document.getElementById('modalBalanceStatus');
-            const balSpan = document.getElementById('modalUserBalance');
-            if (!statusEl || !balSpan) return;
-            balSpan.textContent = balance.toFixed(isUSDT ? 4 : 2);
-
-            if (amount > balance) {
-                statusEl.className = 'modal-balance-warning insufficient';
-                statusEl.innerHTML =
-                    `<i class="fas fa-exclamation-triangle"></i> <span>رصيد غير كافٍ! المتاح: <strong>${balance.toFixed(isUSDT ? 4 : 2)}</strong> ${plan.currency}</span>`;
-                document.getElementById('modalConfirmBtn').disabled = true;
-                document.getElementById('modalConfirmBtn').style.opacity = '0.5';
-                document.getElementById('modalConfirmBtn').style.cursor = 'not-allowed';
-            } else {
-                statusEl.className = 'modal-balance-warning';
-                statusEl.innerHTML =
-                    `<i class="fas fa-wallet"></i> <span>رصيدك المتاح: <strong>${balance.toFixed(isUSDT ? 4 : 2)}</strong> ${plan.currency}</span>`;
-                document.getElementById('modalConfirmBtn').disabled = false;
-                document.getElementById('modalConfirmBtn').style.opacity = '1';
-                document.getElementById('modalConfirmBtn').style.cursor = 'pointer';
-            }
-        }
-
-        // ============================================================
-        // CONFIRM INVESTMENT (يدعم العملتين - تم إزالة مكافأة أول استثمار)
-        // ============================================================
-        async function confirmInvestment() {
-            if (!currentSelectedPlanId) {
-                showToast('حدث خطأ، حاول مرة أخرى');
-                return;
-            }
-
-            const plan = allInvestPlans.find(p => p.id === currentSelectedPlanId);
-            if (!plan) {
-                showToast('الخطة غير موجودة');
-                return;
-            }
-
-            const input = document.getElementById('modalAmountInput');
-            const amount = parseFloat(input.value) || 0;
-            const isUSDT = plan.currency === 'USDT';
-
-            if (amount < plan.minAmount || amount > plan.maxAmount) {
-                showToast(`المبلغ يجب أن يكون بين ${plan.minAmount} و ${plan.maxAmount} ${plan.currency}`);
-                return;
-            }
-
-            // التحقق من الرصيد من قاعدة البيانات بشكل مباشر (لتجنب أي تباين)
-            let freshBalance = 0;
-            try {
-                const doc = await db.collection('users').doc(userData.telegramId).get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    freshBalance = isUSDT ? (data.wallets?.usdt || 0) : ((data.wallets?.dzd || 0) + (data.wallets?.dzdReward || 0) + (data.wallets?.dzdReferral || 0));
-                }
-            } catch (e) {
-                showToast('حدث خطأ في التحقق من الرصيد');
-                console.error(e);
-                return;
-            }
-
-            if (freshBalance < amount) {
-                showToast(`⚠️ الرصيد غير كافٍ! المتاح: ${freshBalance.toFixed(isUSDT ? 4 : 2)} ${plan.currency}`);
-                return;
-            }
-
-            closeInvestmentModal();
-
-            try {
-                const now = new Date();
-                const endDate = new Date(2099, 11, 31);
-                const investmentId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-
-                const investmentObj = {
-                    investmentId: investmentId,
-                    planId: plan.id,
-                    planName: plan.name,
-                    amount: amount,
-                    currency: plan.currency,
-                    dailyReturnPercent: plan.dailyReturnPercent,
-                    durationDays: 36500,
-                    startDate: now,
-                    endDate: endDate,
-                    status: 'active',
-                    totalReturn: 0,
-                    lastReturnDate: null,
-                    capitalReturnable: true,
-                    amountInDZD: isUSDT ? (amount * RATE_USDT_TO_DZD) : amount
-                };
-
-                await db.runTransaction(async (t) => {
-                    const ref = db.collection('users').doc(userData.telegramId);
-                    const doc = await t.get(ref);
-                    if (!doc.exists) throw new Error('غير موجود');
-
-                    const updates = {};
-
-                    if (isUSDT) {
-                        const currentBal = doc.data().wallets?.usdt || 0;
-                        if (currentBal < amount) throw new Error('رصيد USDT غير كاف');
-                        updates['wallets.usdt'] = currentBal - amount;
-                    } else {
-                        let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
-                        if (bal < amount) throw new Error('رصيد غير كاف');
-                        let rem = amount;
-                        const m = doc.data().wallets?.dzd || 0,
-                            r = doc.data().wallets?.dzdReward || 0,
-                            refr = doc.data().wallets?.dzdReferral || 0;
-                        const fm = Math.min(rem, m);
-                        rem -= fm;
-                        const fr = Math.min(rem, r);
-                        rem -= fr;
-                        const fref = Math.min(rem, refr);
-                        rem -= fref;
-                        updates['wallets.dzd'] = m - fm;
-                        updates['wallets.dzdReward'] = r - fr;
-                        updates['wallets.dzdReferral'] = refr - fref;
-                    }
-
-                    updates['investments'] = firebase.firestore.FieldValue.arrayUnion(investmentObj);
-                    updates['totalInvested'] = firebase.firestore.FieldValue.increment(amount);
-                    updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
-                        type: 'investment',
-                        amount: amount,
-                        currency: plan.currency,
-                        description: `استثمار في ${plan.name} (${amount.toFixed(isUSDT ? 4 : 2)} ${plan.currency})`,
-                        timestamp: now,
-                        investmentId: investmentId,
-                        status: 'completed'
-                    });
-
-                    // تم إزالة مكافأة أول استثمار بالكامل
-
-                    t.update(ref, updates);
-                });
-
-                showToast(`✅ تم الاستثمار في "${plan.name}" بنجاح!`);
-                await loadTransactions();
-                await updateUI();
-                renderInvestments();
-            } catch (e) {
-                showToast('❌ ' + (e.message || 'حدث خطأ'));
-                console.error(e);
-            }
-        }
-
-        // ============================================================
-        // RENDER INVESTMENTS (يدعم العملتين - مع إجماليات منفصلة)
-        // ============================================================
-        function renderInvestments() {
-            const container = document.getElementById('activeInvestments');
-            
-            // حساب الإجماليات من جميع الاستثمارات (النشطة والمكتملة)
-            let totalInvestedDZD = 0, totalInvestedUSDT = 0;
-            let totalReturnDZD = 0, totalReturnUSDT = 0;
-            
-            if (userData && userData.investments && userData.investments.length > 0) {
-                for (let inv of userData.investments) {
-                    if (inv.currency === 'USDT') {
-                        totalInvestedUSDT += inv.amount;
-                        totalReturnUSDT += (inv.totalReturn || 0);
-                    } else {
-                        totalInvestedDZD += inv.amount;
-                        totalReturnDZD += (inv.totalReturn || 0);
-                    }
-                }
-            }
-            
-            setText('investTotalInvestedDZD', totalInvestedDZD.toFixed(2));
-            setText('investTotalInvestedUSDT', totalInvestedUSDT.toFixed(4));
-            setText('investTotalReturnDZD', totalReturnDZD.toFixed(2));
-            setText('investTotalReturnUSDT', totalReturnUSDT.toFixed(4));
-
-            if (!userData || !userData.investments || userData.investments.length === 0) {
-                container.innerHTML = '<div class="text-muted text-center" style="padding:30px 0;font-size:15px;">ليس لديك استثمارات نشطة</div>';
-                return;
-            }
-
-            const activeInvestments = userData.investments.filter(inv => inv.status === 'active');
-            if (activeInvestments.length === 0) {
-                container.innerHTML = '<div class="text-muted text-center" style="padding:30px 0;font-size:15px;">لا توجد استثمارات نشطة حالياً</div>';
-                return;
-            }
-
-            container.innerHTML = activeInvestments.map(inv => {
-                const isUSDT = inv.currency === 'USDT';
-                const daily = (inv.amount * inv.dailyReturnPercent) / 100;
-                const remainingText = "دائمة";
-                const colorClass = isUSDT ? 'usdt-color' : 'gold';
-                const decimalPlaces = isUSDT ? 4 : 2;
-                return `
-                    <div class="card" style="border-right:4px solid var(--${isUSDT ? 'usdt' : 'gold'});">
-                        <div class="flex-between">
-                            <div><span style="font-weight:800;font-size:18px;">${inv.planName}</span></div>
-                            <span class="status status-gold">نشط</span>
-                        </div>
-                        <div class="grid-2" style="margin-top:8px;">
-                            <div class="invest-stat">
-                                <div class="number ${colorClass}">${inv.amount.toFixed(decimalPlaces)} ${inv.currency}</div>
-                                <div class="label">المبلغ المستثمر</div>
-                            </div>
-                            <div class="invest-stat">
-                                <div class="number ${colorClass}">${daily.toFixed(decimalPlaces)} ${inv.currency}</div>
-                                <div class="label">العائد اليومي</div>
-                            </div>
-                            <div class="invest-stat">
-                                <div class="number ${colorClass}">${(inv.totalReturn||0).toFixed(decimalPlaces)} ${inv.currency}</div>
-                                <div class="label">إجمالي الأرباح</div>
-                            </div>
-                            <div class="invest-stat">
-                                <div class="number">${remainingText}</div>
-                                <div class="label">المدة المتبقية</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ============================================================
-        // REFERRALS
-        // ============================================================
-        async function loadReferrals() {
-            if (!userData) return;
-            try {
-                const list = userData.referrals || [];
-                renderReferrals(list);
-            } catch (e) {
-                console.error(e);
-                renderReferrals([]);
-            }
-        }
-
-        function renderReferrals(list) {
-            const c = document.getElementById('referralsList');
-            if (!list || !list.length) { c.innerHTML =
-                    '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>';
-                return; }
-            c.innerHTML = list.map(r => {
-                return `
-                    <div class="list-item">
-                        <div class="left"><div class="avatar" style="width:36px;height:36px;font-size:14px;">${(r.displayName||'م').charAt(0)}</div>
-                            <div><div class="title">${r.displayName||'مستخدم'}</div>
-                            <div class="sub">${formatDate(r.joinedAt)}</div></div>
-                        </div>
-                        <div class="right"><div style="color:var(--success);font-weight:700;">${r.commissionEarned||0} DZD</div></div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ============================================================
-        // TRANSACTIONS
+        // TRANSACTIONS, DEPOSITS, WITHDRAWALS LISTS
         // ============================================================
         async function loadTransactions() {
             if (!userData) return;
             try {
                 allTransactions = userData.transactions || [];
                 allTransactions.sort((a, b) => {
-                    const timeA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
-                    const timeB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
-                    return timeB - timeA;
+                    const ta = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+                    const tb = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+                    return tb - ta;
                 });
                 renderTransactions(allTransactions);
-            } catch (e) {
-                console.error(e);
-                allTransactions = [];
-                renderTransactions([]);
-            }
+            } catch (e) { allTransactions = [];
+                renderTransactions([]); }
         }
 
         function renderTransactions(list) {
             const c = document.getElementById('transactionsList');
             const filtered = currentFilter === 'all' ? list : list.filter(t => t.type === currentFilter);
-            if (!filtered.length) {
-                c.innerHTML =
-                    `<div class="text-muted text-center" style="padding:32px 0;"><div style="font-size:48px;">📭</div><div style="font-size:16px;">لا توجد عمليات</div></div>`;
-                return;
-            }
+            if (!filtered.length) { c.innerHTML =
+                    `<div class="text-muted text-center" style="padding:32px 0;"><div style="font-size:48px;">📭</div><div style="font-size:16px;">لا توجد عمليات</div></div>`; return; }
             c.innerHTML = filtered.map(t => `
                 <div class="list-item">
                     <div class="left"><div style="width:36px;text-align:center;"><i class="fas ${getTransactionIcon(t.type)}" style="font-size:18px;"></i></div>
@@ -6100,15 +5095,823 @@
             renderTransactions(allTransactions);
         }
 
+        async function loadDeposits() {
+            if (!userData) return;
+            try {
+                const list = (userData.deposits || []).sort((a, b) => {
+                    const ta = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+                    const tb = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+                    return tb - ta;
+                });
+                renderDeposits(list);
+            } catch (e) { renderDeposits([]); }
+        }
+
+        function renderDeposits(list) {
+            const c = document.getElementById('depositRequests');
+            if (!list || !list.length) { c.innerHTML =
+                    '<div class="text-muted text-center" style="padding:12px 0;font-size:13px;">لا توجد طلبات إيداع</div>'; return; }
+            c.innerHTML = list.map(d => `
+                <div class="list-item" style="padding:10px 0;">
+                    <div class="left"><div><div class="title" style="font-size:14px;">${d.amount} ${d.currency || 'DZD'}</div><div class="sub" style="font-size:12px;">${d.methodDisplay || d.method || 'طريقة غير معروفة'} • رقم العملية: ${d.transactionId} • ${formatDateTime(d.createdAt)}</div></div></div>
+                    <div class="right"><span class="status ${getStatusBadge(d.status)}" style="font-size:11px;padding:2px 10px;">${getStatusText(d.status)}</span></div>
+                </div>
+            `).join('');
+        }
+
+        async function loadWithdrawals() {
+            if (!userData) return;
+            try {
+                const list = (userData.withdrawals || []).sort((a, b) => {
+                    const ta = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+                    const tb = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+                    return tb - ta;
+                });
+                renderWithdrawals(list);
+            } catch (e) { renderWithdrawals([]); }
+        }
+
+        function renderWithdrawals(list) {
+            const c = document.getElementById('withdrawRequests');
+            if (!list || !list.length) { c.innerHTML =
+                    '<div class="text-muted text-center" style="padding:12px 0;font-size:13px;">لا توجد طلبات سحب</div>'; return; }
+            c.innerHTML = list.map(w => `
+                <div class="list-item" style="padding:10px 0;">
+                    <div class="left"><div><div class="title" style="font-size:14px;">${w.amount} ${w.currency || 'DZD'}</div><div class="sub" style="font-size:12px;">${w.methodDisplay || w.method || 'طريقة غير معروفة'} • ${formatDateTime(w.createdAt)}</div></div></div>
+                    <div class="right"><span class="status ${getStatusBadge(w.status)}" style="font-size:11px;padding:2px 10px;">${getStatusText(w.status)}</span></div>
+                </div>
+            `).join('');
+        }
+
         // ============================================================
-        // INVESTMENT DAILY RETURNS (يدعم العملتين)
+        // PLANS & INVESTMENTS
+        // ============================================================
+        async function loadPlans() { allInvestPlans = DEFAULT_INVEST_PLANS;
+            renderPlansInside(); }
+
+        function renderPlansInside() {
+            const container = document.getElementById('investPlansListInside');
+            if (!container) return;
+            if (!allInvestPlans.length) { container.innerHTML =
+                    `<div class="card text-center" style="padding:32px 0;"><div style="font-size:48px;">📊</div><div style="font-size:18px;font-weight:700;">لا توجد خطط</div></div>`; return; }
+            container.innerHTML = allInvestPlans.map((p, i) => {
+                const isUSDT = p.currency === 'USDT';
+                const symbol = isUSDT ? 'USDT' : 'DZD';
+                const returnColor = isUSDT ? 'usdt-color' : 'dzd-return';
+                const btnClass = isUSDT ? 'btn-usdt' : 'btn-dzd';
+                const minDaily = (p.minAmount * p.dailyReturnPercent) / 100;
+                const maxDaily = (p.maxAmount * p.dailyReturnPercent) / 100;
+                const dec = isUSDT ? 4 : 2;
+                return `
+                    <div class="plan-card ${i===1?'popular':''}">
+                        ${i===1?'<div class="badge-popular">⭐ الأفضل</div>':''}
+                        <div class="name">${p.name}</div>
+                        <div class="return ${returnColor}">${p.dailyReturnPercent}% <small>يومياً</small></div>
+                        <ul class="features">
+                            <li><i class="fas fa-coins"></i> المبلغ: ${p.minAmount.toFixed(0)} - ${p.maxAmount.toFixed(0)} ${symbol}</li>
+                            <li><i class="fas fa-chart-line"></i> الربح اليومي: ${minDaily.toFixed(dec)} - ${maxDaily.toFixed(dec)} ${symbol}</li>
+                            <li><i class="fas fa-infinity" style="color:#10b981;"></i> المدة: دائمة (بدون انتهاء)</li>
+                        </ul>
+                        <button class="btn ${btnClass}" onclick="openInvestmentModal('${p.id}')">
+                            <i class="fas fa-plus-circle"></i> استثمر الآن
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function switchInvestTab(tabId) {
+            document.querySelectorAll('.invest-tab-panel').forEach(p => { p.style.display = 'none';
+                p.classList.remove('active'); });
+            const target = document.getElementById('panel-' + tabId);
+            if (target) { target.style.display = 'block';
+                target.classList.add('active'); }
+            document.querySelectorAll('#page-investments .profile-tab-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.tab === tabId);
+            });
+            if (tabId === 'invest-plans') renderPlansInside();
+        }
+
+        // ============================================================
+        // INVESTMENT MODAL
+        // ============================================================
+        async function openInvestmentModal(planId) {
+            if (isModalOpen) return;
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+            try {
+                const doc = await db.collection('users').doc(userData.telegramId).get();
+                if (doc.exists) { userData = { telegramId: userData.telegramId, ...doc.data() };
+                    updateUI(); }
+            } catch (e) { console.error(e); }
+            const plan = allInvestPlans.find(p => p.id === planId);
+            if (!plan) { showToast('الخطة غير موجودة'); return; }
+            currentSelectedPlanId = planId;
+            isModalOpen = true;
+            const isUSDT = plan.currency === 'USDT';
+            setText('modalPlanName', plan.name);
+            setText('modalPlanReturn', `${plan.dailyReturnPercent}% يومياً`);
+            setText('modalCurrencyLabel', `(${plan.currency})`);
+            setText('modalBalanceCurrency', plan.currency);
+            const minAmount = plan.minAmount,
+                maxAmount = plan.maxAmount;
+            setText('modalMinDisplay', minAmount.toFixed(isUSDT ? 4 : 0));
+            setText('modalMaxDisplay', maxAmount.toFixed(isUSDT ? 4 : 0));
+            const input = document.getElementById('modalAmountInput');
+            const slider = document.getElementById('modalRangeSlider');
+            input.min = minAmount;
+            input.max = maxAmount;
+            input.step = isUSDT ? 1 : 100;
+            input.value = minAmount;
+            slider.min = minAmount;
+            slider.max = maxAmount;
+            slider.step = isUSDT ? 1 : 100;
+            slider.value = minAmount;
+            const balance = isUSDT ? (userData.wallets?.usdt || 0) : ((userData.wallets?.dzd || 0) + (userData.wallets
+                ?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0));
+            setText('modalUserBalance', balance.toFixed(isUSDT ? 4 : 2));
+            updateModalCalculations();
+            const modal = document.getElementById('investmentModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            modal.onclick = function(e) { if (e.target === this) closeInvestmentModal(); };
+        }
+
+        function closeInvestmentModal() {
+            document.getElementById('investmentModal').classList.remove('active');
+            document.body.style.overflow = '';
+            isModalOpen = false;
+            currentSelectedPlanId = null;
+        }
+
+        function adjustAmount(change, event) {
+            if (event) { event.preventDefault();
+                event.stopPropagation(); }
+            const input = document.getElementById('modalAmountInput');
+            let val = parseFloat(input.value) || 0;
+            val = Math.max(parseFloat(input.min) || 0, Math.min(parseFloat(input.max) || 0, val + change));
+            const step = parseFloat(input.step) || 1;
+            val = Math.round(val / step) * step;
+            input.value = val;
+            document.getElementById('modalRangeSlider').value = val;
+            updateModalCalculations();
+        }
+
+        function updateModalCalculations() {
+            const plan = allInvestPlans.find(p => p.id === currentSelectedPlanId);
+            if (!plan) return;
+            const isUSDT = plan.currency === 'USDT';
+            const amount = parseFloat(document.getElementById('modalAmountInput').value) || 0;
+            const daily = (amount * plan.dailyReturnPercent) / 100;
+            setText('modalDailyProfit', daily.toFixed(isUSDT ? 4 : 2));
+            setText('modalTotalReturn', (daily * 30).toFixed(isUSDT ? 4 : 2));
+            const balance = isUSDT ? (userData.wallets?.usdt || 0) : ((userData.wallets?.dzd || 0) + (userData.wallets
+                ?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0));
+            const statusEl = document.getElementById('modalBalanceStatus');
+            const balSpan = document.getElementById('modalUserBalance');
+            if (!statusEl || !balSpan) return;
+            balSpan.textContent = balance.toFixed(isUSDT ? 4 : 2);
+            if (amount > balance) {
+                statusEl.className = 'modal-balance-warning insufficient';
+                statusEl.innerHTML =
+                    `<i class="fas fa-exclamation-triangle"></i> <span>رصيد غير كافٍ! المتاح: <strong>${balance.toFixed(isUSDT ? 4 : 2)}</strong> ${plan.currency}</span>`;
+                document.getElementById('modalConfirmBtn').disabled = true;
+                document.getElementById('modalConfirmBtn').style.opacity = '0.5';
+                document.getElementById('modalConfirmBtn').style.cursor = 'not-allowed';
+            } else {
+                statusEl.className = 'modal-balance-warning';
+                statusEl.innerHTML =
+                    `<i class="fas fa-wallet"></i> <span>رصيدك المتاح: <strong>${balance.toFixed(isUSDT ? 4 : 2)}</strong> ${plan.currency}</span>`;
+                document.getElementById('modalConfirmBtn').disabled = false;
+                document.getElementById('modalConfirmBtn').style.opacity = '1';
+                document.getElementById('modalConfirmBtn').style.cursor = 'pointer';
+            }
+        }
+
+        async function confirmInvestment() {
+            if (!currentSelectedPlanId) { showToast('حدث خطأ'); return; }
+            const plan = allInvestPlans.find(p => p.id === currentSelectedPlanId);
+            if (!plan) { showToast('الخطة غير موجودة'); return; }
+            const input = document.getElementById('modalAmountInput');
+            const amount = parseFloat(input.value) || 0;
+            const isUSDT = plan.currency === 'USDT';
+            if (amount < plan.minAmount || amount > plan.maxAmount) { showToast(
+                    `المبلغ بين ${plan.minAmount} و ${plan.maxAmount} ${plan.currency}`); return; }
+            let freshBalance = 0;
+            try {
+                const doc = await db.collection('users').doc(userData.telegramId).get();
+                if (doc.exists) {
+                    const d = doc.data();
+                    freshBalance = isUSDT ? (d.wallets?.usdt || 0) : ((d.wallets?.dzd || 0) + (d.wallets?.dzdReward || 0) + (
+                        d.wallets?.dzdReferral || 0));
+                }
+            } catch (e) { showToast('خطأ في التحقق من الرصيد'); return; }
+            if (freshBalance < amount) { showToast(`⚠️ الرصيد غير كافٍ! المتاح: ${freshBalance.toFixed(isUSDT ? 4 : 2)} ${plan.currency}`); return; }
+            closeInvestmentModal();
+            try {
+                const now = new Date();
+                const endDate = new Date(2099, 11, 31);
+                const investmentId = `${Date.now()}_${Math.random().toString(36).substring(2,8)}`;
+                const investmentObj = {
+                    investmentId,
+                    planId: plan.id,
+                    planName: plan.name,
+                    amount,
+                    currency: plan.currency,
+                    dailyReturnPercent: plan.dailyReturnPercent,
+                    durationDays: 36500,
+                    startDate: now,
+                    endDate: endDate,
+                    status: 'active',
+                    totalReturn: 0,
+                    lastReturnDate: null,
+                    capitalReturnable: true,
+                    amountInDZD: isUSDT ? (amount * RATE_USDT_TO_DZD) : amount
+                };
+                await db.runTransaction(async (t) => {
+                    const ref = db.collection('users').doc(userData.telegramId);
+                    const doc = await t.get(ref);
+                    if (!doc.exists) throw new Error('غير موجود');
+                    const updates = {};
+                    if (isUSDT) {
+                        const bal = doc.data().wallets?.usdt || 0;
+                        if (bal < amount) throw new Error('رصيد USDT غير كاف');
+                        updates['wallets.usdt'] = bal - amount;
+                    } else {
+                        let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                            .wallets?.dzdReferral || 0);
+                        if (bal < amount) throw new Error('رصيد غير كاف');
+                        let rem = amount;
+                        const m = doc.data().wallets?.dzd || 0,
+                            r = doc.data().wallets?.dzdReward || 0,
+                            refr = doc.data().wallets?.dzdReferral || 0;
+                        const fm = Math.min(rem, m);
+                        rem -= fm;
+                        const fr = Math.min(rem, r);
+                        rem -= fr;
+                        const fref = Math.min(rem, refr);
+                        rem -= fref;
+                        updates['wallets.dzd'] = m - fm;
+                        updates['wallets.dzdReward'] = r - fr;
+                        updates['wallets.dzdReferral'] = refr - fref;
+                    }
+                    updates['investments'] = firebase.firestore.FieldValue.arrayUnion(investmentObj);
+                    updates['totalInvested'] = firebase.firestore.FieldValue.increment(amount);
+                    updates['transactions'] = firebase.firestore.FieldValue.arrayUnion({
+                        type: 'investment',
+                        amount,
+                        currency: plan.currency,
+                        description: `استثمار في ${plan.name} (${amount.toFixed(isUSDT ? 4 : 2)} ${plan.currency})`,
+                        timestamp: now,
+                        investmentId,
+                        status: 'completed'
+                    });
+                    t.update(ref, updates);
+                });
+                showToast(`✅ تم الاستثمار في "${plan.name}" بنجاح!`);
+                await loadTransactions();
+                await updateUI();
+                renderInvestments();
+            } catch (e) { showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e); }
+        }
+
+        function renderInvestments() {
+            const container = document.getElementById('activeInvestments');
+            let totalDZD = 0,
+                totalUSDT = 0,
+                retDZD = 0,
+                retUSDT = 0;
+            if (userData && userData.investments) {
+                for (let inv of userData.investments) {
+                    if (inv.currency === 'USDT') { totalUSDT += inv.amount;
+                        retUSDT += (inv.totalReturn || 0); } else { totalDZD += inv.amount;
+                        retDZD += (inv.totalReturn || 0); }
+                }
+            }
+            setText('investTotalInvestedDZD', totalDZD.toFixed(2));
+            setText('investTotalInvestedUSDT', totalUSDT.toFixed(4));
+            setText('investTotalReturnDZD', retDZD.toFixed(2));
+            setText('investTotalReturnUSDT', retUSDT.toFixed(4));
+            if (!userData || !userData.investments || !userData.investments.length) {
+                container.innerHTML =
+                    '<div class="text-muted text-center" style="padding:30px 0;font-size:15px;">ليس لديك استثمارات نشطة</div>';
+                return;
+            }
+            const active = userData.investments.filter(inv => inv.status === 'active');
+            if (!active.length) { container.innerHTML =
+                    '<div class="text-muted text-center" style="padding:30px 0;font-size:15px;">لا توجد استثمارات نشطة حالياً</div>'; return; }
+            container.innerHTML = active.map(inv => {
+                const isUSDT = inv.currency === 'USDT';
+                const daily = (inv.amount * inv.dailyReturnPercent) / 100;
+                const dec = isUSDT ? 4 : 2;
+                const color = isUSDT ? 'usdt-color' : 'gold';
+                return `
+                    <div class="card" style="border-right:4px solid var(--${isUSDT ? 'usdt' : 'gold'});">
+                        <div class="flex-between"><div><span style="font-weight:800;font-size:18px;">${inv.planName}</span></div><span class="status status-gold">نشط</span></div>
+                        <div class="grid-2" style="margin-top:8px;">
+                            <div class="invest-stat"><div class="number ${color}">${inv.amount.toFixed(dec)} ${inv.currency}</div><div class="label">المبلغ المستثمر</div></div>
+                            <div class="invest-stat"><div class="number ${color}">${daily.toFixed(dec)} ${inv.currency}</div><div class="label">العائد اليومي</div></div>
+                            <div class="invest-stat"><div class="number ${color}">${(inv.totalReturn||0).toFixed(dec)} ${inv.currency}</div><div class="label">إجمالي الأرباح</div></div>
+                            <div class="invest-stat"><div class="number">دائمة</div><div class="label">المدة المتبقية</div></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================================
+        // REFERRALS
+        // ============================================================
+        async function loadReferrals() {
+            if (!userData) return;
+            try { renderReferrals(userData.referrals || []); } catch (e) { renderReferrals([]); }
+        }
+
+        function renderReferrals(list) {
+            const c = document.getElementById('referralsList');
+            if (!list || !list.length) { c.innerHTML =
+                    '<div class="text-muted text-center" style="padding:16px 0;font-size:14px;">لم تدعو أحداً بعد</div>'; return; }
+            c.innerHTML = list.map(r => `
+                <div class="list-item">
+                    <div class="left"><div class="avatar" style="width:36px;height:36px;font-size:14px;">${(r.displayName||'م').charAt(0)}</div>
+                        <div><div class="title">${r.displayName||'مستخدم'}</div><div class="sub">${formatDate(r.joinedAt)}</div></div>
+                    </div>
+                    <div class="right"><div style="color:var(--success);font-weight:700;">${r.commissionEarned||0} DZD</div></div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================================
+        // SUBSCRIPTION
+        // ============================================================
+        function updateSubscriptionUI() {
+            const card = document.getElementById('currentSubscriptionCard');
+            if (!userData || !card) return;
+            const sub = userData.subscription || { plan: null, status: 'inactive' };
+            const plan = sub.plan,
+                status = sub.status;
+            document.querySelectorAll('.pc-btn').forEach(b => { b.disabled = false;
+                b.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك'; });
+            if (status === 'active' && plan) {
+                card.style.display = 'block';
+                setText('currentPlanName', plan.charAt(0).toUpperCase() + plan.slice(1));
+                const end = sub.endDate?.toDate ? sub.endDate.toDate() : new Date(sub.endDate);
+                setText('subscriptionEndDate', formatDate(end));
+                updateSubscriptionRemaining();
+                document.querySelectorAll('.pc-btn').forEach(b => {
+                    if (b.dataset.plan !== plan) { b.disabled = true;
+                        b.innerHTML = '<i class="fas fa-lock"></i> غير متاح'; } else { b.disabled = true;
+                        b.innerHTML = '<i class="fas fa-check-circle"></i> مفعّل'; }
+                });
+                if (subscriptionRemainingInterval) clearInterval(subscriptionRemainingInterval);
+                subscriptionRemainingInterval = setInterval(updateSubscriptionRemaining, 60000);
+                const cancelBtn = card.querySelector('.btn-danger');
+                if (cancelBtn) { cancelBtn.innerHTML = '<i class="fas fa-times"></i> إلغاء';
+                    cancelBtn.disabled = false;
+                    cancelBtn.style.opacity = '1';
+                    cancelBtn.style.cursor = 'pointer'; }
+            } else if (status === 'expired') {
+                card.style.display = 'block';
+                setText('currentPlanName', plan ? (plan.charAt(0).toUpperCase() + plan.slice(1)) : '--');
+                setText('subscriptionEndDate', 'انتهى');
+                setText('subscriptionRemaining', 'منتهي');
+                const cancelBtn = card.querySelector('.btn-danger');
+                if (cancelBtn) { cancelBtn.innerHTML = 'تم الإلغاء';
+                    cancelBtn.disabled = true;
+                    cancelBtn.style.opacity = '0.6';
+                    cancelBtn.style.cursor = 'not-allowed'; }
+                document.querySelectorAll('.pc-btn').forEach(b => { b.disabled = false;
+                    b.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك'; });
+            } else {
+                card.style.display = 'none';
+                document.querySelectorAll('.pc-btn').forEach(b => { b.disabled = false;
+                    b.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك'; });
+                if (subscriptionRemainingInterval) { clearInterval(subscriptionRemainingInterval);
+                    subscriptionRemainingInterval = null; }
+            }
+        }
+
+        function updateSubscriptionRemaining() {
+            const sub = userData?.subscription;
+            if (!sub || sub.status !== 'active') { setText('subscriptionRemaining', '--'); return; }
+            const end = sub.endDate?.toDate ? sub.endDate.toDate() : new Date(sub.endDate);
+            const diff = end - new Date();
+            if (diff <= 0) { setText('subscriptionRemaining', 'انتهى'); return; }
+            const days = Math.floor(diff / (86400000));
+            const hours = Math.floor((diff % 86400000) / 3600000);
+            setText('subscriptionRemaining', `${days} يوم و ${hours} ساعة`);
+        }
+
+        async function cancelSubscription() {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+            const sub = userData.subscription || {};
+            if (sub.status !== 'active') { showToast('ليس لديك اشتراك نشط'); return; }
+            if (!confirm(`هل أنت متأكد من إلغاء اشتراكك الحالي (${sub.plan})؟`)) return;
+            try {
+                await db.collection('users').doc(userData.telegramId).update({
+                    'subscription.status': 'inactive',
+                    'subscription.plan': null,
+                    'subscription.startDate': null,
+                    'subscription.endDate': null
+                });
+                showToast('✅ تم إلغاء الاشتراك');
+                if (userData.subscription) { userData.subscription.status = 'inactive';
+                    userData.subscription.plan = null; }
+                updateSubscriptionUI();
+            } catch (e) { showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e); }
+        }
+
+        function showSubscriptionConfirmModal(planId, price) {
+            const modal = document.getElementById('subscriptionConfirmModal');
+            const details = document.getElementById('subscriptionConfirmDetails');
+            const names = { starter: 'Starter', basic: 'Basic', advanced: 'Advanced', premium: 'Premium', pro: 'Pro' };
+            const bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral ||
+                0);
+            details.innerHTML = `
+                <div class="detail-row"><span class="label">الخطة</span><span class="value">${names[planId]}</span></div>
+                <div class="detail-row"><span class="label">المبلغ</span><span class="value dzd-color">${price.toFixed(2)} DZD</span></div>
+                <div class="detail-row"><span class="label">المدة</span><span class="value">شهر واحد</span></div>
+                <div class="detail-row" style="border-bottom:none;"><span class="label">رصيدك المتاح</span><span class="value">${bal.toFixed(2)} DZD</span></div>
+            `;
+            pendingSubscriptionData = { planId, price };
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSubscriptionConfirmModal() {
+            document.getElementById('subscriptionConfirmModal').classList.remove('active');
+            document.body.style.overflow = '';
+            pendingSubscriptionData = null;
+        }
+
+        async function confirmSubscriptionSubmit() {
+            if (!pendingSubscriptionData) { showToast('حدث خطأ'); return; }
+            const { planId, price } = pendingSubscriptionData;
+            try {
+                const now = new Date(),
+                    end = new Date(now);
+                end.setMonth(end.getMonth() + 1);
+                await db.runTransaction(async (t) => {
+                    const ref = db.collection('users').doc(userData.telegramId);
+                    const doc = await t.get(ref);
+                    if (!doc.exists) throw new Error('غير موجود');
+                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                        .wallets?.dzdReferral || 0);
+                    if (bal < price) throw new Error('رصيد غير كاف');
+                    let rem = price;
+                    const m = doc.data().wallets?.dzd || 0,
+                        r = doc.data().wallets?.dzdReward || 0,
+                        refr = doc.data().wallets?.dzdReferral || 0;
+                    const fm = Math.min(rem, m);
+                    rem -= fm;
+                    const fr = Math.min(rem, r);
+                    rem -= fr;
+                    const fref = Math.min(rem, refr);
+                    rem -= fref;
+                    t.update(ref, {
+                        'wallets.dzd': m - fm,
+                        'wallets.dzdReward': r - fr,
+                        'wallets.dzdReferral': refr - fref,
+                        'subscription': { plan: planId, startDate: now, endDate: end, status: 'active' },
+                        'transactions': firebase.firestore.FieldValue.arrayUnion({
+                            type: 'subscription',
+                            amount: price,
+                            currency: 'DZD',
+                            description: `اشتراك خطة ${planId} (شهرياً - ${price} DZD)`,
+                            timestamp: now,
+                            plan: planId,
+                            status: 'completed'
+                        })
+                    });
+                });
+                showToast(`✅ تم تفعيل اشتراك ${planId} (شهرياً) بنجاح!`);
+                closeSubscriptionConfirmModal();
+                await updateUI();
+                updateSubscriptionUI();
+            } catch (e) { showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e);
+                closeSubscriptionConfirmModal(); }
+        }
+
+        async function subscribeToPlan(planId) {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+            const fresh = await db.collection('users').doc(userData.telegramId).get();
+            if (!fresh.exists) { showToast('حدث خطأ'); return; }
+            const sub = fresh.data().subscription || {};
+            if (sub.status === 'active' && sub.plan === planId) { showToast(`أنت مشترك بالفعل في خطة ${planId}`); return; }
+            if (sub.status === 'active') {
+                if (!confirm(`لديك اشتراك نشط في خطة ${sub.plan}. هل تريد التبديل إلى ${planId}؟`)) return;
+                await db.collection('users').doc(userData.telegramId).update({
+                    'subscription.status': 'inactive',
+                    'subscription.plan': null,
+                    'subscription.startDate': null,
+                    'subscription.endDate': null
+                });
+                if (userData.subscription) { userData.subscription.status = 'inactive';
+                    userData.subscription.plan = null; }
+                await new Promise(r => setTimeout(r, 1000));
+                await subscribeToPlan(planId);
+                return;
+            }
+            const prices = { starter: 300, basic: 500, advanced: 750, premium: 1500, pro: 3500 };
+            const price = prices[planId];
+            if (!price) { showToast('خطة غير معروفة'); return; }
+            const bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral ||
+                0);
+            if (bal < price) { showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`); return; }
+            showSubscriptionConfirmModal(planId, price);
+        }
+
+        // ============================================================
+        // VERIFICATION (مع دعم التجديد التلقائي)
+        // ============================================================
+        // ===== NEW: Toggle Auto-Renew =====
+        async function toggleAutoRenew() {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+            const toggle = document.getElementById('autoRenewToggle');
+            if (!toggle) return;
+            const newValue = toggle.checked;
+            try {
+                await db.collection('users').doc(userData.telegramId).update({
+                    autoRenewVerification: newValue
+                });
+                userData.autoRenewVerification = newValue;
+                showToast(newValue ? '✅ تم تفعيل التجديد التلقائي' : '❌ تم إلغاء التجديد التلقائي');
+                updateVerificationUI();
+            } catch (e) {
+                showToast('❌ حدث خطأ: ' + e.message);
+                console.error(e);
+                toggle.checked = !newValue;
+            }
+        }
+
+        // ===== NEW: Check and Renew Verification Automatically =====
+        async function checkAndRenewVerification() {
+            if (!userData) return;
+            if (!userData.autoRenewVerification) return;
+            if (!userData.verified) return;
+            const expiry = userData.verificationExpiry?.toDate ? userData.verificationExpiry.toDate() : new Date(userData
+                .verificationExpiry);
+            if (!expiry) return;
+            const now = new Date();
+            const diff = expiry - now;
+            // إذا تبقى أقل من يوم واحد، قم بالتجديد
+            if (diff < 24 * 60 * 60 * 1000 && diff > 0) {
+                try {
+                    const price = 100;
+                    const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets
+                        ?.dzdReferral || 0);
+                    if (balance < price) {
+                        console.warn('⚠️ رصيد غير كافٍ لتجديد التوثيق التلقائي');
+                        return;
+                    }
+                    await db.runTransaction(async (t) => {
+                        const ref = db.collection('users').doc(userData.telegramId);
+                        const doc = await t.get(ref);
+                        if (!doc.exists) return;
+                        const data = doc.data();
+                        let bal = (data.wallets?.dzd || 0) + (data.wallets?.dzdReward || 0) + (data.wallets
+                            ?.dzdReferral || 0);
+                        if (bal < price) throw new Error('رصيد غير كاف');
+                        let rem = price;
+                        const m = data.wallets?.dzd || 0,
+                            r = data.wallets?.dzdReward || 0,
+                            refr = data.wallets?.dzdReferral || 0;
+                        const fm = Math.min(rem, m);
+                        rem -= fm;
+                        const fr = Math.min(rem, r);
+                        rem -= fr;
+                        const fref = Math.min(rem, refr);
+                        rem -= fref;
+                        const newExpiry = new Date();
+                        newExpiry.setMonth(newExpiry.getMonth() + 1);
+                        t.update(ref, {
+                            'wallets.dzd': m - fm,
+                            'wallets.dzdReward': r - fr,
+                            'wallets.dzdReferral': refr - fref,
+                            'verificationExpiry': newExpiry,
+                            'transactions': firebase.firestore.FieldValue.arrayUnion({
+                                type: 'verification',
+                                amount: price,
+                                currency: 'DZD',
+                                description: 'تجديد تلقائي للتوثيق (شهر)',
+                                timestamp: new Date(),
+                                status: 'completed',
+                                expiryDate: newExpiry
+                            })
+                        });
+                    });
+                    console.log('✅ تم تجديد التوثيق تلقائياً');
+                    showToast('✅ تم تجديد التوثيق تلقائياً');
+                    await updateUI();
+                    updateVerificationUI();
+                } catch (e) {
+                    console.error('❌ فشل التجديد التلقائي:', e);
+                    // إذا فشل، نوقف التبديل لتجنب المحاولات المتكررة
+                    if (userData.autoRenewVerification) {
+                        await db.collection('users').doc(userData.telegramId).update({
+                            autoRenewVerification: false
+                        });
+                        userData.autoRenewVerification = false;
+                        const toggle = document.getElementById('autoRenewToggle');
+                        if (toggle) toggle.checked = false;
+                        showToast('⚠️ تم إلغاء التجديد التلقائي بسبب نقص الرصيد');
+                    }
+                }
+            }
+        }
+
+        function updateVerificationUI() {
+            if (!userData) return;
+            const container = document.getElementById('autoRenewContainer');
+            const toggle = document.getElementById('autoRenewToggle');
+            const btn = document.getElementById('verificationActionBtn');
+            const priceSpan = document.querySelector('.vc-price');
+            if (!btn) return;
+
+            const verified = userData.verified || false;
+            const expiry = userData.verificationExpiry;
+            const autoRenew = userData.autoRenewVerification || false;
+
+            if (toggle) toggle.checked = autoRenew;
+
+            if (verified && expiry) {
+                const expiryDate = expiry.toDate ? expiry.toDate() : new Date(expiry);
+                const now = new Date();
+                if (expiryDate > now) {
+                    // Active
+                    const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+                    if (container) container.style.display = 'flex';
+                    btn.innerHTML = `<i class="fas fa-sync-alt"></i> تجديد يدوي (متبقي ${daysLeft} يوم)`;
+                    btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
+                    btn.disabled = false;
+                    btn.style.cursor = 'pointer';
+                    btn.onclick = function() {
+                        if (autoRenew) {
+                            if (confirm('التجديد التلقائي مفعّل. هل تريد تجديداً يدوياً الآن؟')) {
+                                requestVerification();
+                            }
+                        } else {
+                            requestVerification();
+                        }
+                    };
+                    if (priceSpan) {
+                        priceSpan.style.display = 'inline-block';
+                        priceSpan.innerHTML = '100 <small>دج</small>';
+                        priceSpan.style.background = '#eff6ff';
+                        priceSpan.style.color = '#2563eb';
+                    }
+                } else {
+                    // Expired
+                    if (container) container.style.display = 'none';
+                    btn.innerHTML = '<i class="fas fa-clock"></i> انتهى - جدد الآن';
+                    btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                    btn.disabled = false;
+                    btn.style.cursor = 'pointer';
+                    btn.onclick = function() { requestVerification(); };
+                    if (priceSpan) {
+                        priceSpan.style.display = 'inline-block';
+                        priceSpan.innerHTML = '100 <small>دج</small>';
+                        priceSpan.style.background = '#fef3c7';
+                        priceSpan.style.color = '#b45309';
+                    }
+                }
+            } else {
+                // Not verified
+                if (container) container.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
+                btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
+                btn.disabled = false;
+                btn.style.cursor = 'pointer';
+                btn.onclick = function() { requestVerification(); };
+                if (priceSpan) {
+                    priceSpan.style.display = 'inline-block';
+                    priceSpan.innerHTML = '100 <small>دج</small>';
+                    priceSpan.style.background = '#eff6ff';
+                    priceSpan.style.color = '#2563eb';
+                }
+            }
+            updateVerificationStatus();
+        }
+
+        async function checkVerificationExpiry() {
+            if (!userData) return;
+            if (!userData.verified || !userData.verificationExpiry) return;
+            const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData
+                .verificationExpiry);
+            if (expiry <= new Date()) {
+                try {
+                    await db.collection('users').doc(userData.telegramId).update({ verified: false,
+                        verificationExpiry: null });
+                    userData.verified = false;
+                    userData.verificationExpiry = null;
+                    showToast('⏳ انتهت صلاحية التوثيق، يرجى التجديد');
+                    updateVerificationUI();
+                    updateVerificationStatus();
+                } catch (e) { console.error(e); }
+            }
+        }
+
+        function showVerificationConfirmModal(isRenewal) {
+            const modal = document.getElementById('verificationConfirmModal');
+            const details = document.getElementById('verificationConfirmDetails');
+            const price = 100;
+            const bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral ||
+                0);
+            details.innerHTML = `
+                <div class="detail-row"><span class="label">النوع</span><span class="value">${isRenewal ? 'تجديد التوثيق' : 'توثيق الحساب'}</span></div>
+                <div class="detail-row"><span class="label">المبلغ</span><span class="value dzd-color">${price.toFixed(2)} DZD</span></div>
+                <div class="detail-row"><span class="label">المدة</span><span class="value">شهر واحد</span></div>
+                <div class="detail-row" style="border-bottom:none;"><span class="label">رصيدك المتاح</span><span class="value">${bal.toFixed(2)} DZD</span></div>
+            `;
+            pendingVerificationData = { isRenewal };
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVerificationConfirmModal() {
+            document.getElementById('verificationConfirmModal').classList.remove('active');
+            document.body.style.overflow = '';
+            pendingVerificationData = null;
+        }
+
+        async function confirmVerificationSubmit() {
+            if (!pendingVerificationData) { showToast('حدث خطأ'); return; }
+            const { isRenewal } = pendingVerificationData;
+            const price = 100;
+            try {
+                const now = new Date(),
+                    expiry = new Date(now);
+                expiry.setMonth(expiry.getMonth() + 1);
+                await db.runTransaction(async (t) => {
+                    const ref = db.collection('users').doc(userData.telegramId);
+                    const doc = await t.get(ref);
+                    if (!doc.exists) throw new Error('غير موجود');
+                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data()
+                        .wallets?.dzdReferral || 0);
+                    if (bal < price) throw new Error('رصيد غير كاف');
+                    let rem = price;
+                    const m = doc.data().wallets?.dzd || 0,
+                        r = doc.data().wallets?.dzdReward || 0,
+                        refr = doc.data().wallets?.dzdReferral || 0;
+                    const fm = Math.min(rem, m);
+                    rem -= fm;
+                    const fr = Math.min(rem, r);
+                    rem -= fr;
+                    const fref = Math.min(rem, refr);
+                    rem -= fref;
+                    t.update(ref, {
+                        'wallets.dzd': m - fm,
+                        'wallets.dzdReward': r - fr,
+                        'wallets.dzdReferral': refr - fref,
+                        'verified': true,
+                        'verificationExpiry': expiry,
+                        'transactions': firebase.firestore.FieldValue.arrayUnion({
+                            type: 'verification',
+                            amount: price,
+                            currency: 'DZD',
+                            description: isRenewal ? `تجديد التوثيق (شهر)` : `توثيق الحساب (شهر)`,
+                            timestamp: new Date(),
+                            status: 'completed',
+                            expiryDate: expiry
+                        })
+                    });
+                });
+                showToast(isRenewal ? '✅ تم تجديد التوثيق بنجاح!' : '✅ تم توثيق حسابك بنجاح!');
+                closeVerificationConfirmModal();
+                await updateUI();
+                updateVerificationUI();
+                updateVerificationStatus();
+            } catch (e) { showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e);
+                closeVerificationConfirmModal(); }
+        }
+
+        async function requestVerification() {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+            if (userData.verified && userData.verificationExpiry) {
+                const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData
+                    .verificationExpiry);
+                if (expiry > new Date()) {
+                    const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24));
+                    if (!confirm(`التوثيق لا يزال نشطاً (متبقي ${daysLeft} يوم). هل تريد التجديد مبكراً؟`)) { return; }
+                }
+            }
+            const price = 100;
+            const bal = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral ||
+                0);
+            if (bal < price) { showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`); return; }
+            const isRenewal = userData.verified && userData.verificationExpiry;
+            showVerificationConfirmModal(isRenewal);
+        }
+
+        // ============================================================
+        // DAILY INVESTMENT RETURNS
         // ============================================================
         function startInvestmentReturns() {
             if (investmentInterval) clearInterval(investmentInterval);
-            investmentInterval = setInterval(() => {
-                if (!userData) return;
-                processInvestmentReturns();
-            }, 60000);
+            investmentInterval = setInterval(() => { if (userData) processInvestmentReturns(); }, 60000);
         }
 
         async function processInvestmentReturns() {
@@ -6117,45 +5920,29 @@
                 const doc = await ref.get();
                 if (!doc.exists) return;
                 const data = doc.data();
-                const today = new Date();
-                const todayStr = today.toISOString().split('T')[0];
-                if (data.lastDailyDistribution === todayStr) return;
-
+                const today = new Date().toISOString().split('T')[0];
+                if (data.lastDailyDistribution === today) return;
                 const investments = data.investments || [];
-                let updated = false;
-                let totalDZD = 0;
-                let totalUSDT = 0;
-                const now = new Date();
-
+                let updated = false,
+                    totalDZD = 0,
+                    totalUSDT = 0,
+                    now = new Date();
                 for (let inv of investments) {
                     if (inv.status !== 'active') continue;
-                    const endDate = inv.endDate?.toDate ? inv.endDate.toDate() : null;
-                    if (endDate && now > endDate) {
-                        inv.status = 'completed';
-                        updated = true;
-                        continue;
-                    }
-                    const dailyReturn = (inv.amount * inv.dailyReturnPercent) / 100;
-                    inv.totalReturn = (inv.totalReturn || 0) + dailyReturn;
+                    const end = inv.endDate?.toDate ? inv.endDate.toDate() : null;
+                    if (end && now > end) { inv.status = 'completed';
+                        updated = true; continue; }
+                    const daily = (inv.amount * inv.dailyReturnPercent) / 100;
+                    inv.totalReturn = (inv.totalReturn || 0) + daily;
                     inv.lastReturnDate = now;
                     updated = true;
-
-                    if (inv.currency === 'USDT') {
-                        totalUSDT += dailyReturn;
-                    } else {
-                        totalDZD += dailyReturn;
-                    }
+                    if (inv.currency === 'USDT') totalUSDT += daily;
+                    else totalDZD += daily;
                 }
-
-                if (!updated && totalDZD === 0 && totalUSDT === 0) {
-                    await ref.update({ lastDailyDistribution: todayStr });
-                    return;
-                }
-
+                if (!updated && totalDZD === 0 && totalUSDT === 0) { await ref.update({ lastDailyDistribution: today }); return; }
                 const updates = {};
                 updates['investments'] = investments;
-                updates['lastDailyDistribution'] = todayStr;
-
+                updates['lastDailyDistribution'] = today;
                 if (totalDZD > 0) {
                     updates['wallets.dzdReward'] = firebase.firestore.FieldValue.increment(totalDZD);
                     updates['totalInvestmentReturns'] = firebase.firestore.FieldValue.increment(totalDZD);
@@ -6164,7 +5951,7 @@
                         amount: totalDZD,
                         currency: 'DZD',
                         description: `أرباح يومية (${totalDZD.toFixed(2)} DZD)`,
-                        timestamp: now,
+                        timestamp: now
                     });
                 }
                 if (totalUSDT > 0) {
@@ -6174,24 +5961,19 @@
                         amount: totalUSDT,
                         currency: 'USDT',
                         description: `أرباح يومية (${totalUSDT.toFixed(4)} USDT)`,
-                        timestamp: now,
+                        timestamp: now
                     });
                 }
-
                 await ref.update(updates);
-                console.log(`✅ تم توزيع الأرباح اليومية: ${totalDZD} DZD و ${totalUSDT} USDT`);
-                if (userData) {
-                    userData.investments = investments;
+                console.log(`✅ توزيع الأرباح: ${totalDZD} DZD و ${totalUSDT} USDT`);
+                if (userData) { userData.investments = investments;
                     renderInvestments();
-                    updateUI();
-                }
-            } catch (e) {
-                console.error('❌ فشل توزيع الأرباح اليومية:', e);
-            }
+                    updateUI(); }
+            } catch (e) { console.error('❌ فشل توزيع الأرباح:', e); }
         }
 
         // ============================================================
-        // THEME TOGGLE
+        // THEME / PROFILE TABS
         // ============================================================
         function toggleTheme() {
             isDarkTheme = !isDarkTheme;
@@ -6237,504 +6019,15 @@
 
         function toggleLanguage() { showToast('سيتم دعم الإنجليزية قريباً'); }
 
-        // ============================================================
-        // PROFILE TABS
-        // ============================================================
         function switchProfileTab(tabId) {
-            document.querySelectorAll('.profile-tab-panel').forEach(panel => {
-                panel.classList.remove('active');
+            document.querySelectorAll('.profile-tab-panel').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById('panel-' + tabId);
+            if (target) target.classList.add('active');
+            document.querySelectorAll('.profile-tab-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.tab === tabId);
             });
-            const targetPanel = document.getElementById('panel-' + tabId);
-            if (targetPanel) targetPanel.classList.add('active');
-
-            document.querySelectorAll('.profile-tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.tab === tabId) {
-                    btn.classList.add('active');
-                }
-            });
-            if (tabId === 'subscription') {
-                updateSubscriptionUI();
-            }
-            if (tabId === 'verification') {
-                updateVerificationUI();
-            }
-        }
-
-        // ============================================================
-        // SUBSCRIPTION LOGIC (مع عرض الوقت المتبقي وإلغاء الاشتراك)
-        // ============================================================
-        function updateSubscriptionUI() {
-            const card = document.getElementById('currentSubscriptionCard');
-            if (!userData || !card) return;
-
-            const sub = userData.subscription || { plan: null, status: 'inactive' };
-            const plan = sub.plan;
-            const status = sub.status;
-
-            // تحديث أزرار الباقات
-            document.querySelectorAll('.pc-btn').forEach(btn => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك';
-            });
-
-            if (status === 'active' && plan) {
-                card.style.display = 'block';
-                setText('currentPlanName', plan.charAt(0).toUpperCase() + plan.slice(1));
-
-                const endDate = sub.endDate?.toDate ? sub.endDate.toDate() : new Date(sub.endDate);
-                setText('subscriptionEndDate', formatDate(endDate));
-
-                updateSubscriptionRemaining();
-
-                document.querySelectorAll('.pc-btn').forEach(btn => {
-                    if (btn.dataset.plan !== plan) {
-                        btn.disabled = true;
-                        btn.innerHTML = '<i class="fas fa-lock"></i> غير متاح';
-                    } else {
-                        btn.disabled = true;
-                        btn.innerHTML = '<i class="fas fa-check-circle"></i> مفعّل';
-                    }
-                });
-
-                if (subscriptionRemainingInterval) clearInterval(subscriptionRemainingInterval);
-                subscriptionRemainingInterval = setInterval(() => {
-                    updateSubscriptionRemaining();
-                }, 60000);
-
-                // إعادة تمكين زر الإلغاء في حالة العودة من expired
-                const cancelBtn = card.querySelector('.btn-danger');
-                if (cancelBtn) {
-                    cancelBtn.textContent = '<i class="fas fa-times"></i> إلغاء';
-                    cancelBtn.disabled = false;
-                    cancelBtn.style.opacity = '1';
-                    cancelBtn.style.cursor = 'pointer';
-                }
-
-            } else if (status === 'expired') {
-                card.style.display = 'block';
-                setText('currentPlanName', plan ? (plan.charAt(0).toUpperCase() + plan.slice(1)) : '--');
-                setText('subscriptionEndDate', 'انتهى');
-                setText('subscriptionRemaining', 'منتهي');
-                const cancelBtn = card.querySelector('.btn-danger');
-                if (cancelBtn) {
-                    cancelBtn.innerHTML = 'تم الإلغاء';
-                    cancelBtn.disabled = true;
-                    cancelBtn.style.opacity = '0.6';
-                    cancelBtn.style.cursor = 'not-allowed';
-                }
-                document.querySelectorAll('.pc-btn').forEach(btn => {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك';
-                });
-            } else {
-                card.style.display = 'none';
-                document.querySelectorAll('.pc-btn').forEach(btn => {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-shopping-cart"></i> اشتراك';
-                });
-                if (subscriptionRemainingInterval) {
-                    clearInterval(subscriptionRemainingInterval);
-                    subscriptionRemainingInterval = null;
-                }
-            }
-        }
-
-        function updateSubscriptionRemaining() {
-            const sub = userData?.subscription;
-            if (!sub || sub.status !== 'active') {
-                setText('subscriptionRemaining', '--');
-                return;
-            }
-            const endDate = sub.endDate?.toDate ? sub.endDate.toDate() : new Date(sub.endDate);
-            const now = new Date();
-            const diff = endDate - now;
-            if (diff <= 0) {
-                setText('subscriptionRemaining', 'انتهى');
-                return;
-            }
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            setText('subscriptionRemaining', `${days} يوم و ${hours} ساعة`);
-        }
-
-        // ===== إلغاء الاشتراك =====
-        async function cancelSubscription() {
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-            const sub = userData.subscription || {};
-            if (sub.status !== 'active') {
-                showToast('ليس لديك اشتراك نشط لإلغائه');
-                return;
-            }
-
-            if (!confirm(`هل أنت متأكد من إلغاء اشتراكك الحالي (${sub.plan})؟`)) return;
-
-            try {
-                await db.collection('users').doc(userData.telegramId).update({
-                    'subscription.status': 'inactive',
-                    'subscription.plan': null,
-                    'subscription.startDate': null,
-                    'subscription.endDate': null
-                });
-                showToast('✅ تم إلغاء الاشتراك بنجاح');
-                if (userData.subscription) {
-                    userData.subscription.status = 'inactive';
-                    userData.subscription.plan = null;
-                    userData.subscription.startDate = null;
-                    userData.subscription.endDate = null;
-                }
-                updateSubscriptionUI();
-            } catch (e) {
-                showToast('❌ ' + (e.message || 'حدث خطأ'));
-                console.error(e);
-            }
-        }
-
-        // ===== دوال نافذة تأكيد الاشتراك =====
-        function showSubscriptionConfirmModal(planId, price) {
-            const modal = document.getElementById('subscriptionConfirmModal');
-            const detailsContainer = document.getElementById('subscriptionConfirmDetails');
-
-            const planNames = {
-                starter: 'Starter',
-                basic: 'Basic',
-                advanced: 'Advanced',
-                premium: 'Premium',
-                pro: 'Pro'
-            };
-
-            const planDisplay = planNames[planId] || planId;
-
-            detailsContainer.innerHTML = `
-                <div class="detail-row">
-                    <span class="label">الخطة</span>
-                    <span class="value">${planDisplay}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">المبلغ</span>
-                    <span class="value dzd-color">${price.toFixed(2)} DZD</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">المدة</span>
-                    <span class="value">شهر واحد</span>
-                </div>
-                <div class="detail-row" style="border-bottom:none;">
-                    <span class="label">رصيدك المتاح</span>
-                    <span class="value">${((userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0)).toFixed(2)} DZD</span>
-                </div>
-            `;
-
-            pendingSubscriptionData = { planId, price };
-
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeSubscriptionConfirmModal() {
-            const modal = document.getElementById('subscriptionConfirmModal');
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            pendingSubscriptionData = null;
-        }
-
-        async function confirmSubscriptionSubmit() {
-            if (!pendingSubscriptionData) {
-                showToast('حدث خطأ، حاول مرة أخرى');
-                return;
-            }
-
-            const { planId, price } = pendingSubscriptionData;
-
-            try {
-                const now = new Date();
-                const endDate = new Date(now);
-                endDate.setMonth(endDate.getMonth() + 1);
-
-                await db.runTransaction(async (t) => {
-                    const ref = db.collection('users').doc(userData.telegramId);
-                    const doc = await t.get(ref);
-                    if (!doc.exists) throw new Error('غير موجود');
-
-                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
-                    if (bal < price) throw new Error('رصيد غير كاف');
-
-                    let rem = price;
-                    const m = doc.data().wallets?.dzd || 0,
-                        r = doc.data().wallets?.dzdReward || 0,
-                        refr = doc.data().wallets?.dzdReferral || 0;
-                    const fm = Math.min(rem, m);
-                    rem -= fm;
-                    const fr = Math.min(rem, r);
-                    rem -= fr;
-                    const fref = Math.min(rem, refr);
-                    rem -= fref;
-
-                    const updates = {
-                        'wallets.dzd': m - fm,
-                        'wallets.dzdReward': r - fr,
-                        'wallets.dzdReferral': refr - fref,
-                        'subscription': {
-                            plan: planId,
-                            startDate: now,
-                            endDate: endDate,
-                            status: 'active'
-                        },
-                        'transactions': firebase.firestore.FieldValue.arrayUnion({
-                            type: 'subscription',
-                            amount: price,
-                            currency: 'DZD',
-                            description: `اشتراك خطة ${planId} (شهرياً - ${price} DZD)`,
-                            timestamp: now,
-                            plan: planId,
-                            status: 'completed'
-                        })
-                    };
-                    t.update(ref, updates);
-                });
-
-                showToast(`✅ تم تفعيل اشتراك ${planId} (شهرياً) بنجاح!`);
-                closeSubscriptionConfirmModal();
-                await updateUI();
-                updateSubscriptionUI();
-            } catch (e) {
-                showToast('❌ ' + (e.message || 'حدث خطأ'));
-                console.error(e);
-                closeSubscriptionConfirmModal();
-            }
-        }
-
-        // ===== تعديل دالة subscribeToPlan لاستخدام النافذة المخصصة بدلاً من confirm =====
-        async function subscribeToPlan(planId) {
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-
-            const freshDoc = await db.collection('users').doc(userData.telegramId).get();
-            if (!freshDoc.exists) { showToast('حدث خطأ'); return; }
-            const freshData = freshDoc.data();
-            const sub = freshData.subscription || {};
-
-            if (sub.status === 'active' && sub.plan === planId) {
-                showToast(`أنت مشترك بالفعل في خطة ${planId}`);
-                return;
-            }
-
-            if (sub.status === 'active') {
-                if (!confirm(`لديك اشتراك نشط في خطة ${sub.plan}. هل تريد التبديل إلى ${planId}؟`)) return;
-                await db.collection('users').doc(userData.telegramId).update({
-                    'subscription.status': 'inactive',
-                    'subscription.plan': null,
-                    'subscription.startDate': null,
-                    'subscription.endDate': null
-                });
-                if (userData.subscription) {
-                    userData.subscription.status = 'inactive';
-                    userData.subscription.plan = null;
-                }
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                await subscribeToPlan(planId);
-                return;
-            }
-
-            const prices = {
-                starter: 300,
-                basic: 500,
-                advanced: 750,
-                premium: 1500,
-                pro: 3500
-            };
-
-            const price = prices[planId];
-            if (!price) { showToast('خطة غير معروفة'); return; }
-
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
-            if (balance < price) {
-                showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
-                return;
-            }
-
-            showSubscriptionConfirmModal(planId, price);
-        }
-
-        // ============================================================
-        // VERIFICATION (مع نافذة تأكيد مخصصة)
-        // ============================================================
-        function updateVerificationUI() {
-            if (!userData) return;
-            const verified = userData.verified || false;
-            const expiry = userData.verificationExpiry;
-            const btn = document.querySelector('.vc-btn');
-            const priceSpan = document.querySelector('.vc-price');
-
-            if (!btn) return;
-
-            if (verified && expiry) {
-                const expiryDate = expiry.toDate ? expiry.toDate() : new Date(expiry);
-                const now = new Date();
-                if (expiryDate > now) {
-                    const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
-                    btn.innerHTML = `<i class="fas fa-check-circle"></i> موثق (متبقي ${daysLeft} يوم)`;
-                    btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
-                    btn.disabled = false;
-                    btn.style.cursor = 'pointer';
-                    btn.onclick = function() { requestVerification(); };
-                    if (priceSpan) {
-                        priceSpan.style.display = 'none';
-                    }
-                } else {
-                    btn.innerHTML = '<i class="fas fa-clock"></i> انتهى التوثيق - جدد الآن';
-                    btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-                    btn.disabled = false;
-                    btn.style.cursor = 'pointer';
-                    btn.onclick = function() { requestVerification(); };
-                    if (priceSpan) {
-                        priceSpan.style.display = 'inline-block';
-                        priceSpan.innerHTML = '100 <small>دج</small>';
-                        priceSpan.style.background = '#fef3c7';
-                        priceSpan.style.color = '#b45309';
-                    }
-                }
-            } else {
-                btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
-                btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
-                btn.disabled = false;
-                btn.style.cursor = 'pointer';
-                btn.onclick = function() { requestVerification(); };
-                if (priceSpan) {
-                    priceSpan.style.display = 'inline-block';
-                    priceSpan.innerHTML = '100 <small>دج</small>';
-                    priceSpan.style.background = '#eff6ff';
-                    priceSpan.style.color = '#2563eb';
-                }
-            }
-            updateVerificationStatus();
-        }
-
-        // ===== دوال نافذة تأكيد التوثيق =====
-        function showVerificationConfirmModal(isRenewal) {
-            const modal = document.getElementById('verificationConfirmModal');
-            const detailsContainer = document.getElementById('verificationConfirmDetails');
-            const price = 100;
-
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
-
-            detailsContainer.innerHTML = `
-                <div class="detail-row">
-                    <span class="label">النوع</span>
-                    <span class="value">${isRenewal ? 'تجديد التوثيق' : 'توثيق الحساب'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">المبلغ</span>
-                    <span class="value dzd-color">${price.toFixed(2)} DZD</span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">المدة</span>
-                    <span class="value">شهر واحد</span>
-                </div>
-                <div class="detail-row" style="border-bottom:none;">
-                    <span class="label">رصيدك المتاح</span>
-                    <span class="value">${balance.toFixed(2)} DZD</span>
-                </div>
-            `;
-
-            pendingVerificationData = { isRenewal };
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeVerificationConfirmModal() {
-            const modal = document.getElementById('verificationConfirmModal');
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            pendingVerificationData = null;
-        }
-
-        async function confirmVerificationSubmit() {
-            if (!pendingVerificationData) {
-                showToast('حدث خطأ، حاول مرة أخرى');
-                return;
-            }
-
-            const { isRenewal } = pendingVerificationData;
-            const price = 100;
-
-            try {
-                const now = new Date();
-                const expiryDate = new Date(now);
-                expiryDate.setMonth(expiryDate.getMonth() + 1);
-
-                await db.runTransaction(async (t) => {
-                    const ref = db.collection('users').doc(userData.telegramId);
-                    const doc = await t.get(ref);
-                    if (!doc.exists) throw new Error('غير موجود');
-
-                    let bal = (doc.data().wallets?.dzd || 0) + (doc.data().wallets?.dzdReward || 0) + (doc.data().wallets?.dzdReferral || 0);
-                    if (bal < price) throw new Error('رصيد غير كاف');
-
-                    let rem = price;
-                    const m = doc.data().wallets?.dzd || 0,
-                        r = doc.data().wallets?.dzdReward || 0,
-                        refr = doc.data().wallets?.dzdReferral || 0;
-                    const fm = Math.min(rem, m);
-                    rem -= fm;
-                    const fr = Math.min(rem, r);
-                    rem -= fr;
-                    const fref = Math.min(rem, refr);
-                    rem -= fref;
-
-                    const updates = {
-                        'wallets.dzd': m - fm,
-                        'wallets.dzdReward': r - fr,
-                        'wallets.dzdReferral': refr - fref,
-                        'verified': true,
-                        'verificationExpiry': expiryDate,
-                        'transactions': firebase.firestore.FieldValue.arrayUnion({
-                            type: 'verification',
-                            amount: price,
-                            currency: 'DZD',
-                            description: isRenewal ? `تجديد التوثيق (شهر)` : `توثيق الحساب (شهر)`,
-                            timestamp: new Date(),
-                            status: 'completed',
-                            expiryDate: expiryDate
-                        })
-                    };
-                    t.update(ref, updates);
-                });
-
-                showToast(isRenewal ? '✅ تم تجديد التوثيق بنجاح!' : '✅ تم توثيق حسابك بنجاح!');
-                closeVerificationConfirmModal();
-                await updateUI();
-                updateVerificationUI();
-                updateVerificationStatus();
-            } catch (e) {
-                showToast('❌ ' + (e.message || 'حدث خطأ'));
-                console.error(e);
-                closeVerificationConfirmModal();
-            }
-        }
-
-        // ===== تعديل دالة requestVerification لاستخدام النافذة المخصصة =====
-        async function requestVerification() {
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-
-            if (userData.verified && userData.verificationExpiry) {
-                const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData.verificationExpiry);
-                if (expiry > new Date()) {
-                    const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24));
-                    if (!confirm(`التوثيق لا يزال نشطاً (متبقي ${daysLeft} يوم). هل تريد التجديد مبكراً؟`)) {
-                        return;
-                    }
-                }
-            }
-
-            const price = 100;
-            const balance = (userData.wallets?.dzd || 0) + (userData.wallets?.dzdReward || 0) + (userData.wallets?.dzdReferral || 0);
-            if (balance < price) {
-                showToast(`⚠️ رصيد غير كافٍ! تحتاج ${price} DZD`);
-                return;
-            }
-
-            const isRenewal = userData.verified && userData.verificationExpiry;
-
-            showVerificationConfirmModal(isRenewal);
+            if (tabId === 'subscription') updateSubscriptionUI();
+            if (tabId === 'verification') updateVerificationUI();
         }
 
         // ============================================================
@@ -6752,14 +6045,47 @@
             }
             updateSwapUI();
             calculateSwapResult();
+            // ربط حدث حساب الرسوم
+            const wd = document.getElementById('withdrawAmount');
+            if (wd) wd.addEventListener('input', calculateWithdrawFee);
+            // ربط حدث التبرع
+            const donationInput = document.getElementById('donationAmountInput');
+            const donationSlider = document.getElementById('donationRangeSlider');
+            if (donationInput && donationSlider) {
+                donationInput.addEventListener('input', function() {
+                    let val = parseFloat(this.value) || 0;
+                    val = Math.max(parseFloat(this.min) || 0, Math.min(parseFloat(this.max) || 0, val));
+                    donationSlider.value = val;
+                    updateDonationUI();
+                });
+                donationSlider.addEventListener('input', function() {
+                    const val = parseFloat(this.value);
+                    donationInput.value = val;
+                    updateDonationUI();
+                });
+            }
+            // ربط أحداث المودال الاستثماري
+            const modalInput = document.getElementById('modalAmountInput');
+            const modalSlider = document.getElementById('modalRangeSlider');
+            if (modalInput && modalSlider) {
+                modalInput.addEventListener('input', function() {
+                    let val = parseFloat(this.value) || 0;
+                    val = Math.max(parseFloat(this.min) || 0, Math.min(parseFloat(this.max) || 0, val));
+                    modalSlider.value = val;
+                    updateModalCalculations();
+                });
+                modalSlider.addEventListener('input', function() {
+                    const val = parseFloat(this.value);
+                    modalInput.value = val;
+                    updateModalCalculations();
+                });
+            }
         });
 
-        console.log('🚀 Crynova - باقة استثمار دائمة (0.2% يومياً، 5,000 - 200,000 دج) + باقة USDT (0.05%، 10 - 5,000 USDT)');
-        console.log('💱 أسعار الصرف: 1 USDT = 243 DZD  |  263 DZD = 1 USDT (مخفية عن المستخدم)');
-        console.log('✅ تم إزالة مكافأة أول استثمار من البطاقتين والمودال والمنطق');
-        console.log('✅ تم تعديل عرض إجمالي المستثمر والأرباح ليشمل DZD و USDT بشكل منفصل');
-        console.log('✅ تم تفعيل واجهة حظر الحساب (banned/disabled)');
-        console.log('✅ تم تفعيل تقييد الإيداع والسحب (restricted) مع عرض تحذير مرئي');
+        console.log('🚀 Crynova - تم التحديث مع ميزة التجديد التلقائي للتوثيق');
+        console.log('✅ يمكن للمستخدم تفعيل/إلغاء التجديد التلقائي من صفحة التوثيق');
+        console.log('🔄 سيتم التجديد التلقائي قبل انتهاء الصلاحية بيوم واحد (إذا كان الرصيد كافياً)');
     </script>
+
 </body>
 </html>
