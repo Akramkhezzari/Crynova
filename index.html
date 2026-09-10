@@ -1368,6 +1368,12 @@
         .verify-card .vc-btn i {
             font-size: 1.2rem;
         }
+        .verify-card .vc-btn:disabled {
+            opacity: 0.7;
+            cursor: default;
+            transform: none !important;
+            box-shadow: none !important;
+        }
 
         .verify-card .vc-note {
             font-size: 0.7rem;
@@ -3601,7 +3607,7 @@
                             <button class="vc-btn" id="verificationActionBtn" onclick="requestVerification()">
                                 <i class="fas fa-badge-check"></i> وثّق حسابي الآن
                             </button>
-                            <p class="vc-note">* اشتراك شهري قابل للتجديد (يدوياً أو تلقائياً)</p>
+                            <p class="vc-note">* اشتراك شهري قابل للتجديد تلقائياً (بدون تدخل يدوي)</p>
                         </div>
                     </div>
                 </div>
@@ -4518,7 +4524,6 @@
             updateSwapBalances();
             updateSubscriptionUI();
             updateRestrictedUI();
-            // تحديث شارات التوثيق
             updateVerificationBadges();
         }
 
@@ -4534,7 +4539,6 @@
             updateVerificationBadges();
         }
 
-        // ===== NEW: Update verification badges =====
         function updateVerificationBadges() {
             const isVerified = userData && userData.verified && userData.verificationExpiry;
             let isValid = false;
@@ -5656,7 +5660,7 @@
         }
 
         // ============================================================
-        // VERIFICATION (مع دعم التجديد التلقائي والشارات)
+        // VERIFICATION (مع دعم التجديد التلقائي والشارات - تم إزالة التجديد اليدوي)
         // ============================================================
         async function toggleAutoRenew() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -5768,21 +5772,17 @@
                 const expiryDate = expiry.toDate ? expiry.toDate() : new Date(expiry);
                 const now = new Date();
                 if (expiryDate > now) {
+                    // ===== الحالة: موثق ونشط =====
                     const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
-                    if (container) container.style.display = 'flex';
-                    btn.innerHTML = `<i class="fas fa-sync-alt"></i> تجديد يدوي (متبقي ${daysLeft} يوم)`;
-                    btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
-                    btn.disabled = false;
-                    btn.style.cursor = 'pointer';
-                    btn.onclick = function() {
-                        if (autoRenew) {
-                            if (confirm('التجديد التلقائي مفعّل. هل تريد تجديداً يدوياً الآن؟')) {
-                                requestVerification();
-                            }
-                        } else {
-                            requestVerification();
-                        }
-                    };
+                    if (container) container.style.display = 'flex'; // إظهار مفتاح التجديد التلقائي
+
+                    // زر معطل يعرض حالة التوثيق (بدون تجديد يدوي)
+                    btn.innerHTML = `<i class="fas fa-check-circle"></i> ✅ موثق (متبقي ${daysLeft} يوم)`;
+                    btn.style.background = 'var(--success)';
+                    btn.disabled = true;
+                    btn.style.cursor = 'default';
+                    btn.onclick = null;
+
                     if (priceSpan) {
                         priceSpan.style.display = 'inline-block';
                         priceSpan.innerHTML = '100 <small>دج</small>';
@@ -5790,8 +5790,9 @@
                         priceSpan.style.color = '#2563eb';
                     }
                 } else {
+                    // ===== الحالة: انتهت الصلاحية =====
                     if (container) container.style.display = 'none';
-                    btn.innerHTML = '<i class="fas fa-clock"></i> انتهى - جدد الآن';
+                    btn.innerHTML = '<i class="fas fa-clock"></i> انتهى - وثّق الآن';
                     btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
                     btn.disabled = false;
                     btn.style.cursor = 'pointer';
@@ -5804,6 +5805,7 @@
                     }
                 }
             } else {
+                // ===== الحالة: غير موثق =====
                 if (container) container.style.display = 'none';
                 btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
                 btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
@@ -5918,12 +5920,13 @@
 
         async function requestVerification() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+            // منع التجديد اليدوي إذا كان الحساب موثقاً ونشطاً
             if (userData.verified && userData.verificationExpiry) {
                 const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData
                     .verificationExpiry);
                 if (expiry > new Date()) {
-                    const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24));
-                    if (!confirm(`التوثيق لا يزال نشطاً (متبقي ${daysLeft} يوم). هل تريد التجديد مبكراً؟`)) { return; }
+                    showToast('✅ حسابك موثق بالفعل! يتم التجديد تلقائياً إذا كان الرصيد كافياً.');
+                    return;
                 }
             }
             const price = 100;
@@ -6107,8 +6110,9 @@
             }
         });
 
-        console.log('🚀 Crynova - تم إضافة شارة التوثيق الزرقاء على صورة الملف الشخصي وفي الهيدر');
-        console.log('✅ تظهر الشارة فقط عند تفعيل التوثيق وصلاحية سارية');
+        console.log('🚀 Crynova - تم إزالة التجديد اليدوي نهائياً');
+        console.log('✅ الاعتماد الآن على التجديد التلقائي فقط بعد التوثيق الأولي');
+        console.log('🔵 شارة التوثيق الزرقاء تظهر في الملف الشخصي والهيدر');
     </script>
 
 </body>
