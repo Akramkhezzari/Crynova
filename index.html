@@ -1192,131 +1192,77 @@
         }
 
         /* ============================================================
-           بطاقة توثيق الحساب (Verification Card)
+           بطاقة توثيق الحساب (بنمط الاشتراكات)
            ============================================================ */
-        .verify-card {
-            max-width: 450px;
-            width: 100%;
-            margin: 0 auto;
-            background: var(--bg-card);
-            border-radius: 28px;
-            overflow: hidden;
-            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.12);
-            border: 1px solid rgba(59, 130, 246, 0.15);
-            transition: transform 0.25s ease, box-shadow 0.3s ease;
-            font-family: 'Tajawal', 'Cairo', sans-serif;
-        }
-        .verify-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 24px 56px rgba(59, 130, 246, 0.18);
-        }
-
-        .verify-card .vc-stripe {
-            height: 6px;
+        .pricing-widget .pc-verification .pc-stripe {
             background: linear-gradient(90deg, #2563eb, #7c3aed, #2563eb);
             background-size: 200% 100%;
             animation: vcShimmer 3s ease-in-out infinite;
         }
         @keyframes vcShimmer {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        .verify-card .vc-body {
-            padding: 2rem 2rem 1.8rem;
-            text-align: center;
-        }
-
-        .verify-card .vc-icon {
-            display: inline-block;
-            position: relative;
-            font-size: 3.8rem;
+        .pricing-widget .pc-verification .pc-name-badge i {
             color: #2563eb;
-            background: linear-gradient(135deg, #eff6ff, #ede9fe);
-            width: 90px;
-            height: 90px;
-            line-height: 90px;
-            border-radius: 50%;
-            margin-bottom: 0.8rem;
-            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.20);
         }
-        .verify-card .vc-icon .fa-shield-alt {
-            font-size: 3.2rem;
-            vertical-align: middle;
+        .pricing-widget .pc-verification .pc-name-badge h3 {
+            color: #1e40af;
         }
-        .verify-card .vc-check {
-            position: absolute;
-            bottom: 2px;
-            right: -2px;
-            background: #22c55e;
-            color: #fff;
-            font-size: 0.9rem;
-            width: 28px;
-            height: 28px;
-            line-height: 28px;
-            border-radius: 50%;
-            border: 3px solid var(--bg-card);
-            box-shadow: 0 4px 10px rgba(34, 197, 94, 0.4);
-        }
-        .verify-card .vc-check i {
-            font-size: 0.7rem;
-            vertical-align: middle;
-        }
-
-        .verify-card .vc-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 0.8rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .verify-card .vc-header h3 {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            margin: 0;
-        }
-        .verify-card .vc-price {
-            font-size: 2.2rem;
-            font-weight: 800;
+        .pricing-widget .pc-verification .pc-price {
             color: #2563eb;
             background: #eff6ff;
-            padding: 0.1rem 1.2rem;
+            padding: 0.1rem 1rem;
             border-radius: 60px;
-            line-height: 1.4;
+            font-size: 1.6rem;
         }
-        .verify-card .vc-price small {
-            font-size: 0.9rem;
-            font-weight: 500;
+        .pricing-widget .pc-verification .pc-price small {
             color: #4a6a9f;
         }
-
-        .verify-card .vc-features {
-            list-style: none;
-            padding: 0;
-            margin: 1.2rem 0 1.6rem;
-            text-align: right;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.4rem 0.8rem;
-            background: var(--bg-input);
-            padding: 0.8rem 1.2rem;
-            border-radius: 16px;
-        }
-        .verify-card .vc-features li {
-            font-size: 0.85rem;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 500;
-        }
-        .verify-card .vc-features li i {
+        .pricing-widget .pc-verification .pc-features span i {
             color: #2563eb;
-            font-size: 0.85rem;
-            width: 1.2rem;
+        }
+
+        .pricing-widget .pc-verification .pc-btn {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #fff;
+        }
+        .pricing-widget .pc-verification .pc-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1d4ed8, #6d28d9);
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+        }
+        .pricing-widget .pc-verification .pc-btn:disabled {
+            opacity: 1;
+            cursor: default;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .pricing-widget .pc-verification .pc-note {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 0.8rem;
+        }
+
+        .pricing-widget .pc-verification .pc-sticker-verified {
+            background: #2563eb;
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 0.15rem 0.7rem;
+            border-radius: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+        }
+
+        .pricing-widget .pc-verification .auto-renew-row {
+            margin: 0 0 14px 0;
         }
 
         /* ===== Auto-Renew Toggle Row ===== */
@@ -1343,82 +1289,7 @@
             font-size: 16px;
         }
 
-        .verify-card .vc-btn {
-            width: 100%;
-            padding: 0.8rem 0;
-            border: none;
-            border-radius: 60px;
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #fff;
-            background: linear-gradient(135deg, #2563eb, #7c3aed);
-            cursor: pointer;
-            transition: all 0.25s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.6rem;
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.30);
-        }
-        .verify-card .vc-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 32px rgba(37, 99, 235, 0.40);
-        }
-        .verify-card .vc-btn i {
-            font-size: 1.2rem;
-        }
-        .verify-card .vc-btn:disabled {
-            opacity: 0.7;
-            cursor: default;
-            transform: none !important;
-            box-shadow: none !important;
-        }
-
-        .verify-card .vc-note {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-top: 0.8rem;
-            font-weight: 400;
-        }
-
         @media (max-width: 480px) {
-            .verify-card .vc-body {
-                padding: 1.5rem 1.2rem;
-            }
-            .verify-card .vc-header h3 {
-                font-size: 1.3rem;
-            }
-            .verify-card .vc-price {
-                font-size: 1.8rem;
-                padding: 0.1rem 1rem;
-            }
-            .verify-card .vc-icon {
-                width: 70px;
-                height: 70px;
-                line-height: 70px;
-                font-size: 2.8rem;
-            }
-            .verify-card .vc-icon .fa-shield-alt {
-                font-size: 2.5rem;
-            }
-            .verify-card .vc-check {
-                width: 24px;
-                height: 24px;
-                line-height: 24px;
-                font-size: 0.7rem;
-            }
-            .verify-card .vc-features {
-                grid-template-columns: 1fr;
-                gap: 0.2rem;
-            }
-            .verify-card .vc-features li {
-                font-size: 0.8rem;
-            }
-            .verify-card .vc-btn {
-                font-size: 0.95rem;
-                padding: 0.7rem 0;
-            }
             .auto-renew-row {
                 padding: 8px 12px;
                 font-size: 13px;
@@ -3571,50 +3442,65 @@
                     </div>
                 </div>
 
-                <!-- ===== VERIFICATION TAB ===== -->
+                <!-- ===== VERIFICATION TAB - بنمط الاشتراكات ===== -->
                 <div class="profile-tab-panel" id="panel-verification">
-                    <div class="verify-card">
-                        <div class="vc-stripe"></div>
-                        <div class="vc-body">
-                            <div class="vc-icon">
-                                <i class="fas fa-shield-alt"></i>
-                                <span class="vc-check"><i class="fas fa-check"></i></span>
-                            </div>
-                            <div class="vc-header">
-                                <h3>توثيق الحساب</h3>
-                                <span class="vc-price">100 <small>دج</small></span>
-                            </div>
-                            <ul class="vc-features">
-                                <li><i class="fas fa-check-circle"></i> شارة موثّقة زرقاء</li>
-                                <li><i class="fas fa-check-circle"></i> زيادة الثقة والمصداقية</li>
-                                <li><i class="fas fa-check-circle"></i> أولوية في نتائج البحث</li>
-                                <li><i class="fas fa-check-circle"></i> حماية إضافية للحساب</li>
-                                <li><i class="fas fa-check-circle"></i> ظهور مميز للملف الشخصي</li>
-                            </ul>
+                    <div class="pricing-widget">
+                        <div class="pc-card pc-verification">
+                            <div class="pc-stripe"></div>
+                            <div class="pc-body">
+                                <!-- العنوان + السعر -->
+                                <div class="pc-top">
+                                    <div class="pc-name-badge">
+                                        <i class="fas fa-shield-alt"></i>
+                                        <h3>توثيق الحساب</h3>
+                                        <span class="pc-sticker-verified">
+                                            <i class="fas fa-check"></i> شارة زرقاء
+                                        </span>
+                                    </div>
+                                    <span class="pc-price">
+                                        100 <small>دج</small>
+                                        <span style="font-size:0.6rem;color:var(--text-muted);font-weight:500;">/ شهرياً</span>
+                                    </span>
+                                </div>
 
-                            <!-- ===== Auto-Renew Toggle ===== -->
-                            <div class="auto-renew-row" id="autoRenewContainer">
-                                <span class="label">
-                                    <i class="fas fa-sync-alt"></i> تفعيل التجديد التلقائي
-                                </span>
-                                <label style="position:relative; display:inline-block; width:44px; height:24px;">
-                                    <input type="checkbox" id="autoRenewToggle" onchange="toggleAutoRenew()" style="opacity:0; width:0; height:0;">
-                                    <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:var(--border); border-radius:24px; transition:0.3s;"></span>
-                                    <span style="position:absolute; content:''; height:18px; width:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.3s; box-shadow:var(--shadow-sm);" id="autoRenewSlider"></span>
-                                </label>
-                            </div>
+                                <!-- المزايا -->
+                                <div class="pc-features">
+                                    <span><i class="fas fa-check-circle"></i> شارة موثّقة زرقاء</span>
+                                    <span><i class="fas fa-check-circle"></i> زيادة الثقة والمصداقية</span>
+                                    <span><i class="fas fa-check-circle"></i> أولوية في نتائج البحث</span>
+                                    <span><i class="fas fa-check-circle"></i> حماية إضافية للحساب</span>
+                                    <span><i class="fas fa-check-circle"></i> ظهور مميز للملف الشخصي</span>
+                                </div>
 
-                            <button class="vc-btn" id="verificationActionBtn" onclick="requestVerification()">
-                                <i class="fas fa-badge-check"></i> وثّق حسابي الآن
-                            </button>
-                            <p class="vc-note">* اشتراك شهري قابل للتجديد تلقائياً (بدون تدخل يدوي)</p>
+                                <!-- مفتاح التجديد التلقائي -->
+                                <div class="auto-renew-row" id="autoRenewContainer">
+                                    <span class="label">
+                                        <i class="fas fa-sync-alt"></i> تفعيل التجديد التلقائي
+                                    </span>
+                                    <label style="position:relative; display:inline-block; width:44px; height:24px;">
+                                        <input type="checkbox" id="autoRenewToggle" onchange="toggleAutoRenew()"
+                                               style="opacity:0; width:0; height:0;">
+                                        <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0;
+                                                     background:var(--border); border-radius:24px; transition:0.3s;"></span>
+                                        <span style="position:absolute; content:''; height:18px; width:18px; left:3px; bottom:3px;
+                                                     background:white; border-radius:50%; transition:0.3s; box-shadow:var(--shadow-sm);"
+                                              id="autoRenewSlider"></span>
+                                    </label>
+                                </div>
+
+                                <!-- زر التوثيق -->
+                                <button class="pc-btn" id="verificationActionBtn" onclick="requestVerification()">
+                                    <i class="fas fa-badge-check"></i> وثّق حسابي الآن
+                                </button>
+                                <p class="pc-note">* اشتراك شهري قابل للتجديد تلقائياً (بدون تدخل يدوي)</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="profile-tab-panel" id="panel-subscription">
                     <!-- ===== بطاقة الاشتراك الحالي ===== -->
-                    <div id="currentSubscriptionCard" style="display:none;" class="card" style="border:2px solid var(--accent);">
+                    <div id="currentSubscriptionCard" class="card" style="display:none; border:2px solid var(--accent);">
                         <div class="flex-between">
                             <div>
                                 <div style="font-weight:800;font-size:18px;">اشتراكك الحالي: <span id="currentPlanName">-</span></div>
@@ -5660,7 +5546,7 @@
         }
 
         // ============================================================
-        // VERIFICATION (مع دعم التجديد التلقائي والشارات - تم إزالة التجديد اليدوي)
+        // VERIFICATION (مع دعم التجديد التلقائي والشارات)
         // ============================================================
         async function toggleAutoRenew() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -5759,7 +5645,7 @@
             const container = document.getElementById('autoRenewContainer');
             const toggle = document.getElementById('autoRenewToggle');
             const btn = document.getElementById('verificationActionBtn');
-            const priceSpan = document.querySelector('.vc-price');
+            const priceSpan = document.querySelector('.pc-verification .pc-price');
             if (!btn) return;
 
             const verified = userData.verified || false;
@@ -5774,13 +5660,14 @@
                 if (expiryDate > now) {
                     // ===== الحالة: موثق ونشط =====
                     const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
-                    if (container) container.style.display = 'flex'; // إظهار مفتاح التجديد التلقائي
+                    if (container) container.style.display = 'flex';
 
-                    // زر معطل يعرض حالة التوثيق (بدون تجديد يدوي)
                     btn.innerHTML = `<i class="fas fa-check-circle"></i> ✅ موثق (متبقي ${daysLeft} يوم)`;
-                    btn.style.background = 'var(--success)';
+                    btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                    btn.style.color = '#fff';
                     btn.disabled = true;
                     btn.style.cursor = 'default';
+                    btn.style.opacity = '1';
                     btn.onclick = null;
 
                     if (priceSpan) {
@@ -5796,6 +5683,7 @@
                     btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
                     btn.disabled = false;
                     btn.style.cursor = 'pointer';
+                    btn.style.opacity = '1';
                     btn.onclick = function() { requestVerification(); };
                     if (priceSpan) {
                         priceSpan.style.display = 'inline-block';
@@ -5811,6 +5699,7 @@
                 btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
                 btn.disabled = false;
                 btn.style.cursor = 'pointer';
+                btn.style.opacity = '1';
                 btn.onclick = function() { requestVerification(); };
                 if (priceSpan) {
                     priceSpan.style.display = 'inline-block';
@@ -5920,7 +5809,6 @@
 
         async function requestVerification() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-            // منع التجديد اليدوي إذا كان الحساب موثقاً ونشطاً
             if (userData.verified && userData.verificationExpiry) {
                 const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData
                     .verificationExpiry);
@@ -6110,8 +5998,8 @@
             }
         });
 
-        console.log('🚀 Crynova - تم إزالة التجديد اليدوي نهائياً');
-        console.log('✅ الاعتماد الآن على التجديد التلقائي فقط بعد التوثيق الأولي');
+        console.log('🚀 Crynova - بطاقة التوثيق بنمط بطاقات الاشتراك');
+        console.log('✅ التجديد التلقائي فقط بعد التوثيق الأولي');
         console.log('🔵 شارة التوثيق الزرقاء تظهر في الملف الشخصي والهيدر');
     </script>
 
