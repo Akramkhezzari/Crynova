@@ -5,16 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Crynova - استثمر واربح (DZD & USDT)</title>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js">
+    </script>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js">
+    </script>
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet" />
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ============================================================
+           RESET & VARIABLES - LIGHT THEME
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         :root {
             --bg-primary: #f0f4f8;
@@ -23,14 +40,17 @@
             --bg-card-hover: #f8faff;
             --bg-input: #f0f4f8;
             --bg-nav: #ffffff;
+
             --text-primary: #1a1a2e;
             --text-secondary: #4a4a6a;
             --text-muted: #8a8aaa;
             --text-white: #ffffff;
+
             --accent: #6c5ce7;
             --accent-light: #a29bfe;
             --accent-glow: rgba(108, 92, 231, 0.15);
             --accent-gradient: linear-gradient(135deg, #6c5ce7, #a29bfe);
+
             --success: #00b894;
             --success-light: rgba(0, 184, 148, 0.12);
             --warning: #fdcb6e;
@@ -45,21 +65,26 @@
             --usdt-color: #26a17b;
             --binance-color: #f3ba2f;
             --redotpay-color: #8b5cf6;
+
             --border: #e2e8f0;
             --border-light: #f0f4f8;
             --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
             --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.08);
             --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
             --shadow-glow: 0 4px 24px rgba(108, 92, 231, 0.25);
+
             --radius-sm: 10px;
             --radius-md: 16px;
             --radius-lg: 24px;
             --radius-xl: 32px;
+
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+        }
 
         body {
             font-family: 'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -72,13 +97,27 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-primary); }
-        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent-light); }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-light);
+        }
 
-        .app-container { max-width: 480px; margin: 0 auto; padding: 16px 16px 24px; }
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px 16px 24px;
+        }
 
+        /* HEADER */
         .app-header {
             display: flex;
             justify-content: space-between;
@@ -99,7 +138,11 @@
             -webkit-text-fill-color: var(--accent);
             font-size: 24px;
         }
-        .app-header .header-actions { display: flex; gap: 8px; align-items: center; }
+        .app-header .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
         .app-header .header-actions button {
             width: 40px;
             height: 40px;
@@ -115,16 +158,32 @@
             align-items: center;
             justify-content: center;
         }
-        .app-header .header-actions button:hover { transform: scale(1.05); box-shadow: var(--shadow-md); }
-
-        .page { display: none; animation: fadeSlideIn 0.4s ease; }
-        .page.active { display: block; }
-
-        @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(24px); }
-            to { opacity: 1; transform: translateY(0); }
+        .app-header .header-actions button:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
         }
 
+        /* PAGES */
+        .page {
+            display: none;
+            animation: fadeSlideIn 0.4s ease;
+        }
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* CARDS */
         .card {
             background: var(--bg-card);
             border-radius: var(--radius-md);
@@ -134,21 +193,56 @@
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
         }
-        .card:hover { box-shadow: var(--shadow-md); border-color: var(--accent-light); }
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent-light);
+        }
         .card.gradient {
             background: var(--accent-gradient);
             border: none;
             color: var(--text-white);
         }
-        .card.gradient .card-title i, .card.gradient .text-muted, .card.gradient .balance-label { color: rgba(255, 255, 255, 0.8); }
-        .card.gradient .balance-large { -webkit-text-fill-color: white; background: none; }
-        .card.dzd-gradient { background: linear-gradient(135deg, #e17055, #d63031); border: none; color: var(--text-white); }
-        .card.dzd-gradient .card-title i, .card.dzd-gradient .text-muted, .card.dzd-gradient .balance-label { color: rgba(255, 255, 255, 0.8); }
-        .card.gold-gradient { background: linear-gradient(135deg, #f9a825, #f57f17); border: none; color: var(--text-white); }
-        .card.gold-gradient .card-title i, .card.gold-gradient .text-muted, .card.gold-gradient .balance-label { color: rgba(255, 255, 255, 0.8); }
-        .card.usdt-gradient { background: linear-gradient(135deg, #26a17b, #1f8b6b); border: none; color: var(--text-white); }
-        .card.usdt-gradient .card-title i, .card.usdt-gradient .text-muted, .card.usdt-gradient .balance-label { color: rgba(255, 255, 255, 0.8); }
+        .card.gradient .card-title i,
+        .card.gradient .text-muted,
+        .card.gradient .balance-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .card.gradient .balance-large {
+            -webkit-text-fill-color: white;
+            background: none;
+        }
+        .card.dzd-gradient {
+            background: linear-gradient(135deg, #e17055, #d63031);
+            border: none;
+            color: var(--text-white);
+        }
+        .card.dzd-gradient .card-title i,
+        .card.dzd-gradient .text-muted,
+        .card.dzd-gradient .balance-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .card.gold-gradient {
+            background: linear-gradient(135deg, #f9a825, #f57f17);
+            border: none;
+            color: var(--text-white);
+        }
+        .card.gold-gradient .card-title i,
+        .card.gold-gradient .text-muted,
+        .card.gold-gradient .balance-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .card.usdt-gradient {
+            background: linear-gradient(135deg, #26a17b, #1f8b6b);
+            border: none;
+            color: var(--text-white);
+        }
+        .card.usdt-gradient .card-title i,
+        .card.usdt-gradient .text-muted,
+        .card.usdt-gradient .balance-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
 
+        /* stats-bar retained for other pages */
         .stats-bar {
             display: flex;
             justify-content: space-around;
@@ -160,16 +254,54 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
         }
-        .stats-bar .stat-item { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center; }
-        .stats-bar .stat-item .stat-label { font-size: 14px; color: var(--text-secondary); font-weight: 600; }
-        .stats-bar .stat-item .stat-label i { margin-left: 4px; color: var(--accent); }
-        .stats-bar .stat-item .stat-value { font-size: 20px; font-weight: 900; color: var(--text-primary); min-width: 30px; text-align: center; }
-        .stats-bar .stat-divider { width: 1px; height: 30px; background: var(--border); }
+        .stats-bar .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+        .stats-bar .stat-item .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .stats-bar .stat-item .stat-label i {
+            margin-left: 4px;
+            color: var(--accent);
+        }
+        .stats-bar .stat-item .stat-value {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text-primary);
+            min-width: 30px;
+            text-align: center;
+        }
+        .stats-bar .stat-divider {
+            width: 1px;
+            height: 30px;
+            background: var(--border);
+        }
 
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-        .card-title { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-        .card-title i { color: var(--accent); font-size: 18px; }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title i {
+            color: var(--accent);
+            font-size: 18px;
+        }
 
+        /* BALANCE */
         .balance-large {
             font-size: 40px;
             font-weight: 900;
@@ -179,12 +311,33 @@
             display: inline-block;
             letter-spacing: -1px;
         }
-        .balance-large.white { -webkit-text-fill-color: white; background: none; }
-        .balance-label { color: var(--text-secondary); font-size: 14px; font-weight: 600; }
-        .balance-currency { font-size: 18px; font-weight: 700; color: var(--text-secondary); margin-right: 4px; }
+        .balance-large.white {
+            -webkit-text-fill-color: white;
+            background: none;
+        }
+        .balance-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .balance-currency {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-right: 4px;
+        }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        /* STAT BOXES */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
 
         .stat-box {
             background: var(--bg-input);
@@ -194,14 +347,37 @@
             transition: var(--transition);
             border: 1px solid transparent;
         }
-        .stat-box:hover { border-color: var(--accent-light); transform: translateY(-2px); }
-        .stat-box .number { font-size: 22px; font-weight: 800; color: var(--accent); }
-        .stat-box .number.dzd { color: var(--dzd-color); }
-        .stat-box .number.gold { color: var(--gold); }
-        .stat-box .number.usdt { color: var(--usdt-color); }
-        .stat-box .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; font-weight: 600; }
-        .stat-box .icon { font-size: 20px; margin-bottom: 4px; display: block; }
+        .stat-box:hover {
+            border-color: var(--accent-light);
+            transform: translateY(-2px);
+        }
+        .stat-box .number {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        .stat-box .number.dzd {
+            color: var(--dzd-color);
+        }
+        .stat-box .number.gold {
+            color: var(--gold);
+        }
+        .stat-box .number.usdt {
+            color: var(--usdt-color);
+        }
+        .stat-box .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-weight: 600;
+        }
+        .stat-box .icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+            display: block;
+        }
 
+        /* BUTTONS */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -220,33 +396,121 @@
             position: relative;
             overflow: hidden;
         }
-        .btn:active { transform: scale(0.96); }
+        .btn:active {
+            transform: scale(0.96);
+        }
 
-        .btn-primary { background: var(--accent-gradient); color: white; box-shadow: var(--shadow-glow); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(108, 92, 231, 0.35); }
-        .btn-success { background: var(--success); color: white; }
-        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 184, 148, 0.35); }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(225, 112, 85, 0.35); }
-        .btn-dzd { background: linear-gradient(135deg, #e17055, #d63031); color: white; box-shadow: 0 4px 24px rgba(225, 112, 85, 0.3); }
-        .btn-dzd:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(225, 112, 85, 0.4); }
-        .btn-gold { background: linear-gradient(135deg, #f9a825, #f57f17); color: white; box-shadow: 0 4px 24px rgba(249, 168, 37, 0.3); }
-        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(249, 168, 37, 0.4); }
-        .btn-usdt { background: linear-gradient(135deg, #26a17b, #1f8b6b); color: white; box-shadow: 0 4px 24px rgba(38, 161, 123, 0.3); }
-        .btn-usdt:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(38, 161, 123, 0.4); }
-        .btn-binance { background: linear-gradient(135deg, #f3ba2f, #e8a92e); color: #1a1a2e; box-shadow: 0 4px 24px rgba(243, 186, 47, 0.3); }
-        .btn-binance:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(243, 186, 47, 0.4); }
-        .btn-redotpay { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; box-shadow: 0 4px 24px rgba(139, 92, 246, 0.3); }
-        .btn-redotpay:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4); }
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(108, 92, 231, 0.35);
+        }
 
-        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text-primary); }
-        .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
-        .btn-ghost { background: var(--bg-input); color: var(--text-secondary); }
-        .btn-ghost:hover { background: var(--border); }
-        .btn-sm { padding: 10px 16px; font-size: 14px; }
-        .btn-xs { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
-        .btn-block { width: 100%; }
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 184, 148, 0.35);
+        }
 
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(225, 112, 85, 0.35);
+        }
+
+        .btn-dzd {
+            background: linear-gradient(135deg, #e17055, #d63031);
+            color: white;
+            box-shadow: 0 4px 24px rgba(225, 112, 85, 0.3);
+        }
+        .btn-dzd:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(225, 112, 85, 0.4);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #f9a825, #f57f17);
+            color: white;
+            box-shadow: 0 4px 24px rgba(249, 168, 37, 0.3);
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(249, 168, 37, 0.4);
+        }
+
+        .btn-usdt {
+            background: linear-gradient(135deg, #26a17b, #1f8b6b);
+            color: white;
+            box-shadow: 0 4px 24px rgba(38, 161, 123, 0.3);
+        }
+        .btn-usdt:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(38, 161, 123, 0.4);
+        }
+
+        .btn-binance {
+            background: linear-gradient(135deg, #f3ba2f, #e8a92e);
+            color: #1a1a2e;
+            box-shadow: 0 4px 24px rgba(243, 186, 47, 0.3);
+        }
+        .btn-binance:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(243, 186, 47, 0.4);
+        }
+
+        .btn-redotpay {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            box-shadow: 0 4px 24px rgba(139, 92, 246, 0.3);
+        }
+        .btn-redotpay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+        }
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .btn-ghost {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+        }
+        .btn-ghost:hover {
+            background: var(--border);
+        }
+
+        .btn-sm {
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+        .btn-xs {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+        .btn-block {
+            width: 100%;
+        }
+
+        /* COPY BUTTON */
         .copy-btn {
             background: var(--accent);
             color: white;
@@ -263,10 +527,18 @@
             gap: 6px;
             flex-shrink: 0;
         }
-        .copy-btn:hover { background: var(--accent-light); transform: scale(1.02); }
-        .copy-btn:active { transform: scale(0.95); }
-        .copy-btn.copied { background: var(--success); }
+        .copy-btn:hover {
+            background: var(--accent-light);
+            transform: scale(1.02);
+        }
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+        .copy-btn.copied {
+            background: var(--success);
+        }
 
+        /* PLAN CARDS (used in investments tab) */
         .plan-card {
             background: var(--bg-card);
             border-radius: var(--radius-md);
@@ -289,9 +561,18 @@
             opacity: 0;
             transition: var(--transition);
         }
-        .plan-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-        .plan-card:hover::before { opacity: 1; }
-        .plan-card.popular { border-color: var(--gold); background: rgba(249, 168, 37, 0.05); }
+        .plan-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .plan-card:hover::before {
+            opacity: 1;
+        }
+        .plan-card.popular {
+            border-color: var(--gold);
+            background: rgba(249, 168, 37, 0.05);
+        }
         .plan-card.popular .badge-popular {
             position: absolute;
             top: 12px;
@@ -303,13 +584,43 @@
             font-size: 11px;
             font-weight: 700;
         }
-        .plan-card .icon { font-size: 44px; display: block; text-align: center; margin-bottom: 8px; }
-        .plan-card .name { font-size: 20px; font-weight: 800; text-align: center; }
-        .plan-card .subtitle { text-align: center; color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
-        .plan-card .return { text-align: center; font-size: 28px; font-weight: 900; color: var(--accent); margin: 8px 0; }
-        .plan-card .return.dzd-return { color: var(--dzd-color); }
-        .plan-card .return small { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
-        .plan-card .features { list-style: none; padding: 0; margin: 12px 0 16px; }
+        .plan-card .icon {
+            font-size: 44px;
+            display: block;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .plan-card .name {
+            font-size: 20px;
+            font-weight: 800;
+            text-align: center;
+        }
+        .plan-card .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        .plan-card .return {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--accent);
+            margin: 8px 0;
+        }
+        .plan-card .return.dzd-return {
+            color: var(--dzd-color);
+        }
+        .plan-card .return small {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .plan-card .features {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0 16px;
+        }
         .plan-card .features li {
             padding: 6px 0;
             color: var(--text-secondary);
@@ -318,8 +629,14 @@
             align-items: center;
             gap: 10px;
         }
-        .plan-card .features li i { color: var(--success); font-size: 14px; width: 20px; text-align: center; }
+        .plan-card .features li i {
+            color: var(--success);
+            font-size: 14px;
+            width: 20px;
+            text-align: center;
+        }
 
+        /* BOTTOM NAVIGATION */
         .bottom-nav {
             position: fixed;
             bottom: 16px;
@@ -358,9 +675,17 @@
             position: relative;
             flex: 1;
         }
-        .nav-item i { font-size: 24px; margin-bottom: 2px; transition: var(--transition); }
-        .nav-item.active { color: var(--accent); }
-        .nav-item.active i { transform: scale(1.1); }
+        .nav-item i {
+            font-size: 24px;
+            margin-bottom: 2px;
+            transition: var(--transition);
+        }
+        .nav-item.active {
+            color: var(--accent);
+        }
+        .nav-item.active i {
+            transform: scale(1.1);
+        }
         .nav-item.active::before {
             content: '';
             position: absolute;
@@ -372,8 +697,12 @@
             background: var(--accent);
             border-radius: 10px;
         }
-        .nav-item:hover { color: var(--text-primary); }
-        .nav-item span { line-height: 1.2; }
+        .nav-item:hover {
+            color: var(--text-primary);
+        }
+        .nav-item span {
+            line-height: 1.2;
+        }
 
         @media (max-width: 420px) {
             .bottom-nav {
@@ -383,14 +712,28 @@
                 gap: 4px;
                 min-height: 64px;
             }
-            .nav-item { padding: 4px 4px; font-size: 11px; }
-            .nav-item i { font-size: 20px; }
-            .stats-bar .stat-item .stat-label { font-size: 12px; }
-            .stats-bar .stat-item .stat-value { font-size: 16px; }
-            .stats-bar .stat-item { gap: 4px; }
+            .nav-item {
+                padding: 4px 4px;
+                font-size: 11px;
+            }
+            .nav-item i {
+                font-size: 20px;
+            }
+            .stats-bar .stat-item .stat-label {
+                font-size: 12px;
+            }
+            .stats-bar .stat-item .stat-value {
+                font-size: 16px;
+            }
+            .stats-bar .stat-item {
+                gap: 4px;
+            }
         }
 
-        .input-group { margin-bottom: 16px; }
+        /* INPUTS */
+        .input-group {
+            margin-bottom: 16px;
+        }
         .input-group label {
             display: block;
             color: var(--text-secondary);
@@ -398,8 +741,13 @@
             margin-bottom: 6px;
             font-weight: 600;
         }
-        .input-group label .required { color: var(--danger); margin-right: 2px; }
-        .input-group input, .input-group select, .input-group textarea {
+        .input-group label .required {
+            color: var(--danger);
+            margin-right: 2px;
+        }
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
             width: 100%;
             padding: 14px 16px;
             background: var(--bg-input);
@@ -411,14 +759,21 @@
             font-family: inherit;
             font-weight: 500;
         }
-        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 4px var(--accent-glow);
             background: var(--bg-card);
         }
-        .input-group input::placeholder { color: var(--text-muted); font-weight: 400; }
-        .input-group .input-icon { position: relative; }
+        .input-group input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+        .input-group .input-icon {
+            position: relative;
+        }
         .input-group .input-icon i {
             position: absolute;
             right: 14px;
@@ -426,8 +781,11 @@
             transform: translateY(-50%);
             color: var(--text-muted);
         }
-        .input-group .input-icon input { padding-right: 44px; }
+        .input-group .input-icon input {
+            padding-right: 44px;
+        }
 
+        /* LIST ITEMS */
         .list-item {
             display: flex;
             justify-content: space-between;
@@ -436,8 +794,15 @@
             border-bottom: 1px solid var(--border-light);
             transition: var(--transition);
         }
-        .list-item:last-child { border-bottom: none; }
-        .list-item .left { display: flex; align-items: center; gap: 14px; flex: 1; }
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        .list-item .left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+        }
         .list-item .left .avatar {
             width: 44px;
             height: 44px;
@@ -451,12 +816,28 @@
             color: white;
             flex-shrink: 0;
         }
-        .list-item .info .title { font-weight: 700; font-size: 15px; }
-        .list-item .info .sub { font-size: 13px; color: var(--text-secondary); }
-        .list-item .right { text-align: left; flex-shrink: 0; }
-        .list-item .right .amount { font-weight: 700; font-size: 16px; }
-        .list-item .right .date { font-size: 12px; color: var(--text-secondary); }
+        .list-item .info .title {
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .list-item .info .sub {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .list-item .right {
+            text-align: left;
+            flex-shrink: 0;
+        }
+        .list-item .right .amount {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .list-item .right .date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
 
+        /* STATUS BADGES */
         .status {
             display: inline-block;
             padding: 4px 14px;
@@ -465,13 +846,33 @@
             font-weight: 700;
             letter-spacing: 0.3px;
         }
-        .status-success { background: var(--success-light); color: var(--success); }
-        .status-pending { background: var(--warning-light); color: #b7950b; }
-        .status-danger { background: var(--danger-light); color: var(--danger); }
-        .status-info { background: var(--info-light); color: var(--info); }
-        .status-gold { background: rgba(249, 168, 37, 0.15); color: var(--gold); }
+        .status-success {
+            background: var(--success-light);
+            color: var(--success);
+        }
+        .status-pending {
+            background: var(--warning-light);
+            color: #b7950b;
+        }
+        .status-danger {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+        .status-info {
+            background: var(--info-light);
+            color: var(--info);
+        }
+        .status-gold {
+            background: rgba(249, 168, 37, 0.15);
+            color: var(--gold);
+        }
 
-        .qr-container { display: flex; justify-content: center; padding: 16px 0; }
+        /* QR CODE */
+        .qr-container {
+            display: flex;
+            justify-content: center;
+            padding: 16px 0;
+        }
         .qr-container .qr-placeholder {
             background: white;
             padding: 16px;
@@ -487,6 +888,7 @@
             background: var(--bg-input);
         }
 
+        /* LOADING */
         .loader {
             display: inline-block;
             width: 28px;
@@ -496,9 +898,19 @@
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
-        .user-mini { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        /* USER INFO IN HEADER */
+        .user-mini {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
         .user-mini .avatar-small {
             width: 32px;
             height: 32px;
@@ -512,7 +924,11 @@
             font-size: 14px;
             position: relative;
         }
-        .user-mini .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-mini .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
         .user-mini .user-level {
             font-size: 10px;
             color: var(--text-secondary);
@@ -521,7 +937,7 @@
             border-radius: 10px;
         }
 
-        /* ===== باقات الاشتراك ===== */
+        /* ===== باقات الاشتراك (Pricing Widget) ===== */
         .pricing-widget {
             max-width: 650px;
             margin: 0 auto;
@@ -530,6 +946,7 @@
             gap: 1.2rem;
             font-family: 'Tajawal', 'Cairo', sans-serif;
         }
+
         .pricing-widget .pc-card {
             background: var(--bg-card);
             border-radius: 20px;
@@ -538,9 +955,20 @@
             border: 1px solid var(--border);
             transition: transform 0.2s ease, box-shadow 0.3s ease;
         }
-        .pricing-widget .pc-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(0, 0, 0, 0.07); }
-        .pricing-widget .pc-stripe { height: 6px; width: 100%; }
-        .pricing-widget .pc-body { padding: 1.2rem 1.5rem 1.5rem 1.5rem; }
+        .pricing-widget .pc-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.07);
+        }
+
+        .pricing-widget .pc-stripe {
+            height: 6px;
+            width: 100%;
+        }
+
+        .pricing-widget .pc-body {
+            padding: 1.2rem 1.5rem 1.5rem 1.5rem;
+        }
+
         .pricing-widget .pc-top {
             display: flex;
             align-items: center;
@@ -549,8 +977,14 @@
             flex-wrap: wrap;
             gap: 0.5rem;
         }
-        .pricing-widget .pc-name-badge { display: flex; align-items: center; gap: 0.6rem; }
-        .pricing-widget .pc-name-badge i { font-size: 1.4rem; }
+        .pricing-widget .pc-name-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .pricing-widget .pc-name-badge i {
+            font-size: 1.4rem;
+        }
         .pricing-widget .pc-name-badge h3 {
             font-size: 1.15rem;
             font-weight: 800;
@@ -564,7 +998,11 @@
             color: var(--text-primary);
             line-height: 1;
         }
-        .pricing-widget .pc-price small { font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); }
+        .pricing-widget .pc-price small {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
 
         .pricing-widget .pc-sticker {
             background: #fbbf24;
@@ -600,12 +1038,26 @@
             align-items: center;
             gap: 0.4rem;
         }
-        .pricing-widget .pc-features span i { font-size: 0.7rem; width: 1.1rem; color: #3b82f6; }
-        .pricing-widget .pc-features .fa-check-circle { color: #22c55e; }
-        .pricing-widget .pc-features .fa-star { color: #fbbf24; }
-        .pricing-widget .pc-features .fa-bolt { color: #f43f5e; }
-        .pricing-widget .pc-features .fa-gem { color: #a855f7; }
-        .pricing-widget .pc-features .fa-infinity { color: #f43f5e; }
+        .pricing-widget .pc-features span i {
+            font-size: 0.7rem;
+            width: 1.1rem;
+            color: #3b82f6;
+        }
+        .pricing-widget .pc-features .fa-check-circle {
+            color: #22c55e;
+        }
+        .pricing-widget .pc-features .fa-star {
+            color: #fbbf24;
+        }
+        .pricing-widget .pc-features .fa-bolt {
+            color: #f43f5e;
+        }
+        .pricing-widget .pc-features .fa-gem {
+            color: #a855f7;
+        }
+        .pricing-widget .pc-features .fa-infinity {
+            color: #f43f5e;
+        }
 
         .pricing-widget .pc-btn {
             width: 100%;
@@ -623,47 +1075,120 @@
             align-items: center;
             gap: 0.4rem;
         }
-        .pricing-widget .pc-btn:hover { transform: scale(1.02); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15); }
-        .pricing-widget .pc-btn:active { transform: scale(0.96); }
-        .pricing-widget .pc-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+        .pricing-widget .pc-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+        .pricing-widget .pc-btn:active {
+            transform: scale(0.96);
+        }
+        .pricing-widget .pc-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
 
-        .pc-starter .pc-stripe { background: #22c55e; }
-        .pc-starter .pc-name-badge i { color: #22c55e; }
-        .pc-starter .pc-name-badge h3 { color: #15803d; }
-        .pc-starter .pc-btn { background: #22c55e; }
-        .pc-starter .pc-btn:hover:not(:disabled) { background: #16a34a; }
+        /* ===== ألوان الباقات ===== */
+        .pc-starter .pc-stripe {
+            background: #22c55e;
+        }
+        .pc-starter .pc-name-badge i {
+            color: #22c55e;
+        }
+        .pc-starter .pc-name-badge h3 {
+            color: #15803d;
+        }
+        .pc-starter .pc-btn {
+            background: #22c55e;
+        }
+        .pc-starter .pc-btn:hover:not(:disabled) {
+            background: #16a34a;
+        }
 
-        .pc-basic .pc-stripe { background: #3b82f6; }
-        .pc-basic .pc-name-badge i { color: #3b82f6; }
-        .pc-basic .pc-name-badge h3 { color: #2563eb; }
-        .pc-basic .pc-btn { background: #3b82f6; }
-        .pc-basic .pc-btn:hover:not(:disabled) { background: #2563eb; }
+        .pc-basic .pc-stripe {
+            background: #3b82f6;
+        }
+        .pc-basic .pc-name-badge i {
+            color: #3b82f6;
+        }
+        .pc-basic .pc-name-badge h3 {
+            color: #2563eb;
+        }
+        .pc-basic .pc-btn {
+            background: #3b82f6;
+        }
+        .pc-basic .pc-btn:hover:not(:disabled) {
+            background: #2563eb;
+        }
 
-        .pc-advanced .pc-stripe { background: #a855f7; }
-        .pc-advanced .pc-name-badge i { color: #a855f7; }
-        .pc-advanced .pc-name-badge h3 { color: #7e22ce; }
-        .pc-advanced .pc-btn { background: #a855f7; }
-        .pc-advanced .pc-btn:hover:not(:disabled) { background: #8b34e6; }
+        .pc-advanced .pc-stripe {
+            background: #a855f7;
+        }
+        .pc-advanced .pc-name-badge i {
+            color: #a855f7;
+        }
+        .pc-advanced .pc-name-badge h3 {
+            color: #7e22ce;
+        }
+        .pc-advanced .pc-btn {
+            background: #a855f7;
+        }
+        .pc-advanced .pc-btn:hover:not(:disabled) {
+            background: #8b34e6;
+        }
 
-        .pc-premium .pc-stripe { background: #f59e0b; }
-        .pc-premium .pc-name-badge i { color: #f59e0b; }
-        .pc-premium .pc-name-badge h3 { color: #b45309; }
-        .pc-premium .pc-btn { background: #f59e0b; }
-        .pc-premium .pc-btn:hover:not(:disabled) { background: #d97706; }
+        .pc-premium .pc-stripe {
+            background: #f59e0b;
+        }
+        .pc-premium .pc-name-badge i {
+            color: #f59e0b;
+        }
+        .pc-premium .pc-name-badge h3 {
+            color: #b45309;
+        }
+        .pc-premium .pc-btn {
+            background: #f59e0b;
+        }
+        .pc-premium .pc-btn:hover:not(:disabled) {
+            background: #d97706;
+        }
 
-        .pc-pro .pc-stripe { background: #f43f5e; }
-        .pc-pro .pc-name-badge i { color: #f43f5e; }
-        .pc-pro .pc-name-badge h3 { color: #be123c; }
-        .pc-pro .pc-btn { background: #f43f5e; }
-        .pc-pro .pc-btn:hover:not(:disabled) { background: #e11d48; }
+        .pc-pro .pc-stripe {
+            background: #f43f5e;
+        }
+        .pc-pro .pc-name-badge i {
+            color: #f43f5e;
+        }
+        .pc-pro .pc-name-badge h3 {
+            color: #be123c;
+        }
+        .pc-pro .pc-btn {
+            background: #f43f5e;
+        }
+        .pc-pro .pc-btn:hover:not(:disabled) {
+            background: #e11d48;
+        }
 
         @media (max-width: 480px) {
-            .pricing-widget .pc-body { padding: 1rem; }
-            .pricing-widget .pc-price { font-size: 1.5rem; }
-            .pricing-widget .pc-features { grid-template-columns: 1fr 1fr; gap: 0.2rem 0.6rem; }
-            .pricing-widget .pc-features span { font-size: 0.7rem; }
-            .pricing-widget .pc-name-badge h3 { font-size: 1rem; }
-            .pricing-widget .pc-btn { font-size: 0.8rem; }
+            .pricing-widget .pc-body {
+                padding: 1rem;
+            }
+            .pricing-widget .pc-price {
+                font-size: 1.5rem;
+            }
+            .pricing-widget .pc-features {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.2rem 0.6rem;
+            }
+            .pricing-widget .pc-features span {
+                font-size: 0.7rem;
+            }
+            .pricing-widget .pc-name-badge h3 {
+                font-size: 1rem;
+            }
+            .pricing-widget .pc-btn {
+                font-size: 0.8rem;
+            }
         }
 
         /* ============================================================
@@ -679,10 +1204,23 @@
             50%  { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-        .pricing-widget .pc-verification .pc-name-badge i { color: #2563eb; }
-        .pricing-widget .pc-verification .pc-name-badge h3 { color: #1e40af; }
-        .pricing-widget .pc-verification .pc-price { color: #1e40af; }
-        .pricing-widget .pc-verification .pc-features span i { color: #2563eb; }
+
+        .pricing-widget .pc-verification .pc-name-badge i {
+            color: #2563eb;
+        }
+        .pricing-widget .pc-verification .pc-name-badge h3 {
+            color: #1e40af;
+        }
+
+        /* السعر في بطاقة التوثيق بنفس تنسيق بطاقات الاشتراك تماماً */
+        .pricing-widget .pc-verification .pc-price {
+            color: #1e40af;
+        }
+
+        .pricing-widget .pc-verification .pc-features span i {
+            color: #2563eb;
+        }
+
         .pricing-widget .pc-verification .pc-btn {
             background: linear-gradient(135deg, #2563eb, #7c3aed);
             color: #fff;
@@ -698,13 +1236,17 @@
             transform: none !important;
             box-shadow: none !important;
         }
+
         .pricing-widget .pc-verification .pc-note {
             font-size: 0.7rem;
             color: var(--text-muted);
             text-align: center;
             margin-top: 0.8rem;
         }
-        .pricing-widget .pc-verification .auto-renew-row { margin: 0 0 14px 0; }
+
+        .pricing-widget .pc-verification .auto-renew-row {
+            margin: 0 0 14px 0;
+        }
 
         /* ===== Auto-Renew Toggle Row ===== */
         .auto-renew-row {
@@ -725,17 +1267,17 @@
             align-items: center;
             gap: 8px;
         }
-        .auto-renew-row .label i { color: var(--accent); font-size: 16px; }
-
-        @media (max-width: 480px) {
-            .auto-renew-row { padding: 8px 12px; font-size: 13px; }
+        .auto-renew-row .label i {
+            color: var(--accent);
+            font-size: 16px;
         }
 
-        /* ===== إصلاح مفاتيح التبديل (Toggle Switches) ===== */
-        #autoRenewToggle:checked + span { background: #10b981 !important; }
-        #autoRenewToggle:checked + span + span { transform: translateX(20px); }
-        #darkModeToggle:checked + span { background: var(--accent) !important; }
-        #darkModeToggle:checked + span + span { transform: translateX(22px); }
+        @media (max-width: 480px) {
+            .auto-renew-row {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+        }
 
         /* ============================================================
            INVESTMENT MODAL
@@ -756,10 +1298,18 @@
             padding: 20px;
             animation: fadeIn 0.3s ease;
         }
-        .modal-overlay.active { display: flex; }
+        .modal-overlay.active {
+            display: flex;
+        }
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
         .modal-card {
             background: var(--bg-card);
@@ -779,7 +1329,11 @@
             align-items: center;
             margin-bottom: 12px;
         }
-        .modal-card .modal-header h3 { font-size: 20px; font-weight: 900; color: var(--text-primary); }
+        .modal-card .modal-header h3 {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text-primary);
+        }
         .modal-card .modal-header .close-modal {
             background: none;
             border: none;
@@ -789,7 +1343,10 @@
             padding: 0 4px;
             transition: var(--transition);
         }
-        .modal-card .modal-header .close-modal:hover { color: var(--danger); transform: rotate(90deg); }
+        .modal-card .modal-header .close-modal:hover {
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
 
         .modal-plan-detail {
             background: var(--bg-input);
@@ -802,11 +1359,23 @@
             flex-wrap: wrap;
             gap: 4px;
         }
-        .modal-plan-detail .label { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
-        .modal-plan-detail .value { font-size: 16px; font-weight: 800; color: var(--accent); }
-        .modal-plan-detail .value.dzd-color { color: var(--dzd-color); }
+        .modal-plan-detail .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .modal-plan-detail .value {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        .modal-plan-detail .value.dzd-color {
+            color: var(--dzd-color);
+        }
 
-        .modal-amount-section { margin: 12px 0; }
+        .modal-amount-section {
+            margin: 12px 0;
+        }
         .modal-amount-section label {
             font-weight: 700;
             font-size: 14px;
@@ -824,7 +1393,10 @@
             transition: var(--transition);
             padding: 2px;
         }
-        .amount-input-wrapper:focus-within { border-color: var(--accent); box-shadow: var(--accent-glow); }
+        .amount-input-wrapper:focus-within {
+            border-color: var(--accent);
+            box-shadow: var(--accent-glow);
+        }
         .amount-input-wrapper button {
             width: 36px;
             height: 36px;
@@ -841,7 +1413,10 @@
             justify-content: center;
             flex-shrink: 0;
         }
-        .amount-input-wrapper button:hover { background: var(--accent); color: white; }
+        .amount-input-wrapper button:hover {
+            background: var(--accent);
+            color: white;
+        }
         .amount-input-wrapper input {
             flex: 1;
             border: none;
@@ -856,8 +1431,13 @@
             min-width: 50px;
         }
         .amount-input-wrapper input[type="number"]::-webkit-inner-spin-button,
-        .amount-input-wrapper input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        .amount-input-wrapper input[type="number"] { -moz-appearance: textfield; }
+        .amount-input-wrapper input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .amount-input-wrapper input[type="number"] {
+            -moz-appearance: textfield;
+        }
 
         .range-slider {
             width: 100%;
@@ -887,17 +1467,35 @@
             border: none;
         }
 
-        .modal-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+        .modal-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
         .modal-info-item {
             background: var(--bg-input);
             border-radius: var(--radius-sm);
             padding: 8px 6px;
             text-align: center;
         }
-        .modal-info-item .number { font-size: 18px; font-weight: 900; color: var(--accent); }
-        .modal-info-item .number.dzd-color { color: var(--dzd-color); }
-        .modal-info-item .number.gold-color { color: var(--gold); }
-        .modal-info-item .label { font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-top: 2px; }
+        .modal-info-item .number {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--accent);
+        }
+        .modal-info-item .number.dzd-color {
+            color: var(--dzd-color);
+        }
+        .modal-info-item .number.gold-color {
+            color: var(--gold);
+        }
+        .modal-info-item .label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 2px;
+        }
 
         .modal-balance-warning {
             background: var(--success-light);
@@ -912,15 +1510,24 @@
             font-size: 13px;
             color: var(--success);
         }
-        .modal-balance-warning i { font-size: 16px; }
+        .modal-balance-warning i {
+            font-size: 16px;
+        }
         .modal-balance-warning.insufficient {
             background: var(--danger-light);
             border-color: var(--danger);
             color: var(--danger);
         }
 
-        .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
-        .modal-actions .btn { padding: 10px 16px; font-size: 14px; }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+        }
+        .modal-actions .btn {
+            padding: 10px 16px;
+            font-size: 14px;
+        }
 
         /* ===== واجهة التبادل (Swap) ===== */
         .swap-card {
@@ -931,7 +1538,10 @@
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
         }
-        .swap-card:hover { box-shadow: var(--shadow-md); border-color: var(--accent-light); }
+        .swap-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent-light);
+        }
         .swap-direction {
             display: flex;
             align-items: center;
@@ -942,15 +1552,25 @@
             border-radius: var(--radius-sm);
             margin-bottom: 12px;
         }
-        .swap-direction .dir-label { font-weight: 700; font-size: 14px; color: var(--text-secondary); }
+        .swap-direction .dir-label {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
         .swap-direction .dir-badge {
             padding: 4px 12px;
             border-radius: 20px;
             font-weight: 700;
             font-size: 13px;
         }
-        .swap-direction .dir-badge.dzd { background: var(--dzd-light); color: var(--dzd-color); }
-        .swap-direction .dir-badge.usdt { background: rgba(38, 161, 123, 0.12); color: var(--usdt-color); }
+        .swap-direction .dir-badge.dzd {
+            background: var(--dzd-light);
+            color: var(--dzd-color);
+        }
+        .swap-direction .dir-badge.usdt {
+            background: rgba(38, 161, 123, 0.12);
+            color: var(--usdt-color);
+        }
         .swap-direction .dir-switch-btn {
             background: none;
             border: none;
@@ -960,8 +1580,14 @@
             transition: var(--transition);
             padding: 4px;
         }
-        .swap-direction .dir-switch-btn:hover { transform: rotate(180deg); }
-        .swap-amount { display: flex; gap: 8px; margin-bottom: 12px; }
+        .swap-direction .dir-switch-btn:hover {
+            transform: rotate(180deg);
+        }
+        .swap-amount {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
         .swap-amount input {
             flex: 1;
             padding: 12px 14px;
@@ -975,7 +1601,10 @@
             outline: none;
             transition: var(--transition);
         }
-        .swap-amount input:focus { border-color: var(--accent); box-shadow: var(--accent-glow); }
+        .swap-amount input:focus {
+            border-color: var(--accent);
+            box-shadow: var(--accent-glow);
+        }
         .swap-amount .currency-label {
             display: flex;
             align-items: center;
@@ -987,7 +1616,10 @@
             color: var(--text-secondary);
             font-size: 16px;
         }
-        .swap-rate { display: none !important; }
+        /* إخفاء سعر الصرف نهائياً */
+        .swap-rate {
+            display: none !important;
+        }
         .swap-result {
             background: var(--bg-input);
             border-radius: var(--radius-sm);
@@ -997,13 +1629,24 @@
             justify-content: space-between;
             align-items: center;
         }
-        .swap-result .label { font-weight: 600; color: var(--text-secondary); font-size: 14px; }
-        .swap-result .value { font-weight: 800; font-size: 18px; }
-        .swap-result .value.dzd-color { color: var(--dzd-color); }
-        .swap-result .value.usdt-color { color: var(--usdt-color); }
+        .swap-result .label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        .swap-result .value {
+            font-weight: 800;
+            font-size: 18px;
+        }
+        .swap-result .value.dzd-color {
+            color: var(--dzd-color);
+        }
+        .swap-result .value.usdt-color {
+            color: var(--usdt-color);
+        }
 
-        /* ===== قوائم منسدلة ===== */
-        .deposit-method-select, .withdraw-method-select {
+        /* ===== قائمة منسدلة لطريقة الإيداع ===== */
+        .deposit-method-select {
             width: 100%;
             padding: 12px 16px;
             background: var(--bg-input);
@@ -1022,16 +1665,24 @@
             background-position: left 14px center;
             padding-left: 40px;
         }
-        .deposit-method-select:focus, .withdraw-method-select:focus {
+        .deposit-method-select:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 4px var(--accent-glow);
             background-color: var(--bg-card);
         }
-        .deposit-method-select option, .withdraw-method-select option { padding: 8px; font-weight: 500; }
+        .deposit-method-select option {
+            padding: 8px;
+            font-weight: 500;
+        }
+        .deposit-method-select option i {
+            margin-left: 8px;
+        }
 
-        /* ===== نوافذ التأكيد ===== */
-        .deposit-confirm-modal .modal-card { border-top: 6px solid var(--success); }
+        /* ===== نافذة تأكيد الإيداع ===== */
+        .deposit-confirm-modal .modal-card {
+            border-top: 6px solid var(--success);
+        }
         .deposit-confirm-modal .confirm-details {
             background: var(--bg-input);
             border-radius: var(--radius-sm);
@@ -1045,8 +1696,13 @@
             border-bottom: 1px solid var(--border-light);
             font-size: 14px;
         }
-        .deposit-confirm-modal .confirm-details .detail-row:last-child { border-bottom: none; }
-        .deposit-confirm-modal .confirm-details .detail-row .label { color: var(--text-secondary); font-weight: 600; }
+        .deposit-confirm-modal .confirm-details .detail-row:last-child {
+            border-bottom: none;
+        }
+        .deposit-confirm-modal .confirm-details .detail-row .label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
         .deposit-confirm-modal .confirm-details .detail-row .value {
             font-weight: 700;
             color: var(--text-primary);
@@ -1054,11 +1710,21 @@
             text-align: left;
             max-width: 60%;
         }
-        .deposit-confirm-modal .confirm-details .detail-row .value.dzd-color { color: var(--dzd-color); }
-        .deposit-confirm-modal .confirm-details .detail-row .value.usdt-color { color: var(--usdt-color); }
-        .deposit-confirm-modal .confirm-details .detail-row .value.method-baridi { color: var(--dzd-color); }
-        .deposit-confirm-modal .confirm-details .detail-row .value.method-binance { color: var(--binance-color); }
-        .deposit-confirm-modal .confirm-details .detail-row .value.method-redotpay { color: var(--redotpay-color); }
+        .deposit-confirm-modal .confirm-details .detail-row .value.dzd-color {
+            color: var(--dzd-color);
+        }
+        .deposit-confirm-modal .confirm-details .detail-row .value.usdt-color {
+            color: var(--usdt-color);
+        }
+        .deposit-confirm-modal .confirm-details .detail-row .value.method-baridi {
+            color: var(--dzd-color);
+        }
+        .deposit-confirm-modal .confirm-details .detail-row .value.method-binance {
+            color: var(--binance-color);
+        }
+        .deposit-confirm-modal .confirm-details .detail-row .value.method-redotpay {
+            color: var(--redotpay-color);
+        }
         .deposit-confirm-modal .confirm-warning {
             background: var(--warning-light);
             border: 1px solid var(--warning);
@@ -1071,84 +1737,263 @@
             gap: 8px;
             margin-bottom: 12px;
         }
-        .deposit-confirm-modal .confirm-warning i { font-size: 16px; }
+        .deposit-confirm-modal .confirm-warning i {
+            font-size: 16px;
+        }
 
-        .withdraw-confirm-modal .modal-card { border-top: 6px solid var(--danger); }
-        .withdraw-confirm-modal .confirm-details .detail-row .value.dzd-color { color: var(--dzd-color); }
-        .withdraw-confirm-modal .confirm-details .detail-row .value.usdt-color { color: var(--usdt-color); }
-        .withdraw-confirm-modal .confirm-details .detail-row .value.method-baridi { color: var(--dzd-color); }
-        .withdraw-confirm-modal .confirm-details .detail-row .value.method-binance { color: var(--binance-color); }
-        .withdraw-confirm-modal .confirm-details .detail-row .value.method-redotpay { color: var(--redotpay-color); }
+        /* ===== قائمة منسدلة لطريقة السحب ===== */
+        .withdraw-method-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: var(--transition);
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236c5ce7' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 14px center;
+            padding-left: 40px;
+        }
+        .withdraw-method-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+            background-color: var(--bg-card);
+        }
+        .withdraw-method-select option {
+            padding: 8px;
+            font-weight: 500;
+        }
 
-        .subscription-confirm-modal .modal-card { border-top: 6px solid var(--gold); }
-        .subscription-confirm-modal .confirm-details .detail-row .value.dzd-color { color: var(--dzd-color); }
-        .verification-confirm-modal .modal-card { border-top: 6px solid #2563eb; }
-        .verification-confirm-modal .confirm-details .detail-row .value.dzd-color { color: var(--dzd-color); }
+        /* ===== نافذة تأكيد السحب ===== */
+        .withdraw-confirm-modal .modal-card {
+            border-top: 6px solid var(--danger);
+        }
+        .withdraw-confirm-modal .confirm-details .detail-row .value.dzd-color {
+            color: var(--dzd-color);
+        }
+        .withdraw-confirm-modal .confirm-details .detail-row .value.usdt-color {
+            color: var(--usdt-color);
+        }
+        .withdraw-confirm-modal .confirm-details .detail-row .value.method-baridi {
+            color: var(--dzd-color);
+        }
+        .withdraw-confirm-modal .confirm-details .detail-row .value.method-binance {
+            color: var(--binance-color);
+        }
+        .withdraw-confirm-modal .confirm-details .detail-row .value.method-redotpay {
+            color: var(--redotpay-color);
+        }
+
+        /* ===== نافذة تأكيد الاشتراك ===== */
+        .subscription-confirm-modal .modal-card {
+            border-top: 6px solid var(--gold);
+        }
+        .subscription-confirm-modal .confirm-details .detail-row .value.dzd-color {
+            color: var(--dzd-color);
+        }
+
+        /* ===== نافذة تأكيد التوثيق ===== */
+        .verification-confirm-modal .modal-card {
+            border-top: 6px solid #2563eb;
+        }
+        .verification-confirm-modal .confirm-details .detail-row .value.dzd-color {
+            color: var(--dzd-color);
+        }
 
         /* RESPONSIVE */
         @media (max-width: 420px) {
-            .app-container { padding: 12px; }
-            .balance-large { font-size: 32px; }
-            .grid-2 { gap: 8px; }
-            .grid-3 { gap: 6px; }
-            .stat-box .number { font-size: 18px; }
-            .stat-box { padding: 10px 8px; }
-            .plan-card .return { font-size: 22px; }
-            .card { padding: 16px; }
-            .btn { padding: 12px 18px; font-size: 14px; }
-            .user-mini .user-name { font-size: 11px; }
-            .user-mini .avatar-small { width: 28px; height: 28px; font-size: 12px; }
-            .modal-card { padding: 16px 14px; max-width: 95%; }
-            .modal-card .modal-header h3 { font-size: 18px; }
-            .modal-info-grid { gap: 6px; }
-            .modal-actions { flex-direction: column; gap: 8px; }
-            .amount-input-wrapper input { font-size: 16px; }
-            .swap-amount { flex-direction: column; }
-            .swap-amount .currency-label { justify-content: center; padding: 8px; }
-            .deposit-method-select, .withdraw-method-select {
+            .app-container {
+                padding: 12px;
+            }
+            .balance-large {
+                font-size: 32px;
+            }
+            .grid-2 {
+                gap: 8px;
+            }
+            .grid-3 {
+                gap: 6px;
+            }
+            .stat-box .number {
+                font-size: 18px;
+            }
+            .stat-box {
+                padding: 10px 8px;
+            }
+            .plan-card .return {
+                font-size: 22px;
+            }
+            .card {
+                padding: 16px;
+            }
+            .btn {
+                padding: 12px 18px;
+                font-size: 14px;
+            }
+            .user-mini .user-name {
+                font-size: 11px;
+            }
+            .user-mini .avatar-small {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            .modal-card {
+                padding: 16px 14px;
+                max-width: 95%;
+            }
+            .modal-card .modal-header h3 {
+                font-size: 18px;
+            }
+            .modal-info-grid {
+                gap: 6px;
+            }
+            .modal-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .amount-input-wrapper input {
+                font-size: 16px;
+            }
+            .stats-bar .stat-item .stat-label {
+                font-size: 12px;
+            }
+            .stats-bar .stat-item .stat-value {
+                font-size: 16px;
+            }
+            .stats-bar .stat-item {
+                gap: 4px;
+            }
+            .swap-amount {
+                flex-direction: column;
+            }
+            .swap-amount .currency-label {
+                justify-content: center;
+                padding: 8px;
+            }
+            .deposit-method-select,
+            .withdraw-method-select {
                 font-size: 14px;
                 padding: 10px 14px;
                 padding-left: 36px;
             }
             .deposit-confirm-modal .confirm-details .detail-row,
-            .withdraw-confirm-modal .confirm-details .detail-row { font-size: 13px; }
+            .withdraw-confirm-modal .confirm-details .detail-row {
+                font-size: 13px;
+            }
         }
 
         @media (min-width: 768px) {
-            .app-container { padding: 24px; }
-            .bottom-nav { bottom: 24px; padding: 14px 8px; }
+            .app-container {
+                padding: 24px;
+            }
+            .bottom-nav {
+                bottom: 24px;
+                padding: 14px 8px;
+            }
         }
 
         /* UTILITY */
-        .text-center { text-align: center; }
-        .text-accent { color: var(--accent); }
-        .text-success { color: var(--success); }
-        .text-danger { color: var(--danger); }
-        .text-warning { color: var(--warning); }
-        .text-muted { color: var(--text-secondary); }
-        .text-white { color: white; }
-        .text-dzd { color: var(--dzd-color); }
-        .text-gold { color: var(--gold); }
-        .text-usdt { color: var(--usdt-color); }
-        .mt-8 { margin-top: 8px; }
-        .mt-16 { margin-top: 16px; }
-        .mt-24 { margin-top: 24px; }
-        .mb-8 { margin-bottom: 8px; }
-        .mb-16 { margin-bottom: 16px; }
-        .flex { display: flex; }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; }
-        .flex-center { display: flex; align-items: center; gap: 8px; }
-        .flex-wrap { flex-wrap: wrap; }
-        .gap-8 { gap: 8px; }
-        .gap-12 { gap: 12px; }
-        .gap-16 { gap: 16px; }
-        .w-full { width: 100%; }
-        .hidden { display: none !important; }
-        .relative { position: relative; }
-        .rounded-full { border-radius: 50%; }
-        .divider { height: 1px; background: var(--border); margin: 16px 0; }
-        .clickable { cursor: pointer; }
+        .text-center {
+            text-align: center;
+        }
+        .text-accent {
+            color: var(--accent);
+        }
+        .text-success {
+            color: var(--success);
+        }
+        .text-danger {
+            color: var(--danger);
+        }
+        .text-warning {
+            color: var(--warning);
+        }
+        .text-muted {
+            color: var(--text-secondary);
+        }
+        .text-white {
+            color: white;
+        }
+        .text-dzd {
+            color: var(--dzd-color);
+        }
+        .text-gold {
+            color: var(--gold);
+        }
+        .text-usdt {
+            color: var(--usdt-color);
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mt-16 {
+            margin-top: 16px;
+        }
+        .mt-24 {
+            margin-top: 24px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        .mb-16 {
+            margin-bottom: 16px;
+        }
+        .flex {
+            display: flex;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+        .gap-8 {
+            gap: 8px;
+        }
+        .gap-12 {
+            gap: 12px;
+        }
+        .gap-16 {
+            gap: 16px;
+        }
+        .w-full {
+            width: 100%;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .relative {
+            position: relative;
+        }
+        .rounded-full {
+            border-radius: 50%;
+        }
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 16px 0;
+        }
+        .clickable {
+            cursor: pointer;
+        }
 
+        /* Investment specific */
         .invest-stat {
             background: rgba(249, 168, 37, 0.08);
             border: 1px solid rgba(249, 168, 37, 0.2);
@@ -1156,8 +2001,17 @@
             padding: 12px;
             text-align: center;
         }
-        .invest-stat .number { font-size: 20px; font-weight: 800; color: var(--gold); }
-        .invest-stat .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; font-weight: 600; }
+        .invest-stat .number {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        .invest-stat .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-weight: 600;
+        }
 
         .back-btn {
             display: inline-flex;
@@ -1174,11 +2028,21 @@
             transition: var(--transition);
             margin-right: auto;
         }
-        .back-btn:hover { background: var(--accent-glow); }
+        .back-btn:hover {
+            background: var(--accent-glow);
+        }
 
-        .deposit-step { display: none; animation: fadeSlideIn 0.3s ease; }
-        .deposit-step.active { display: block; }
-        .deposit-step .divider { margin: 16px 0; }
+        /* ====== أقسام الإيداع والسحب ====== */
+        .deposit-step {
+            display: none;
+            animation: fadeSlideIn 0.3s ease;
+        }
+        .deposit-step.active {
+            display: block;
+        }
+        .deposit-step .divider {
+            margin: 16px 0;
+        }
         .deposit-info-box {
             background: var(--bg-input);
             border-radius: var(--radius-sm);
@@ -1186,7 +2050,11 @@
             margin: 12px 0;
             border: 1px dashed var(--border);
         }
-        .deposit-info-box .label { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+        .deposit-info-box .label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
         .deposit-info-box .value {
             font-size: 18px;
             font-weight: 800;
@@ -1194,6 +2062,7 @@
             word-break: break-all;
         }
 
+        /* تحذير التقييد (Restricted) */
         .restricted-warning {
             display: none;
             background: var(--danger-light);
@@ -1207,70 +2076,216 @@
             gap: 10px;
             font-size: 14px;
         }
-        .restricted-warning i { font-size: 20px; flex-shrink: 0; }
+        .restricted-warning i {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
 
-        #page-withdraw .card { padding: 14px 16px; margin-bottom: 12px; }
-        #page-withdraw .card .card-title { font-size: 15px; }
-        #page-withdraw .card .card-title i { font-size: 16px; }
-        #page-withdraw .input-group { margin-bottom: 10px; }
-        #page-withdraw .input-group label { font-size: 13px; margin-bottom: 4px; }
-        #page-withdraw .input-group input { padding: 10px 14px; font-size: 14px; }
-        #page-withdraw .input-group .input-icon i { font-size: 14px; }
-        #page-withdraw .btn { padding: 10px 16px; font-size: 14px; }
-        #page-withdraw .flex-between { font-size: 14px; }
-        #page-withdraw .flex-between .amount { font-size: 18px; }
-        #page-withdraw .balance-large { font-size: 28px; }
-        #page-withdraw .balance-label { font-size: 12px; }
-        #page-withdraw .grid-2 .card { padding: 10px 12px; }
-        #page-withdraw .grid-2 .card .amount { font-size: 18px; }
-        #page-withdraw .grid-2 .card .label { font-size: 11px; }
-        #page-withdraw .withdraw-summary { padding: 8px 0; font-size: 13px; }
-        #page-withdraw .withdraw-summary .label { font-size: 13px; }
-        #page-withdraw .withdraw-summary .value { font-size: 18px; }
-        #page-withdraw .card[style*="border:2px solid var(--warning)"] { padding: 12px 16px; }
-        #page-withdraw .card[style*="border:2px solid var(--warning)"] .balance-large { font-size: 24px; }
-        #page-withdraw .card[style*="border:2px solid var(--warning)"] .balance-label { font-size: 12px; }
-        #page-withdraw .card[style*="border:2px solid var(--warning)"] .amount { font-size: 16px; }
-        #page-withdraw .input-icon i { font-size: 14px; right: 12px; }
-        #page-withdraw .input-icon input { padding-right: 36px; }
-        #page-withdraw .list-item { padding: 10px 0; }
-        #page-withdraw .list-item .title { font-size: 14px; }
-        #page-withdraw .list-item .sub { font-size: 12px; }
-        #page-withdraw .list-item .avatar { width: 32px; height: 32px; font-size: 14px; }
-        #page-withdraw .fee-row { padding: 6px 0; font-size: 13px; }
-        #page-withdraw .total-row { padding: 8px 0; font-size: 16px; }
-        #page-withdraw .total-row .amount { font-size: 20px; }
-        #page-withdraw h2 { font-size: 20px; margin-bottom: 12px; }
-        #page-withdraw h2 i { font-size: 18px; }
-        #page-withdraw .page-content { padding-bottom: 8px; }
+        #page-withdraw .card {
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+        #page-withdraw .card .card-title {
+            font-size: 15px;
+        }
+        #page-withdraw .card .card-title i {
+            font-size: 16px;
+        }
+        #page-withdraw .input-group {
+            margin-bottom: 10px;
+        }
+        #page-withdraw .input-group label {
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        #page-withdraw .input-group input {
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+        #page-withdraw .input-group .input-icon i {
+            font-size: 14px;
+        }
+        #page-withdraw .btn {
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+        #page-withdraw .flex-between {
+            font-size: 14px;
+        }
+        #page-withdraw .flex-between .amount {
+            font-size: 18px;
+        }
+        #page-withdraw .balance-large {
+            font-size: 28px;
+        }
+        #page-withdraw .balance-label {
+            font-size: 12px;
+        }
+        #page-withdraw .grid-2 .card {
+            padding: 10px 12px;
+        }
+        #page-withdraw .grid-2 .card .amount {
+            font-size: 18px;
+        }
+        #page-withdraw .grid-2 .card .label {
+            font-size: 11px;
+        }
+        #page-withdraw .withdraw-summary {
+            padding: 8px 0;
+            font-size: 13px;
+        }
+        #page-withdraw .withdraw-summary .label {
+            font-size: 13px;
+        }
+        #page-withdraw .withdraw-summary .value {
+            font-size: 18px;
+        }
+        #page-withdraw .card[style*="border:2px solid var(--warning)"] {
+            padding: 12px 16px;
+        }
+        #page-withdraw .card[style*="border:2px solid var(--warning)"] .balance-large {
+            font-size: 24px;
+        }
+        #page-withdraw .card[style*="border:2px solid var(--warning)"] .balance-label {
+            font-size: 12px;
+        }
+        #page-withdraw .card[style*="border:2px solid var(--warning)"] .amount {
+            font-size: 16px;
+        }
+        #page-withdraw .input-icon i {
+            font-size: 14px;
+            right: 12px;
+        }
+        #page-withdraw .input-icon input {
+            padding-right: 36px;
+        }
+        #page-withdraw .list-item {
+            padding: 10px 0;
+        }
+        #page-withdraw .list-item .title {
+            font-size: 14px;
+        }
+        #page-withdraw .list-item .sub {
+            font-size: 12px;
+        }
+        #page-withdraw .list-item .avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+        }
+        #page-withdraw .fee-row {
+            padding: 6px 0;
+            font-size: 13px;
+        }
+        #page-withdraw .total-row {
+            padding: 8px 0;
+            font-size: 16px;
+        }
+        #page-withdraw .total-row .amount {
+            font-size: 20px;
+        }
+        #page-withdraw h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        #page-withdraw h2 i {
+            font-size: 18px;
+        }
+        #page-withdraw .page-content {
+            padding-bottom: 8px;
+        }
 
-        #page-deposit .card { padding: 14px 16px; margin-bottom: 12px; }
-        #page-deposit .card .card-title { font-size: 15px; }
-        #page-deposit .card .card-title i { font-size: 16px; }
-        #page-deposit .input-group { margin-bottom: 10px; }
-        #page-deposit .input-group label { font-size: 13px; margin-bottom: 4px; }
-        #page-deposit .input-group input { padding: 10px 14px; font-size: 14px; }
-        #page-deposit .input-group .input-icon i { font-size: 14px; right: 12px; }
-        #page-deposit .input-group .input-icon input { padding-right: 36px; }
-        #page-deposit .btn { padding: 10px 16px; font-size: 14px; }
-        #page-deposit .copy-btn { padding: 4px 12px; font-size: 12px; }
-        #page-deposit .list-item { padding: 10px 0; }
-        #page-deposit .list-item .title { font-size: 14px; }
-        #page-deposit .list-item .sub { font-size: 12px; }
-        #page-deposit .list-item .avatar { width: 32px; height: 32px; font-size: 14px; }
-        #page-deposit .status { font-size: 11px; padding: 2px 10px; }
-        #page-deposit h2 { font-size: 20px; margin-bottom: 12px; }
-        #page-deposit h2 i { font-size: 18px; }
-        #page-deposit .deposit-info-box { padding: 8px 12px; margin: 8px 0; }
-        #page-deposit .deposit-info-box .label { font-size: 12px; }
-        #page-deposit .deposit-info-box .value { font-size: 16px; }
-        #page-deposit .flex-between { font-size: 13px; }
-        #page-deposit .flex-between .amount { font-size: 16px; }
-        #page-deposit #depositMainCard .input-group:last-of-type { margin-bottom: 6px; }
-        #page-deposit #depositMainCard .btn { margin-top: 4px; }
-        #page-deposit .input-group .text-muted { font-size: 11px; }
-        #page-deposit .input-group .text-muted i { font-size: 11px; }
+        #page-deposit .card {
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+        #page-deposit .card .card-title {
+            font-size: 15px;
+        }
+        #page-deposit .card .card-title i {
+            font-size: 16px;
+        }
+        #page-deposit .input-group {
+            margin-bottom: 10px;
+        }
+        #page-deposit .input-group label {
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        #page-deposit .input-group input {
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+        #page-deposit .input-group .input-icon i {
+            font-size: 14px;
+            right: 12px;
+        }
+        #page-deposit .input-group .input-icon input {
+            padding-right: 36px;
+        }
+        #page-deposit .btn {
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+        #page-deposit .copy-btn {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+        #page-deposit .list-item {
+            padding: 10px 0;
+        }
+        #page-deposit .list-item .title {
+            font-size: 14px;
+        }
+        #page-deposit .list-item .sub {
+            font-size: 12px;
+        }
+        #page-deposit .list-item .avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+        }
+        #page-deposit .status {
+            font-size: 11px;
+            padding: 2px 10px;
+        }
+        #page-deposit h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        #page-deposit h2 i {
+            font-size: 18px;
+        }
+        #page-deposit .deposit-info-box {
+            padding: 8px 12px;
+            margin: 8px 0;
+        }
+        #page-deposit .deposit-info-box .label {
+            font-size: 12px;
+        }
+        #page-deposit .deposit-info-box .value {
+            font-size: 16px;
+        }
+        #page-deposit .flex-between {
+            font-size: 13px;
+        }
+        #page-deposit .flex-between .amount {
+            font-size: 16px;
+        }
+        #page-deposit #depositMainCard .input-group:last-of-type {
+            margin-bottom: 6px;
+        }
+        #page-deposit #depositMainCard .btn {
+            margin-top: 4px;
+        }
+        #page-deposit .input-group .text-muted {
+            font-size: 11px;
+        }
+        #page-deposit .input-group .text-muted i {
+            font-size: 11px;
+        }
 
+        /* ====== تبويبات الملف الشخصي ====== */
         .profile-tab-btn {
             background: transparent;
             border: none;
@@ -1288,16 +2303,27 @@
             flex: 1;
             justify-content: center;
         }
-        .profile-tab-btn i { font-size: 16px; }
-        .profile-tab-btn:hover { background: var(--bg-input); color: var(--text-primary); }
+        .profile-tab-btn i {
+            font-size: 16px;
+        }
+        .profile-tab-btn:hover {
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
         .profile-tab-btn.active {
             background: var(--accent-gradient);
             color: white;
             box-shadow: var(--shadow-glow);
         }
-        .profile-tab-panel { display: none; animation: fadeSlideIn 0.3s ease; }
-        .profile-tab-panel.active { display: block; }
+        .profile-tab-panel {
+            display: none;
+            animation: fadeSlideIn 0.3s ease;
+        }
+        .profile-tab-panel.active {
+            display: block;
+        }
 
+        /* ===== تبويبات استثماراتي ===== */
         #page-investments .profile-tab-btn {
             background: transparent;
             border: none;
@@ -1315,17 +2341,27 @@
             flex: 1;
             justify-content: center;
         }
-        #page-investments .profile-tab-btn i { font-size: 16px; }
-        #page-investments .profile-tab-btn:hover { background: var(--bg-input); color: var(--text-primary); }
+        #page-investments .profile-tab-btn i {
+            font-size: 16px;
+        }
+        #page-investments .profile-tab-btn:hover {
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
         #page-investments .profile-tab-btn.active {
             background: var(--accent-gradient);
             color: white;
             box-shadow: var(--shadow-glow);
         }
-        .invest-tab-panel { display: none; animation: fadeSlideIn 0.3s ease; }
-        .invest-tab-panel.active { display: block; }
+        .invest-tab-panel {
+            display: none;
+            animation: fadeSlideIn 0.3s ease;
+        }
+        .invest-tab-panel.active {
+            display: block;
+        }
 
-        /* ===== صندوق الزكاة ===== */
+        /* ===== صندوق الزكاة والرصيد ===== */
         .zakat-box {
             max-width: 450px;
             width: 100%;
@@ -1339,7 +2375,11 @@
             position: relative;
             overflow: hidden;
         }
-        .zakat-box:hover { transform: translateY(-4px); box-shadow: 0 24px 56px rgba(16, 185, 129, 0.18); }
+        .zakat-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 56px rgba(16, 185, 129, 0.18);
+        }
+
         .zakat-box::before {
             content: '';
             position: absolute;
@@ -1362,6 +2402,8 @@
             border-radius: 50%;
             pointer-events: none;
         }
+
+        /* الرأس */
         .zakat-box .zb-header {
             display: flex;
             align-items: center;
@@ -1394,6 +2436,8 @@
             letter-spacing: 0.5px;
             border: 1px solid #a7f3d0;
         }
+
+        /* الإحصائيات الرئيسية (3 أعمدة) */
         .zakat-box .zb-stats-main {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -1410,7 +2454,10 @@
             border: 1px solid #f3f4f6;
             transition: background 0.2s, transform 0.2s;
         }
-        .zakat-box .zb-stat-main-item:hover { background: #ecfdf5; transform: translateY(-2px); }
+        .zakat-box .zb-stat-main-item:hover {
+            background: #ecfdf5;
+            transform: translateY(-2px);
+        }
         .zakat-box .zb-stat-main-item i {
             display: block;
             font-size: 1.1rem;
@@ -1424,8 +2471,18 @@
             font-weight: 500;
             margin-bottom: 0.1rem;
         }
-        .zakat-box .zb-stat-main-item strong { display: block; font-size: 1.1rem; color: #064e3b; font-weight: 800; }
-        .zakat-box .zb-stat-main-item .small-text { font-size: 0.7rem; font-weight: 500; }
+        .zakat-box .zb-stat-main-item strong {
+            display: block;
+            font-size: 1.1rem;
+            color: #064e3b;
+            font-weight: 800;
+        }
+        .zakat-box .zb-stat-main-item .small-text {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        /* شريط التقدم */
         .zakat-box .zb-progress {
             width: 100%;
             height: 10px;
@@ -1450,7 +2507,12 @@
             position: relative;
             z-index: 1;
         }
-        .zakat-box .zb-progress-stats strong { color: #064e3b; font-weight: 700; }
+        .zakat-box .zb-progress-stats strong {
+            color: #064e3b;
+            font-weight: 700;
+        }
+
+        /* إحصائيات إضافية (عدد المتبرعين + عدد المستفيدين) */
         .zakat-box .zb-stats-extra {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1467,14 +2529,21 @@
             border: 1px solid #f3f4f6;
             transition: background 0.2s;
         }
-        .zakat-box .zb-stat-extra-item:hover { background: #ecfdf5; }
+        .zakat-box .zb-stat-extra-item:hover {
+            background: #ecfdf5;
+        }
         .zakat-box .zb-stat-extra-item i {
             display: block;
             font-size: 1.2rem;
             color: #10b981;
             margin-bottom: 0.2rem;
         }
-        .zakat-box .zb-stat-extra-item span { display: block; font-size: 0.7rem; color: #6b7280; font-weight: 500; }
+        .zakat-box .zb-stat-extra-item span {
+            display: block;
+            font-size: 0.7rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
         .zakat-box .zb-stat-extra-item strong {
             display: block;
             font-size: 1.1rem;
@@ -1482,6 +2551,8 @@
             font-weight: 800;
             margin-top: 0.1rem;
         }
+
+        /* زر التبرع */
         .zakat-box .zb-btn {
             width: 100%;
             padding: 0.75rem 0;
@@ -1502,8 +2573,14 @@
             position: relative;
             z-index: 1;
         }
-        .zakat-box .zb-btn:hover { transform: scale(1.02); box-shadow: 0 10px 32px rgba(16, 185, 129, 0.40); }
-        .zakat-box .zb-btn i { font-size: 1.1rem; }
+        .zakat-box .zb-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 32px rgba(16, 185, 129, 0.40);
+        }
+        .zakat-box .zb-btn i {
+            font-size: 1.1rem;
+        }
+
         .zakat-box .zb-note {
             font-size: 0.65rem;
             color: #9ca3af;
@@ -1513,32 +2590,71 @@
             z-index: 1;
         }
 
+        /* ===== استجابة للجوال ===== */
         @media (max-width: 480px) {
-            .zakat-box { padding: 1.5rem 1.2rem; }
-            .zakat-box .zb-header h3 { font-size: 1.2rem; }
-            .zakat-box .zb-stats-main { grid-template-columns: 1fr 1fr 1fr; gap: 0.4rem; }
-            .zakat-box .zb-stat-main-item strong { font-size: 0.95rem; }
-            .zakat-box .zb-stat-main-item .small-text { font-size: 0.6rem; }
-            .zakat-box .zb-stat-main-item span { font-size: 0.6rem; }
-            .zakat-box .zb-stats-extra { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
-            .zakat-box .zb-stat-extra-item strong { font-size: 1rem; }
-            .zakat-box .zb-btn { font-size: 0.9rem; padding: 0.65rem 0; }
+            .zakat-box {
+                padding: 1.5rem 1.2rem;
+            }
+            .zakat-box .zb-header h3 {
+                font-size: 1.2rem;
+            }
+            .zakat-box .zb-stats-main {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 0.4rem;
+            }
+            .zakat-box .zb-stat-main-item strong {
+                font-size: 0.95rem;
+            }
+            .zakat-box .zb-stat-main-item .small-text {
+                font-size: 0.6rem;
+            }
+            .zakat-box .zb-stat-main-item span {
+                font-size: 0.6rem;
+            }
+            .zakat-box .zb-stats-extra {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.6rem;
+            }
+            .zakat-box .zb-stat-extra-item strong {
+                font-size: 1rem;
+            }
+            .zakat-box .zb-btn {
+                font-size: 0.9rem;
+                padding: 0.65rem 0;
+            }
         }
+
         @media (max-width: 380px) {
-            .zakat-box .zb-stats-main { grid-template-columns: 1fr; gap: 0.4rem; }
+            .zakat-box .zb-stats-main {
+                grid-template-columns: 1fr;
+                gap: 0.4rem;
+            }
             .zakat-box .zb-stat-main-item {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 padding: 0.5rem 0.8rem;
             }
-            .zakat-box .zb-stat-main-item i { margin: 0 0 0 0.3rem; font-size: 1rem; }
-            .zakat-box .zb-stat-main-item span { margin: 0; font-size: 0.7rem; }
-            .zakat-box .zb-stat-main-item strong { font-size: 1rem; }
-            .zakat-box .zb-stat-main-item .small-text { font-size: 0.65rem; }
+            .zakat-box .zb-stat-main-item i {
+                margin: 0 0 0 0.3rem;
+                font-size: 1rem;
+            }
+            .zakat-box .zb-stat-main-item span {
+                margin: 0;
+                font-size: 0.7rem;
+            }
+            .zakat-box .zb-stat-main-item strong {
+                font-size: 1rem;
+            }
+            .zakat-box .zb-stat-main-item .small-text {
+                font-size: 0.65rem;
+            }
         }
 
-        .donation-modal .modal-card { border-top: 6px solid #10b981; }
+        /* ===== نافذة التبرع المنبثقة المخصصة ===== */
+        .donation-modal .modal-card {
+            border-top: 6px solid #10b981;
+        }
         .donation-modal .donation-balance {
             background: #ecfdf5;
             border: 1px solid #10b981;
@@ -1549,13 +2665,33 @@
             align-items: center;
             margin-bottom: 16px;
         }
-        .donation-modal .donation-balance .label { font-size: 14px; color: var(--text-secondary); font-weight: 600; }
-        .donation-modal .donation-balance .value { font-size: 18px; font-weight: 800; color: #10b981; }
+        .donation-modal .donation-balance .label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .donation-modal .donation-balance .value {
+            font-size: 18px;
+            font-weight: 800;
+            color: #10b981;
+        }
 
-        .deposit-tx-id-wrapper { display: flex; gap: 8px; align-items: center; }
-        .deposit-tx-id-wrapper input { flex: 1; }
-        .deposit-tx-id-wrapper .tx-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+        /* ===== قسم الإيداع - حقل رقم العملية ===== */
+        .deposit-tx-id-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .deposit-tx-id-wrapper input {
+            flex: 1;
+        }
+        .deposit-tx-id-wrapper .tx-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
 
+        /* ===== بطاقة الرصيد الموحدة (DZD + USDT) ===== */
         .balance-combined {
             background: var(--bg-card);
             border-radius: var(--radius-md);
@@ -1576,17 +2712,31 @@
             transition: var(--transition);
             gap: 0;
         }
-        .balance-combined .col { padding: 4px 6px; }
+        .balance-combined .col {
+            padding: 4px 6px;
+        }
         .balance-combined .col .label {
             font-size: 10px;
             font-weight: 600;
             color: var(--text-secondary);
             letter-spacing: 0.3px;
         }
-        .balance-combined .col .amount { font-size: 20px; font-weight: 900; line-height: 1.2; }
-        .balance-combined .col .amount.dzd { color: var(--dzd-color); }
-        .balance-combined .col .amount.usdt { color: var(--usdt-color); }
-        .balance-combined .col .currency { font-size: 11px; font-weight: 700; color: var(--text-secondary); }
+        .balance-combined .col .amount {
+            font-size: 20px;
+            font-weight: 900;
+            line-height: 1.2;
+        }
+        .balance-combined .col .amount.dzd {
+            color: var(--dzd-color);
+        }
+        .balance-combined .col .amount.usdt {
+            color: var(--usdt-color);
+        }
+        .balance-combined .col .currency {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
         .balance-combined .divider {
             width: 1px;
             background: var(--border);
@@ -1594,12 +2744,22 @@
             flex-shrink: 0;
             display: none;
         }
-        .dark .balance-combined { background: rgba(26, 26, 62, 0.92); border-color: var(--border); }
+
+        .dark .balance-combined {
+            background: rgba(26, 26, 62, 0.92);
+            border-color: var(--border);
+        }
 
         @media (max-width: 420px) {
-            .balance-combined .col .amount { font-size: 18px; }
-            .balance-combined { padding: 6px 6px; }
-            .balance-combined .col .label { font-size: 9px; }
+            .balance-combined .col .amount {
+                font-size: 18px;
+            }
+            .balance-combined {
+                padding: 6px 6px;
+            }
+            .balance-combined .col .label {
+                font-size: 9px;
+            }
         }
 
         /* ============================================================
@@ -1620,6 +2780,7 @@
             font-family: 'Cairo', 'Tajawal', sans-serif;
             direction: rtl;
         }
+
         #bannedOverlay .banned-card {
             max-width: 420px;
             width: 100%;
@@ -1631,13 +2792,20 @@
             text-align: center;
             animation: fadeSlideIn 0.5s ease;
         }
-        #bannedOverlay .banned-icon { font-size: 64px; color: var(--danger); margin-bottom: 16px; }
+
+        #bannedOverlay .banned-icon {
+            font-size: 64px;
+            color: var(--danger);
+            margin-bottom: 16px;
+        }
+
         #bannedOverlay h2 {
             font-size: 24px;
             font-weight: 900;
             color: var(--text-primary);
             margin-bottom: 8px;
         }
+
         #bannedOverlay .banned-reason {
             font-size: 16px;
             font-weight: 600;
@@ -1648,12 +2816,14 @@
             display: inline-block;
             margin-bottom: 16px;
         }
+
         #bannedOverlay p {
             font-size: 15px;
             color: var(--text-secondary);
             line-height: 1.7;
             margin-bottom: 24px;
         }
+
         #bannedOverlay .btn-support {
             background: var(--accent-gradient);
             color: white;
@@ -1668,13 +2838,26 @@
             box-shadow: var(--shadow-glow);
             width: 100%;
         }
-        #bannedOverlay .btn-support:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(108, 92, 231, 0.4); }
-        #bannedOverlay .btn-support:active { transform: scale(0.96); }
+
+        #bannedOverlay .btn-support:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(108, 92, 231, 0.4);
+        }
+
+        #bannedOverlay .btn-support:active {
+            transform: scale(0.96);
+        }
 
         @media (max-width: 480px) {
-            #bannedOverlay .banned-card { padding: 30px 20px 24px; }
-            #bannedOverlay h2 { font-size: 20px; }
-            #bannedOverlay .banned-icon { font-size: 48px; }
+            #bannedOverlay .banned-card {
+                padding: 30px 20px 24px;
+            }
+            #bannedOverlay h2 {
+                font-size: 20px;
+            }
+            #bannedOverlay .banned-icon {
+                font-size: 48px;
+            }
         }
     </style>
 </head>
@@ -1802,28 +2985,12 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: PACKAGES (SWAP PAGE) - الأرصدة في الأعلى ========== -->
+        <!-- ========== PAGE: PACKAGES (SWAP PAGE) ========== -->
         <div class="page" id="page-packages">
             <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-exchange-alt text-accent"></i> تبادل العملات
             </h2>
 
-            <!-- بطاقة الأرصدة - في الأعلى -->
-            <div class="card" style="margin-bottom:16px;">
-                <div style="display:flex;justify-content:space-around;align-items:center;padding:8px 0;">
-                    <div style="text-align:center;flex:1;">
-                        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">رصيد DZD</div>
-                        <div style="font-size:22px;font-weight:900;color:var(--dzd-color);" id="swapDzdBalance">0.00</div>
-                    </div>
-                    <div style="width:1px;background:var(--border);height:40px;flex-shrink:0;"></div>
-                    <div style="text-align:center;flex:1;">
-                        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">رصيد USDT</div>
-                        <div style="font-size:22px;font-weight:900;color:var(--usdt-color);" id="swapUsdtBalance">0.00</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- بطاقة التبادل -->
             <div class="swap-card">
                 <div class="swap-direction">
                     <span class="dir-label">من</span>
@@ -1852,6 +3019,19 @@
                 <button class="btn btn-usdt" onclick="executeSwap()">
                     <i class="fas fa-exchange-alt"></i> تبادل
                 </button>
+            </div>
+
+            <div class="card" style="margin-top:8px;">
+                <div style="display:flex;justify-content:space-around;padding:8px 0;">
+                    <div>
+                        <div style="font-size:13px;color:var(--text-secondary);">رصيد DZD</div>
+                        <div style="font-size:20px;font-weight:800;color:var(--dzd-color);" id="swapDzdBalance">0.00</div>
+                    </div>
+                    <div>
+                        <div style="font-size:13px;color:var(--text-secondary);">رصيد USDT</div>
+                        <div style="font-size:20px;font-weight:800;color:var(--usdt-color);" id="swapUsdtBalance">0.00</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -2496,7 +3676,8 @@
                 <h3><i class="fas fa-check-circle" style="color:var(--success);"></i> تأكيد الإيداع</h3>
                 <button class="close-modal" onclick="closeDepositConfirmModal()">&times;</button>
             </div>
-            <div class="confirm-details" id="confirmDetails"></div>
+            <div class="confirm-details" id="confirmDetails">
+            </div>
             <div class="confirm-warning">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>يرجى التأكد من صحة البيانات قبل تأكيد الإيداع</span>
@@ -2519,7 +3700,8 @@
                 <h3><i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i> تأكيد السحب</h3>
                 <button class="close-modal" onclick="closeWithdrawConfirmModal()">&times;</button>
             </div>
-            <div class="confirm-details" id="withdrawConfirmDetails"></div>
+            <div class="confirm-details" id="withdrawConfirmDetails">
+            </div>
             <div class="confirm-warning">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>يرجى التأكد من صحة البيانات قبل تأكيد السحب</span>
@@ -2542,7 +3724,8 @@
                 <h3><i class="fas fa-crown" style="color:var(--gold);"></i> تأكيد الاشتراك</h3>
                 <button class="close-modal" onclick="closeSubscriptionConfirmModal()">&times;</button>
             </div>
-            <div class="confirm-details" id="subscriptionConfirmDetails"></div>
+            <div class="confirm-details" id="subscriptionConfirmDetails">
+            </div>
             <div class="confirm-warning">
                 <i class="fas fa-info-circle"></i>
                 <span>سيتم خصم المبلغ من رصيدك المتاح</span>
@@ -2565,7 +3748,8 @@
                 <h3><i class="fas fa-shield-alt" style="color:#2563eb;"></i> تأكيد التوثيق</h3>
                 <button class="close-modal" onclick="closeVerificationConfirmModal()">&times;</button>
             </div>
-            <div class="confirm-details" id="verificationConfirmDetails"></div>
+            <div class="confirm-details" id="verificationConfirmDetails">
+            </div>
             <div class="confirm-warning">
                 <i class="fas fa-info-circle"></i>
                 <span>سيتم خصم المبلغ من رصيدك المتاح</span>
@@ -4411,6 +5595,7 @@
                 const expiryDate = expiry.toDate ? expiry.toDate() : new Date(expiry);
                 const now = new Date();
                 if (expiryDate > now) {
+                    // ===== الحالة: موثق ونشط =====
                     const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
                     if (container) container.style.display = 'flex';
 
@@ -4427,6 +5612,7 @@
                         priceSpan.innerHTML = '100 <small>دج</small>';
                     }
                 } else {
+                    // ===== الحالة: انتهت الصلاحية =====
                     if (container) container.style.display = 'none';
                     btn.innerHTML = '<i class="fas fa-clock"></i> انتهى - وثّق الآن';
                     btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
@@ -4440,6 +5626,7 @@
                     }
                 }
             } else {
+                // ===== الحالة: غير موثق =====
                 if (container) container.style.display = 'none';
                 btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
                 btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
@@ -4742,12 +5929,9 @@
             }
         });
 
-        console.log('🚀 Crynova - جميع التعديلات مطبقة:');
-        console.log('✅ بطاقة التوثيق بنمط الاشتراكات');
+        console.log('🚀 Crynova - بطاقة التوثيق بنفس تنسيق بطاقات الاشتراك تماماً');
         console.log('✅ السعر: 100 دج / شهرياً');
-        console.log('✅ إزالة نص "شارة زرقاء"');
-        console.log('✅ مفتاح التجديد التلقائي يعمل (CSS fix)');
-        console.log('✅ الأرصدة في أعلى صفحة التبادل');
+        console.log('✅ تم إزالة نص "شارة زرقاء"');
     </script>
 
 </body>
