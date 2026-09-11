@@ -1192,60 +1192,131 @@
         }
 
         /* ============================================================
-           بطاقة توثيق الحساب (بنمط الاشتراكات)
+           بطاقة توثيق الحساب (Verification Card)
            ============================================================ */
-        .pricing-widget .pc-verification .pc-stripe {
+        .verify-card {
+            max-width: 450px;
+            width: 100%;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            font-family: 'Tajawal', 'Cairo', sans-serif;
+        }
+        .verify-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 56px rgba(59, 130, 246, 0.18);
+        }
+
+        .verify-card .vc-stripe {
+            height: 6px;
             background: linear-gradient(90deg, #2563eb, #7c3aed, #2563eb);
             background-size: 200% 100%;
             animation: vcShimmer 3s ease-in-out infinite;
         }
         @keyframes vcShimmer {
-            0%   { background-position: 0% 50%; }
-            50%  { background-position: 100% 50%; }
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        .pricing-widget .pc-verification .pc-name-badge i {
-            color: #2563eb;
-        }
-        .pricing-widget .pc-verification .pc-name-badge h3 {
-            color: #1e40af;
-        }
-
-        /* السعر في بطاقة التوثيق بنفس تنسيق بطاقات الاشتراك تماماً */
-        .pricing-widget .pc-verification .pc-price {
-            color: #1e40af;
-        }
-
-        .pricing-widget .pc-verification .pc-features span i {
-            color: #2563eb;
-        }
-
-        .pricing-widget .pc-verification .pc-btn {
-            background: linear-gradient(135deg, #2563eb, #7c3aed);
-            color: #fff;
-        }
-        .pricing-widget .pc-verification .pc-btn:hover:not(:disabled) {
-            background: linear-gradient(135deg, #1d4ed8, #6d28d9);
-            transform: scale(1.02);
-            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
-        }
-        .pricing-widget .pc-verification .pc-btn:disabled {
-            opacity: 1;
-            cursor: default;
-            transform: none !important;
-            box-shadow: none !important;
-        }
-
-        .pricing-widget .pc-verification .pc-note {
-            font-size: 0.7rem;
-            color: var(--text-muted);
+        .verify-card .vc-body {
+            padding: 2rem 2rem 1.8rem;
             text-align: center;
-            margin-top: 0.8rem;
         }
 
-        .pricing-widget .pc-verification .auto-renew-row {
-            margin: 0 0 14px 0;
+        .verify-card .vc-icon {
+            display: inline-block;
+            position: relative;
+            font-size: 3.8rem;
+            color: #2563eb;
+            background: linear-gradient(135deg, #eff6ff, #ede9fe);
+            width: 90px;
+            height: 90px;
+            line-height: 90px;
+            border-radius: 50%;
+            margin-bottom: 0.8rem;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.20);
+        }
+        .verify-card .vc-icon .fa-shield-alt {
+            font-size: 3.2rem;
+            vertical-align: middle;
+        }
+        .verify-card .vc-check {
+            position: absolute;
+            bottom: 2px;
+            right: -2px;
+            background: #22c55e;
+            color: #fff;
+            font-size: 0.9rem;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            border-radius: 50%;
+            border: 3px solid var(--bg-card);
+            box-shadow: 0 4px 10px rgba(34, 197, 94, 0.4);
+        }
+        .verify-card .vc-check i {
+            font-size: 0.7rem;
+            vertical-align: middle;
+        }
+
+        .verify-card .vc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .verify-card .vc-header h3 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        .verify-card .vc-price {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #2563eb;
+            background: #eff6ff;
+            padding: 0.1rem 1.2rem;
+            border-radius: 60px;
+            line-height: 1.4;
+        }
+        .verify-card .vc-price small {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #4a6a9f;
+        }
+
+        .verify-card .vc-features {
+            list-style: none;
+            padding: 0;
+            margin: 1.2rem 0 1.6rem;
+            text-align: right;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem 0.8rem;
+            background: var(--bg-input);
+            padding: 0.8rem 1.2rem;
+            border-radius: 16px;
+        }
+        .verify-card .vc-features li {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+        .verify-card .vc-features li i {
+            color: #2563eb;
+            font-size: 0.85rem;
+            width: 1.2rem;
         }
 
         /* ===== Auto-Renew Toggle Row ===== */
@@ -1272,29 +1343,86 @@
             font-size: 16px;
         }
 
+        .verify-card .vc-btn {
+            width: 100%;
+            padding: 0.8rem 0;
+            border: none;
+            border-radius: 60px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #fff;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.30);
+        }
+        .verify-card .vc-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 32px rgba(37, 99, 235, 0.40);
+        }
+        .verify-card .vc-btn i {
+            font-size: 1.2rem;
+        }
+        .verify-card .vc-btn:disabled {
+            opacity: 0.7;
+            cursor: default;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .verify-card .vc-note {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.8rem;
+            font-weight: 400;
+        }
+
         @media (max-width: 480px) {
+            .verify-card .vc-body {
+                padding: 1.5rem 1.2rem;
+            }
+            .verify-card .vc-header h3 {
+                font-size: 1.3rem;
+            }
+            .verify-card .vc-price {
+                font-size: 1.8rem;
+                padding: 0.1rem 1rem;
+            }
+            .verify-card .vc-icon {
+                width: 70px;
+                height: 70px;
+                line-height: 70px;
+                font-size: 2.8rem;
+            }
+            .verify-card .vc-icon .fa-shield-alt {
+                font-size: 2.5rem;
+            }
+            .verify-card .vc-check {
+                width: 24px;
+                height: 24px;
+                line-height: 24px;
+                font-size: 0.7rem;
+            }
+            .verify-card .vc-features {
+                grid-template-columns: 1fr;
+                gap: 0.2rem;
+            }
+            .verify-card .vc-features li {
+                font-size: 0.8rem;
+            }
+            .verify-card .vc-btn {
+                font-size: 0.95rem;
+                padding: 0.7rem 0;
+            }
             .auto-renew-row {
                 padding: 8px 12px;
                 font-size: 13px;
             }
-        }
-
-        /* ===== إصلاح مفاتيح التبديل (Toggle Switches) ===== */
-
-        /* مفتاح التجديد التلقائي - التوثيق */
-        #autoRenewToggle:checked + span {
-            background: #10b981 !important;
-        }
-        #autoRenewToggle:checked + span + span {
-            transform: translateX(20px);
-        }
-
-        /* مفتاح الوضع المظلم */
-        #darkModeToggle:checked + span {
-            background: var(--accent) !important;
-        }
-        #darkModeToggle:checked + span + span {
-            transform: translateX(22px);
         }
 
         /* ============================================================
@@ -2341,7 +2469,7 @@
             display: block;
         }
 
-        /* ===== تبويبات استثماراتي ===== */
+        /* ===== تبويبات استثماراتي (تم تبديل الترتيب) ===== */
         #page-investments .profile-tab-btn {
             background: transparent;
             border: none;
@@ -2709,7 +2837,7 @@
             margin-top: 4px;
         }
 
-        /* ===== بطاقة الرصيد الموحدة (DZD + USDT) ===== */
+        /* ===== بطاقة الرصيد الموحدة (DZD + USDT) - مثبتة ومقسومة بالتساوي ===== */
         .balance-combined {
             background: var(--bg-card);
             border-radius: var(--radius-md);
@@ -2763,6 +2891,7 @@
             display: none;
         }
 
+        /* في الوضع المظلم */
         .dark .balance-combined {
             background: rgba(26, 26, 62, 0.92);
             border-color: var(--border);
@@ -2910,6 +3039,7 @@
                 <div class="user-mini" onclick="navigateTo('profile')">
                     <div style="position:relative;">
                         <div class="avatar-small" id="headerAvatar">?</div>
+                        <!-- شارة التوثيق في الهيدر -->
                         <div id="headerVerifiedBadge" style="display:none; position:absolute; bottom:-2px; right:-2px; background:#1d9bf0; border:2px solid var(--bg-nav); border-radius:50%; width:16px; height:16px; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(29,155,240,0.3);">
                             <i class="fas fa-check" style="color:white; font-size:8px;"></i>
                         </div>
@@ -2927,6 +3057,7 @@
 
         <!-- ========== PAGE: HOME ========== -->
         <div class="page active" id="page-home">
+            <!-- بطاقة الرصيد المدمجة - DZD و USDT -->
             <div class="balance-combined" id="homeBalanceCombined">
                 <div class="col">
                     <div class="label">الرصيد الكلي (DZD)</div>
@@ -2940,6 +3071,7 @@
                 </div>
             </div>
 
+            <!-- أزرار الإيداع والسحب -->
             <div style="display:flex;gap:12px;margin-bottom:16px;">
                 <button class="btn btn-success" style="flex:1;" onclick="navigateTo('deposit')">
                     <i class="fas fa-arrow-down"></i> إيداع
@@ -2949,6 +3081,7 @@
                 </button>
             </div>
 
+            <!-- ===== صندوق الزكاة والرصيد (مشترك لجميع المستخدمين) ===== -->
             <div class="zakat-box" id="zakatBox">
                 <div class="zb-header">
                     <i class="fas fa-hand-holding-heart"></i>
@@ -2995,6 +3128,7 @@
                     </div>
                 </div>
 
+                <!-- زر التبرع يفتح النافذة المنبثقة -->
                 <button class="zb-btn" onclick="openDonationModal()">
                     <i class="fas fa-hand-holding-usd"></i> تبرع الآن
                 </button>
@@ -3009,23 +3143,8 @@
                 <i class="fas fa-exchange-alt text-accent"></i> تبادل العملات
             </h2>
 
-            <!-- بطاقة الأرصدة - في الأعلى -->
-            <div class="card" style="margin-bottom:16px;">
-                <div style="display:flex;justify-content:space-around;align-items:center;padding:8px 0;">
-                    <div style="text-align:center;flex:1;">
-                        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">رصيد DZD</div>
-                        <div style="font-size:22px;font-weight:900;color:var(--dzd-color);" id="swapDzdBalance">0.00</div>
-                    </div>
-                    <div style="width:1px;background:var(--border);height:40px;"></div>
-                    <div style="text-align:center;flex:1;">
-                        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">رصيد USDT</div>
-                        <div style="font-size:22px;font-weight:900;color:var(--usdt-color);" id="swapUsdtBalance">0.00</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- بطاقة التبادل -->
             <div class="swap-card">
+                <!-- اتجاه التبادل -->
                 <div class="swap-direction">
                     <span class="dir-label">من</span>
                     <span class="dir-badge dzd" id="swapFromLabel">DZD</span>
@@ -3036,23 +3155,41 @@
                     <span class="dir-label">إلى</span>
                 </div>
 
+                <!-- حقل إدخال المبلغ -->
                 <div class="swap-amount">
                     <input type="number" id="swapAmountInput" placeholder="أدخل المبلغ" min="0" step="1" value="100">
                     <span class="currency-label" id="swapInputCurrency">DZD</span>
                 </div>
 
+                <!-- سعر الصرف مخفي نهائياً -->
                 <div class="swap-rate" style="display:none !important;">
                     سعر الصرف: <strong id="swapRateDisplay"></strong>
                 </div>
 
+                <!-- النتيجة -->
                 <div class="swap-result">
                     <span class="label">ستحصل على:</span>
                     <span class="value usdt-color" id="swapResultValue">0.3802 USDT</span>
                 </div>
 
+                <!-- زر التبادل -->
                 <button class="btn btn-usdt" onclick="executeSwap()">
                     <i class="fas fa-exchange-alt"></i> تبادل
                 </button>
+            </div>
+
+            <!-- عرض أرصدة المستخدم -->
+            <div class="card" style="margin-top:8px;">
+                <div style="display:flex;justify-content:space-around;padding:8px 0;">
+                    <div>
+                        <div style="font-size:13px;color:var(--text-secondary);">رصيد DZD</div>
+                        <div style="font-size:20px;font-weight:800;color:var(--dzd-color);" id="swapDzdBalance">0.00</div>
+                    </div>
+                    <div>
+                        <div style="font-size:13px;color:var(--text-secondary);">رصيد USDT</div>
+                        <div style="font-size:20px;font-weight:800;color:var(--usdt-color);" id="swapUsdtBalance">0.00</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -3062,6 +3199,7 @@
                 <i class="fas fa-chart-line text-gold"></i> استثماراتي
             </h2>
 
+            <!-- أزرار التبويب - تم تبديل الترتيب -->
             <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:8px;">
                 <button class="profile-tab-btn active" data-tab="invest-plans" onclick="switchInvestTab('invest-plans')">
                     <i class="fas fa-cubes"></i> باقات العائد الثابت
@@ -3071,12 +3209,16 @@
                 </button>
             </div>
 
+            <!-- محتوى التبويبات - تم تبديل الترتيب -->
             <div id="investTabContent">
+                <!-- أولاً: باقات العائد الثابت (نشط) -->
                 <div class="invest-tab-panel active" id="panel-invest-plans">
                     <div id="investPlansListInside"></div>
                 </div>
 
+                <!-- ثانياً: استثماراتي (مخفي) -->
                 <div class="invest-tab-panel" id="panel-my-investments" style="display:none;">
+                    <!-- بطاقة الإجماليات المعدلة لتعرض DZD و USDT -->
                     <div class="card gold-gradient" id="investSummaryCard">
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                             <div>
@@ -3110,6 +3252,7 @@
                 <i class="fas fa-wallet text-accent"></i> المحفظة
             </h2>
 
+            <!-- بطاقة واحدة مثبتة ومقسومة بالتساوي تجمع DZD و USDT -->
             <div class="balance-combined" id="walletCombined">
                 <div class="col">
                     <div class="label">الرصيد الكلي (DZD)</div>
@@ -3123,6 +3266,7 @@
                 </div>
             </div>
 
+            <!-- باقي البطاقات (المحافظ الفرعية) -->
             <div class="grid-2">
                 <div class="card" style="border-right:4px solid var(--success);">
                     <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">الرئيسية</div>
@@ -3176,7 +3320,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: DEPOSIT ========== -->
+        <!-- ========== PAGE: DEPOSIT (Dropdown + Confirmation) ========== -->
         <div class="page" id="page-deposit">
             <h2 style="font-size:20px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-down text-success" style="font-size:18px;"></i> الإيداع
@@ -3185,11 +3329,13 @@
                 </button>
             </h2>
 
+            <!-- تحذير التقييد -->
             <div id="depositRestrictedWarning" class="restricted-warning">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>⚠️ حسابك مقيد. لا يمكنك تنفيذ عمليات الإيداع حالياً. يرجى التواصل مع الدعم.</span>
             </div>
 
+            <!-- قائمة منسدلة لطريقة الإيداع -->
             <div class="input-group">
                 <label for="depositMethodSelect">طريقة الإيداع <span class="required">*</span></label>
                 <select id="depositMethodSelect" class="deposit-method-select" onchange="updateDepositForm(this.value)">
@@ -3200,6 +3346,7 @@
             </div>
 
             <div class="card" id="depositMainCard" style="padding:14px 16px;">
+                <!-- حقل رقم الحساب / معرف المحفظة (يتغير حسب الطريقة) -->
                 <div class="input-group" id="depositAccountGroup" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;" id="depositAccountLabel">رقم حساب BaridiMob <span class="required">*</span></label>
                     <div style="display:flex;gap:6px;align-items:center;">
@@ -3213,6 +3360,7 @@
                     </div>
                 </div>
 
+                <!-- حقل المبلغ (يتغير حسب العملة) -->
                 <div class="input-group" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;" id="depositAmountLabel">المبلغ (DZD) <span class="required">*</span></label>
                     <div class="input-icon">
@@ -3222,6 +3370,7 @@
                     <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="depositMinHint">الحد الأدنى للإيداع: 2000 DZD</div>
                 </div>
 
+                <!-- حقل رقم العملية -->
                 <div class="input-group" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;" id="depositTxLabel">رقم عملية التحويل <span class="required">*</span></label>
                     <div class="input-icon">
@@ -3246,7 +3395,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: WITHDRAW ========== -->
+        <!-- ========== PAGE: WITHDRAW (مع قائمة منسدلة ونافذة تأكيد) ========== -->
         <div class="page" id="page-withdraw">
             <h2 style="font-size:20px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-up text-danger" style="font-size:18px;"></i> السحب
@@ -3255,11 +3404,13 @@
                 </button>
             </h2>
 
+            <!-- تحذير التقييد -->
             <div id="withdrawRestrictedWarning" class="restricted-warning">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>⚠️ حسابك مقيد. لا يمكنك تنفيذ عمليات السحب حالياً. يرجى التواصل مع الدعم.</span>
             </div>
 
+            <!-- قائمة منسدلة لطريقة السحب -->
             <div class="input-group">
                 <label for="withdrawMethodSelect">طريقة السحب <span class="required">*</span></label>
                 <select id="withdrawMethodSelect" class="withdraw-method-select" onchange="updateWithdrawForm(this.value)">
@@ -3284,6 +3435,7 @@
             </div>
 
             <div class="card" style="padding:14px 16px;">
+                <!-- حقل المعرف (يتغير حسب الطريقة) -->
                 <div class="input-group" id="withdrawAccountGroup" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;" id="withdrawAccountLabel"> معرّف حسابك البريدي<span class="required">*</span></label>
                     <div class="input-icon">
@@ -3295,6 +3447,7 @@
                     </div>
                 </div>
 
+                <!-- حقل المبلغ -->
                 <div class="input-group" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;" id="withdrawAmountLabel">المبلغ (DZD) <span class="required">*</span></label>
                     <div class="input-icon">
@@ -3304,6 +3457,7 @@
                     <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="withdrawMinHint">الحد الأدنى للسحب: 1000 DZD</div>
                 </div>
 
+                <!-- حقل الرسوم والإجمالي -->
                 <div class="flex-between fee-row" style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">
                     <span style="color:var(--text-secondary);font-weight:600;" id="feeLabel">الرسوم (10%)</span>
                     <span id="withdrawFee" style="font-weight:700;">0.00</span>
@@ -3362,10 +3516,12 @@
             </h2>
 
             <div class="card text-center" style="padding:24px;">
+                <!-- صورة الملف الشخصي مع شارة التوثيق -->
                 <div style="position:relative; width:80px; height:80px; margin:0 auto 12px;">
                     <div id="profileAvatar" style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:white;box-shadow:var(--shadow-glow);">
                         ?
                     </div>
+                    <!-- شارة التوثيق الزرقاء -->
                     <div id="profileVerifiedBadge" style="display:none; position:absolute; bottom:0; right:-4px; background:#1d9bf0; border:2px solid var(--bg-card); border-radius:50%; width:26px; height:26px; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(29,155,240,0.4);">
                         <i class="fas fa-check" style="color:white; font-size:14px;"></i>
                     </div>
@@ -3415,54 +3571,50 @@
                     </div>
                 </div>
 
-                <!-- ===== VERIFICATION TAB - بنمط الاشتراكات ===== -->
+                <!-- ===== VERIFICATION TAB ===== -->
                 <div class="profile-tab-panel" id="panel-verification">
-                    <div class="pricing-widget">
-                        <div class="pc-card pc-verification">
-                            <div class="pc-stripe"></div>
-                            <div class="pc-body">
-                                <div class="pc-top">
-                                    <div class="pc-name-badge">
-                                        <i class="fas fa-shield-alt"></i>
-                                        <h3>توثيق الحساب</h3>
-                                    </div>
-                                    <span class="pc-price">100 <small>دج</small> <span style="font-size:0.6rem;color:var(--text-muted);">/ شهرياً</span></span>
-                                </div>
-
-                                <div class="pc-features">
-                                    <span><i class="fas fa-check-circle"></i> شارة موثّقة زرقاء</span>
-                                    <span><i class="fas fa-check-circle"></i> زيادة الثقة والمصداقية</span>
-                                    <span><i class="fas fa-check-circle"></i> أولوية في نتائج البحث</span>
-                                    <span><i class="fas fa-check-circle"></i> حماية إضافية للحساب</span>
-                                    <span><i class="fas fa-check-circle"></i> ظهور مميز للملف الشخصي</span>
-                                </div>
-
-                                <div class="auto-renew-row" id="autoRenewContainer">
-                                    <span class="label">
-                                        <i class="fas fa-sync-alt"></i> تفعيل التجديد التلقائي
-                                    </span>
-                                    <label style="position:relative; display:inline-block; width:44px; height:24px;">
-                                        <input type="checkbox" id="autoRenewToggle" onchange="toggleAutoRenew()"
-                                               style="opacity:0; width:0; height:0;">
-                                        <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0;
-                                                     background:var(--border); border-radius:24px; transition:0.3s;"></span>
-                                        <span style="position:absolute; content:''; height:18px; width:18px; left:3px; bottom:3px;
-                                                     background:white; border-radius:50%; transition:0.3s; box-shadow:var(--shadow-sm);"
-                                              id="autoRenewSlider"></span>
-                                    </label>
-                                </div>
-
-                                <button class="pc-btn" id="verificationActionBtn" onclick="requestVerification()">
-                                    <i class="fas fa-badge-check"></i> وثّق حسابي الآن
-                                </button>
-                                <p class="pc-note">* اشتراك شهري قابل للتجديد تلقائياً (بدون تدخل يدوي)</p>
+                    <div class="verify-card">
+                        <div class="vc-stripe"></div>
+                        <div class="vc-body">
+                            <div class="vc-icon">
+                                <i class="fas fa-shield-alt"></i>
+                                <span class="vc-check"><i class="fas fa-check"></i></span>
                             </div>
+                            <div class="vc-header">
+                                <h3>توثيق الحساب</h3>
+                                <span class="vc-price">100 <small>دج</small></span>
+                            </div>
+                            <ul class="vc-features">
+                                <li><i class="fas fa-check-circle"></i> شارة موثّقة زرقاء</li>
+                                <li><i class="fas fa-check-circle"></i> زيادة الثقة والمصداقية</li>
+                                <li><i class="fas fa-check-circle"></i> أولوية في نتائج البحث</li>
+                                <li><i class="fas fa-check-circle"></i> حماية إضافية للحساب</li>
+                                <li><i class="fas fa-check-circle"></i> ظهور مميز للملف الشخصي</li>
+                            </ul>
+
+                            <!-- ===== Auto-Renew Toggle ===== -->
+                            <div class="auto-renew-row" id="autoRenewContainer">
+                                <span class="label">
+                                    <i class="fas fa-sync-alt"></i> تفعيل التجديد التلقائي
+                                </span>
+                                <label style="position:relative; display:inline-block; width:44px; height:24px;">
+                                    <input type="checkbox" id="autoRenewToggle" onchange="toggleAutoRenew()" style="opacity:0; width:0; height:0;">
+                                    <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:var(--border); border-radius:24px; transition:0.3s;"></span>
+                                    <span style="position:absolute; content:''; height:18px; width:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.3s; box-shadow:var(--shadow-sm);" id="autoRenewSlider"></span>
+                                </label>
+                            </div>
+
+                            <button class="vc-btn" id="verificationActionBtn" onclick="requestVerification()">
+                                <i class="fas fa-badge-check"></i> وثّق حسابي الآن
+                            </button>
+                            <p class="vc-note">* اشتراك شهري قابل للتجديد تلقائياً (بدون تدخل يدوي)</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="profile-tab-panel" id="panel-subscription">
-                    <div id="currentSubscriptionCard" class="card" style="display:none; border:2px solid var(--accent);">
+                    <!-- ===== بطاقة الاشتراك الحالي ===== -->
+                    <div id="currentSubscriptionCard" style="display:none;" class="card" style="border:2px solid var(--accent);">
                         <div class="flex-between">
                             <div>
                                 <div style="font-weight:800;font-size:18px;">اشتراكك الحالي: <span id="currentPlanName">-</span></div>
@@ -3698,6 +3850,7 @@
                 <button class="close-modal" onclick="closeDepositConfirmModal()">&times;</button>
             </div>
             <div class="confirm-details" id="confirmDetails">
+                <!-- سيتم ملء البيانات بواسطة JavaScript -->
             </div>
             <div class="confirm-warning">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -3722,6 +3875,7 @@
                 <button class="close-modal" onclick="closeWithdrawConfirmModal()">&times;</button>
             </div>
             <div class="confirm-details" id="withdrawConfirmDetails">
+                <!-- سيتم ملء البيانات بواسطة JavaScript -->
             </div>
             <div class="confirm-warning">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -3746,6 +3900,7 @@
                 <button class="close-modal" onclick="closeSubscriptionConfirmModal()">&times;</button>
             </div>
             <div class="confirm-details" id="subscriptionConfirmDetails">
+                <!-- سيتم ملء البيانات بواسطة JavaScript -->
             </div>
             <div class="confirm-warning">
                 <i class="fas fa-info-circle"></i>
@@ -3770,6 +3925,7 @@
                 <button class="close-modal" onclick="closeVerificationConfirmModal()">&times;</button>
             </div>
             <div class="confirm-details" id="verificationConfirmDetails">
+                <!-- سيتم ملء البيانات بواسطة JavaScript -->
             </div>
             <div class="confirm-warning">
                 <i class="fas fa-info-circle"></i>
@@ -4336,7 +4492,7 @@
         }
 
         // ============================================================
-        // UI UPDATES
+        // UI UPDATES (including verification badges)
         // ============================================================
         function updateUI() {
             if (!userData) return;
@@ -5504,7 +5660,7 @@
         }
 
         // ============================================================
-        // VERIFICATION
+        // VERIFICATION (مع دعم التجديد التلقائي والشارات - تم إزالة التجديد اليدوي)
         // ============================================================
         async function toggleAutoRenew() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -5603,7 +5759,7 @@
             const container = document.getElementById('autoRenewContainer');
             const toggle = document.getElementById('autoRenewToggle');
             const btn = document.getElementById('verificationActionBtn');
-            const priceSpan = document.querySelector('.pc-verification .pc-price');
+            const priceSpan = document.querySelector('.vc-price');
             if (!btn) return;
 
             const verified = userData.verified || false;
@@ -5616,45 +5772,51 @@
                 const expiryDate = expiry.toDate ? expiry.toDate() : new Date(expiry);
                 const now = new Date();
                 if (expiryDate > now) {
+                    // ===== الحالة: موثق ونشط =====
                     const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
-                    if (container) container.style.display = 'flex';
+                    if (container) container.style.display = 'flex'; // إظهار مفتاح التجديد التلقائي
 
+                    // زر معطل يعرض حالة التوثيق (بدون تجديد يدوي)
                     btn.innerHTML = `<i class="fas fa-check-circle"></i> ✅ موثق (متبقي ${daysLeft} يوم)`;
-                    btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-                    btn.style.color = '#fff';
+                    btn.style.background = 'var(--success)';
                     btn.disabled = true;
                     btn.style.cursor = 'default';
-                    btn.style.opacity = '1';
                     btn.onclick = null;
 
                     if (priceSpan) {
                         priceSpan.style.display = 'inline-block';
                         priceSpan.innerHTML = '100 <small>دج</small>';
+                        priceSpan.style.background = '#eff6ff';
+                        priceSpan.style.color = '#2563eb';
                     }
                 } else {
+                    // ===== الحالة: انتهت الصلاحية =====
                     if (container) container.style.display = 'none';
                     btn.innerHTML = '<i class="fas fa-clock"></i> انتهى - وثّق الآن';
                     btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
                     btn.disabled = false;
                     btn.style.cursor = 'pointer';
-                    btn.style.opacity = '1';
                     btn.onclick = function() { requestVerification(); };
                     if (priceSpan) {
                         priceSpan.style.display = 'inline-block';
                         priceSpan.innerHTML = '100 <small>دج</small>';
+                        priceSpan.style.background = '#fef3c7';
+                        priceSpan.style.color = '#b45309';
                     }
                 }
             } else {
+                // ===== الحالة: غير موثق =====
                 if (container) container.style.display = 'none';
                 btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
                 btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
                 btn.disabled = false;
                 btn.style.cursor = 'pointer';
-                btn.style.opacity = '1';
                 btn.onclick = function() { requestVerification(); };
                 if (priceSpan) {
                     priceSpan.style.display = 'inline-block';
                     priceSpan.innerHTML = '100 <small>دج</small>';
+                    priceSpan.style.background = '#eff6ff';
+                    priceSpan.style.color = '#2563eb';
                 }
             }
             updateVerificationStatus();
@@ -5758,6 +5920,7 @@
 
         async function requestVerification() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+            // منع التجديد اليدوي إذا كان الحساب موثقاً ونشطاً
             if (userData.verified && userData.verificationExpiry) {
                 const expiry = userData.verificationExpiry.toDate ? userData.verificationExpiry.toDate() : new Date(userData
                     .verificationExpiry);
@@ -5947,9 +6110,9 @@
             }
         });
 
-        console.log('🚀 Crynova - نسخة محدّثة');
-        console.log('✅ مفاتيح التبديل تعمل بشكل صحيح');
-        console.log('✅ بطاقة الأرصدة في أعلى صفحة التبادل');
+        console.log('🚀 Crynova - تم إزالة التجديد اليدوي نهائياً');
+        console.log('✅ الاعتماد الآن على التجديد التلقائي فقط بعد التوثيق الأولي');
+        console.log('🔵 شارة التوثيق الزرقاء تظهر في الملف الشخصي والهيدر');
     </script>
 
 </body>
