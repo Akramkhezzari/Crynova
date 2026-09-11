@@ -1211,16 +1211,12 @@
         .pricing-widget .pc-verification .pc-name-badge h3 {
             color: #1e40af;
         }
+
+        /* السعر في بطاقة التوثيق بنفس تنسيق بطاقات الاشتراك تماماً */
         .pricing-widget .pc-verification .pc-price {
-            color: #2563eb;
-            background: #eff6ff;
-            padding: 0.1rem 1rem;
-            border-radius: 60px;
-            font-size: 1.6rem;
+            color: #1e40af;
         }
-        .pricing-widget .pc-verification .pc-price small {
-            color: #4a6a9f;
-        }
+
         .pricing-widget .pc-verification .pc-features span i {
             color: #2563eb;
         }
@@ -1246,19 +1242,6 @@
             color: var(--text-muted);
             text-align: center;
             margin-top: 0.8rem;
-        }
-
-        .pricing-widget .pc-verification .pc-sticker-verified {
-            background: #2563eb;
-            color: #fff;
-            font-size: 0.6rem;
-            font-weight: 800;
-            padding: 0.15rem 0.7rem;
-            border-radius: 40px;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
         }
 
         .pricing-widget .pc-verification .auto-renew-row {
@@ -2340,7 +2323,7 @@
             display: block;
         }
 
-        /* ===== تبويبات استثماراتي (تم تبديل الترتيب) ===== */
+        /* ===== تبويبات استثماراتي ===== */
         #page-investments .profile-tab-btn {
             background: transparent;
             border: none;
@@ -2708,7 +2691,7 @@
             margin-top: 4px;
         }
 
-        /* ===== بطاقة الرصيد الموحدة (DZD + USDT) - مثبتة ومقسومة بالتساوي ===== */
+        /* ===== بطاقة الرصيد الموحدة (DZD + USDT) ===== */
         .balance-combined {
             background: var(--bg-card);
             border-radius: var(--radius-md);
@@ -2762,7 +2745,6 @@
             display: none;
         }
 
-        /* في الوضع المظلم */
         .dark .balance-combined {
             background: rgba(26, 26, 62, 0.92);
             border-color: var(--border);
@@ -2910,7 +2892,6 @@
                 <div class="user-mini" onclick="navigateTo('profile')">
                     <div style="position:relative;">
                         <div class="avatar-small" id="headerAvatar">?</div>
-                        <!-- شارة التوثيق في الهيدر -->
                         <div id="headerVerifiedBadge" style="display:none; position:absolute; bottom:-2px; right:-2px; background:#1d9bf0; border:2px solid var(--bg-nav); border-radius:50%; width:16px; height:16px; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(29,155,240,0.3);">
                             <i class="fas fa-check" style="color:white; font-size:8px;"></i>
                         </div>
@@ -2928,7 +2909,6 @@
 
         <!-- ========== PAGE: HOME ========== -->
         <div class="page active" id="page-home">
-            <!-- بطاقة الرصيد المدمجة - DZD و USDT -->
             <div class="balance-combined" id="homeBalanceCombined">
                 <div class="col">
                     <div class="label">الرصيد الكلي (DZD)</div>
@@ -2942,7 +2922,6 @@
                 </div>
             </div>
 
-            <!-- أزرار الإيداع والسحب -->
             <div style="display:flex;gap:12px;margin-bottom:16px;">
                 <button class="btn btn-success" style="flex:1;" onclick="navigateTo('deposit')">
                     <i class="fas fa-arrow-down"></i> إيداع
@@ -2952,7 +2931,6 @@
                 </button>
             </div>
 
-            <!-- ===== صندوق الزكاة والرصيد (مشترك لجميع المستخدمين) ===== -->
             <div class="zakat-box" id="zakatBox">
                 <div class="zb-header">
                     <i class="fas fa-hand-holding-heart"></i>
@@ -2999,7 +2977,6 @@
                     </div>
                 </div>
 
-                <!-- زر التبرع يفتح النافذة المنبثقة -->
                 <button class="zb-btn" onclick="openDonationModal()">
                     <i class="fas fa-hand-holding-usd"></i> تبرع الآن
                 </button>
@@ -3015,7 +2992,6 @@
             </h2>
 
             <div class="swap-card">
-                <!-- اتجاه التبادل -->
                 <div class="swap-direction">
                     <span class="dir-label">من</span>
                     <span class="dir-badge dzd" id="swapFromLabel">DZD</span>
@@ -3026,30 +3002,25 @@
                     <span class="dir-label">إلى</span>
                 </div>
 
-                <!-- حقل إدخال المبلغ -->
                 <div class="swap-amount">
                     <input type="number" id="swapAmountInput" placeholder="أدخل المبلغ" min="0" step="1" value="100">
                     <span class="currency-label" id="swapInputCurrency">DZD</span>
                 </div>
 
-                <!-- سعر الصرف مخفي نهائياً -->
                 <div class="swap-rate" style="display:none !important;">
                     سعر الصرف: <strong id="swapRateDisplay"></strong>
                 </div>
 
-                <!-- النتيجة -->
                 <div class="swap-result">
                     <span class="label">ستحصل على:</span>
                     <span class="value usdt-color" id="swapResultValue">0.3802 USDT</span>
                 </div>
 
-                <!-- زر التبادل -->
                 <button class="btn btn-usdt" onclick="executeSwap()">
                     <i class="fas fa-exchange-alt"></i> تبادل
                 </button>
             </div>
 
-            <!-- عرض أرصدة المستخدم -->
             <div class="card" style="margin-top:8px;">
                 <div style="display:flex;justify-content:space-around;padding:8px 0;">
                     <div>
@@ -3070,7 +3041,6 @@
                 <i class="fas fa-chart-line text-gold"></i> استثماراتي
             </h2>
 
-            <!-- أزرار التبويب - تم تبديل الترتيب -->
             <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:8px;">
                 <button class="profile-tab-btn active" data-tab="invest-plans" onclick="switchInvestTab('invest-plans')">
                     <i class="fas fa-cubes"></i> باقات العائد الثابت
@@ -3080,16 +3050,12 @@
                 </button>
             </div>
 
-            <!-- محتوى التبويبات - تم تبديل الترتيب -->
             <div id="investTabContent">
-                <!-- أولاً: باقات العائد الثابت (نشط) -->
                 <div class="invest-tab-panel active" id="panel-invest-plans">
                     <div id="investPlansListInside"></div>
                 </div>
 
-                <!-- ثانياً: استثماراتي (مخفي) -->
                 <div class="invest-tab-panel" id="panel-my-investments" style="display:none;">
-                    <!-- بطاقة الإجماليات المعدلة لتعرض DZD و USDT -->
                     <div class="card gold-gradient" id="investSummaryCard">
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                             <div>
@@ -3123,7 +3089,6 @@
                 <i class="fas fa-wallet text-accent"></i> المحفظة
             </h2>
 
-            <!-- بطاقة واحدة مثبتة ومقسومة بالتساوي تجمع DZD و USDT -->
             <div class="balance-combined" id="walletCombined">
                 <div class="col">
                     <div class="label">الرصيد الكلي (DZD)</div>
@@ -3137,7 +3102,6 @@
                 </div>
             </div>
 
-            <!-- باقي البطاقات (المحافظ الفرعية) -->
             <div class="grid-2">
                 <div class="card" style="border-right:4px solid var(--success);">
                     <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">الرئيسية</div>
@@ -3191,7 +3155,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: DEPOSIT (Dropdown + Confirmation) ========== -->
+        <!-- ========== PAGE: DEPOSIT ========== -->
         <div class="page" id="page-deposit">
             <h2 style="font-size:20px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-down text-success" style="font-size:18px;"></i> الإيداع
@@ -3200,13 +3164,11 @@
                 </button>
             </h2>
 
-            <!-- تحذير التقييد -->
             <div id="depositRestrictedWarning" class="restricted-warning">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>⚠️ حسابك مقيد. لا يمكنك تنفيذ عمليات الإيداع حالياً. يرجى التواصل مع الدعم.</span>
             </div>
 
-            <!-- قائمة منسدلة لطريقة الإيداع -->
             <div class="input-group">
                 <label for="depositMethodSelect">طريقة الإيداع <span class="required">*</span></label>
                 <select id="depositMethodSelect" class="deposit-method-select" onchange="updateDepositForm(this.value)">
@@ -3217,7 +3179,6 @@
             </div>
 
             <div class="card" id="depositMainCard" style="padding:14px 16px;">
-                <!-- حقل رقم الحساب / معرف المحفظة (يتغير حسب الطريقة) -->
                 <div class="input-group" id="depositAccountGroup" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;" id="depositAccountLabel">رقم حساب BaridiMob <span class="required">*</span></label>
                     <div style="display:flex;gap:6px;align-items:center;">
@@ -3231,7 +3192,6 @@
                     </div>
                 </div>
 
-                <!-- حقل المبلغ (يتغير حسب العملة) -->
                 <div class="input-group" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;" id="depositAmountLabel">المبلغ (DZD) <span class="required">*</span></label>
                     <div class="input-icon">
@@ -3241,7 +3201,6 @@
                     <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="depositMinHint">الحد الأدنى للإيداع: 2000 DZD</div>
                 </div>
 
-                <!-- حقل رقم العملية -->
                 <div class="input-group" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;" id="depositTxLabel">رقم عملية التحويل <span class="required">*</span></label>
                     <div class="input-icon">
@@ -3266,7 +3225,7 @@
             </div>
         </div>
 
-        <!-- ========== PAGE: WITHDRAW (مع قائمة منسدلة ونافذة تأكيد) ========== -->
+        <!-- ========== PAGE: WITHDRAW ========== -->
         <div class="page" id="page-withdraw">
             <h2 style="font-size:20px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
                 <i class="fas fa-arrow-up text-danger" style="font-size:18px;"></i> السحب
@@ -3275,13 +3234,11 @@
                 </button>
             </h2>
 
-            <!-- تحذير التقييد -->
             <div id="withdrawRestrictedWarning" class="restricted-warning">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>⚠️ حسابك مقيد. لا يمكنك تنفيذ عمليات السحب حالياً. يرجى التواصل مع الدعم.</span>
             </div>
 
-            <!-- قائمة منسدلة لطريقة السحب -->
             <div class="input-group">
                 <label for="withdrawMethodSelect">طريقة السحب <span class="required">*</span></label>
                 <select id="withdrawMethodSelect" class="withdraw-method-select" onchange="updateWithdrawForm(this.value)">
@@ -3306,7 +3263,6 @@
             </div>
 
             <div class="card" style="padding:14px 16px;">
-                <!-- حقل المعرف (يتغير حسب الطريقة) -->
                 <div class="input-group" id="withdrawAccountGroup" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;" id="withdrawAccountLabel"> معرّف حسابك البريدي<span class="required">*</span></label>
                     <div class="input-icon">
@@ -3318,7 +3274,6 @@
                     </div>
                 </div>
 
-                <!-- حقل المبلغ -->
                 <div class="input-group" style="margin-bottom:10px;">
                     <label style="font-size:13px;margin-bottom:4px;" id="withdrawAmountLabel">المبلغ (DZD) <span class="required">*</span></label>
                     <div class="input-icon">
@@ -3328,7 +3283,6 @@
                     <div style="font-size:11px;color:var(--text-muted);margin-top:4px;" id="withdrawMinHint">الحد الأدنى للسحب: 1000 DZD</div>
                 </div>
 
-                <!-- حقل الرسوم والإجمالي -->
                 <div class="flex-between fee-row" style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">
                     <span style="color:var(--text-secondary);font-weight:600;" id="feeLabel">الرسوم (10%)</span>
                     <span id="withdrawFee" style="font-weight:700;">0.00</span>
@@ -3387,12 +3341,10 @@
             </h2>
 
             <div class="card text-center" style="padding:24px;">
-                <!-- صورة الملف الشخصي مع شارة التوثيق -->
                 <div style="position:relative; width:80px; height:80px; margin:0 auto 12px;">
                     <div id="profileAvatar" style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:white;box-shadow:var(--shadow-glow);">
                         ?
                     </div>
-                    <!-- شارة التوثيق الزرقاء -->
                     <div id="profileVerifiedBadge" style="display:none; position:absolute; bottom:0; right:-4px; background:#1d9bf0; border:2px solid var(--bg-card); border-radius:50%; width:26px; height:26px; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(29,155,240,0.4);">
                         <i class="fas fa-check" style="color:white; font-size:14px;"></i>
                     </div>
@@ -3448,22 +3400,14 @@
                         <div class="pc-card pc-verification">
                             <div class="pc-stripe"></div>
                             <div class="pc-body">
-                                <!-- العنوان + السعر -->
                                 <div class="pc-top">
                                     <div class="pc-name-badge">
                                         <i class="fas fa-shield-alt"></i>
                                         <h3>توثيق الحساب</h3>
-                                        <span class="pc-sticker-verified">
-                                            <i class="fas fa-check"></i> شارة زرقاء
-                                        </span>
                                     </div>
-                                    <span class="pc-price">
-                                        100 <small>دج</small>
-                                        <span style="font-size:0.6rem;color:var(--text-muted);font-weight:500;">/ شهرياً</span>
-                                    </span>
+                                    <span class="pc-price">100 <small>دج</small> <span style="font-size:0.6rem;color:var(--text-muted);">/ شهرياً</span></span>
                                 </div>
 
-                                <!-- المزايا -->
                                 <div class="pc-features">
                                     <span><i class="fas fa-check-circle"></i> شارة موثّقة زرقاء</span>
                                     <span><i class="fas fa-check-circle"></i> زيادة الثقة والمصداقية</span>
@@ -3472,7 +3416,6 @@
                                     <span><i class="fas fa-check-circle"></i> ظهور مميز للملف الشخصي</span>
                                 </div>
 
-                                <!-- مفتاح التجديد التلقائي -->
                                 <div class="auto-renew-row" id="autoRenewContainer">
                                     <span class="label">
                                         <i class="fas fa-sync-alt"></i> تفعيل التجديد التلقائي
@@ -3488,7 +3431,6 @@
                                     </label>
                                 </div>
 
-                                <!-- زر التوثيق -->
                                 <button class="pc-btn" id="verificationActionBtn" onclick="requestVerification()">
                                     <i class="fas fa-badge-check"></i> وثّق حسابي الآن
                                 </button>
@@ -3499,7 +3441,6 @@
                 </div>
 
                 <div class="profile-tab-panel" id="panel-subscription">
-                    <!-- ===== بطاقة الاشتراك الحالي ===== -->
                     <div id="currentSubscriptionCard" class="card" style="display:none; border:2px solid var(--accent);">
                         <div class="flex-between">
                             <div>
@@ -3736,7 +3677,6 @@
                 <button class="close-modal" onclick="closeDepositConfirmModal()">&times;</button>
             </div>
             <div class="confirm-details" id="confirmDetails">
-                <!-- سيتم ملء البيانات بواسطة JavaScript -->
             </div>
             <div class="confirm-warning">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -3761,7 +3701,6 @@
                 <button class="close-modal" onclick="closeWithdrawConfirmModal()">&times;</button>
             </div>
             <div class="confirm-details" id="withdrawConfirmDetails">
-                <!-- سيتم ملء البيانات بواسطة JavaScript -->
             </div>
             <div class="confirm-warning">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -3786,7 +3725,6 @@
                 <button class="close-modal" onclick="closeSubscriptionConfirmModal()">&times;</button>
             </div>
             <div class="confirm-details" id="subscriptionConfirmDetails">
-                <!-- سيتم ملء البيانات بواسطة JavaScript -->
             </div>
             <div class="confirm-warning">
                 <i class="fas fa-info-circle"></i>
@@ -3811,7 +3749,6 @@
                 <button class="close-modal" onclick="closeVerificationConfirmModal()">&times;</button>
             </div>
             <div class="confirm-details" id="verificationConfirmDetails">
-                <!-- سيتم ملء البيانات بواسطة JavaScript -->
             </div>
             <div class="confirm-warning">
                 <i class="fas fa-info-circle"></i>
@@ -4378,7 +4315,7 @@
         }
 
         // ============================================================
-        // UI UPDATES (including verification badges)
+        // UI UPDATES
         // ============================================================
         function updateUI() {
             if (!userData) return;
@@ -5546,7 +5483,7 @@
         }
 
         // ============================================================
-        // VERIFICATION (مع دعم التجديد التلقائي والشارات)
+        // VERIFICATION
         // ============================================================
         async function toggleAutoRenew() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
@@ -5673,8 +5610,6 @@
                     if (priceSpan) {
                         priceSpan.style.display = 'inline-block';
                         priceSpan.innerHTML = '100 <small>دج</small>';
-                        priceSpan.style.background = '#eff6ff';
-                        priceSpan.style.color = '#2563eb';
                     }
                 } else {
                     // ===== الحالة: انتهت الصلاحية =====
@@ -5688,8 +5623,6 @@
                     if (priceSpan) {
                         priceSpan.style.display = 'inline-block';
                         priceSpan.innerHTML = '100 <small>دج</small>';
-                        priceSpan.style.background = '#fef3c7';
-                        priceSpan.style.color = '#b45309';
                     }
                 }
             } else {
@@ -5704,8 +5637,6 @@
                 if (priceSpan) {
                     priceSpan.style.display = 'inline-block';
                     priceSpan.innerHTML = '100 <small>دج</small>';
-                    priceSpan.style.background = '#eff6ff';
-                    priceSpan.style.color = '#2563eb';
                 }
             }
             updateVerificationStatus();
@@ -5998,9 +5929,9 @@
             }
         });
 
-        console.log('🚀 Crynova - بطاقة التوثيق بنمط بطاقات الاشتراك');
-        console.log('✅ التجديد التلقائي فقط بعد التوثيق الأولي');
-        console.log('🔵 شارة التوثيق الزرقاء تظهر في الملف الشخصي والهيدر');
+        console.log('🚀 Crynova - بطاقة التوثيق بنفس تنسيق بطاقات الاشتراك تماماً');
+        console.log('✅ السعر: 100 دج / شهرياً');
+        console.log('✅ تم إزالة نص "شارة زرقاء"');
     </script>
 
 </body>
