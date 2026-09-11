@@ -3631,6 +3631,20 @@
                             <span class="left"><i class="fas fa-calendar" style="color:var(--text-muted);width:20px;"></i> تاريخ التسجيل</span>
                             <span id="profileJoinDate" style="font-weight:600;">--</span>
                         </div>
+
+                        <div class="list-item clickable" onclick="openContactEditModal('phone')">
+                            <span class="left"><i class="fas fa-phone" style="color:var(--text-muted);width:20px;"></i> رقم الهاتف</span>
+                            <span id="profilePhone" style="font-weight:600;color:var(--text-muted);">
+                                أضف رقم الهاتف <i class="fas fa-chevron-left" style="font-size:12px;margin-right:4px;"></i>
+                            </span>
+                        </div>
+
+                        <div class="list-item clickable" style="border-bottom:none;" onclick="openContactEditModal('email')">
+                            <span class="left"><i class="fas fa-envelope" style="color:var(--text-muted);width:20px;"></i> البريد الإلكتروني</span>
+                            <span id="profileEmail" style="font-weight:600;color:var(--text-muted);">
+                                أضف البريد الإلكتروني <i class="fas fa-chevron-left" style="font-size:12px;margin-right:4px;"></i>
+                            </span>
+                        </div>
                     </div>
                     <div class="card">
                         <div class="list-item clickable" onclick="toggleLanguage()" style="padding-top:14px;">
@@ -4100,6 +4114,32 @@
         </div>
     </div>
 
+    <!-- ===== CONTACT EDIT MODAL ===== -->
+    <div class="modal-overlay" id="contactEditModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="contactModalTitle"><i class="fas fa-user-edit"></i> تعديل البيانات</h3>
+                <button class="close-modal" onclick="closeContactEditModal()">&times;</button>
+            </div>
+            <div class="input-group">
+                <label id="contactInputLabel">القيمة</label>
+                <div class="input-icon">
+                    <i class="fas fa-phone" id="contactInputIcon"></i>
+                    <input type="text" id="contactInput" placeholder="أدخل القيمة" maxlength="100">
+                </div>
+                <div id="contactInputHint" style="font-size:11px;color:var(--text-muted);margin-top:6px;"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeContactEditModal()">
+                    <i class="fas fa-times"></i> إلغاء
+                </button>
+                <button class="btn btn-primary" id="contactSaveBtn" onclick="saveContactInfo()">
+                    <i class="fas fa-check-circle"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== BOTTOM NAVIGATION ===== -->
     <nav class="bottom-nav" id="bottomNav">
         <button class="nav-item active" data-page="home" onclick="navigateTo('home')">
@@ -4474,7 +4514,9 @@
                         restrictedReason: null,
                         autoRenewVerification: false,
                         kyc: null,
-                        kycStatus: null
+                        kycStatus: null,
+                        phone: null,
+                        email: null
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -4704,8 +4746,138 @@
             const refLink = document.getElementById('referralLink');
             if (userData.telegramId) { refLink.value = `https://t.me/Crynova_bot?start=${userData.telegramId}`; } else {
                 refLink.value = 'جاري التحميل...'; }
+            updateContactUI();
             updateVerificationStatus();
             updateVerificationBadges();
+        }
+
+        // ============================================================
+        // CONTACT INFO (Phone & Email)
+        // ============================================================
+        let currentContactField = null;
+
+        function esc(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        function openContactEditModal(field) {
+            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
+
+            currentContactField = field;
+            const modal = document.getElementById('contactEditModal');
+            const title = document.getElementById('contactModalTitle');
+            const label = document.getElementById('contactInputLabel');
+            const icon = document.getElementById('contactInputIcon');
+            const input = document.getElementById('contactInput');
+            const hint = document.getElementById('contactInputHint');
+
+            if (field === 'phone') {
+                title.innerHTML = '<i class="fas fa-phone"></i> رقم الهاتف';
+                label.textContent = 'رقم الهاتف';
+                icon.className = 'fas fa-phone';
+                input.type = 'tel';
+                input.placeholder = 'مثال: 0555123456';
+                input.value = userData.phone || '';
+                hint.innerHTML = '<i class="fas fa-info-circle"></i> أدخل رقماً جزائرياً صحيحاً (يبدأ بـ 05/06/07 و10 أرقام)';
+            } else {
+                title.innerHTML = '<i class="fas fa-envelope"></i> البريد الإلكتروني';
+                label.textContent = 'البريد الإلكتروني';
+                icon.className = 'fas fa-envelope';
+                input.type = 'email';
+                input.placeholder = 'example@mail.com';
+                input.value = userData.email || '';
+                hint.innerHTML = '<i class="fas fa-info-circle"></i> أدخل بريداً إلكترونياً صحيحاً';
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            modal.onclick = function(e) { if (e.target === this) closeContactEditModal(); };
+            setTimeout(() => input.focus(), 150);
+        }
+
+        function closeContactEditModal() {
+            document.getElementById('contactEditModal').classList.remove('active');
+            document.body.style.overflow = '';
+            currentContactField = null;
+        }
+
+        async function saveContactInfo() {
+            if (!userData || !currentContactField) return;
+
+            const input = document.getElementById('contactInput');
+            const value = input.value.trim();
+
+            if (currentContactField === 'phone') {
+                if (!value) { showToast('⚠️ أدخل رقم الهاتف'); return; }
+                const clean = value.replace(/\s/g, '');
+                if (!/^0[5-7]\d{8}$/.test(clean)) {
+                    showToast('⚠️ رقم هاتف غير صحيح (مثال: 0555123456)');
+                    return;
+                }
+            } else {
+                if (!value) { showToast('⚠️ أدخل البريد الإلكتروني'); return; }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    showToast('⚠️ بريد إلكتروني غير صحيح');
+                    return;
+                }
+            }
+
+            const btn = document.getElementById('contactSaveBtn');
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader-sm" style="display:inline-block;"></span> جاري الحفظ...';
+
+            try {
+                const updateObj = {};
+                updateObj[currentContactField] = value;
+                await db.collection('users').doc(userData.telegramId).update(updateObj);
+
+                userData[currentContactField] = value;
+                showToast('✅ تم الحفظ بنجاح');
+                closeContactEditModal();
+                updateContactUI();
+            } catch (e) {
+                showToast('❌ ' + (e.message || 'حدث خطأ'));
+                console.error(e);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        }
+
+        function updateContactUI() {
+            if (!userData) return;
+
+            const phoneEl = document.getElementById('profilePhone');
+            const emailEl = document.getElementById('profileEmail');
+
+            const chevron = '<i class="fas fa-chevron-left" style="font-size:12px;color:var(--text-muted);margin-right:4px;"></i>';
+
+            if (phoneEl) {
+                if (userData.phone) {
+                    phoneEl.innerHTML = `${esc(userData.phone)} ${chevron}`;
+                    phoneEl.style.color = 'var(--text-primary)';
+                    phoneEl.style.fontWeight = '600';
+                } else {
+                    phoneEl.innerHTML = `أضف رقم الهاتف ${chevron}`;
+                    phoneEl.style.color = 'var(--text-muted)';
+                    phoneEl.style.fontWeight = '600';
+                }
+            }
+
+            if (emailEl) {
+                if (userData.email) {
+                    emailEl.innerHTML = `${esc(userData.email)} ${chevron}`;
+                    emailEl.style.color = 'var(--text-primary)';
+                    emailEl.style.fontWeight = '600';
+                } else {
+                    emailEl.innerHTML = `أضف البريد الإلكتروني ${chevron}`;
+                    emailEl.style.color = 'var(--text-muted)';
+                    emailEl.style.fontWeight = '600';
+                }
+            }
         }
 
         function updateVerificationBadges() {
@@ -6541,6 +6713,7 @@
         console.log('✅ مفاتيح التبديل تعمل بشكل صحيح');
         console.log('✅ بطاقة الأرصدة في أعلى صفحة التبادل');
         console.log('✅ بطاقة التحقق من الهوية (KYC) مضافة');
+        console.log('✅ خيارات رقم الهاتف والبريد الإلكتروني في تبويب الشخصي');
     </script>
 
 </body>
