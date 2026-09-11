@@ -4185,6 +4185,9 @@
         const db = firebase.firestore();
         const storage = firebase.storage();
 
+        // ⚠️ مفتاح Veriphone API
+        const VERIPHONE_API_KEY = 'AVweKoiFRubvej4grr2NqtqKpYNDIO9VhkAYYX0PKnz-Gi4SYK3TLKD5F9DRH_KCODqaJoTF42kxzd8Ocz9gSUXRJjFcO4TrabjHxXFjTaM_zg_bK3LpwhqwBvN1uGxLELxfNyZgBmWBhyOaA6RDQcrW';
+
         // تخزين مؤقت لملفات KYC
         let kycFiles = {
             front: null,
@@ -4752,7 +4755,7 @@
         }
 
         // ============================================================
-        // CONTACT INFO (Phone & Email)
+        // CONTACT INFO (Phone & Email) - Phone verified via Veriphone
         // ============================================================
         let currentContactField = null;
 
@@ -4780,7 +4783,7 @@
                 input.type = 'tel';
                 input.placeholder = 'مثال: 0555123456';
                 input.value = userData.phone || '';
-                hint.innerHTML = '<i class="fas fa-info-circle"></i> أدخل رقماً جزائرياً صحيحاً (يبدأ بـ 05/06/07 و10 أرقام)';
+                hint.innerHTML = '<i class="fas fa-info-circle"></i> سيتم التحقق من الرقم عبر خدمة Veriphone';
             } else {
                 title.innerHTML = '<i class="fas fa-envelope"></i> البريد الإلكتروني';
                 label.textContent = 'البريد الإلكتروني';
@@ -4809,6 +4812,7 @@
             const input = document.getElementById('contactInput');
             const value = input.value.trim();
 
+            // ============ رقم الهاتف: تحقق عبر Veriphone ============
             if (currentContactField === 'phone') {
                 if (!value) { showToast('⚠️ أدخل رقم الهاتف'); return; }
                 const clean = value.replace(/\s/g, '');
@@ -4816,12 +4820,70 @@
                     showToast('⚠️ رقم هاتف غير صحيح (مثال: 0555123456)');
                     return;
                 }
-            } else {
-                if (!value) { showToast('⚠️ أدخل البريد الإلكتروني'); return; }
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                    showToast('⚠️ بريد إلكتروني غير صحيح');
-                    return;
+
+                const btn = document.getElementById('contactSaveBtn');
+                const original = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loader-sm" style="display:inline-block;"></span> جاري التحقق...';
+
+                try {
+                    // تحويل الرقم إلى الصيغة الدولية
+                    let formattedPhone = clean;
+                    if (formattedPhone.startsWith('0')) {
+                        formattedPhone = '+213' + formattedPhone.substring(1);
+                    }
+
+                    const url = `https://api.veriphone.io/v3/verify?phone=${encodeURIComponent(formattedPhone)}&default_country=DZ&key=${VERIPHONE_API_KEY}`;
+                    const response = await fetch(url);
+                    const result = await response.json();
+
+                    if (!response.ok || result.status === 'error') {
+                        console.error('Veriphone error:', result);
+                        showToast('❌ ' + (result.message || 'فشل الاتصال بخدمة التحقق'));
+                        return;
+                    }
+
+                    if (!result.phone_valid) {
+                        const reasonMap = {
+                            'too_short': 'الرقم قصير جداً',
+                            'too_long': 'الرقم طويل جداً',
+                            'invalid_length': 'طول الرقم غير صحيح',
+                            'invalid_country_code': 'رمز الدولة غير صحيح',
+                            'unrecognized_range': 'الرقم غير مُعرَّف لدى مشغلي الشبكات',
+                            'not_a_number': 'المدخل ليس رقم هاتف'
+                        };
+                        const reason = reasonMap[result.reason] || 'رقم غير صالح';
+                        showToast(`❌ ${reason}`);
+                        return;
+                    }
+
+                    // حفظ الرقم بعد التحقق الناجح
+                    await db.collection('users').doc(userData.telegramId).update({ phone: clean });
+                    userData.phone = clean;
+
+                    if (result.carrier) {
+                        showToast(`✅ تم التحقق - المشغل: ${result.carrier}`);
+                    } else {
+                        showToast('✅ تم التحقق من الرقم وحفظه');
+                    }
+
+                    closeContactEditModal();
+                    updateContactUI();
+                } catch (e) {
+                    console.error('خطأ في التحقق:', e);
+                    showToast('❌ ' + (e.message || 'فشل التحقق من الرقم'));
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = original;
                 }
+                return;
+            }
+
+            // ============ البريد الإلكتروني ============
+            if (!value) { showToast('⚠️ أدخل البريد الإلكتروني'); return; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                showToast('⚠️ بريد إلكتروني غير صحيح');
+                return;
             }
 
             const btn = document.getElementById('contactSaveBtn');
@@ -4830,11 +4892,8 @@
             btn.innerHTML = '<span class="loader-sm" style="display:inline-block;"></span> جاري الحفظ...';
 
             try {
-                const updateObj = {};
-                updateObj[currentContactField] = value;
-                await db.collection('users').doc(userData.telegramId).update(updateObj);
-
-                userData[currentContactField] = value;
+                await db.collection('users').doc(userData.telegramId).update({ email: value });
+                userData.email = value;
                 showToast('✅ تم الحفظ بنجاح');
                 closeContactEditModal();
                 updateContactUI();
@@ -6714,6 +6773,7 @@
         console.log('✅ بطاقة الأرصدة في أعلى صفحة التبادل');
         console.log('✅ بطاقة التحقق من الهوية (KYC) مضافة');
         console.log('✅ خيارات رقم الهاتف والبريد الإلكتروني في تبويب الشخصي');
+        console.log('✅ التحقق من رقم الهاتف عبر Veriphone API');
     </script>
 
 </body>
