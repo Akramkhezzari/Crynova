@@ -3009,18 +3009,17 @@
                 <i class="fas fa-exchange-alt text-accent"></i> تبادل العملات
             </h2>
 
-            <!-- بطاقة الأرصدة - في الأعلى -->
-            <div class="card" style="margin-bottom:16px;">
-                <div style="display:flex;justify-content:space-around;align-items:center;padding:8px 0;">
-                    <div style="text-align:center;flex:1;">
-                        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">رصيد DZD</div>
-                        <div style="font-size:22px;font-weight:900;color:var(--dzd-color);" id="swapDzdBalance">0.00</div>
-                    </div>
-                    <div style="width:1px;background:var(--border);height:40px;"></div>
-                    <div style="text-align:center;flex:1;">
-                        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">رصيد USDT</div>
-                        <div style="font-size:22px;font-weight:900;color:var(--usdt-color);" id="swapUsdtBalance">0.00</div>
-                    </div>
+            <!-- بطاقة الأرصدة - بنفس تصميم المحفظة -->
+            <div class="balance-combined" id="swapCombined">
+                <div class="col">
+                    <div class="label">رصيد DZD</div>
+                    <div class="amount dzd" id="swapDzdBalance">0.00</div>
+                    <div class="currency">DZD</div>
+                </div>
+                <div class="col">
+                    <div class="label">رصيد USDT</div>
+                    <div class="amount usdt" id="swapUsdtBalance">0.00</div>
+                    <div class="currency">USDT</div>
                 </div>
             </div>
 
@@ -4464,8 +4463,7 @@
         function updateSwapUI() {
             const fromLabel = document.getElementById('swapFromLabel');
             const toLabel = document.getElementById('swapToLabel');
-            const inputCurrency = document.getElementById('swapInputCurrency');
-            if (!fromLabel || !toLabel || !inputCurrency) return;
+            if (!fromLabel || !toLabel) return;
             if (swapDirection) {
                 fromLabel.textContent = 'DZD';
                 toLabel.textContent = 'USDT';
@@ -5910,6 +5908,8 @@
             }
             updateSwapUI();
             calculateSwapResult();
+            const swapInput = document.getElementById('swapAmountInput');
+            if (swapInput) swapInput.addEventListener('input', calculateSwapResult);
             const wd = document.getElementById('withdrawAmount');
             if (wd) wd.addEventListener('input', calculateWithdrawFee);
             const donationInput = document.getElementById('donationAmountInput');
