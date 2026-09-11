@@ -3038,7 +3038,6 @@
 
                 <div class="swap-amount">
                     <input type="number" id="swapAmountInput" placeholder="أدخل المبلغ" min="0" step="1" value="100">
-                    <span class="currency-label" id="swapInputCurrency">DZD</span>
                 </div>
 
                 <div class="swap-rate" style="display:none !important;">
@@ -4470,11 +4469,9 @@
             if (swapDirection) {
                 fromLabel.textContent = 'DZD';
                 toLabel.textContent = 'USDT';
-                inputCurrency.textContent = 'DZD';
             } else {
                 fromLabel.textContent = 'USDT';
                 toLabel.textContent = 'DZD';
-                inputCurrency.textContent = 'USDT';
             }
             fromLabel.className = `dir-badge ${swapDirection ? 'dzd' : 'usdt'}`;
             toLabel.className = `dir-badge ${swapDirection ? 'usdt' : 'dzd'}`;
