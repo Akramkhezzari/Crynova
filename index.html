@@ -1279,6 +1279,24 @@
             }
         }
 
+        /* ===== إصلاح مفاتيح التبديل (Toggle Switches) ===== */
+
+        /* مفتاح التجديد التلقائي - التوثيق */
+        #autoRenewToggle:checked + span {
+            background: #10b981 !important;
+        }
+        #autoRenewToggle:checked + span + span {
+            transform: translateX(20px);
+        }
+
+        /* مفتاح الوضع المظلم */
+        #darkModeToggle:checked + span {
+            background: var(--accent) !important;
+        }
+        #darkModeToggle:checked + span + span {
+            transform: translateX(22px);
+        }
+
         /* ============================================================
            INVESTMENT MODAL
            ============================================================ */
@@ -2991,6 +3009,22 @@
                 <i class="fas fa-exchange-alt text-accent"></i> تبادل العملات
             </h2>
 
+            <!-- بطاقة الأرصدة - في الأعلى -->
+            <div class="card" style="margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-around;align-items:center;padding:8px 0;">
+                    <div style="text-align:center;flex:1;">
+                        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">رصيد DZD</div>
+                        <div style="font-size:22px;font-weight:900;color:var(--dzd-color);" id="swapDzdBalance">0.00</div>
+                    </div>
+                    <div style="width:1px;background:var(--border);height:40px;"></div>
+                    <div style="text-align:center;flex:1;">
+                        <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">رصيد USDT</div>
+                        <div style="font-size:22px;font-weight:900;color:var(--usdt-color);" id="swapUsdtBalance">0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بطاقة التبادل -->
             <div class="swap-card">
                 <div class="swap-direction">
                     <span class="dir-label">من</span>
@@ -3019,19 +3053,6 @@
                 <button class="btn btn-usdt" onclick="executeSwap()">
                     <i class="fas fa-exchange-alt"></i> تبادل
                 </button>
-            </div>
-
-            <div class="card" style="margin-top:8px;">
-                <div style="display:flex;justify-content:space-around;padding:8px 0;">
-                    <div>
-                        <div style="font-size:13px;color:var(--text-secondary);">رصيد DZD</div>
-                        <div style="font-size:20px;font-weight:800;color:var(--dzd-color);" id="swapDzdBalance">0.00</div>
-                    </div>
-                    <div>
-                        <div style="font-size:13px;color:var(--text-secondary);">رصيد USDT</div>
-                        <div style="font-size:20px;font-weight:800;color:var(--usdt-color);" id="swapUsdtBalance">0.00</div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -5595,7 +5616,6 @@
                 const expiryDate = expiry.toDate ? expiry.toDate() : new Date(expiry);
                 const now = new Date();
                 if (expiryDate > now) {
-                    // ===== الحالة: موثق ونشط =====
                     const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
                     if (container) container.style.display = 'flex';
 
@@ -5612,7 +5632,6 @@
                         priceSpan.innerHTML = '100 <small>دج</small>';
                     }
                 } else {
-                    // ===== الحالة: انتهت الصلاحية =====
                     if (container) container.style.display = 'none';
                     btn.innerHTML = '<i class="fas fa-clock"></i> انتهى - وثّق الآن';
                     btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
@@ -5626,7 +5645,6 @@
                     }
                 }
             } else {
-                // ===== الحالة: غير موثق =====
                 if (container) container.style.display = 'none';
                 btn.innerHTML = '<i class="fas fa-badge-check"></i> وثّق حسابي الآن';
                 btn.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
@@ -5929,9 +5947,9 @@
             }
         });
 
-        console.log('🚀 Crynova - بطاقة التوثيق بنفس تنسيق بطاقات الاشتراك تماماً');
-        console.log('✅ السعر: 100 دج / شهرياً');
-        console.log('✅ تم إزالة نص "شارة زرقاء"');
+        console.log('🚀 Crynova - نسخة محدّثة');
+        console.log('✅ مفاتيح التبديل تعمل بشكل صحيح');
+        console.log('✅ بطاقة الأرصدة في أعلى صفحة التبادل');
     </script>
 
 </body>
