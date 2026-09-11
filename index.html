@@ -4516,9 +4516,6 @@
                 toAmount = amount * RATE_USDT_TO_DZD;
                 if (fromAmount > (userData.wallets?.usdt || 0)) { showToast('رصيد USDT غير كافٍ'); return; }
             }
-            if (!confirm(
-                    `تأكيد تبادل ${fromAmount.toFixed(2)} ${fromCurrency.toUpperCase()} إلى ${toAmount.toFixed(4)} ${toCurrency.toUpperCase()}؟`
-                    )) return;
             try {
                 const now = new Date();
                 const ref = db.collection('users').doc(userData.telegramId);
