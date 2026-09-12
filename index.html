@@ -6,18 +6,13 @@
     <title>Crynova - استثمر واربح (DZD & USDT)</title>
 
     <!-- Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js">
-    </script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js">
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -1192,7 +1187,6 @@
             color: #1e40af;
         }
 
-        /* السعر في بطاقة التوثيق بنفس تنسيق بطاقات الاشتراك تماماً */
         .pricing-widget .pc-verification .pc-price {
             color: #1e40af;
         }
@@ -1255,7 +1249,6 @@
             color: #059669;
         }
 
-        /* حالة البطاقة بعد الإرسال */
         .pricing-widget .pc-kyc .pc-btn {
             background: linear-gradient(135deg, #059669, #10b981);
             color: #fff;
@@ -1516,7 +1509,6 @@
 
         /* ===== إصلاح مفاتيح التبديل (Toggle Switches) ===== */
 
-        /* مفتاح التجديد التلقائي - التوثيق */
         #autoRenewToggle:checked + span {
             background: #10b981 !important;
         }
@@ -1524,7 +1516,6 @@
             transform: translateX(20px);
         }
 
-        /* مفتاح الوضع المظلم */
         #darkModeToggle:checked + span {
             background: var(--accent) !important;
         }
@@ -1869,7 +1860,6 @@
             color: var(--text-secondary);
             font-size: 16px;
         }
-        /* إخفاء سعر الصرف نهائياً */
         .swap-rate {
             display: none !important;
         }
@@ -2656,7 +2646,6 @@
             pointer-events: none;
         }
 
-        /* الرأس */
         .zakat-box .zb-header {
             display: flex;
             align-items: center;
@@ -2690,7 +2679,6 @@
             border: 1px solid #a7f3d0;
         }
 
-        /* الإحصائيات الرئيسية (3 أعمدة) */
         .zakat-box .zb-stats-main {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -2735,7 +2723,6 @@
             font-weight: 500;
         }
 
-        /* شريط التقدم */
         .zakat-box .zb-progress {
             width: 100%;
             height: 10px;
@@ -2765,7 +2752,6 @@
             font-weight: 700;
         }
 
-        /* إحصائيات إضافية (عدد المتبرعين + عدد المستفيدين) */
         .zakat-box .zb-stats-extra {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -2805,7 +2791,6 @@
             margin-top: 0.1rem;
         }
 
-        /* زر التبرع */
         .zakat-box .zb-btn {
             width: 100%;
             padding: 0.75rem 0;
@@ -2843,7 +2828,6 @@
             z-index: 1;
         }
 
-        /* ===== استجابة للجوال ===== */
         @media (max-width: 480px) {
             .zakat-box {
                 padding: 1.5rem 1.2rem;
@@ -3112,6 +3096,69 @@
                 font-size: 48px;
             }
         }
+
+        /* ===== تعليمات KYC الجديدة ===== */
+        .kyc-instructions {
+            background: var(--bg-input);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin: 12px 0 16px;
+            border: 1px solid var(--border);
+        }
+        .kyc-inst-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: #059669;
+            font-size: 0.88rem;
+            margin-bottom: 12px;
+        }
+        .kyc-inst-header i {
+            font-size: 1.2rem;
+            color: #0088cc;
+        }
+        .kyc-steps {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 12px 0;
+        }
+        .kyc-steps li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 0;
+            font-size: 0.78rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .kyc-steps .step-num {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .kyc-security-note {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            padding: 8px 10px;
+            background: rgba(5, 150, 105, 0.06);
+            border-radius: 10px;
+            border: 1px solid rgba(5, 150, 105, 0.15);
+        }
+        .kyc-security-note i {
+            color: #059669;
+        }
     </style>
 </head>
 <body>
@@ -3125,7 +3172,7 @@
             <p>
                 تم حظر حسابك من طرف الإدارة بسبب مخالفتك لقوانين وشروط استخدام منصة Crynova.
                 <br><br>
-                لا يمكنك الوصول إلى حسابك حاليًا. إذا كنت تعتقد أن هذا الإجراء تم عن طريق الخطأ، يرجى التواصل مع فريق الدعم لمراجعة حالة حسابك.
+                لا يمكنك الوصول إلى حسابك حاليًا إذا كنت تعتقد أن هذا الإجراء تم عن طريق الخطأ يرجى التواصل مع فريق الدعم لمراجعة حالة حسابك.
             </p>
             <button class="btn-support" onclick="contactSupport()">
                 <i class="fas fa-headset"></i> تواصل مع الدعم
@@ -3244,7 +3291,6 @@
                 <i class="fas fa-exchange-alt text-accent"></i> تبادل العملات
             </h2>
 
-            <!-- بطاقة الأرصدة - بنفس تصميم المحفظة -->
             <div class="balance-combined" id="swapCombined">
                 <div class="col">
                     <div class="label">رصيد DZD</div>
@@ -3258,7 +3304,6 @@
                 </div>
             </div>
 
-            <!-- بطاقة التبادل -->
             <div class="swap-card">
                 <div class="swap-direction">
                     <span class="dir-label">من</span>
@@ -3631,20 +3676,6 @@
                             <span class="left"><i class="fas fa-calendar" style="color:var(--text-muted);width:20px;"></i> تاريخ التسجيل</span>
                             <span id="profileJoinDate" style="font-weight:600;">--</span>
                         </div>
-
-                        <div class="list-item clickable" onclick="openContactEditModal('phone')">
-                            <span class="left"><i class="fas fa-phone" style="color:var(--text-muted);width:20px;"></i> رقم الهاتف</span>
-                            <span id="profilePhone" style="font-weight:600;color:var(--text-muted);">
-                                أضف رقم الهاتف <i class="fas fa-chevron-left" style="font-size:12px;margin-right:4px;"></i>
-                            </span>
-                        </div>
-
-                        <div class="list-item clickable" style="border-bottom:none;" onclick="openContactEditModal('email')">
-                            <span class="left"><i class="fas fa-envelope" style="color:var(--text-muted);width:20px;"></i> البريد الإلكتروني</span>
-                            <span id="profileEmail" style="font-weight:600;color:var(--text-muted);">
-                                أضف البريد الإلكتروني <i class="fas fa-chevron-left" style="font-size:12px;margin-right:4px;"></i>
-                            </span>
-                        </div>
                     </div>
                     <div class="card">
                         <div class="list-item clickable" onclick="toggleLanguage()" style="padding-top:14px;">
@@ -3725,62 +3756,30 @@
                                     <span><i class="fas fa-check-circle"></i> أولوية في الدعم</span>
                                 </div>
 
-                                <!-- حالة الطلب (تظهر فقط بعد الإرسال) -->
+                                <!-- حالة الطلب -->
                                 <div id="kycStatusContainer" style="display:none;"></div>
 
-                                <!-- نموذج KYC (يختفي بعد الموافقة) -->
+                                <!-- الواجهة الرئيسية -->
                                 <div id="kycFormContainer">
-                                    <div class="kyc-form">
-                                        <div class="kyc-input-group">
-                                            <label><i class="fas fa-user" style="color:#059669;"></i> الاسم (كما في البطاقة)</label>
-                                            <input type="text" id="kycFirstName" placeholder="أدخل الاسم" maxlength="50">
+                                    <div class="kyc-instructions">
+                                        <div class="kyc-inst-header">
+                                            <i class="fab fa-telegram"></i>
+                                            <span>التحقق يتم عبر بوت التيليجرام الرسمي</span>
                                         </div>
-                                        <div class="kyc-input-group">
-                                            <label><i class="fas fa-user-tag" style="color:#059669;"></i> اللقب (كما في البطاقة)</label>
-                                            <input type="text" id="kycLastName" placeholder="أدخل اللقب" maxlength="50">
-                                        </div>
-                                        <div class="kyc-input-group">
-                                            <label><i class="fas fa-calendar" style="color:#059669;"></i> تاريخ الميلاد</label>
-                                            <input type="date" id="kycBirthDate">
-                                        </div>
-
-                                        <div class="kyc-upload">
-                                            <label><i class="fas fa-id-card" style="color:#059669;"></i> صورة البطاقة (الوجه الأمامي)</label>
-                                            <div class="kyc-upload-box" id="kycFrontBox" onclick="document.getElementById('kycFrontInput').click()">
-                                                <button type="button" class="kyc-remove-btn" onclick="removeKycFile(event, 'front')"><i class="fas fa-times"></i></button>
-                                                <i class="fas fa-cloud-upload-alt"></i>
-                                                <span>اضغط لاختيار صورة</span>
-                                                <img id="kycFrontPreview" style="display:none;" alt="front">
-                                            </div>
-                                            <input type="file" id="kycFrontInput" accept="image/*" style="display:none;" onchange="previewKycImage(event, 'front')">
-                                        </div>
-
-                                        <div class="kyc-upload">
-                                            <label><i class="fas fa-id-card" style="color:#059669;"></i> صورة البطاقة (الوجه الخلفي)</label>
-                                            <div class="kyc-upload-box" id="kycBackBox" onclick="document.getElementById('kycBackInput').click()">
-                                                <button type="button" class="kyc-remove-btn" onclick="removeKycFile(event, 'back')"><i class="fas fa-times"></i></button>
-                                                <i class="fas fa-cloud-upload-alt"></i>
-                                                <span>اضغط لاختيار صورة</span>
-                                                <img id="kycBackPreview" style="display:none;" alt="back">
-                                            </div>
-                                            <input type="file" id="kycBackInput" accept="image/*" style="display:none;" onchange="previewKycImage(event, 'back')">
-                                        </div>
-
-                                        <div class="kyc-upload">
-                                            <label><i class="fas fa-video" style="color:#059669;"></i> مقطع فيديو (20 - 30 ثانية)</label>
-                                            <div class="kyc-upload-box" id="kycVideoBox" onclick="document.getElementById('kycVideoInput').click()">
-                                                <button type="button" class="kyc-remove-btn" onclick="removeKycFile(event, 'video')"><i class="fas fa-times"></i></button>
-                                                <i class="fas fa-video"></i>
-                                                <span>اضغط لاختيار فيديو</span>
-                                                <video id="kycVideoPreview" style="display:none;" controls playsinline></video>
-                                            </div>
-                                            <input type="file" id="kycVideoInput" accept="video/*" style="display:none;" onchange="previewKycVideo(event)">
-                                            <div id="kycVideoInfo" style="font-size:11px;color:var(--text-muted);margin-top:4px;text-align:center;"></div>
+                                        <ul class="kyc-steps">
+                                            <li><span class="step-num">1</span> اضغط الزر أدناه لفتح البوت</li>
+                                            <li><span class="step-num">2</span> أرسل اسمك الكامل ورقم حسابك</li>
+                                            <li><span class="step-num">3</span> أرسل صورتي البطاقة (أمامي وخلفي)</li>
+                                            <li><span class="step-num">4</span> أرسل فيديو قصير (20-30 ثانية)</li>
+                                        </ul>
+                                        <div class="kyc-security-note">
+                                            <i class="fas fa-lock"></i>
+                                            <span>بياناتك محمية وتُرسل مباشرة لفريق المراجعة</span>
                                         </div>
                                     </div>
 
-                                    <button class="pc-btn" id="kycSubmitBtn" onclick="submitKyc()">
-                                        <i class="fas fa-paper-plane"></i> إرسال طلب التحقق
+                                    <button class="pc-btn" id="kycSubmitBtn" onclick="openKycBot()">
+                                        <i class="fab fa-telegram"></i> فتح البوت والبدء
                                     </button>
                                     <p class="pc-note">* سيتم مراجعة طلبك خلال 24 - 48 ساعة</p>
                                 </div>
@@ -4114,32 +4113,6 @@
         </div>
     </div>
 
-    <!-- ===== CONTACT EDIT MODAL ===== -->
-    <div class="modal-overlay" id="contactEditModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3 id="contactModalTitle"><i class="fas fa-user-edit"></i> تعديل البيانات</h3>
-                <button class="close-modal" onclick="closeContactEditModal()">&times;</button>
-            </div>
-            <div class="input-group">
-                <label id="contactInputLabel">القيمة</label>
-                <div class="input-icon">
-                    <i class="fas fa-phone" id="contactInputIcon"></i>
-                    <input type="text" id="contactInput" placeholder="أدخل القيمة" maxlength="100">
-                </div>
-                <div id="contactInputHint" style="font-size:11px;color:var(--text-muted);margin-top:6px;"></div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-outline" onclick="closeContactEditModal()">
-                    <i class="fas fa-times"></i> إلغاء
-                </button>
-                <button class="btn btn-primary" id="contactSaveBtn" onclick="saveContactInfo()">
-                    <i class="fas fa-check-circle"></i> حفظ
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- ===== BOTTOM NAVIGATION ===== -->
     <nav class="bottom-nav" id="bottomNav">
         <button class="nav-item active" data-page="home" onclick="navigateTo('home')">
@@ -4184,13 +4157,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const storage = firebase.storage();
-
-        // تخزين مؤقت لملفات KYC
-        let kycFiles = {
-            front: null,
-            back: null,
-            video: null
-        };
 
         // ============================================================
         // SAFE DOM HELPERS
@@ -4243,6 +4209,8 @@
         const RATE_USDT_TO_DZD = 243;
         const RATE_DZD_TO_USDT = 263;
         let swapDirection = true;
+
+        const KYC_BOT_USERNAME = 'CrynovaVerification_bot';
 
         const DEFAULT_INVEST_PLANS = [{
             id: 'plan_basic',
@@ -4514,9 +4482,7 @@
                         restrictedReason: null,
                         autoRenewVerification: false,
                         kyc: null,
-                        kycStatus: null,
-                        phone: null,
-                        email: null
+                        kycStatus: null
                     };
                     await userRef.set(newUser);
                     userData = { telegramId: telegramId, ...newUser };
@@ -4746,138 +4712,8 @@
             const refLink = document.getElementById('referralLink');
             if (userData.telegramId) { refLink.value = `https://t.me/Crynova_bot?start=${userData.telegramId}`; } else {
                 refLink.value = 'جاري التحميل...'; }
-            updateContactUI();
             updateVerificationStatus();
             updateVerificationBadges();
-        }
-
-        // ============================================================
-        // CONTACT INFO (Phone & Email)
-        // ============================================================
-        let currentContactField = null;
-
-        function esc(s) {
-            return String(s ?? '').replace(/[&<>"']/g, c => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-            }[c]));
-        }
-
-        function openContactEditModal(field) {
-            if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
-
-            currentContactField = field;
-            const modal = document.getElementById('contactEditModal');
-            const title = document.getElementById('contactModalTitle');
-            const label = document.getElementById('contactInputLabel');
-            const icon = document.getElementById('contactInputIcon');
-            const input = document.getElementById('contactInput');
-            const hint = document.getElementById('contactInputHint');
-
-            if (field === 'phone') {
-                title.innerHTML = '<i class="fas fa-phone"></i> رقم الهاتف';
-                label.textContent = 'رقم الهاتف';
-                icon.className = 'fas fa-phone';
-                input.type = 'tel';
-                input.placeholder = 'مثال: 0555123456';
-                input.value = userData.phone || '';
-                hint.innerHTML = '<i class="fas fa-info-circle"></i> أدخل رقماً جزائرياً صحيحاً (يبدأ بـ 05/06/07 و10 أرقام)';
-            } else {
-                title.innerHTML = '<i class="fas fa-envelope"></i> البريد الإلكتروني';
-                label.textContent = 'البريد الإلكتروني';
-                icon.className = 'fas fa-envelope';
-                input.type = 'email';
-                input.placeholder = 'example@mail.com';
-                input.value = userData.email || '';
-                hint.innerHTML = '<i class="fas fa-info-circle"></i> أدخل بريداً إلكترونياً صحيحاً';
-            }
-
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            modal.onclick = function(e) { if (e.target === this) closeContactEditModal(); };
-            setTimeout(() => input.focus(), 150);
-        }
-
-        function closeContactEditModal() {
-            document.getElementById('contactEditModal').classList.remove('active');
-            document.body.style.overflow = '';
-            currentContactField = null;
-        }
-
-        async function saveContactInfo() {
-            if (!userData || !currentContactField) return;
-
-            const input = document.getElementById('contactInput');
-            const value = input.value.trim();
-
-            if (currentContactField === 'phone') {
-                if (!value) { showToast('⚠️ أدخل رقم الهاتف'); return; }
-                const clean = value.replace(/\s/g, '');
-                if (!/^0[5-7]\d{8}$/.test(clean)) {
-                    showToast('⚠️ رقم هاتف غير صحيح (مثال: 0555123456)');
-                    return;
-                }
-            } else {
-                if (!value) { showToast('⚠️ أدخل البريد الإلكتروني'); return; }
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                    showToast('⚠️ بريد إلكتروني غير صحيح');
-                    return;
-                }
-            }
-
-            const btn = document.getElementById('contactSaveBtn');
-            const original = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loader-sm" style="display:inline-block;"></span> جاري الحفظ...';
-
-            try {
-                const updateObj = {};
-                updateObj[currentContactField] = value;
-                await db.collection('users').doc(userData.telegramId).update(updateObj);
-
-                userData[currentContactField] = value;
-                showToast('✅ تم الحفظ بنجاح');
-                closeContactEditModal();
-                updateContactUI();
-            } catch (e) {
-                showToast('❌ ' + (e.message || 'حدث خطأ'));
-                console.error(e);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = original;
-            }
-        }
-
-        function updateContactUI() {
-            if (!userData) return;
-
-            const phoneEl = document.getElementById('profilePhone');
-            const emailEl = document.getElementById('profileEmail');
-
-            const chevron = '<i class="fas fa-chevron-left" style="font-size:12px;color:var(--text-muted);margin-right:4px;"></i>';
-
-            if (phoneEl) {
-                if (userData.phone) {
-                    phoneEl.innerHTML = `${esc(userData.phone)} ${chevron}`;
-                    phoneEl.style.color = 'var(--text-primary)';
-                    phoneEl.style.fontWeight = '600';
-                } else {
-                    phoneEl.innerHTML = `أضف رقم الهاتف ${chevron}`;
-                    phoneEl.style.color = 'var(--text-muted)';
-                    phoneEl.style.fontWeight = '600';
-                }
-            }
-
-            if (emailEl) {
-                if (userData.email) {
-                    emailEl.innerHTML = `${esc(userData.email)} ${chevron}`;
-                    emailEl.style.color = 'var(--text-primary)';
-                    emailEl.style.fontWeight = '600';
-                } else {
-                    emailEl.innerHTML = `أضف البريد الإلكتروني ${chevron}`;
-                    emailEl.style.color = 'var(--text-muted)';
-                    emailEl.style.fontWeight = '600';
-                }
-            }
         }
 
         function updateVerificationBadges() {
@@ -6267,225 +6103,68 @@
         }
 
         // ============================================================
-        // KYC - التحقق من الهوية
+        // KYC - التحقق عبر البوت
         // ============================================================
-        function previewKycImage(event, type) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            if (!file.type.startsWith('image/')) {
-                showToast('⚠️ يجب اختيار صورة صحيحة');
-                event.target.value = '';
-                return;
-            }
-            if (file.size > 5 * 1024 * 1024) {
-                showToast('⚠️ حجم الصورة يجب أن يكون أقل من 5 ميغابايت');
-                event.target.value = '';
-                return;
-            }
-
-            kycFiles[type] = file;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById(type === 'front' ? 'kycFrontPreview' : 'kycBackPreview');
-                const box = document.getElementById(type === 'front' ? 'kycFrontBox' : 'kycBackBox');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-                box.classList.add('has-file');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function previewKycVideo(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            if (!file.type.startsWith('video/')) {
-                showToast('⚠️ يجب اختيار مقطع فيديو صحيح');
-                event.target.value = '';
-                return;
-            }
-            if (file.size > 30 * 1024 * 1024) {
-                showToast('⚠️ حجم الفيديو يجب أن يكون أقل من 30 ميغابايت');
-                event.target.value = '';
-                return;
-            }
-
-            const videoUrl = URL.createObjectURL(file);
-            const preview = document.getElementById('kycVideoPreview');
-            const info = document.getElementById('kycVideoInfo');
-            const box = document.getElementById('kycVideoBox');
-
-            preview.src = videoUrl;
-            preview.style.display = 'block';
-            info.textContent = '⏳ جاري التحقق من المدة...';
-
-            preview.onloadedmetadata = function() {
-                const duration = Math.round(preview.duration);
-                if (duration < 20 || duration > 30) {
-                    showToast(`⚠️ مدة الفيديو ${duration} ثانية. يجب أن تكون بين 20 و 30 ثانية`);
-                    info.innerHTML = `<span style="color:var(--danger);">❌ المدة: ${duration} ثانية (يجب 20-30)</span>`;
-                    preview.style.display = 'none';
-                    kycFiles.video = null;
-                    event.target.value = '';
-                    URL.revokeObjectURL(videoUrl);
-                    return;
-                }
-                kycFiles.video = file;
-                box.classList.add('has-file');
-                info.innerHTML = `<span style="color:var(--success);">✅ المدة: ${duration} ثانية</span>`;
-            };
-        }
-
-        function removeKycFile(event, type) {
-            event.stopPropagation();
-            kycFiles[type] = null;
-
-            if (type === 'front' || type === 'back') {
-                const preview = document.getElementById(type === 'front' ? 'kycFrontPreview' : 'kycBackPreview');
-                const input = document.getElementById(type === 'front' ? 'kycFrontInput' : 'kycBackInput');
-                const box = document.getElementById(type === 'front' ? 'kycFrontBox' : 'kycBackBox');
-                preview.src = '';
-                preview.style.display = 'none';
-                input.value = '';
-                box.classList.remove('has-file');
-            } else if (type === 'video') {
-                const preview = document.getElementById('kycVideoPreview');
-                const input = document.getElementById('kycVideoInput');
-                const box = document.getElementById('kycVideoBox');
-                const info = document.getElementById('kycVideoInfo');
-                preview.pause();
-                preview.src = '';
-                preview.style.display = 'none';
-                input.value = '';
-                box.classList.remove('has-file');
-                info.textContent = '';
-            }
-        }
-
-        async function uploadKycFile(file, path) {
-            const ref = storage.ref().child(path);
-            const snapshot = await ref.put(file);
-            return await snapshot.ref.getDownloadURL();
-        }
-
-        async function submitKyc() {
+        async function openKycBot() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
-            // منع الإرسال المتكرر
-            if (userData.kyc && userData.kyc.status === 'pending') {
+            if (userData.kycStatus === 'pending') {
                 showToast('⚠️ لديك طلب قيد المراجعة بالفعل');
                 return;
             }
-            if (userData.kyc && userData.kyc.status === 'approved') {
+            if (userData.kycStatus === 'approved' ||
+                (userData.kyc && userData.kyc.status === 'approved')) {
                 showToast('✅ هويتك موثقة بالفعل');
                 return;
             }
-
-            const firstName = document.getElementById('kycFirstName').value.trim();
-            const lastName = document.getElementById('kycLastName').value.trim();
-            const birthDate = document.getElementById('kycBirthDate').value;
-
-            if (!firstName || firstName.length < 2) { showToast('⚠️ أدخل الاسم بشكل صحيح'); return; }
-            if (!lastName || lastName.length < 2) { showToast('⚠️ أدخل اللقب بشكل صحيح'); return; }
-            if (!birthDate) { showToast('⚠️ أدخل تاريخ الميلاد'); return; }
-            if (!kycFiles.front) { showToast('⚠️ أرفق صورة البطاقة الأمامية'); return; }
-            if (!kycFiles.back) { showToast('⚠️ أرفق صورة البطاقة الخلفية'); return; }
-            if (!kycFiles.video) { showToast('⚠️ أرفق مقطع الفيديو (20-30 ثانية)'); return; }
-
-            const btn = document.getElementById('kycSubmitBtn');
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loader-sm" style="display:inline-block;margin-left:6px;"></span> جاري الرفع...';
+            if (userData.kycStatus === 'awaiting_documents') {
+                _launchBot();
+                return;
+            }
 
             try {
-                const uid = userData.telegramId;
-                const basePath = `kyc/${uid}/${Date.now()}`;
+                const btn = document.getElementById('kycSubmitBtn');
+                if (btn) { btn.disabled = true; btn.innerHTML = '<span class="loader-sm"></span> جاري التحضير...'; }
 
-                // رفع الملفات بشكل متوازي
-                const [frontUrl, backUrl, videoUrl] = await Promise.all([
-                    uploadKycFile(kycFiles.front, `${basePath}_front`),
-                    uploadKycFile(kycFiles.back, `${basePath}_back`),
-                    uploadKycFile(kycFiles.video, `${basePath}_video`)
-                ]);
-
-                // ============================================================
-                // البيانات الكاملة (مع الروابط الحساسة) → للإدارة فقط
-                // ============================================================
-                const kycRequestData = {
-                    status: 'pending',
-                    firstName: firstName,
-                    lastName: lastName,
-                    birthDate: birthDate,
-                    fullName: `${firstName} ${lastName}`,
-                    frontUrl: frontUrl,
-                    backUrl: backUrl,
-                    videoUrl: videoUrl,
-                    submittedAt: new Date(),
-                    reviewedAt: null,
-                    rejectionReason: null,
-                    telegramId: uid,
-                    username: userData.username || '',
-                    displayName: userData.displayName || '',
-                    storagePaths: {
-                        front: `${basePath}_front`,
-                        back: `${basePath}_back`,
-                        video: `${basePath}_video`
-                    }
-                };
-
-                // حفظ في مجموعة منفصلة للمراجعة من طرف الإدارة (تحتوي الروابط)
-                await db.collection('kycRequests').doc(uid).set(kycRequestData);
-
-                // ============================================================
-                // في وثيقة المستخدم: الحالة والبيانات الأساسية فقط (بدون روابط)
-                // ============================================================
-                await db.collection('users').doc(uid).update({
+                await db.collection('users').doc(userData.telegramId).update({
+                    kycStatus: 'awaiting_documents',
                     kyc: {
-                        status: 'pending',
-                        firstName: firstName,
-                        lastName: lastName,
-                        birthDate: birthDate,
-                        submittedAt: new Date(),
-                        reviewedAt: null,
-                        rejectionReason: null
-                    },
-                    kycStatus: 'pending'
+                        status: 'awaiting_documents',
+                        startedAt: new Date(),
+                        telegramId: userData.telegramId,
+                        username: userData.username || '',
+                        displayName: userData.displayName || ''
+                    }
                 });
 
-                // إضافة عملية في السجل
-                await db.collection('users').doc(uid).update({
-                    transactions: firebase.firestore.FieldValue.arrayUnion({
-                        type: 'kyc_submission',
-                        amount: 0,
-                        currency: 'DZD',
-                        description: 'إرسال طلب التحقق من الهوية',
-                        timestamp: new Date(),
-                        status: 'pending'
-                    })
-                });
+                userData.kycStatus = 'awaiting_documents';
+                userData.kyc = { status: 'awaiting_documents', startedAt: new Date() };
 
-                showToast('✅ تم إرسال طلبك، سيتم مراجعته قريباً');
+                _launchBot();
+                showToast('📱 أكمل التوثيق عبر البوت');
 
-                // إعادة تعيين النموذج
-                kycFiles = { front: null, back: null, video: null };
-                document.getElementById('kycFirstName').value = '';
-                document.getElementById('kycLastName').value = '';
-                document.getElementById('kycBirthDate').value = '';
-                removeKycFile({ stopPropagation: () => {} }, 'front');
-                removeKycFile({ stopPropagation: () => {} }, 'back');
-                removeKycFile({ stopPropagation: () => {} }, 'video');
-
-                // تحديث حالة الواجهة
-                renderKycStatus();
+                setTimeout(() => renderKycStatus(), 600);
             } catch (e) {
-                console.error('❌ فشل إرسال KYC:', e);
-                showToast('❌ ' + (e.message || 'فشل رفع الملفات'));
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
+                console.error('❌ KYC start failed:', e);
+                showToast('❌ ' + (e.message || 'حدث خطأ'));
+                const btn = document.getElementById('kycSubmitBtn');
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fab fa-telegram"></i> فتح البوت والبدء'; }
             }
         }
+
+        function _launchBot() {
+            const botUrl = `https://t.me/${KYC_BOT_USERNAME}?start=${userData.telegramId}`;
+            if (window.Telegram?.WebApp?.openTelegramLink) {
+                window.Telegram.WebApp.openTelegramLink(botUrl);
+            } else {
+                window.open(botUrl, '_blank');
+            }
+        }
+
+        window.reopenKycBot = function() {
+            if (!userData) return;
+            _launchBot();
+        };
 
         function renderKycStatus() {
             const statusContainer = document.getElementById('kycStatusContainer');
@@ -6493,62 +6172,88 @@
             if (!statusContainer || !formContainer) return;
 
             const kyc = userData?.kyc;
+            const status = userData?.kycStatus || kyc?.status;
 
-            if (!kyc || !kyc.status) {
-                // لا يوجد طلب بعد
+            if (!status) {
                 statusContainer.style.display = 'none';
                 formContainer.style.display = 'block';
                 return;
             }
 
-            statusContainer.style.display = 'block';
-
-            if (kyc.status === 'pending') {
+            if (status === 'awaiting_documents') {
                 formContainer.style.display = 'none';
+                statusContainer.style.display = 'block';
+                statusContainer.innerHTML = `
+                    <div class="kyc-status-badge pending">
+                        <i class="fas fa-hourglass-half"></i>
+                        <div>
+                            <div>📱 أكمل التوثيق في البوت</div>
+                            <div style="font-size:0.68rem;font-weight:500;margin-top:2px;">
+                                بدأ في: ${formatDateTime(kyc?.startedAt)}
+                            </div>
+                        </div>
+                    </div>
+                    <button class="pc-btn" onclick="reopenKycBot()" style="margin-top:8px;">
+                        <i class="fab fa-telegram"></i> إعادة فتح البوت
+                    </button>
+                    <p class="pc-note">* إذا أكملت الخطوات، انتظر تحديث الحالة تلقائياً</p>
+                `;
+                return;
+            }
+
+            if (status === 'pending') {
+                formContainer.style.display = 'none';
+                statusContainer.style.display = 'block';
                 statusContainer.innerHTML = `
                     <div class="kyc-status-badge pending">
                         <i class="fas fa-clock"></i>
                         <div>
                             <div>⏳ طلبك قيد المراجعة</div>
                             <div style="font-size:0.68rem;font-weight:500;margin-top:2px;">
-                                تم الإرسال: ${formatDateTime(kyc.submittedAt)}
+                                تم الإرسال: ${formatDateTime(kyc?.submittedAt || kyc?.startedAt)}
                             </div>
                         </div>
                     </div>
                     <div class="kyc-progress">
+                        <span class="loader-sm"></span>
                         <span>سيتم المراجعة خلال 24-48 ساعة</span>
                     </div>
                 `;
-            } else if (kyc.status === 'approved') {
+                return;
+            }
+
+            if (status === 'approved') {
                 formContainer.style.display = 'none';
+                statusContainer.style.display = 'block';
                 statusContainer.innerHTML = `
                     <div class="kyc-status-badge approved">
                         <i class="fas fa-check-circle"></i>
                         <div>
                             <div>✅ تم توثيق هويتك بنجاح</div>
                             <div style="font-size:0.68rem;font-weight:500;margin-top:2px;">
-                                تمت الموافقة: ${formatDateTime(kyc.reviewedAt)}
+                                تمت الموافقة: ${formatDateTime(kyc?.reviewedAt)}
                             </div>
                         </div>
                     </div>
                 `;
-            } else if (kyc.status === 'rejected') {
+                return;
+            }
+
+            if (status === 'rejected') {
                 formContainer.style.display = 'block';
+                statusContainer.style.display = 'block';
                 statusContainer.innerHTML = `
                     <div class="kyc-status-badge rejected">
                         <i class="fas fa-times-circle"></i>
                         <div>
                             <div>❌ تم رفض طلبك</div>
                             <div style="font-size:0.68rem;font-weight:500;margin-top:2px;">
-                                ${kyc.rejectionReason || 'يرجى إعادة الإرسال ببيانات صحيحة'}
+                                ${kyc?.rejectionReason || 'يرجى إعادة المحاولة ببيانات صحيحة'}
                             </div>
                         </div>
                     </div>
                 `;
-                // إعادة تعبئة الحقول المحفوظة
-                if (kyc.firstName) document.getElementById('kycFirstName').value = kyc.firstName;
-                if (kyc.lastName) document.getElementById('kycLastName').value = kyc.lastName;
-                if (kyc.birthDate) document.getElementById('kycBirthDate').value = kyc.birthDate;
+                return;
             }
         }
 
@@ -6728,11 +6433,7 @@
         });
 
         console.log('🚀 Crynova - نسخة محدّثة');
-        console.log('✅ مفاتيح التبديل تعمل بشكل صحيح');
-        console.log('✅ بطاقة الأرصدة في أعلى صفحة التبادل');
-        console.log('✅ بطاقة التحقق من الهوية (KYC) مضافة');
-        console.log('✅ خيارات رقم الهاتف والبريد الإلكتروني في تبويب الشخصي');
-        console.log('✅ KYC: الروابط الحساسة في kycRequests، والحالة فقط في users');
+        console.log('✅ KYC عبر البوت - النظام الجديد');
     </script>
 
 </body>
