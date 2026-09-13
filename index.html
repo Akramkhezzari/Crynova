@@ -6198,7 +6198,7 @@
         }
 
         // ============================================================
-        // إرسال KYC إلى Telegram مباشرة (بدون Firebase)
+        // إرسال KYC إلى Telegram مباشرة (بدون Firebase Storage)
         // ============================================================
         async function sendTelegramText(text, parseMode = 'HTML') {
             const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
@@ -6266,15 +6266,14 @@
         async function submitKyc() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
-            // منع الإرسال المتكرر (خلال 24 ساعة)
-            const lastSubmission = localStorage.getItem('crynova_kyc_last_submit');
-            if (lastSubmission) {
-                const elapsed = Date.now() - parseInt(lastSubmission);
-                if (elapsed < 24 * 60 * 60 * 1000) {
-                    const hoursLeft = Math.ceil((24 * 60 * 60 * 1000 - elapsed) / (60 * 60 * 1000));
-                    showToast(`⏳ أرسلت طلباً مؤخراً. حاول بعد ${hoursLeft} ساعة`);
-                    return;
-                }
+            // منع الإرسال المتكرر - فقط إذا كان قيد المراجعة
+            if (userData.kycStatus === 'pending') {
+                showToast('⚠️ لديك طلب قيد المراجعة بالفعل');
+                return;
+            }
+            if (userData.kycStatus === 'approved') {
+                showToast('✅ هويتك موثقة بالفعل');
+                return;
             }
 
             const firstName = document.getElementById('kycFirstName').value.trim();
@@ -6304,11 +6303,17 @@
                     displayName: userData.displayName || ''
                 };
 
-                // 📤 إرسال مباشرة إلى Telegram (بدون Firebase)
+                // 📤 إرسال إلى Telegram
                 await sendKycToTelegram(kycInfo);
 
-                // حفظ وقت الإرسال محلياً فقط (لمنع التكرار)
-                localStorage.setItem('crynova_kyc_last_submit', Date.now().toString());
+                // 💾 حفظ الحالة في Firestore (users فقط - بدون ملفات)
+                await db.collection('users').doc(userData.telegramId).update({
+                    kycStatus: 'pending',
+                    kycSubmittedAt: new Date(),
+                    kycRejectionReason: null,
+                    kycFullName: kycInfo.fullName,
+                    kycBirthDate: kycInfo.birthDate
+                });
 
                 showToast('✅ تم إرسال طلبك إلى الإدارة، سيتم مراجعته قريباً');
 
@@ -6321,7 +6326,7 @@
                 removeKycFile({ stopPropagation: () => {} }, 'back');
                 removeKycFile({ stopPropagation: () => {} }, 'video');
 
-                // تحديث حالة الواجهة
+                // تحديث الواجهة (سيتم عبر onSnapshot تلقائياً)
                 renderKycStatus();
 
             } catch (e) {
@@ -6338,52 +6343,70 @@
             const formContainer = document.getElementById('kycFormContainer');
             if (!statusContainer || !formContainer) return;
 
-            const lastSubmission = localStorage.getItem('crynova_kyc_last_submit');
+            const kycStatus = userData?.kycStatus;
 
-            if (!lastSubmission) {
-                // لا يوجد طلب مُرسَل
+            // لا يوجد طلب بعد
+            if (!kycStatus) {
                 statusContainer.style.display = 'none';
                 formContainer.style.display = 'block';
                 return;
             }
 
-            const elapsed = Date.now() - parseInt(lastSubmission);
-            const hours24 = 24 * 60 * 60 * 1000;
-
             statusContainer.style.display = 'block';
 
-            if (elapsed < hours24) {
-                // قيد المراجعة (أرسل خلال 24 ساعة)
+            if (kycStatus === 'pending') {
                 formContainer.style.display = 'none';
-                const submitTime = new Date(parseInt(lastSubmission));
+                const submitTime = userData.kycSubmittedAt?.toDate
+                    ? userData.kycSubmittedAt.toDate()
+                    : new Date(userData.kycSubmittedAt || Date.now());
                 statusContainer.innerHTML = `
                     <div class="kyc-status-badge pending">
                         <i class="fas fa-clock"></i>
                         <div>
-                            <div>⏳ تم إرسال طلبك وهو قيد المراجعة</div>
+                            <div>⏳ طلبك قيد المراجعة</div>
                             <div style="font-size:0.68rem;font-weight:500;margin-top:2px;">
                                 تم الإرسال: ${formatDateTime(submitTime)}
                             </div>
                         </div>
                     </div>
                     <div class="kyc-progress">
-                        <span>سيتم التواصل معك من طرف الإدارة قريباً</span>
+                        <span>سيتم المراجعة خلال 24-48 ساعة</span>
                     </div>
                 `;
-            } else {
-                // مرت 24 ساعة → يمكن إعادة الإرسال
-                formContainer.style.display = 'block';
+            } else if (kycStatus === 'approved') {
+                formContainer.style.display = 'none';
                 statusContainer.innerHTML = `
-                    <div class="kyc-status-badge pending">
-                        <i class="fas fa-info-circle"></i>
+                    <div class="kyc-status-badge approved">
+                        <i class="fas fa-check-circle"></i>
                         <div>
-                            <div>يمكنك إعادة إرسال طلبك</div>
+                            <div>✅ تم توثيق هويتك بنجاح</div>
                             <div style="font-size:0.68rem;font-weight:500;margin-top:2px;">
-                                إذا لم يتم التواصل معك بعد
+                                شكراً لك! تم قبول طلب التحقق
                             </div>
                         </div>
                     </div>
                 `;
+            } else if (kycStatus === 'rejected') {
+                formContainer.style.display = 'block';
+                const reason = userData.kycRejectionReason || 'يرجى إعادة الإرسال ببيانات صحيحة';
+                statusContainer.innerHTML = `
+                    <div class="kyc-status-badge rejected">
+                        <i class="fas fa-times-circle"></i>
+                        <div>
+                            <div>❌ تم رفض طلبك</div>
+                            <div style="font-size:0.68rem;font-weight:500;margin-top:2px;">
+                                ${reason}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                // إعادة تعبئة الحقول المحفوظة
+                if (userData.kycFullName) {
+                    const parts = userData.kycFullName.split(' ');
+                    if (parts[0]) document.getElementById('kycFirstName').value = parts[0];
+                    if (parts[1]) document.getElementById('kycLastName').value = parts.slice(1).join(' ');
+                }
+                if (userData.kycBirthDate) document.getElementById('kycBirthDate').value = userData.kycBirthDate;
             }
         }
 
@@ -6567,6 +6590,7 @@
         console.log('✅ بطاقة الأرصدة في أعلى صفحة التبادل');
         console.log('✅ بطاقة التحقق من الهوية (KYC) مضافة');
         console.log('✅ إرسال KYC إلى Telegram Bot مباشرة (بدون Firebase)');
+        console.log('✅ حالة KYC محفوظة في Firestore (users) - تتحدّث تلقائياً');
     </script>
 
 </body>
