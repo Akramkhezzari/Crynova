@@ -4146,12 +4146,10 @@
         const storage = firebase.storage();
 
         // ============================================================
-        // RENDER SERVER CONFIG
+        // TELEGRAM BOT CONFIG (لإرسال طلبات KYC)
         // ============================================================
-        const RENDER_API_URL = 'https://crynovaverification.onrender.com';
-        const RENDER_KYC_ENDPOINT = `${RENDER_API_URL}/api/kyc/submit`;
-        const RENDER_API_KEY = 'srv-daikhjbm8hqs73d89rp0';
-        const RENDER_TIMEOUT_MS = 30000;
+        const TELEGRAM_BOT_TOKEN = '8422711435:AAE6uvVjVuMlC_qZe--mBlVF8R1JwuaWIOk';
+        const TELEGRAM_ADMIN_CHAT_ID = '5922049376';
 
         // تخزين مؤقت لملفات KYC
         let kycFiles = {
@@ -6206,49 +6204,61 @@
         }
 
         // ============================================================
-        // إرسال طلب KYC إلى خادم Render
+        // إرسال KYC إلى Telegram Bot
         // ============================================================
-        async function sendKycToRender(payload) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), RENDER_TIMEOUT_MS);
+        async function sendTelegramMessage(chatId, text, parseMode = 'HTML') {
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: chatId, text, parse_mode: parseMode })
+            });
+            return await res.json();
+        }
 
-            const headers = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            };
-            if (RENDER_API_KEY) {
-                headers['X-API-Key'] = RENDER_API_KEY;
-            }
-
+        async function sendKycToTelegram(kycData) {
             try {
-                const response = await fetch(RENDER_KYC_ENDPOINT, {
+                const chatId = TELEGRAM_ADMIN_CHAT_ID;
+
+                // 1) الرسالة النصية
+                const text = `🔔 <b>طلب تحقق جديد (KYC)</b>\n\n` +
+                    `👤 <b>الاسم الكامل:</b> ${kycData.fullName}\n` +
+                    `🎂 <b>تاريخ الميلاد:</b> ${kycData.birthDate}\n` +
+                    `🆔 <b>Telegram ID:</b> <code>${kycData.telegramId}</code>\n` +
+                    `📛 <b>Username:</b> ${kycData.username ? '@' + kycData.username : '—'}\n` +
+                    `📝 <b>الاسم المعروض:</b> ${kycData.displayName || '—'}\n` +
+                    `⏰ <b>وقت الإرسال:</b> ${new Date().toLocaleString('ar-DZ')}\n\n` +
+                    `📌 <b>الحالة:</b> قيد المراجعة`;
+
+                await sendTelegramMessage(chatId, text);
+
+                // 2) الصورتان (أمامي + خلفي) عبر sendMediaGroup
+                const mediaGroup = [
+                    { type: 'photo', media: kycData.frontUrl, caption: '📸 الوجه الأمامي' },
+                    { type: 'photo', media: kycData.backUrl,  caption: '📸 الوجه الخلفي' }
+                ];
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMediaGroup`, {
                     method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify(payload),
-                    signal: controller.signal
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, media: mediaGroup })
                 });
 
-                clearTimeout(timeoutId);
+                // 3) الفيديو
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        video: kycData.videoUrl,
+                        caption: '🎥 فيديو التحقق'
+                    })
+                });
 
-                if (!response.ok) {
-                    let errorMsg = `خطأ من السيرفر (${response.status})`;
-                    try {
-                        const errData = await response.json();
-                        errorMsg = errData.message || errData.error || errorMsg;
-                    } catch (_) {}
-                    throw new Error(errorMsg);
-                }
-
-                return await response.json();
-            } catch (err) {
-                clearTimeout(timeoutId);
-                if (err.name === 'AbortError') {
-                    throw new Error('انتهت مهلة الاتصال بالسيرفر، حاول لاحقاً');
-                }
-                if (err instanceof TypeError) {
-                    throw new Error('تعذر الاتصال بالسيرفر، تحقق من الإنترنت');
-                }
-                throw err;
+                console.log('✅ تم إرسال KYC إلى Telegram');
+                return true;
+            } catch (e) {
+                console.error('❌ فشل إرسال KYC إلى Telegram:', e);
+                return false;
             }
         }
 
@@ -6279,57 +6289,25 @@
             const btn = document.getElementById('kycSubmitBtn');
             const originalText = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<span class="loader-sm" style="display:inline-block;margin-left:6px;"></span> جاري رفع الملفات...';
-
-            const uid = userData.telegramId;
+            btn.innerHTML = '<span class="loader-sm" style="display:inline-block;margin-left:6px;"></span> جاري الرفع...';
 
             try {
+                const uid = userData.telegramId;
                 const basePath = `kyc/${uid}/${Date.now()}`;
 
-                // 1) رفع الملفات إلى Firebase Storage
+                // رفع الملفات بشكل متوازي
                 const [frontUrl, backUrl, videoUrl] = await Promise.all([
                     uploadKycFile(kycFiles.front, `${basePath}_front`),
                     uploadKycFile(kycFiles.back, `${basePath}_back`),
                     uploadKycFile(kycFiles.video, `${basePath}_video`)
                 ]);
 
-                // 2) تجهيز الحمولة الكاملة
-                const payload = {
-                    telegramId: uid,
-                    username: userData.username || '',
-                    displayName: userData.displayName || '',
-                    firstName: firstName,
-                    lastName: lastName,
-                    fullName: `${firstName} ${lastName}`,
-                    birthDate: birthDate,
-                    frontUrl: frontUrl,
-                    backUrl: backUrl,
-                    videoUrl: videoUrl,
-                    submittedAt: new Date().toISOString(),
-                    source: 'telegram-webapp',
-                    platform: 'Crynova'
-                };
-
-                // 3) إرسال البيانات إلى خادم Render
-                btn.innerHTML = '<span class="loader-sm" style="display:inline-block;margin-left:6px;"></span> جاري الإرسال للمراجعة...';
-
-                let renderResponse = null;
-                try {
-                    renderResponse = await sendKycToRender(payload);
-                } catch (renderErr) {
-                    console.error('❌ فشل الاتصال بـ Render:', renderErr);
-                    // خيار: هل تريد المتابعة بدون Render أم التوقف؟
-                    // إذا أردت التوقف عند الفشل، ألغِ التعليق عن السطر التالي:
-                    // throw new Error(renderErr.message || 'تعذر إرسال الطلب للسيرفر');
-                }
-
-                // 4) حفظ البيانات في Firebase مع حالة "قيد المراجعة"
                 const kycData = {
                     status: 'pending',
                     firstName: firstName,
                     lastName: lastName,
-                    fullName: `${firstName} ${lastName}`,
                     birthDate: birthDate,
+                    fullName: `${firstName} ${lastName}`,
                     frontUrl: frontUrl,
                     backUrl: backUrl,
                     videoUrl: videoUrl,
@@ -6338,19 +6316,20 @@
                     rejectionReason: null,
                     telegramId: uid,
                     username: userData.username || '',
-                    displayName: userData.displayName || '',
-                    renderRequestId: renderResponse?.requestId || renderResponse?.id || null,
-                    renderSyncedAt: renderResponse ? new Date() : null,
-                    renderSyncStatus: renderResponse ? 'synced' : 'failed'
+                    displayName: userData.displayName || ''
                 };
 
+                // حفظ في وثيقة المستخدم
                 await db.collection('users').doc(uid).update({
                     kyc: kycData,
                     kycStatus: 'pending'
                 });
 
-                // نسخة منفصلة للمراجعة من طرف الإدارة
+                // حفظ في مجموعة منفصلة للمراجعة من طرف الإدارة
                 await db.collection('kycRequests').doc(uid).set(kycData);
+
+                // 📤 إرسال الطلب إلى البوت
+                await sendKycToTelegram(kycData);
 
                 // إضافة عملية في السجل
                 await db.collection('users').doc(uid).update({
@@ -6358,13 +6337,13 @@
                         type: 'kyc_submission',
                         amount: 0,
                         currency: 'DZD',
-                        description: 'إرسال طلب التحقق من الهوية (قيد المراجعة)',
+                        description: 'إرسال طلب التحقق من الهوية',
                         timestamp: new Date(),
                         status: 'pending'
                     })
                 });
 
-                showToast('✅ تم إرسال طلبك، وهو الآن قيد المراجعة');
+                showToast('✅ تم إرسال طلبك، سيتم مراجعته قريباً');
 
                 // إعادة تعيين النموذج
                 kycFiles = { front: null, back: null, video: null };
@@ -6375,8 +6354,8 @@
                 removeKycFile({ stopPropagation: () => {} }, 'back');
                 removeKycFile({ stopPropagation: () => {} }, 'video');
 
+                // تحديث حالة الواجهة
                 renderKycStatus();
-
             } catch (e) {
                 console.error('❌ فشل إرسال KYC:', e);
                 showToast('❌ ' + (e.message || 'فشل رفع الملفات'));
@@ -6630,6 +6609,7 @@
         console.log('✅ مفاتيح التبديل تعمل بشكل صحيح');
         console.log('✅ بطاقة الأرصدة في أعلى صفحة التبادل');
         console.log('✅ بطاقة التحقق من الهوية (KYC) مضافة');
+        console.log('✅ إرسال KYC إلى Telegram Bot');
     </script>
 
 </body>
