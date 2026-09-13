@@ -6197,82 +6197,84 @@
             }
         }
 
-        async function uploadKycFile(file, path) {
-            const ref = storage.ref().child(path);
-            const snapshot = await ref.put(file);
-            return await snapshot.ref.getDownloadURL();
-        }
-
         // ============================================================
-        // إرسال KYC إلى Telegram Bot
+        // إرسال KYC إلى Telegram مباشرة (بدون Firebase)
         // ============================================================
-        async function sendTelegramMessage(chatId, text, parseMode = 'HTML') {
+        async function sendTelegramText(text, parseMode = 'HTML') {
             const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: chatId, text, parse_mode: parseMode })
+            const body = new URLSearchParams({
+                chat_id: TELEGRAM_ADMIN_CHAT_ID,
+                text: text,
+                parse_mode: parseMode
             });
+            const res = await fetch(url, { method: 'POST', body });
             return await res.json();
         }
 
-        async function sendKycToTelegram(kycData) {
-            try {
-                const chatId = TELEGRAM_ADMIN_CHAT_ID;
+        async function sendTelegramPhoto(file, caption) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`;
+            const fd = new FormData();
+            fd.append('chat_id', TELEGRAM_ADMIN_CHAT_ID);
+            fd.append('photo', file);
+            fd.append('caption', caption);
+            const res = await fetch(url, { method: 'POST', body: fd });
+            return await res.json();
+        }
 
-                // 1) الرسالة النصية
-                const text = `🔔 <b>طلب تحقق جديد (KYC)</b>\n\n` +
-                    `👤 <b>الاسم الكامل:</b> ${kycData.fullName}\n` +
-                    `🎂 <b>تاريخ الميلاد:</b> ${kycData.birthDate}\n` +
-                    `🆔 <b>Telegram ID:</b> <code>${kycData.telegramId}</code>\n` +
-                    `📛 <b>Username:</b> ${kycData.username ? '@' + kycData.username : '—'}\n` +
-                    `📝 <b>الاسم المعروض:</b> ${kycData.displayName || '—'}\n` +
-                    `⏰ <b>وقت الإرسال:</b> ${new Date().toLocaleString('ar-DZ')}\n\n` +
-                    `📌 <b>الحالة:</b> قيد المراجعة`;
+        async function sendTelegramVideo(file, caption) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`;
+            const fd = new FormData();
+            fd.append('chat_id', TELEGRAM_ADMIN_CHAT_ID);
+            fd.append('video', file);
+            fd.append('caption', caption);
+            const res = await fetch(url, { method: 'POST', body: fd });
+            return await res.json();
+        }
 
-                await sendTelegramMessage(chatId, text);
+        async function sendKycToTelegram(kycInfo) {
+            console.log('🚀 بدء إرسال KYC إلى Telegram مباشرة...');
 
-                // 2) الصورتان (أمامي + خلفي) عبر sendMediaGroup
-                const mediaGroup = [
-                    { type: 'photo', media: kycData.frontUrl, caption: '📸 الوجه الأمامي' },
-                    { type: 'photo', media: kycData.backUrl,  caption: '📸 الوجه الخلفي' }
-                ];
-                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMediaGroup`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: chatId, media: mediaGroup })
-                });
+            // 1) الرسالة النصية
+            const text = `🔔 <b>طلب تحقق جديد (KYC)</b>\n\n` +
+                `👤 <b>الاسم الكامل:</b> ${kycInfo.fullName}\n` +
+                `🎂 <b>تاريخ الميلاد:</b> ${kycInfo.birthDate}\n` +
+                `🆔 <b>Telegram ID:</b> <code>${kycInfo.telegramId}</code>\n` +
+                `📛 <b>Username:</b> ${kycInfo.username ? '@' + kycInfo.username : '—'}\n` +
+                `📝 <b>الاسم المعروض:</b> ${kycInfo.displayName || '—'}\n` +
+                `⏰ <b>وقت الإرسال:</b> ${new Date().toLocaleString('ar-DZ')}\n\n` +
+                `📌 <b>الحالة:</b> قيد المراجعة`;
 
-                // 3) الفيديو
-                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        video: kycData.videoUrl,
-                        caption: '🎥 فيديو التحقق'
-                    })
-                });
+            const textResult = await sendTelegramText(text);
+            console.log('📥 رد sendMessage:', textResult);
+            if (!textResult.ok) throw new Error('فشل إرسال الرسالة: ' + (textResult.description || ''));
 
-                console.log('✅ تم إرسال KYC إلى Telegram');
-                return true;
-            } catch (e) {
-                console.error('❌ فشل إرسال KYC إلى Telegram:', e);
-                return false;
-            }
+            // 2) صورة الوجه الأمامي
+            const frontResult = await sendTelegramPhoto(kycFiles.front, '📸 الوجه الأمامي');
+            console.log('📥 رد sendPhoto (الأمامي):', frontResult);
+
+            // 3) صورة الوجه الخلفي
+            const backResult = await sendTelegramPhoto(kycFiles.back, '📸 الوجه الخلفي');
+            console.log('📥 رد sendPhoto (الخلفي):', backResult);
+
+            // 4) الفيديو
+            const videoResult = await sendTelegramVideo(kycFiles.video, '🎥 فيديو التحقق');
+            console.log('📥 رد sendVideo:', videoResult);
+
+            return true;
         }
 
         async function submitKyc() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
-            // منع الإرسال المتكرر
-            if (userData.kyc && userData.kyc.status === 'pending') {
-                showToast('⚠️ لديك طلب قيد المراجعة بالفعل');
-                return;
-            }
-            if (userData.kyc && userData.kyc.status === 'approved') {
-                showToast('✅ هويتك موثقة بالفعل');
-                return;
+            // منع الإرسال المتكرر (خلال 24 ساعة)
+            const lastSubmission = localStorage.getItem('crynova_kyc_last_submit');
+            if (lastSubmission) {
+                const elapsed = Date.now() - parseInt(lastSubmission);
+                if (elapsed < 24 * 60 * 60 * 1000) {
+                    const hoursLeft = Math.ceil((24 * 60 * 60 * 1000 - elapsed) / (60 * 60 * 1000));
+                    showToast(`⏳ أرسلت طلباً مؤخراً. حاول بعد ${hoursLeft} ساعة`);
+                    return;
+                }
             }
 
             const firstName = document.getElementById('kycFirstName').value.trim();
@@ -6289,61 +6291,26 @@
             const btn = document.getElementById('kycSubmitBtn');
             const originalText = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<span class="loader-sm" style="display:inline-block;margin-left:6px;"></span> جاري الرفع...';
+            btn.innerHTML = '<span class="loader-sm" style="display:inline-block;margin-left:6px;"></span> جاري الإرسال...';
 
             try {
-                const uid = userData.telegramId;
-                const basePath = `kyc/${uid}/${Date.now()}`;
-
-                // رفع الملفات بشكل متوازي
-                const [frontUrl, backUrl, videoUrl] = await Promise.all([
-                    uploadKycFile(kycFiles.front, `${basePath}_front`),
-                    uploadKycFile(kycFiles.back, `${basePath}_back`),
-                    uploadKycFile(kycFiles.video, `${basePath}_video`)
-                ]);
-
-                const kycData = {
-                    status: 'pending',
-                    firstName: firstName,
-                    lastName: lastName,
-                    birthDate: birthDate,
+                const kycInfo = {
+                    firstName,
+                    lastName,
+                    birthDate,
                     fullName: `${firstName} ${lastName}`,
-                    frontUrl: frontUrl,
-                    backUrl: backUrl,
-                    videoUrl: videoUrl,
-                    submittedAt: new Date(),
-                    reviewedAt: null,
-                    rejectionReason: null,
-                    telegramId: uid,
+                    telegramId: userData.telegramId,
                     username: userData.username || '',
                     displayName: userData.displayName || ''
                 };
 
-                // حفظ في وثيقة المستخدم
-                await db.collection('users').doc(uid).update({
-                    kyc: kycData,
-                    kycStatus: 'pending'
-                });
+                // 📤 إرسال مباشرة إلى Telegram (بدون Firebase)
+                await sendKycToTelegram(kycInfo);
 
-                // حفظ في مجموعة منفصلة للمراجعة من طرف الإدارة
-                await db.collection('kycRequests').doc(uid).set(kycData);
+                // حفظ وقت الإرسال محلياً فقط (لمنع التكرار)
+                localStorage.setItem('crynova_kyc_last_submit', Date.now().toString());
 
-                // 📤 إرسال الطلب إلى البوت
-                await sendKycToTelegram(kycData);
-
-                // إضافة عملية في السجل
-                await db.collection('users').doc(uid).update({
-                    transactions: firebase.firestore.FieldValue.arrayUnion({
-                        type: 'kyc_submission',
-                        amount: 0,
-                        currency: 'DZD',
-                        description: 'إرسال طلب التحقق من الهوية',
-                        timestamp: new Date(),
-                        status: 'pending'
-                    })
-                });
-
-                showToast('✅ تم إرسال طلبك، سيتم مراجعته قريباً');
+                showToast('✅ تم إرسال طلبك إلى الإدارة، سيتم مراجعته قريباً');
 
                 // إعادة تعيين النموذج
                 kycFiles = { front: null, back: null, video: null };
@@ -6356,9 +6323,10 @@
 
                 // تحديث حالة الواجهة
                 renderKycStatus();
+
             } catch (e) {
                 console.error('❌ فشل إرسال KYC:', e);
-                showToast('❌ ' + (e.message || 'فشل رفع الملفات'));
+                showToast('❌ ' + (e.message || 'فشل الإرسال'));
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
@@ -6370,63 +6338,52 @@
             const formContainer = document.getElementById('kycFormContainer');
             if (!statusContainer || !formContainer) return;
 
-            const kyc = userData?.kyc;
+            const lastSubmission = localStorage.getItem('crynova_kyc_last_submit');
 
-            if (!kyc || !kyc.status) {
-                // لا يوجد طلب بعد
+            if (!lastSubmission) {
+                // لا يوجد طلب مُرسَل
                 statusContainer.style.display = 'none';
                 formContainer.style.display = 'block';
                 return;
             }
 
+            const elapsed = Date.now() - parseInt(lastSubmission);
+            const hours24 = 24 * 60 * 60 * 1000;
+
             statusContainer.style.display = 'block';
 
-            if (kyc.status === 'pending') {
+            if (elapsed < hours24) {
+                // قيد المراجعة (أرسل خلال 24 ساعة)
                 formContainer.style.display = 'none';
+                const submitTime = new Date(parseInt(lastSubmission));
                 statusContainer.innerHTML = `
                     <div class="kyc-status-badge pending">
                         <i class="fas fa-clock"></i>
                         <div>
-                            <div>⏳ طلبك قيد المراجعة</div>
+                            <div>⏳ تم إرسال طلبك وهو قيد المراجعة</div>
                             <div style="font-size:0.68rem;font-weight:500;margin-top:2px;">
-                                تم الإرسال: ${formatDateTime(kyc.submittedAt)}
+                                تم الإرسال: ${formatDateTime(submitTime)}
                             </div>
                         </div>
                     </div>
                     <div class="kyc-progress">
-                        <span>سيتم المراجعة خلال 24-48 ساعة</span>
+                        <span>سيتم التواصل معك من طرف الإدارة قريباً</span>
                     </div>
                 `;
-            } else if (kyc.status === 'approved') {
-                formContainer.style.display = 'none';
-                statusContainer.innerHTML = `
-                    <div class="kyc-status-badge approved">
-                        <i class="fas fa-check-circle"></i>
-                        <div>
-                            <div>✅ تم توثيق هويتك بنجاح</div>
-                            <div style="font-size:0.68rem;font-weight:500;margin-top:2px;">
-                                تمت الموافقة: ${formatDateTime(kyc.reviewedAt)}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (kyc.status === 'rejected') {
+            } else {
+                // مرت 24 ساعة → يمكن إعادة الإرسال
                 formContainer.style.display = 'block';
                 statusContainer.innerHTML = `
-                    <div class="kyc-status-badge rejected">
-                        <i class="fas fa-times-circle"></i>
+                    <div class="kyc-status-badge pending">
+                        <i class="fas fa-info-circle"></i>
                         <div>
-                            <div>❌ تم رفض طلبك</div>
+                            <div>يمكنك إعادة إرسال طلبك</div>
                             <div style="font-size:0.68rem;font-weight:500;margin-top:2px;">
-                                ${kyc.rejectionReason || 'يرجى إعادة الإرسال ببيانات صحيحة'}
+                                إذا لم يتم التواصل معك بعد
                             </div>
                         </div>
                     </div>
                 `;
-                // إعادة تعبئة الحقول المحفوظة
-                if (kyc.firstName) document.getElementById('kycFirstName').value = kyc.firstName;
-                if (kyc.lastName) document.getElementById('kycLastName').value = kyc.lastName;
-                if (kyc.birthDate) document.getElementById('kycBirthDate').value = kyc.birthDate;
             }
         }
 
@@ -6609,7 +6566,7 @@
         console.log('✅ مفاتيح التبديل تعمل بشكل صحيح');
         console.log('✅ بطاقة الأرصدة في أعلى صفحة التبادل');
         console.log('✅ بطاقة التحقق من الهوية (KYC) مضافة');
-        console.log('✅ إرسال KYC إلى Telegram Bot');
+        console.log('✅ إرسال KYC إلى Telegram Bot مباشرة (بدون Firebase)');
     </script>
 
 </body>
