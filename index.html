@@ -4146,10 +4146,10 @@
         const storage = firebase.storage();
 
         // ============================================================
-        // TELEGRAM BOT CONFIG (لإرسال طلبات KYC)
+        // CLOUDFLARE KYC WORKER CONFIG
         // ============================================================
-        const TELEGRAM_BOT_TOKEN = '8971860426:AAHA0GEx8OOe2hf95JljOYDVfBNLoMFekao';
-        const TELEGRAM_ADMIN_CHAT_ID = '5922049376';
+        const KYC_API_URL = 'https://crynova-verification.akramkhezzari3.workers.dev';
+        const KYC_API_KEY = 'a3f8b2c9d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f1a5b6c7d8e9f0a1';
 
         // تخزين مؤقت لملفات KYC
         let kycFiles = {
@@ -6198,71 +6198,8 @@
         }
 
         // ============================================================
-        // إرسال KYC إلى Telegram مباشرة (بدون Firebase Storage)
+        // إرسال KYC إلى Cloudflare Worker
         // ============================================================
-        async function sendTelegramText(text, parseMode = 'HTML') {
-            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-            const body = new URLSearchParams({
-                chat_id: TELEGRAM_ADMIN_CHAT_ID,
-                text: text,
-                parse_mode: parseMode
-            });
-            const res = await fetch(url, { method: 'POST', body });
-            return await res.json();
-        }
-
-        async function sendTelegramPhoto(file, caption) {
-            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`;
-            const fd = new FormData();
-            fd.append('chat_id', TELEGRAM_ADMIN_CHAT_ID);
-            fd.append('photo', file);
-            fd.append('caption', caption);
-            const res = await fetch(url, { method: 'POST', body: fd });
-            return await res.json();
-        }
-
-        async function sendTelegramVideo(file, caption) {
-            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`;
-            const fd = new FormData();
-            fd.append('chat_id', TELEGRAM_ADMIN_CHAT_ID);
-            fd.append('video', file);
-            fd.append('caption', caption);
-            const res = await fetch(url, { method: 'POST', body: fd });
-            return await res.json();
-        }
-
-        async function sendKycToTelegram(kycInfo) {
-            console.log('🚀 بدء إرسال KYC إلى Telegram مباشرة...');
-
-            // 1) الرسالة النصية
-            const text = `🔔 <b>طلب تحقق جديد (KYC)</b>\n\n` +
-                `👤 <b>الاسم الكامل:</b> ${kycInfo.fullName}\n` +
-                `🎂 <b>تاريخ الميلاد:</b> ${kycInfo.birthDate}\n` +
-                `🆔 <b>Telegram ID:</b> <code>${kycInfo.telegramId}</code>\n` +
-                `📛 <b>Username:</b> ${kycInfo.username ? '@' + kycInfo.username : '—'}\n` +
-                `📝 <b>الاسم المعروض:</b> ${kycInfo.displayName || '—'}\n` +
-                `⏰ <b>وقت الإرسال:</b> ${new Date().toLocaleString('ar-DZ')}\n\n` +
-                `📌 <b>الحالة:</b> قيد المراجعة`;
-
-            const textResult = await sendTelegramText(text);
-            console.log('📥 رد sendMessage:', textResult);
-            if (!textResult.ok) throw new Error('فشل إرسال الرسالة: ' + (textResult.description || ''));
-
-            // 2) صورة الوجه الأمامي
-            const frontResult = await sendTelegramPhoto(kycFiles.front, '📸 الوجه الأمامي');
-            console.log('📥 رد sendPhoto (الأمامي):', frontResult);
-
-            // 3) صورة الوجه الخلفي
-            const backResult = await sendTelegramPhoto(kycFiles.back, '📸 الوجه الخلفي');
-            console.log('📥 رد sendPhoto (الخلفي):', backResult);
-
-            // 4) الفيديو
-            const videoResult = await sendTelegramVideo(kycFiles.video, '🎥 فيديو التحقق');
-            console.log('📥 رد sendVideo:', videoResult);
-
-            return true;
-        }
-
         async function submitKyc() {
             if (!userData) { showToast('يرجى تسجيل الدخول'); return; }
 
@@ -6293,27 +6230,25 @@
             btn.innerHTML = '<span class="loader-sm" style="display:inline-block;margin-left:6px;"></span> جاري الإرسال...';
 
             try {
-                const kycInfo = {
-                    firstName,
-                    lastName,
-                    birthDate,
-                    fullName: `${firstName} ${lastName}`,
-                    telegramId: userData.telegramId,
-                    username: userData.username || '',
-                    displayName: userData.displayName || ''
-                };
+                const formData = new FormData();
+                formData.append('telegramId', userData.telegramId);
+                formData.append('firstName', firstName);
+                formData.append('lastName', lastName);
+                formData.append('birthDate', birthDate);
+                formData.append('front', kycFiles.front);
+                formData.append('back', kycFiles.back);
+                formData.append('video', kycFiles.video);
 
-                // 📤 إرسال إلى Telegram
-                await sendKycToTelegram(kycInfo);
-
-                // 💾 حفظ الحالة في Firestore (users فقط - بدون ملفات)
-                await db.collection('users').doc(userData.telegramId).update({
-                    kycStatus: 'pending',
-                    kycSubmittedAt: new Date(),
-                    kycRejectionReason: null,
-                    kycFullName: kycInfo.fullName,
-                    kycBirthDate: kycInfo.birthDate
+                const response = await fetch(`${KYC_API_URL}/api/kyc`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-Key': KYC_API_KEY
+                    },
+                    body: formData
                 });
+
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'فشل الإرسال');
 
                 showToast('✅ تم إرسال طلبك إلى الإدارة، سيتم مراجعته قريباً');
 
@@ -6589,7 +6524,7 @@
         console.log('✅ مفاتيح التبديل تعمل بشكل صحيح');
         console.log('✅ بطاقة الأرصدة في أعلى صفحة التبادل');
         console.log('✅ بطاقة التحقق من الهوية (KYC) مضافة');
-        console.log('✅ إرسال KYC إلى Telegram Bot مباشرة (بدون Firebase)');
+        console.log('✅ إرسال KYC إلى Cloudflare Worker مباشرة (بدون Firebase Storage)');
         console.log('✅ حالة KYC محفوظة في Firestore (users) - تتحدّث تلقائياً');
     </script>
 
